@@ -2,6 +2,7 @@ package adpter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -30,9 +31,7 @@ import java.util.List;
 import ui.ButtonSpan;
 import ui.VideoDetailActivity;
 import utils.DateUtils;
-import utils.NetworkUtil;
 import utils.SPUtils;
-import utils.ToastUtils;
 import widget.OverLineTextView;
 
 @Keep
@@ -51,7 +50,19 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
 
     @Override
     protected void convert(final BaseViewHolder helper, final DataDTO item) {
-        helper.setText(R.id.video_detail_title, item.getTitle());
+        TextView titleText = helper.getView(R.id.video_detail_title);
+        titleText.setText(item.getTitle());
+        titleText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                try {
+                    Log.e("tgt码：",VideoInteractiveParam.getInstance().getCode());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
+            }
+        });
         helper.setText(R.id.video_detail_from_media, item.getSource());
         helper.setText(R.id.video_detail_date, DateUtils.utc2Local(item.getStartTime()));
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
@@ -60,7 +71,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         TextView continuePlay = helper.getView(R.id.continue_play);
         noWifiText.setText(R.string.no_wifi);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(ButtonSpan.dip2px(10), mContext.getResources().getDisplayMetrics().heightPixels/2-ButtonSpan.dip2px(5), ButtonSpan.dip2px(10), 0);
+        layoutParams.setMargins(ButtonSpan.dip2px(10), mContext.getResources().getDisplayMetrics().heightPixels/2 + ButtonSpan.dip2px(10), ButtonSpan.dip2px(10), 0);
         expandableTextLl.setLayoutParams(layoutParams);
 
         if (item.isWifi()) {

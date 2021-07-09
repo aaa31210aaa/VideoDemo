@@ -220,7 +220,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 myContentId = String.valueOf(mDatas.get(0).getId());
-                getContentState(myContentId);
+                if (!PersonInfoManager.getInstance().isRequestToken()) {
+                    getContentState(myContentId);
+                }
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
 
                 mPageIndex = 1;
@@ -601,14 +603,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
-                        if (null == response.body()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
                         try {
                             JSONObject jsonObject = new JSONObject(response.body());
                             if (jsonObject.get("code").toString().equals(success_code)) {
                                 String json = jsonObject.optJSONObject("data").toString();
+                                if (null == json || TextUtils.isEmpty(json)) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
                                 DataDTO dataDTO = JSON.parseObject(json, DataDTO.class);
                                 mDatas.add(dataDTO);
                                 setDataWifiState(mDatas);
@@ -678,11 +680,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
-                        if (null == response.body() || null == response.body().getData()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
                         if (response.body().getCode().equals(success_code)) {
+                            if (null == response.body().getData()) {
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
+
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas);
                             adapter.setNewData(mDatas);
@@ -738,11 +741,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
-                        if (null == response.body() || null == response.body().getData()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
                         if (response.body().getCode().equals(success_code)) {
+                            if (null == response.body().getData()) {
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
+
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas);
                             adapter.setNewData(mDatas);
@@ -801,12 +805,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
-                        if (null == response.body() || null == response.body().getData()) {
-                            isLoadComplate = true;
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
+
                         if (response.body().getCode().equals(success_code)) {
+                            if (null == response.body().getData()) {
+                                isLoadComplate = true;
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
+
                             if (response.body().getData().size() == 0) {
                                 Log.e("loadMoreData", "没有更多视频了");
                                 adapter.loadMoreEnd();
@@ -856,11 +862,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     .execute(new JsonCallback<VideoCollectionModel>(VideoCollectionModel.class) {
                         @Override
                         public void onSuccess(Response<VideoCollectionModel> response) {
-                            if (null == response.body() || null == response.body().getDatas()) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
                             if (response.body().getCode().equals("200")) {
+                                if (null == response.body().getDatas()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
                                 choosePopDatas.clear();
                                 choosePopDatas.addAll(response.body().getDatas().getChildren());
                                 videoDetailPopChooseAdapter.setNewData(choosePopDatas);
@@ -905,12 +911,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<CommentModel>(CommentModel.class) {
                     @Override
                     public void onSuccess(Response<CommentModel> response) {
-                        if (null == response.body() || null == response.body().getData()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
-
                         if (response.body().getCode() == 200) {
+                            if (null == response.body().getData()) {
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
+
                             if (isRefresh) {
                                 mCommentPopRvData.clear();
                                 mCommentPopDtoData.clear();
@@ -974,7 +980,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             String code = mJsonObject.get("code").toString();
 
                             if (code.equals(success_code)) {
-                                ToastUtils.showShort("评论成功");
+                                ToastUtils.showShort("评论已提交，请等待审核通过！");
                                 if (null != inputAndSendPop) {
                                     inputAndSendPop.dissmiss();
                                 }
@@ -1027,11 +1033,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<ContentStateModel>(ContentStateModel.class) {
                     @Override
                     public void onSuccess(Response<ContentStateModel> response) {
-                        if (null == response.body() || null == response.body().getData()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
                         if (response.body().getCode().equals(success_code)) {
+                            if (null == response.body().getData()) {
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
+
                             contentStateModel = response.body().getData();
                             if (contentStateModel.getWhetherFavor().equals("true")) {
                                 videoDetailCollectionImage.setImageResource(R.drawable.collection);
@@ -1053,8 +1060,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 videoDetailCommentLikesNum.setTextColor(getResources().getColor(R.color.c9));
                             }
 
-                            likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())),false));
-                            videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())),false));
+                            likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+                            videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
                         }
@@ -1167,8 +1174,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     }
 
                                     num++;
-                                    likesNum.setText(NumberFormatTool.formatNum(num,false));
-                                    videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(num,false));
+                                    likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(num, false));
                                 } else {
                                     int num;
                                     videoDetailLikesImage.setImageResource(R.drawable.likes_unselect);
@@ -1181,8 +1188,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         num = Integer.parseInt(likesNum.getText().toString());
                                     }
                                     num--;
-                                    likesNum.setText(NumberFormatTool.formatNum(num,false));
-                                    videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(num,false));
+                                    likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(num, false));
                                 }
                             } else if (json.get("code").toString().equals(token_error)) {
                                 Log.e("addOrCancelLike", "无token,跳转登录");
@@ -1253,14 +1260,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<TokenModel>(TokenModel.class) {
                     @Override
                     public void onSuccess(Response<TokenModel> response) {
-                        if (null == response.body() || null == response.body().getData()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
                         if (response.body().getCode() == 200) {
+                            if (null == response.body().getData()) {
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
                             Log.d("mycs_token", "转换成功");
                             transformationToken = response.body().getData().getToken();
                             PersonInfoManager.getInstance().setTransformationToken(transformationToken);
+                        } else {
+                            ToastUtils.showShort(response.body().getMessage());
                         }
                     }
 
@@ -1276,7 +1285,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onFinish() {
                         super.onFinish();
-
+                        getContentState(myContentId);
                     }
                 });
     }

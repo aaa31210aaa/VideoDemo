@@ -85,7 +85,7 @@ public class PersonInfoManager {
                         return true;
                     }
                 } else {
-                    Log.e("YQH_Token", "我的长沙已登录_数智已登");
+                    Log.e("YQH_Token", "我的长沙登录_数智已登");
                     return true;
                 }
 
