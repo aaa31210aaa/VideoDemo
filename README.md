@@ -8,7 +8,7 @@ allprojects {
 		}
 	}
   
-  在app模块下build.gradle添加依赖
+在app模块下build.gradle添加依赖
 	dependencies {
 	        implementation 'com.github.aaa31210aaa.VideoDemo:superplayerkit:1.0.0'
 	}
