@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tool="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:id="@+id/comment_head"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <widget.CircleImageView
+            android:id="@+id/comment_user_head"
+            android:layout_width="45dp"
+            android:layout_height="45dp">
+
+
+        </widget.CircleImageView>
+
+        <LinearLayout
+            android:id="@+id/comment_head_ll"
+            android:layout_toRightOf="@+id/comment_user_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/comment_pop_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="漫国神卡密撒嘛"
+                android:layout_marginTop="5dp"
+                android:textSize="12sp"
+                android:textColor="@color/comment_pop_user_nam">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/comment_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="9sp"
+                android:text="18分钟前"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/c9">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/comment_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/comment_head_ll"
+                android:layout_toRightOf="@+id/comment_user_head"
+                android:text="6666666666666666666"
+                android:textColor="@color/black"
+                android:layout_marginTop="10dp">
+
+            </TextView>
+
+            <LinearLayout
+                android:id="@+id/gm_reback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_10"
+                android:visibility="gone"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="编辑回复："
+                    android:textColor="@color/comment_pop_user_nam"
+                    android:textSize="12sp">
+
+                </TextView>
+
+                <TextView
+                    android:id="@+id/gm_reback_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tool:text="1小时前"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/c9"
+                    android:textSize="9sp"></TextView>
+
+                <TextView
+                    android:id="@+id/gm_reback_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tool:text="官方回复官方回复"
+                    android:textSize="13sp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/black">
+
+                </TextView>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

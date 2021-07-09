@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:id="@+id/item_relativelayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <TextView
+        android:id="@+id/video_detail_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="@dimen/layout_margin_left"
+        android:layout_marginTop="36dp"
+        android:layout_marginRight="@dimen/layout_margin_left"
+        android:textColor="@color/white"
+        android:textSize="21sp"
+        tool:text="长沙实景交响诗MV丨红色经典激荡起“一身挂满音符的河”" />
+
+    <LinearLayout
+        android:id="@+id/video_detail_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/video_detail_title"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="@dimen/dp_10">
+
+        <TextView
+            android:id="@+id/video_detail_from_media"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/layout_margin_left"
+            android:textColor="@color/record_settings_tip"
+            android:textSize="12sp"
+            tool:text="湖南">
+
+        </TextView>
+
+        <TextView
+            android:id="@+id/video_detail_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="2021-05-21 11:30:46"
+            android:textColor="@color/record_settings_tip"
+            android:textSize="12sp"></TextView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/video_detail_choose_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/video_detail_info"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/video_detail_keyword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <TextView
+            android:id="@+id/video_detail_item_choose_btn"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/anthology_bg"
+            android:drawableLeft="@drawable/choose_icon"
+            android:drawablePadding="5dp"
+            android:gravity="center"
+            android:paddingLeft="15dp"
+            android:paddingTop="5dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="5dp"
+            android:text="选集"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            tool:text="选集">
+
+        </TextView>
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/agree_nowifi_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginBottom="80dp"
+            >
+
+            <TextView
+                android:id="@+id/no_wifi_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp_10"
+                android:text="@string/no_wifi"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_16"></TextView>
+
+            <TextView
+                android:id="@+id/continue_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/anthology_bg"
+                android:drawableLeft="@drawable/play_wifi"
+                android:drawablePadding="@dimen/dp_10"
+                android:padding="@dimen/dp_10"
+                android:text="继续播放"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_16"></TextView>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/expandable_text_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_below="@+id/video_detail_info"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/text_rl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!--                <TextView-->
+            <!--                    android:id="@+id/fold_text"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:ellipsize="end"-->
+            <!--                    android:maxLines="3"-->
+            <!--                    android:text=""-->
+            <!--                    android:textColor="@color/c9"-->
+            <!--                    android:textSize="12sp" />-->
+            <widget.OverLineTextView
+                android:id="@+id/fold_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:textColor="@color/c9"
+                android:textSize="12sp">
+
+            </widget.OverLineTextView>
+
+            <TextView
+                android:id="@+id/expandable_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:ellipsize="end"
+                android:maxHeight="200dp"
+                android:maxLines="13"
+                android:text=""
+                android:textColor="@color/c9"
+                android:textSize="12sp"
+                android:visibility="gone">
+
+            </TextView>
+
+        </RelativeLayout>
+
+        <!--            <RelativeLayout-->
+        <!--                android:id="@+id/expand_rl"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:layout_below="@+id/text_rl"-->
+        <!--                android:layout_weight="1">-->
+
+        <!--                <ImageView-->
+        <!--                    android:id="@+id/expand_arrow"-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:layout_centerVertical="true"-->
+        <!--                    android:layout_toLeftOf="@+id/expand_tips_text"-->
+        <!--                    android:src="@drawable/arrow_down">-->
+
+        <!--                </ImageView>-->
+
+        <!--                <TextView-->
+        <!--                    android:id="@+id/expand_tips_text"-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:layout_alignParentRight="true"-->
+        <!--                    android:layout_centerVertical="true"-->
+        <!--                    android:layout_marginLeft="5dp"-->
+        <!--                    android:text="展开"-->
+        <!--                    android:textColor="@color/white"-->
+        <!--                    android:textSize="12sp"></TextView>-->
+
+        <!--            </RelativeLayout>-->
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/share_rl"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_height="100dp">
+
+        <TextView
+            android:id="@+id/share_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/share_ll"
+            android:layout_centerHorizontal="true"
+            android:text="分享到"
+            android:textColor="@color/white">
+
+        </TextView>
+
+        <LinearLayout
+            android:id="@+id/share_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/share_wx"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:src="@drawable/share_wechat">
+
+            </ImageView>
+
+            <ImageView
+                android:id="@+id/share_circle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:src="@drawable/share_circle">
+
+            </ImageView>
+
+            <ImageView
+                android:id="@+id/share_qq"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:src="@drawable/share_qq">
+
+            </ImageView>
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

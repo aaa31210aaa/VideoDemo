@@ -1,0 +1,4 @@
+include ':superplayerkit'
+include ':videodetail'
+include ':app'
+rootProject.name = "X5TestDemo"

@@ -1,0 +1,60 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Black.NoTitleBar">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <style name="matching_dialog" parent="@android:style/Theme.Holo.Dialog">
+
+        <!-- 是否有边框 -->
+        <item name="android:windowFrame">@null</item>    <!--是否在悬浮Activity之上  -->
+        <item name="android:windowIsFloating">true</item>    <!--标题  -->
+        <item name="android:windowNoTitle">true</item>    <!--阴影  -->
+        <item name="android:windowIsTranslucent">true</item>    <!--透明背景-->
+        <item name="android:background">@android:color/transparent</item>    <!--窗口背景透明-->
+        <item name="android:windowBackground">@android:color/transparent</item>    <!--弹窗背景是否变暗-->
+        <item name="android:backgroundDimEnabled">false</item>
+
+
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!--<item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorAccent">@color/colorAccent</item>-->
+        <!--<item name="android:windowBackground">@color/colorActivityBackground</item>-->
+    </style>
+
+    <!--meeting room -->
+    <style name="MeetingActivityTheme" parent="Theme.AppCompat.NoActionBar"/>
+    <style name="MeetingDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert"/>
+    <style name="MeetingFragmentDialogTheme" parent="@android:style/Theme.Holo.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowBackground">@color/hlfTransparent</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="common_alert_dialog" parent="@android:style/Theme.Holo.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.VideoPlayerDemo" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:navigationBarDividerColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="take_popwindow_anim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/anim_popshow</item>
+        <item name="android:windowExitAnimation">@anim/anim_pophidden</item>
+    </style>
+</resources>
