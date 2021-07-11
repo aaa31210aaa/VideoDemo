@@ -332,7 +332,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             } else {
                 if (decorView == null) return;
                 if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
-//                    decorView.setSystemUiVisibility(View.VISIBLE);
+                    decorView.setSystemUiVisibility(View.VISIBLE);
                 } else if (Build.VERSION.SDK_INT >= 19) {
 //                    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                 }
@@ -358,12 +358,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 // 全屏到窗口
 //                sensorEnable = false;
                 mTargetPlayerMode = SuperPlayerDef.PlayerMode.WINDOW;
-
+                showBottomUIMenu();
             } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW && playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
                 // 窗口到全屏
 //                sensorEnable = false;
                 mTargetPlayerMode = SuperPlayerDef.PlayerMode.FULLSCREEN;
-
             }
             if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
                 fullScreen(true);
@@ -478,6 +477,18 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 LogReport.getInstance().uploadLogs(LogReport.ELK_ACTION_FLOATMOE, 0, 0);
             }
             mSuperPlayer.switchPlayMode(playerMode);
+        }
+
+        /**
+         * 显示菜单栏
+         * 如果底部的bar 隐藏就显示
+         */
+        protected void showBottomUIMenu() {
+            // must be executed in main thread :)
+            decorView.setSystemUiVisibility(0);
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+
         }
 
         @Override
@@ -623,7 +634,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
 //                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                SystemUtils.hideSystemUI(decorView);
+                if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
+                    SystemUtils.hideSystemUI(decorView);
+                }
 //                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
 //                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
@@ -636,7 +649,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
 //                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                SystemUtils.hideSystemUI(decorView);
+                if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
+                    SystemUtils.hideSystemUI(decorView);
+                }
 //                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
 //                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
@@ -649,7 +664,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
 //                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                SystemUtils.hideSystemUI(decorView);
+                if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
+                    SystemUtils.hideSystemUI(decorView);
+                }
 //                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
 //                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;

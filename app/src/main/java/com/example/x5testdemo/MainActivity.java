@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         contentId = findViewById(R.id.contentid);
         fxsys = findViewById(R.id.fxsys);
         setCode = findViewById(R.id.set_code);
+
         setCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "5f019b04-667f-480d-9389-db278aef89a3";
+                        return "fcc11156-be83-483c-b5f3-9827df0423b5";
                     }
                 });
             }

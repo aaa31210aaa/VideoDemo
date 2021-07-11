@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -15,15 +17,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,6 +75,7 @@ import utils.KeyboardUtils;
 import utils.NumberFormatTool;
 import utils.SPUtils;
 import utils.ScreenUtils;
+import utils.SoftKeyBoardListener;
 import utils.ToastUtils;
 import widget.LoadingView;
 
@@ -79,7 +86,7 @@ import static constants.Constants.token_error;
  * 视频详情页 可滑动查看视频
  */
 @Keep
-public class VideoDetailActivity extends AppCompatActivity implements View.OnClickListener, View.OnLayoutChangeListener {
+public class VideoDetailActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageView back;
     private RecyclerView videoDetailRv;
     public MyVideoDetailAdapter adapter;
@@ -96,6 +103,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public RelativeLayout videoDetailCommentBtn;
     //评论列表弹窗
     private CustomPopWindow popupWindow;
+    private boolean popupWindowIsShow;
     private LinearLayout videoDetailCollection;
     private RelativeLayout videoDetailLikes;
 
@@ -111,6 +119,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private CustomPopWindow inputAndSendPop;
     private View sendPopContentView;
     private View rootView;
+    private int visibleWindowDisplayHeight = 0;
+    private LinearLayout edtParent;
     private EditText edtInput;
     private TextView tvSend;
     private RelativeLayout videoDetailWhiteCommentRl;
@@ -154,6 +164,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private boolean isLoadComplate = false;
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
     public View decorView;
+    private SoftKeyBoardListener softKeyBoardListener;
 
     @SuppressLint("NewApi")
     @Override
@@ -162,8 +173,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setContentView(R.layout.activity_video_detail);
         decorView = getWindow().getDecorView();
-        SystemUtils.hideSystemUI(decorView);
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//        SystemUtils.hideSystemUI(decorView);
+        SystemUtils.setNavbarColor(this, R.color.black);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION);
         initView();
         if ((null == panelId || TextUtils.isEmpty(panelId)) &&
                 (null == contentId || TextUtils.isEmpty(contentId))) {
@@ -189,9 +201,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            SystemUtils.hideSystemUI(decorView);
-        }
+//        SystemUtils.setNavbarColor(this, R.color.white);
     }
 
     private void initView() {
@@ -216,7 +226,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         likesNum = findViewById(R.id.likes_num);
         manager = new ViewPagerLayoutManager(this);
         videoDetailRv.setLayoutManager(manager);
-
+        setSoftKeyBoardListener();
         manager.setOnViewPagerListener(new OnViewPagerListener() {
 
 
@@ -288,7 +298,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             refreshLayout.setEnableRefresh(true);
                             adapter.setEnableLoadMore(true);
                             videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                            SystemUtils.hideSystemUI(decorView);
                         }
                     }
                 };
@@ -362,6 +371,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         contentView = View.inflate(this, R.layout.video_detail_comment_pop, null);
         sendPopContentView = View.inflate(this, R.layout.layout_input_window, null);
         commentPopCommentTotal = contentView.findViewById(R.id.comment_pop_comment_total);
+        edtParent = sendPopContentView.findViewById(R.id.edt_parent);
         edtInput = sendPopContentView.findViewById(R.id.edtInput);
         tvSend = sendPopContentView.findViewById(R.id.tvSend);
         /**
@@ -379,7 +389,21 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         });
 
         rootView = findViewById(R.id.root);
-        rootView.addOnLayoutChangeListener(this);
+//        rootView.addOnLayoutChangeListener(this);
+
+//        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                if (inputAndSendPop != null) {
+//                    int[] location = new int[2];
+//                    inputAndSendPop.getPopupWindow().getContentView().getLocationOnScreen(location);
+//                    int x = location[0];
+//                    int y = location[1];
+//                    Log.e("yqh", y+"");
+//                }
+//            }
+//        });
+
         dismissPop = contentView.findViewById(R.id.dismiss_pop);
         dismissPop.setOnClickListener(this);
         commentPopRv = contentView.findViewById(R.id.comment_pop_rv);
@@ -418,7 +442,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //        Glide.with(VideoDetailActivity.this).load(mDatas.get(position).getThumbnailUrl()).into(videoStaticBg);
         RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, ButtonSpan.dip2px(200));
-        itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(150));
+        itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(50));
         RelativeLayout item = new RelativeLayout(VideoDetailActivity.this);
         startPlay = new ImageView(VideoDetailActivity.this);
         startPlay.setImageResource(R.drawable.play_start);
@@ -473,9 +497,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 return;
                             }
                             if (TextUtils.isEmpty(panelId)) {
-                                loadMoreData(ApiConstants.getInstance().getVideDetailRandomListUrl(), mDatas.get(mDatas.size()-1).getId()+"", panelId, "true");
+                                loadMoreData(ApiConstants.getInstance().getVideDetailRandomListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", panelId, "true");
                             } else {
-                                loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size()-1).getId()+"", panelId, "true");
+                                loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", panelId, "true");
                             }
                         }
                     });
@@ -555,6 +579,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         } else {
             popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
         }
+//        SystemUtils.hideBottomUIMenuForPopupWindow(popupWindow);
+        popupWindow.getPopupWindow().setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+//                SystemUtils.hideSystemUI(decorView);
+            }
+        });
 
     }
 
@@ -574,6 +605,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         } else {
             choosePop.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
         }
+
+        choosePop.getPopupWindow().setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+//                SystemUtils.hideSystemUI(decorView);
+            }
+        });
     }
 
     /**
@@ -1434,39 +1472,40 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         edtInput.setFocusable(true);
         edtInput.setFocusableInTouchMode(true);
         edtInput.requestFocus();
+
     }
 
-    /**
-     * 监听布局高度变化
-     *
-     * @param v
-     * @param left
-     * @param top
-     * @param right
-     * @param bottom
-     * @param oldLeft
-     * @param oldTop
-     * @param oldRight
-     * @param oldBottom
-     */
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        //获取屏幕高度
-        int screenHeight = getWindowManager().getDefaultDisplay().getHeight();
-        //阀值设置为屏幕高度的1/3
-        int keyHeight = screenHeight / 3;
-        //old是改变前的左上右下坐标点值，没有old的是改变后的左上右下坐标点值
-        //现在认为只要控件将Activity向上推的高度超过了1/3屏幕高，就认为软键盘弹起
-        if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > keyHeight)) {
-            Log.e("onLayoutChange", "=======软键盘弹起");
-        } else if (oldBottom != 0 && bottom != 0 && (bottom - oldBottom > keyHeight)) {
-            Log.e("onLayoutChange", "=======软键盘关闭");
-            if (inputAndSendPop != null) {
-                inputAndSendPop.dissmiss();
-            }
-        }
-    }
+//    /**
+//     * 监听布局高度变化
+//     *
+//     * @param v
+//     * @param left
+//     * @param top
+//     * @param right
+//     * @param bottom
+//     * @param oldLeft
+//     * @param oldTop
+//     * @param oldRight
+//     * @param oldBottom
+//     */
+//    @Override
+//    public void onLayoutChange(View v, int left, int top, int right, int bottom,
+//                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
+//        //获取屏幕高度
+//        int screenHeight = getWindowManager().getDefaultDisplay().getHeight();
+//        //阀值设置为屏幕高度的1/3
+//        int keyHeight = screenHeight / 3;
+//        //old是改变前的左上右下坐标点值，没有old的是改变后的左上右下坐标点值
+//        //现在认为只要控件将Activity向上推的高度超过了1/3屏幕高，就认为软键盘弹起
+//        if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > keyHeight)) {
+//            Log.e("onLayoutChange", "=======软键盘弹起");
+//        } else if (oldBottom != 0 && bottom != 0 && (bottom - oldBottom > keyHeight)) {
+//            Log.e("onLayoutChange", "=======软键盘关闭");
+//            if (inputAndSendPop != null) {
+//                inputAndSendPop.dissmiss();
+//            }
+//        }
+//    }
 
     private void setDataWifiState(List<DataDTO> data) {
         if (SPUtils.isVisibleNoWifiView(this)) {
@@ -1478,5 +1517,30 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 data.get(i).setWifi(true);
             }
         }
+    }
+
+    /**
+     * 添加软键盘监听
+     */
+    private void setSoftKeyBoardListener() {
+        softKeyBoardListener = new SoftKeyBoardListener(this);
+        //软键盘状态监听
+        softKeyBoardListener.setListener(new SoftKeyBoardListener.OnSoftKeyBoardChangeListener() {
+            @Override
+            public void keyBoardShow(int height) {
+                //软键盘已经显示，做逻辑
+                Log.e("yqh","软键盘已经显示,做逻辑");
+            }
+
+            @Override
+            public void keyBoardHide(int height) {
+                //软键盘已经隐藏,做逻辑
+//                SystemUtils.hideSystemUI(decorView);
+                if (null != inputAndSendPop) {
+                    inputAndSendPop.getPopupWindow().dismiss();
+                }
+                Log.e("yqh","软键盘已经隐藏,做逻辑");
+            }
+        });
     }
 }

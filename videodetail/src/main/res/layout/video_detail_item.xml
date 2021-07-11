@@ -15,8 +15,10 @@
         android:layout_marginTop="@dimen/dp_10"
         android:layout_marginRight="@dimen/layout_margin_left"
         android:textColor="@color/white"
-        android:textSize="21sp"
-        tool:text="长沙实景交响诗MV丨红色经典激荡起“一身挂满音符的河”" />
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:textSize="18sp"
+        tool:text="长沙实景交响诗MV丨红色经典激荡起“一身挂满音符的河红色经典激荡起“一身挂满音符的河”一身挂满音符的河红色经典激荡起“一身挂满音符的河" />
 
     <LinearLayout
         android:id="@+id/video_detail_info"
@@ -24,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/video_detail_title"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="@dimen/dp_10">
+        >
 
         <TextView
             android:id="@+id/video_detail_from_media"
@@ -102,7 +104,7 @@
             android:layout_height="200dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:layout_marginBottom="80dp"
+            android:layout_marginBottom="50dp"
             >
 
             <TextView
@@ -169,7 +171,7 @@
                 android:layout_height="match_parent"
                 android:ellipsize="end"
                 android:maxHeight="200dp"
-                android:maxLines="13"
+                android:maxLines="12"
                 android:text=""
                 android:textColor="@color/c9"
                 android:textSize="12sp"
