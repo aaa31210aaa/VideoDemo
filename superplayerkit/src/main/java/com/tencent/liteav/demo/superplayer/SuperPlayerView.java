@@ -105,8 +105,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     @Nullable
     protected View mHideNavBarView;
 
-    public SuperPlayerView(Context context) {
+    public SuperPlayerView(Context context, View decorView) {
         super(context);
+        this.decorView = decorView;
         initialize(context);
     }
 
@@ -131,7 +132,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
      * 初始化view
      */
     private void initView() {
-        decorView = ((Activity)mContext).getWindow().getDecorView();
         mOrientationHelper = new OrientationHelper(getContext().getApplicationContext());
         mOrientationHelper.setOnOrientationChangeListener(this);
         mOrientationHelper.enable();
@@ -161,7 +161,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     }
 
     private void initPlayer() {
-        mSuperPlayer = new SuperPlayerImpl(mContext, mTXCloudVideoView,this);
+        mSuperPlayer = new SuperPlayerImpl(mContext, mTXCloudVideoView, this);
 
         mSuperPlayer.setObserver(mSuperPlayerObserver);
 
@@ -209,7 +209,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         } else if (model.multiURLs != null && !model.multiURLs.isEmpty()) {
             mSuperPlayer.play(model.appId, model.multiURLs, model.playDefaultIndex);
         } else {
-            mSuperPlayer.play(model.url);
+            mSuperPlayer.play(model.url, model.title);
         }
     }
 
@@ -218,8 +218,8 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
      *
      * @param url 视频地址
      */
-    public void play(String url) {
-        mSuperPlayer.play(url);
+    public void play(String url, String title) {
+        mSuperPlayer.play(url, title);
     }
 
     /**
@@ -330,12 +330,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 }
 //                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             } else {
-                View decorView = activity.getWindow().getDecorView();
                 if (decorView == null) return;
                 if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
-                    decorView.setSystemUiVisibility(View.VISIBLE);
+//                    decorView.setSystemUiVisibility(View.VISIBLE);
                 } else if (Build.VERSION.SDK_INT >= 19) {
-                    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+//                    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                 }
 //                ((Activity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             }
@@ -625,8 +624,8 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 SystemUtils.hideSystemUI(decorView);
-                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+//                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
             case LANDSCAPE:
                 if (((Activity) mContext).getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
@@ -638,8 +637,8 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 SystemUtils.hideSystemUI(decorView);
-                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+//                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
             case LANDSCAPE_REVERSE:
                 if (((Activity) mContext).getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
@@ -651,8 +650,8 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
                 SystemUtils.hideSystemUI(decorView);
-                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+//                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
         }
     }

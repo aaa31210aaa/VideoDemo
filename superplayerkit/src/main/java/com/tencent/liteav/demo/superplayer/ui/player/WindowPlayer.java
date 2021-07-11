@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
+import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoGestureDetector;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
@@ -100,7 +101,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
                 show();
                 if (mHideViewRunnable != null) {
                     removeCallbacks(mHideViewRunnable);
-                    postDelayed(mHideViewRunnable, 7000);
+                    postDelayed(mHideViewRunnable, Contants.delayMillis);
                 }
                 return true;
             }
@@ -265,7 +266,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
             show();
             if (mHideViewRunnable != null) {
                 removeCallbacks(mHideViewRunnable);
-                postDelayed(mHideViewRunnable, 7000);
+                postDelayed(mHideViewRunnable, Contants.delayMillis);
             }
         }
     }
@@ -554,7 +555,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             removeCallbacks(mHideViewRunnable);
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
-            postDelayed(mHideViewRunnable, 7000);
+            postDelayed(mHideViewRunnable, Contants.delayMillis);
         }
         return true;
     }
@@ -645,6 +646,6 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
                 }
                 break;
         }
-        postDelayed(mHideViewRunnable, 7000);
+        postDelayed(mHideViewRunnable, Contants.delayMillis);
     }
 }

@@ -99,7 +99,7 @@ public class VideoDetailPopChooseAdapter extends BaseQuickAdapter<DataDTO, BaseV
                 if (SPUtils.isVisibleNoWifiView(mContext)) {
                     SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                 } else {
-                    ((VideoDetailActivity) mContext).play(mDatas.get(position).getPlayUrl());
+                    ((VideoDetailActivity) mContext).play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
                 }
 
                 if (!"1".equals(superPlayerView.mFullScreenPlayer.strSpeed)) {

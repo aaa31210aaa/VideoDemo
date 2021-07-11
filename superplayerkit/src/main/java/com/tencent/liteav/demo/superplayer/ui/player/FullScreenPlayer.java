@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
+import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
 import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
 import com.tencent.liteav.demo.superplayer.model.net.LogReport;
@@ -158,7 +159,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                 show();
                 if (mHideViewRunnable != null) {
                     removeCallbacks(mHideViewRunnable);
-                    postDelayed(mHideViewRunnable, 7000);
+                    postDelayed(mHideViewRunnable, Contants.delayMillis);
                 }
                 return true;
             }
@@ -288,6 +289,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mIvBack = (ImageView) findViewById(R.id.superplayer_iv_back);
         mIvLock = (ImageView) findViewById(R.id.superplayer_iv_lock);
         mTvTitle = (TextView) findViewById(R.id.superplayer_tv_title);
+        mTvTitle.setSelected(true);
         mIvPause = (ImageView) findViewById(R.id.superplayer_iv_pause);
         mIvMore = (ImageView) findViewById(R.id.superplayer_iv_more);
         mIvSnapshot = (ImageView) findViewById(R.id.superplayer_iv_snapshot);
@@ -362,14 +364,14 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                 show();
                 if (mHideViewRunnable != null) {
                     removeCallbacks(mHideViewRunnable);
-                    postDelayed(mHideViewRunnable, 7000);
+                    postDelayed(mHideViewRunnable, Contants.delayMillis);
                 }
             }
         } else {
             mIvLock.setVisibility(VISIBLE);
             if (mHideLockViewRunnable!=null) {
                 removeCallbacks(mHideLockViewRunnable);
-                postDelayed(mHideLockViewRunnable, 7000);
+                postDelayed(mHideLockViewRunnable, Contants.delayMillis);
             }
         }
         if (mVodMoreView.getVisibility() == VISIBLE) {
@@ -624,7 +626,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         if(event.getAction() == MotionEvent.ACTION_DOWN) {
             removeCallbacks(mHideViewRunnable);
         } else if(event.getAction() == MotionEvent.ACTION_UP) {
-            postDelayed(mHideViewRunnable, 7000);
+            postDelayed(mHideViewRunnable, Contants.delayMillis);
         }
         return true;
     }
@@ -771,7 +773,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mIvLock.setVisibility(VISIBLE);
         if (mHideLockViewRunnable!=null) {
             removeCallbacks(mHideLockViewRunnable);
-            postDelayed(mHideLockViewRunnable, 7000);
+            postDelayed(mHideLockViewRunnable, Contants.delayMillis);
         }
         if (mLockScreen) {
             mIvLock.setImageResource(R.drawable.superplayer_ic_player_lock);
@@ -865,14 +867,14 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                 }
                 break;
         }
-        postDelayed(mHideViewRunnable, 7000);
+        postDelayed(mHideViewRunnable, Contants.delayMillis);
     }
 
     @Override
     public void onSeekBarPointClick(final View view, final int pos) {
         if (mHideLockViewRunnable!=null) {
             removeCallbacks(mHideViewRunnable);
-            postDelayed(mHideViewRunnable, 7000);
+            postDelayed(mHideViewRunnable, Contants.delayMillis);
         }
         if (mTXPlayKeyFrameDescInfoList != null) {
             //ELK点击上报

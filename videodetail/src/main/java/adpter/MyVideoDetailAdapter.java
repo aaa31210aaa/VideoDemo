@@ -71,7 +71,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         TextView continuePlay = helper.getView(R.id.continue_play);
         noWifiText.setText(R.string.no_wifi);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(ButtonSpan.dip2px(10), mContext.getResources().getDisplayMetrics().heightPixels/2 + ButtonSpan.dip2px(10), ButtonSpan.dip2px(10), 0);
+        layoutParams.setMargins(ButtonSpan.dip2px(10), mContext.getResources().getDisplayMetrics().heightPixels/2, ButtonSpan.dip2px(10), 0);
         expandableTextLl.setLayoutParams(layoutParams);
 
         if (item.isWifi()) {
@@ -174,7 +174,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         });
         TextView videoDetailItemChooseBtn = helper.getView(R.id.video_detail_item_choose_btn);
         if (null == item.getPid() || TextUtils.isEmpty(String.valueOf(item.getPid()))) {
-            videoDetailItemChooseBtn.setVisibility(View.GONE);
+            videoDetailItemChooseBtn.setVisibility(View.INVISIBLE);
         } else {
             videoDetailItemChooseBtn.setVisibility(View.VISIBLE);
         }

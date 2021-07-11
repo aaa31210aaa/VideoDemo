@@ -80,16 +80,17 @@ public class PersonInfoManager {
                         Log.e("YQH_Token", "我的长沙已登录_数智已登");
                         return false;
                     } else {
-                        Log.e("YQH_Token", "我的长沙切换了用户_重登数智融媒");
+                        Log.e("YQH_Token", "获取到的tgt和本地tgt不一致,我的长沙切换了用户_重登数智融媒");
                         clearToken();
                         return true;
                     }
                 } else {
-                    Log.e("YQH_Token", "我的长沙登录_数智已登");
+                    Log.e("YQH_Token", "本地tgt为空，相当于第一次登录，需要请求");
                     return true;
                 }
 
             } else {
+                //获取的tgt为空，没有登录，不需要请求  点击点赞收藏等则会跳转登录
                 clearToken();
                 return false;
             }

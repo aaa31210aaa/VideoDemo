@@ -38,10 +38,10 @@ public class VideoInteractiveParam {
      */
     public void shared(ShareInfo shareInfo) throws Exception {
         if (callBack == null) {
-            ToastUtils.showShort("获取失败,请重试");
             throw new Exception("获取失败,请重试");
+        } else {
+            callBack.shared(shareInfo);
         }
-        callBack.shared(shareInfo);
     }
 
     /**
@@ -49,10 +49,11 @@ public class VideoInteractiveParam {
      */
     public void toLogin() throws Exception {
         if (callBack == null) {
-            ToastUtils.showShort("请求失败,请重试");
             throw new Exception("请求失败,请重试");
+        } else {
+            callBack.Login();
         }
-        callBack.Login();
+
     }
 
     /**
@@ -63,7 +64,8 @@ public class VideoInteractiveParam {
     public String getCode() throws Exception {
         if (callBack == null) {
             throw new Exception("获取失败,请重试");
+        } else {
+            return callBack.setCode();
         }
-        return callBack.setCode();
     }
 }

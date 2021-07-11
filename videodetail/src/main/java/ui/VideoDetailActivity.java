@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,6 +68,7 @@ import model.VideoDetailModel;
 import utils.KeyboardUtils;
 import utils.NumberFormatTool;
 import utils.SPUtils;
+import utils.ScreenUtils;
 import utils.ToastUtils;
 import widget.LoadingView;
 
@@ -151,6 +153,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private String videoTag = "videoTag";
     private boolean isLoadComplate = false;
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
+    public View decorView;
 
     @SuppressLint("NewApi")
     @Override
@@ -158,8 +161,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setContentView(R.layout.activity_video_detail);
-        SystemUtils.hideSystemUI(getWindow().getDecorView());
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        decorView = getWindow().getDecorView();
+        SystemUtils.hideSystemUI(decorView);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         initView();
         if ((null == panelId || TextUtils.isEmpty(panelId)) &&
                 (null == contentId || TextUtils.isEmpty(contentId))) {
@@ -179,6 +183,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             getOneVideo(contentId);
         } else {
             getPullDownData(contentId, "10", panelId, "false");
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            SystemUtils.hideSystemUI(decorView);
         }
     }
 
@@ -240,7 +252,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
-                playerView = new SuperPlayerView(VideoDetailActivity.this);
+                playerView = new SuperPlayerView(VideoDetailActivity.this, decorView);
                 if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
                     SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                 } else {
@@ -276,6 +288,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             refreshLayout.setEnableRefresh(true);
                             adapter.setEnableLoadMore(true);
                             videoDetailCommentBtn.setVisibility(View.VISIBLE);
+                            SystemUtils.hideSystemUI(decorView);
                         }
                     }
                 };
@@ -405,7 +418,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //        Glide.with(VideoDetailActivity.this).load(mDatas.get(position).getThumbnailUrl()).into(videoStaticBg);
         RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, ButtonSpan.dip2px(200));
-        itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(80));
+        itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(150));
         RelativeLayout item = new RelativeLayout(VideoDetailActivity.this);
         startPlay = new ImageView(VideoDetailActivity.this);
         startPlay.setImageResource(R.drawable.play_start);
@@ -431,7 +444,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //            public void run() {
         item.addView(playerView, itemLp);
         rlLp.addView(item, lp);
-        play(mDatas.get(position).getPlayUrl());
+        play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
 //            }
 //        }, 200);
     }
@@ -455,10 +468,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     videoDetailRv.post(new Runnable() {
                         @Override
                         public void run() {
+                            if (mDatas.isEmpty()) {
+                                adapter.loadMoreFail();
+                                return;
+                            }
                             if (TextUtils.isEmpty(panelId)) {
-                                loadMoreData(ApiConstants.getInstance().getVideDetailRandomListUrl(), myContentId, panelId, "true");
+                                loadMoreData(ApiConstants.getInstance().getVideDetailRandomListUrl(), mDatas.get(mDatas.size()-1).getId()+"", panelId, "true");
                             } else {
-                                loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), myContentId, panelId, "true");
+                                loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size()-1).getId()+"", panelId, "true");
                             }
                         }
                     });
@@ -564,7 +581,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      *
      * @param playUrl
      */
-    public void play(String playUrl) {
+    public void play(String playUrl, String title) {
         if (null == playUrl || TextUtils.isEmpty(playUrl)) {
             ToastUtils.showShort("当前播放地址(" + playUrl + "),是一个无效地址");
             return;
@@ -573,6 +590,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //            videoStaticBg.setVisibility(View.GONE);
             SuperPlayerModel model = new SuperPlayerModel();
             model.url = playUrl;
+            model.title = title;
             playerView.playWithModel(model);
         }
     }
@@ -603,28 +621,33 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(response.body());
-                            if (jsonObject.get("code").toString().equals(success_code)) {
-                                String json = jsonObject.optJSONObject("data").toString();
-                                if (null == json || TextUtils.isEmpty(json)) {
-                                    ToastUtils.showShort(R.string.data_err);
-                                    return;
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response.body());
+                                if (jsonObject.get("code").toString().equals(success_code)) {
+                                    String json = jsonObject.optJSONObject("data").toString();
+                                    if (null == json || TextUtils.isEmpty(json)) {
+                                        ToastUtils.showShort(R.string.data_err);
+                                        return;
+                                    }
+                                    DataDTO dataDTO = JSON.parseObject(json, DataDTO.class);
+                                    mDatas.add(dataDTO);
+                                    setDataWifiState(mDatas);
+                                    adapter.setNewData(mDatas);
+                                    if (!mDatas.isEmpty()) {
+                                        initialize = false;
+                                    }
+                                } else {
+                                    ToastUtils.showShort(jsonObject.get("message").toString());
                                 }
-                                DataDTO dataDTO = JSON.parseObject(json, DataDTO.class);
-                                mDatas.add(dataDTO);
-                                setDataWifiState(mDatas);
-                                adapter.setNewData(mDatas);
-                                if (!mDatas.isEmpty()) {
-                                    initialize = false;
-                                }
-                            } else {
-                                ToastUtils.showShort(jsonObject.get("message").toString());
-                            }
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
+
                         if (null != refreshLayout) {
                             refreshLayout.finishRefresh();
                         }
@@ -636,13 +659,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onError(Response<String> response) {
                         try {
-                            JSONObject jsonObject = new JSONObject(response.body());
-                            if (null != jsonObject) {
-                                ToastUtils.showShort(jsonObject.getString("message"));
-                            } else {
+                            if (null == response.body()) {
                                 ToastUtils.showShort(R.string.net_err);
+                            } else {
+                                JSONObject jsonObject = new JSONObject(response.body());
+                                ToastUtils.showShort(jsonObject.getString("message"));
                             }
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -680,6 +702,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
                         if (response.body().getCode().equals(success_code)) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
@@ -741,6 +768,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
                         if (response.body().getCode().equals(success_code)) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
@@ -805,6 +837,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
+                        if (null == response.body()) {
+                            isLoadComplate = true;
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
 
                         if (response.body().getCode().equals(success_code)) {
                             if (null == response.body().getData()) {
@@ -862,6 +899,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     .execute(new JsonCallback<VideoCollectionModel>(VideoCollectionModel.class) {
                         @Override
                         public void onSuccess(Response<VideoCollectionModel> response) {
+                            if (null == response.body()) {
+                                ToastUtils.showShort(R.string.data_err);
+                                return;
+                            }
+
                             if (response.body().getCode().equals("200")) {
                                 if (null == response.body().getDatas()) {
                                     ToastUtils.showShort(R.string.data_err);
@@ -911,6 +953,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<CommentModel>(CommentModel.class) {
                     @Override
                     public void onSuccess(Response<CommentModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
                         if (response.body().getCode() == 200) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
@@ -1033,6 +1080,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<ContentStateModel>(ContentStateModel.class) {
                     @Override
                     public void onSuccess(Response<ContentStateModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
                         if (response.body().getCode().equals(success_code)) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
@@ -1158,6 +1210,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (null != json && json.get("code").toString().equals("200")) {
@@ -1239,8 +1296,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 e.printStackTrace();
             }
         }
-
-
     }
 
     /**
@@ -1260,6 +1315,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .execute(new JsonCallback<TokenModel>(TokenModel.class) {
                     @Override
                     public void onSuccess(Response<TokenModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
                         if (response.body().getCode() == 200) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);

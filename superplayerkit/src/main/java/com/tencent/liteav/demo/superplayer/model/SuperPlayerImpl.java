@@ -24,6 +24,7 @@ import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoParams;
 import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoProtocolV2;
 import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoProtocolV4;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoQualityUtils;
+import com.tencent.liteav.demo.superplayer.ui.player.VideoPlayerCallback;
 import com.tencent.rtmp.ITXLivePlayListener;
 import com.tencent.rtmp.ITXVodPlayListener;
 import com.tencent.rtmp.TXBitrateItem;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.PlayerState.PLAYING;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.rtmp.TXLiveConstants.PLAY_EVT_PLAY_PROGRESS;
 
@@ -104,7 +106,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         switch (event) {
             case TXLiveConstants.PLAY_EVT_VOD_PLAY_PREPARED: //视频播放开始
             case TXLiveConstants.PLAY_EVT_PLAY_BEGIN:
-                updatePlayerState(SuperPlayerDef.PlayerState.PLAYING);
+                updatePlayerState(PLAYING);
                 break;
             case TXLiveConstants.PLAY_ERR_NET_DISCONNECT:
             case TXLiveConstants.PLAY_EVT_PLAY_END:
@@ -112,7 +114,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                     mLivePlayer.resumeLive();
                     updatePlayerType(SuperPlayerDef.PlayerType.LIVE);
                     onError(SuperPlayerCode.LIVE_SHIFT_FAIL, "时移失败,返回直播");
-                    updatePlayerState(SuperPlayerDef.PlayerState.PLAYING);
+                    updatePlayerState(PLAYING);
                 } else {
                     stop();
                     updatePlayerState(SuperPlayerDef.PlayerState.END);
@@ -187,7 +189,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         }
         switch (event) {
             case TXLiveConstants.PLAY_EVT_VOD_PLAY_PREPARED://视频播放开始
-                updatePlayerState(SuperPlayerDef.PlayerState.PLAYING);
+                updatePlayerState(PLAYING);
                 if (mIsMultiBitrateStream) {
                     List<TXBitrateItem> bitrateItems = mVodPlayer.getSupportedBitrates();
                     if (bitrateItems == null || bitrateItems.size() == 0) {
@@ -230,7 +232,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 updatePlayProgress(progress / 1000, duration / 1000);
                 break;
             case TXLiveConstants.PLAY_EVT_PLAY_BEGIN:
-                updatePlayerState(SuperPlayerDef.PlayerState.PLAYING);
+                updatePlayerState(PLAYING);
                 break;
             default:
                 break;
@@ -425,7 +427,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             if (result != 0) {
                 TXCLog.e(TAG, "playLiveURL videoURL:" + url + ",result:" + result);
             } else {
-                updatePlayerState(SuperPlayerDef.PlayerState.PLAYING);
+                updatePlayerState(PLAYING);
             }
         }
     }
@@ -590,6 +592,18 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
      */
     private void updatePlayerState(SuperPlayerDef.PlayerState playState) {
         mCurrentPlayState = playState;
+        VideoPlayerParam param = VideoPlayerParam.getInstance();
+
+        try {
+            if (playState.equals(PLAYING)) {
+                param.setVideoPlayStates(true);
+            } else {
+                param.setVideoPlayStates(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         if (mObserver == null) {
             return;
         }
@@ -671,10 +685,12 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 || videoURL.startsWith("https://")) && videoURL.contains(".flv");
     }
 
+
     @Override
-    public void play(String url) {
+    public void play(String url, String title) {
         SuperPlayerModel model = new SuperPlayerModel();
         model.url = url;
+        model.title = title;
         playWithModel(model);
     }
 
@@ -748,7 +764,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         } else {
             mLivePlayer.resume();
         }
-        updatePlayerState(SuperPlayerDef.PlayerState.PLAYING);
+        updatePlayerState(PLAYING);
     }
 
     @Override
