@@ -5,4 +5,12 @@
     <dimen name="icon_width">40dp</dimen>
     <dimen name="icon_height">40dp</dimen>
     <dimen name="layout_margin_left">10dp</dimen>
+    <dimen name="dp5">5dp</dimen>
+    <dimen name="dp10">10dp</dimen>
+    <dimen name="dp20">20dp</dimen>
+    <dimen name="dp30">30dp</dimen>
+    <dimen name="dp40">40dp</dimen>
+    <dimen name="dp50">50dp</dimen>
+    <dimen name="dp60">60dp</dimen>
+    <dimen name="dp70">70dp</dimen>
 </resources>

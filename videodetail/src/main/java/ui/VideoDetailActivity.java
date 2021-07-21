@@ -8,8 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -17,18 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -46,6 +40,7 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
+import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.wdcs.videodetail.demo.R;
@@ -68,13 +63,13 @@ import model.CommentModel;
 import model.CommentModel.DataDTO.RecordsDTO;
 import model.ContentStateModel;
 import model.DataDTO;
+import model.ShareInfo;
 import model.TokenModel;
 import model.VideoCollectionModel;
 import model.VideoDetailModel;
 import utils.KeyboardUtils;
 import utils.NumberFormatTool;
 import utils.SPUtils;
-import utils.ScreenUtils;
 import utils.SoftKeyBoardListener;
 import utils.ToastUtils;
 import widget.LoadingView;
@@ -165,6 +160,17 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
     public View decorView;
     private SoftKeyBoardListener softKeyBoardListener;
+    private CustomPopWindow noLoginTipsPop;
+    private View noLoginTipsView;
+    private TextView noLoginTipsCancel;
+    private TextView noLoginTipsOk;
+    private ImageView share;
+    private CustomPopWindow sharePop;
+    private View sharePopView;
+    private ImageView shareWxBtn;
+    private ImageView shareCircleBtn;
+    private ImageView shareQqBtn;
+    private DataDTO mDataDTO;
 
     @SuppressLint("NewApi")
     @Override
@@ -210,11 +216,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         contentId = getIntent().getStringExtra("contentId");
         param = VideoInteractiveParam.getInstance();
 //        ScreenUtils.setStatusBarColor(this, R.color.black);
-        PersonInfoManager.getInstance().setTransformationToken(token);
+//        PersonInfoManager.getInstance().setTransformationToken(token);
         backLl = findViewById(R.id.back_ll);
         back = (ImageView) findViewById(R.id.back);
         back.setOnClickListener(this);
+        share = findViewById(R.id.share);
+        share.setOnClickListener(this);
         mDatas = new ArrayList<>();
+        mDataDTO = new DataDTO();
         loadingProgress = findViewById(R.id.loading_progress);
         loadingProgress.setVisibility(View.VISIBLE);
         commentEdittext = findViewById(R.id.comment_edittext);
@@ -240,7 +249,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 if (mDatas.isEmpty()) {
                     return;
                 }
-
+                mDataDTO = mDatas.get(0);
                 myContentId = String.valueOf(mDatas.get(0).getId());
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
                     getContentState(myContentId);
@@ -291,6 +300,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             if (null != choosePop) {
                                 choosePop.dissmiss();
                             }
+                            if (null != noLoginTipsPop) {
+                                noLoginTipsPop.dissmiss();
+                            }
+                            if (null != sharePop) {
+                                sharePop.dissmiss();
+                            }
                             KeyboardUtils.hideKeyboard(getWindow().getDecorView());
                         } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                             backLl.setVisibility(View.VISIBLE);
@@ -317,7 +332,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 if (null != playerView.getTag() && position == (int) playerView.getTag()) {
                     return;
                 }
-
+                mDataDTO = mDatas.get(position);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 currentIndex = position;
@@ -374,6 +389,18 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         edtParent = sendPopContentView.findViewById(R.id.edt_parent);
         edtInput = sendPopContentView.findViewById(R.id.edtInput);
         tvSend = sendPopContentView.findViewById(R.id.tvSend);
+
+        noLoginTipsView = View.inflate(this, R.layout.no_login_tips, null);
+        noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
+        noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
+        noLoginTipsCancel.setOnClickListener(this);
+        noLoginTipsOk.setOnClickListener(this);
+
+        sharePopView = View.inflate(this, R.layout.share_pop_view, null);
+        shareWxBtn = sharePopView.findViewById(R.id.share_wx_btn);
+        shareCircleBtn = sharePopView.findViewById(R.id.share_circle_btn);
+        shareQqBtn = sharePopView.findViewById(R.id.share_qq_btn);
+
         /**
          * 发送评论
          */
@@ -389,20 +416,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         });
 
         rootView = findViewById(R.id.root);
-//        rootView.addOnLayoutChangeListener(this);
-
-//        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                if (inputAndSendPop != null) {
-//                    int[] location = new int[2];
-//                    inputAndSendPop.getPopupWindow().getContentView().getLocationOnScreen(location);
-//                    int x = location[0];
-//                    int y = location[1];
-//                    Log.e("yqh", y+"");
-//                }
-//            }
-//        });
 
         dismissPop = contentView.findViewById(R.id.dismiss_pop);
         dismissPop.setOnClickListener(this);
@@ -612,6 +625,35 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                SystemUtils.hideSystemUI(decorView);
             }
         });
+    }
+
+    /**
+     * 分享弹窗
+     */
+    private void sharePop() {
+        if (null == sharePop) {
+            sharePop = new CustomPopWindow.PopupWindowBuilder(this)
+                    .setView(sharePopView)
+                    .setOutsideTouchable(false)
+                    .setFocusable(true)
+                    .size(getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(150))
+                    .setAnimationStyle(R.style.take_popwindow_anim)
+                    .create()
+                    .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
+        } else {
+            sharePop.showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
+        }
+    }
+
+    public void toShare(DataDTO item, String platform) {
+        VideoInteractiveParam param = VideoInteractiveParam.getInstance();
+        ShareInfo shareInfo = ShareInfo.getInstance(item.getShareUrl(), item.getShareImageUrl(),
+                item.getShareBrief(), item.getShareTitle(), platform);
+        try {
+            param.shared(shareInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1414,24 +1456,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             finish();
         } else if (id == R.id.video_detail_collection || id == R.id.collection_btn) {//收藏
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                try {
-                    Log.e("addOrCancelFavor", "无token 去跳登录");
-                    param.toLogin();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                noLoginTipsPop();
             } else {
                 addOrCancelFavor(myContentId, videoType);
             }
 
         } else if (id == R.id.video_detail_likes || id == R.id.video_detail_comment_likes_btn) {//点赞
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                try {
-                    Log.e("addOrCancelFavor", "无token 去跳登录");
-                    param.toLogin();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                noLoginTipsPop();
             } else {
                 addOrCancelLike(myContentId, videoType);
             }
@@ -1442,13 +1474,51 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         } else if (id == R.id.video_detail_comment_btn) {
             showCommentPopWindow();
         } else if (id == R.id.comment_pop_rl) {
-            KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
-            showInputEdittextAndSend();
+            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                try {
+                    noLoginTipsPop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
+                showInputEdittextAndSend();
+            }
         } else if (id == R.id.video_detail_white_comment_rl) {
-            KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
-            showInputEdittextAndSend();
+            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                try {
+                    noLoginTipsPop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
+                showInputEdittextAndSend();
+            }
+        } else if (id == R.id.no_login_tips_cancel) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+        } else if (id == R.id.no_login_tips_ok) {
+            try {
+                param.toLogin();
+                if (null != noLoginTipsPop) {
+                    noLoginTipsPop.dissmiss();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (id == R.id.share) {
+            sharePop();
+        } else if (id == R.id.share_wx_btn) {
+            toShare(mDataDTO, Constants.SHARE_WX);
+        } else if (id == R.id.share_circle_btn) {
+            toShare(mDataDTO, Constants.SHARE_CIRCLE);
+        } else if (id == R.id.share_qq_btn) {
+            toShare(mDataDTO, Constants.SHARE_QQ);
         }
     }
+
 
     /**
      * 弹出发送评论弹出窗
@@ -1460,8 +1530,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     .setView(sendPopContentView)
                     .setOutsideTouchable(false)
                     .setFocusable(true)
-                    .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE |
-                            WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+                    .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .size(getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(50))
                     .create()
@@ -1473,6 +1542,24 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         edtInput.setFocusableInTouchMode(true);
         edtInput.requestFocus();
 
+    }
+
+    /**
+     * 没有登录情况下 点击点赞收藏评论 提示登录的提示框
+     */
+    private void noLoginTipsPop() {
+        if (null == noLoginTipsPop) {
+            noLoginTipsPop = new CustomPopWindow.PopupWindowBuilder(this)
+                    .setView(noLoginTipsView)
+                    .setOutsideTouchable(true)
+                    .setFocusable(true)
+                    .setAnimationStyle(R.style.AnimCenter)
+                    .size(getResources().getDisplayMetrics().widthPixels - ButtonSpan.dip2px(60), ButtonSpan.dip2px(180))
+                    .create()
+                    .showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        } else {
+            noLoginTipsPop.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        }
     }
 
 //    /**
@@ -1529,7 +1616,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void keyBoardShow(int height) {
                 //软键盘已经显示，做逻辑
-                Log.e("yqh","软键盘已经显示,做逻辑");
+                Log.e("yqh", "软键盘已经显示,做逻辑");
             }
 
             @Override
@@ -1539,7 +1626,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 if (null != inputAndSendPop) {
                     inputAndSendPop.getPopupWindow().dismiss();
                 }
-                Log.e("yqh","软键盘已经隐藏,做逻辑");
+                Log.e("yqh", "软键盘已经隐藏,做逻辑");
             }
         });
     }
