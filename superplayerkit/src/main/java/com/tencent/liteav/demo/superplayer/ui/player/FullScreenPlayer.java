@@ -11,8 +11,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -23,17 +27,17 @@ import com.example.zhouwei.library.CustomPopWindow;
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
 import com.tencent.liteav.demo.superplayer.model.net.LogReport;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoGestureDetector;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
 import com.tencent.liteav.demo.superplayer.ui.view.VodMoreView;
 import com.tencent.liteav.demo.superplayer.ui.view.VodQualityView;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
 import com.tencent.rtmp.TXImageSprite;
+import com.wdcs.model.PlayImageSpriteInfo;
+import com.wdcs.model.PlayKeyFrameDescInfo;
+import com.wdcs.model.VideoQuality;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -41,94 +45,101 @@ import java.util.List;
 
 /**
  * 全屏模式播放控件
- *
+ * <p>
  * 除{@link WindowPlayer}基本功能外，还包括进度条关键帧打点信息显示与跳转、快进快退时缩略图的显示、切换画质
  * 镜像播放、硬件加速、倍速播放、弹幕、截图等功能
- *
+ * <p>
  * 1、点击事件监听{@link #onClick(View)}
- *
+ * <p>
  * 2、触摸事件监听{@link #onTouchEvent(MotionEvent)}
- *
+ * <p>
  * 3、进度条滑动事件监听{@link #onProgressChanged(PointSeekBar, int, boolean)}
- *                    {@link #onStartTrackingTouch(PointSeekBar)}{@link #onStopTrackingTouch(PointSeekBar)}
- *
+ * {@link #onStartTrackingTouch(PointSeekBar)}{@link #onStopTrackingTouch(PointSeekBar)}
+ * <p>
  * 4、进度条打点信息点击监听{@link #onSeekBarPointClick(View, int)}
- *
+ * <p>
  * 5、切换画质监听{@link #onQualitySelect(VideoQuality)}
- *
+ * <p>
  * 6、倍速播放监听{@link #onSpeedChange(float)}
- *
+ * <p>
  * 7、镜像播放监听{@link #onMirrorChange(boolean)}
- *
+ * <p>
  * 8、硬件加速监听{@link #onHWAcceleration(boolean)}
- *
  */
 public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         VodMoreView.Callback, VodQualityView.Callback, PointSeekBar.OnSeekBarChangeListener, PointSeekBar.OnSeekBarPointClickListener, RadioGroup.OnCheckedChangeListener {
 
     // UI控件
-    private RelativeLayout                      mLayoutTop;                             // 顶部标题栏布局
-    private LinearLayout                        mLayoutBottom;                          // 底部进度条所在布局
-    private ImageView                           mIvPause;                               // 暂停播放按钮
-    private TextView                            mTvTitle;                               // 视频名称文本
-    private TextView                            mTvBackToLive;                          // 返回直播文本
-    private ImageView                           mIvWatermark;                           // 水印
-    private TextView                            mTvCurrent;                             // 当前进度文本
-    private TextView                            mTvDuration;                            // 总时长文本
-    private PointSeekBar                        mSeekBarProgress;                       // 播放进度条
-    public  ProgressBar                         mFullLoadBar;
-    private LinearLayout                        mLayoutReplay;                          // 重播按钮所在布局
-    private ProgressBar                         mPbLiveLoading;                         // 加载圈
-    private VolumeBrightnessProgressLayout      mGestureVolumeBrightnessProgressLayout; // 音量亮度调节布局
-    private VideoProgressLayout                 mGestureVideoProgressLayout;            // 手势快进提示布局
+    private LinearLayout mLayoutTop;                             // 顶部标题栏布局
+    private RelativeLayout mLayoutBottom;                          // 底部进度条所在布局
+    private ImageView mIvPause;                               // 暂停播放按钮
+    private TextView mTvTitle;                               // 视频名称文本
+    private TextView mTvBackToLive;                          // 返回直播文本
+    private ImageView mIvWatermark;                           // 水印
+    private TextView mTvCurrent;                             // 当前进度文本
+    private TextView mTvDuration;                            // 总时长文本
+    private PointSeekBar mSeekBarProgress;                       // 播放进度条
+    public ProgressBar mFullLoadBar;
+    private LinearLayout mLayoutReplay;                          // 重播按钮所在布局
+    private ProgressBar mPbLiveLoading;                         // 加载圈
+    private VolumeBrightnessProgressLayout mGestureVolumeBrightnessProgressLayout; // 音量亮度调节布局
+    private VideoProgressLayout mGestureVideoProgressLayout;            // 手势快进提示布局
 
-    private ImageView                           mIvBack;                                // 顶部标题栏中的返回按钮
-    private ImageView                           mIvSnapshot;                            // 截屏按钮
-    private ImageView                           mIvLock;                                // 锁屏按钮
-    private ImageView                           mIvMore;                                // 更多设置弹窗按钮
-    private VodQualityView                      mVodQualityView;                        // 画质列表弹窗
-    public  VodMoreView                         mVodMoreView;                           // 更多设置弹窗
-    private TextView                            mTvVttText;                             // 关键帧打点信息文本
+    private ImageView mIvBack;                                // 顶部标题栏中的返回按钮
+    public ImageView mLike;                                  // 点赞按钮
+    public TextView fullscreenLikeNum;                       // 点赞数
+    public ImageView mCollection;                            // 收藏按钮
+    private ImageView mShare;                                 // 分享按钮
+    private ImageView mIvSnapshot;                            // 截屏按钮
+    private ImageView mIvLock;                                // 锁屏按钮
+    private ImageView mIvMore;                                // 更多设置弹窗按钮
+    private VodQualityView mVodQualityView;                        // 画质列表弹窗
+    public VodMoreView mVodMoreView;                           // 更多设置弹窗
+    private TextView mTvVttText;                             // 关键帧打点信息文本
 
-    private HideLockViewRunnable                mHideLockViewRunnable;                  // 隐藏锁屏按钮子线程
-    private GestureDetector                     mGestureDetector;                       // 手势检测监听器
-    private VideoGestureDetector                mVideoGestureDetector;                      // 手势控制工具
+    private HideLockViewRunnable mHideLockViewRunnable;                  // 隐藏锁屏按钮子线程
+    private GestureDetector mGestureDetector;                       // 手势检测监听器
+    private VideoGestureDetector mVideoGestureDetector;                      // 手势控制工具
 
-    private boolean                             isShowing;                              // 自身是否可见
-    private boolean                             mIsChangingSeekBarProgress;             // 进度条是否正在拖动，避免SeekBar由于视频播放的update而跳动
-    private SuperPlayerDef.PlayerType           mPlayType;                              // 当前播放视频类型
-    private SuperPlayerDef.PlayerState          mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
-    private long                                mDuration;                              // 视频总时长
-    private long                                mLivePushDuration;                      // 直播推流总时长
-    private long                                mProgress;                              // 当前播放进度
+    private boolean isShowing;                              // 自身是否可见
+    private boolean mIsChangingSeekBarProgress;             // 进度条是否正在拖动，避免SeekBar由于视频播放的update而跳动
+    private SuperPlayerDef.PlayerType mPlayType;                              // 当前播放视频类型
+    private SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
+    private long mDuration;                              // 视频总时长
+    private long mLivePushDuration;                      // 直播推流总时长
+    private long mProgress;                              // 当前播放进度
 
-    private Bitmap                              mBackgroundBmp;                         // 背景图
-    private Bitmap                              mWaterMarkBmp;                          // 水印图
-    private float                               mWaterMarkBmpX;                         // 水印x坐标
-    private float                               mWaterMarkBmpY;                         // 水印y坐标
+    private Bitmap mBackgroundBmp;                         // 背景图
+    private Bitmap mWaterMarkBmp;                          // 水印图
+    private float mWaterMarkBmpX;                         // 水印x坐标
+    private float mWaterMarkBmpY;                         // 水印y坐标
 
-    private boolean                             mBarrageOn;                             // 弹幕是否开启
-    public boolean                             mLockScreen;                            // 是否锁屏
-    private TXImageSprite                       mTXImageSprite;                         // 雪碧图信息
-    private List<PlayKeyFrameDescInfo>          mTXPlayKeyFrameDescInfoList;            // 关键帧信息
-    private int                                 mSelectedPos = -1;                      // 点击的关键帧时间点
+    private boolean mBarrageOn;                             // 弹幕是否开启
+    public boolean mLockScreen;                            // 是否锁屏
+    private TXImageSprite mTXImageSprite;                         // 雪碧图信息
+    private List<PlayKeyFrameDescInfo> mTXPlayKeyFrameDescInfoList;            // 关键帧信息
+    private int mSelectedPos = -1;                      // 点击的关键帧时间点
 
-    private VideoQuality                        mDefaultVideoQuality;                   // 默认画质
-    private List<VideoQuality>                  mVideoQualityList;                      // 画质列表
-    private boolean                             mFirstShowQuality;                      // 是都是首次显示画质信息
-    public TextView                            superplayerSpeed;                       // 倍速按钮
-    public CustomPopWindow popupWindow;
-    private View contentView;
-    private RadioGroup                          mRadioGroup;                            // 倍速选择radioGroup
-    private RadioButton                         mRbSpeed05;                              // 0.5倍速按钮
-    private RadioButton                         mRbSpeed075;                            // 0.75倍速按钮
-    public  RadioButton                         mRbSpeed1;                              // 1.0倍速按钮
-    private RadioButton                         mRbSpeed125;                            // 1.25倍速按钮
-    private RadioButton                         mRbSpeed15;                             // 1.5倍速按钮
-    private RadioButton                         mRbSpeed2;                              // 2.0倍速按钮
+    private VideoQuality mDefaultVideoQuality;                   // 默认画质
+    private List<VideoQuality> mVideoQualityList;                      // 画质列表
+    private boolean mFirstShowQuality;                      // 是都是首次显示画质信息
+    public TextView superplayerSpeed;                       // 倍速按钮
+    public PopupWindow popupWindow;
+//    private View contentView;
+    private RadioGroup mRadioGroup;                            // 倍速选择radioGroup
+    private RadioButton mRbSpeed05;                              // 0.5倍速按钮
+    private RadioButton mRbSpeed075;                            // 0.75倍速按钮
+    public RadioButton mRbSpeed1;                              // 1.0倍速按钮
+    private RadioButton mRbSpeed125;                            // 1.25倍速按钮
+    private RadioButton mRbSpeed15;                             // 1.5倍速按钮
+    private RadioButton mRbSpeed2;                              // 2.0倍速按钮
     private Context mContext;
     public int phoneWidth;
+    public int phoneHeight;
     public String strSpeed;
+    public CustomPopWindow sharePop;
+    private View shareView;
+    private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow,translateAniBottomHide;
 
     public FullScreenPlayer(Context context) {
         super(context);
@@ -151,10 +162,13 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private void initialize(Context context) {
         mContext = context;
         initView(context);
+
         mGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                if (mLockScreen) return false;
+                if (mLockScreen) {
+                    return false;
+                }
                 togglePlayState();
                 show();
                 if (mHideViewRunnable != null) {
@@ -172,7 +186,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
             @Override
             public boolean onScroll(MotionEvent downEvent, MotionEvent moveEvent, float distanceX, float distanceY) {
-                if (mLockScreen) return false;
+                if (mLockScreen) {
+                    return false;
+                }
                 if (downEvent == null || moveEvent == null) {
                     return false;
                 }
@@ -184,7 +200,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
             @Override
             public boolean onDown(MotionEvent e) {
-                if (mLockScreen) return true;
+                if (mLockScreen) {
+                    return true;
+                }
                 if (mVideoGestureDetector != null) {
                     mVideoGestureDetector.reset(getWidth(), mSeekBarProgress.getProgress());
                 }
@@ -233,9 +251,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                     float currentTime = (mDuration * percentage);
                     if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
                         if (mLivePushDuration > MAX_SHIFT_TIME) {
-                            currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (1 - percentage));
+                            currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
                         } else {
-                            currentTime  = mLivePushDuration * percentage;
+                            currentTime = mLivePushDuration * percentage;
                         }
                         mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime));
                     } else {
@@ -243,8 +261,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                     }
                     setThumbnail(progress);
                 }
-                if (mSeekBarProgress!= null)
+                if (mSeekBarProgress != null) {
                     mSeekBarProgress.setProgress(progress);
+                }
             }
         });
     }
@@ -253,36 +272,44 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
      * 初始化view
      */
     private void initView(Context context) {
-//        mRadioGroup = findViewById(R.id.superplayer_rg);
-//        mRbSpeed05 = findViewById(R.id.superplayer_rb_speed05);
-//        mRbSpeed075 = findViewById(R.id.superplayer_rb_speed075);
-//        mRbSpeed1 = findViewById(R.id.superplayer_rb_speed1);
-//        mRbSpeed125 = findViewById(R.id.superplayer_rb_speed125);
-//        mRbSpeed15 = findViewById(R.id.superplayer_rb_speed15);
-//        mRbSpeed2 = findViewById(R.id.superplayer_rb_speed2);
         phoneWidth = getResources().getDisplayMetrics().widthPixels;
+        phoneHeight = getResources().getDisplayMetrics().heightPixels;
         mHideLockViewRunnable = new HideLockViewRunnable(this);
         LayoutInflater.from(context).inflate(R.layout.superplayer_vod_player_fullscreen, this);
-
-        contentView = View.inflate(context,R.layout.speed_popwindow,null);
-        mRadioGroup = contentView.findViewById(R.id.superplayer_rg);
-        mRbSpeed05 = contentView.findViewById(R.id.superplayer_rb_speed05);
+//        contentView = View.inflate(context, R.layout.speed_popwindow, null);
+//        mRadioGroup = contentView.findViewById(R.id.superplayer_rg);
+//        mRbSpeed05 = contentView.findViewById(R.id.superplayer_rb_speed05);
+//        mRbSpeed05.setOnClickListener(this);
+//        mRbSpeed075 = contentView.findViewById(R.id.superplayer_rb_speed075);
+//        mRbSpeed075.setOnClickListener(this);
+//        mRbSpeed1 = contentView.findViewById(R.id.superplayer_rb_speed1);
+//        mRbSpeed1.setOnClickListener(this);
+//        mRbSpeed125 = contentView.findViewById(R.id.superplayer_rb_speed125);
+//        mRbSpeed125.setOnClickListener(this);
+//        mRbSpeed15 = contentView.findViewById(R.id.superplayer_rb_speed15);
+//        mRbSpeed15.setOnClickListener(this);
+//        mRbSpeed2 = contentView.findViewById(R.id.superplayer_rb_speed2);
+//        mRbSpeed2.setOnClickListener(this);
+        mRadioGroup = findViewById(R.id.superplayer_rg);
+        mRbSpeed05 = findViewById(R.id.superplayer_rb_speed05);
         mRbSpeed05.setOnClickListener(this);
-        mRbSpeed075 = contentView.findViewById(R.id.superplayer_rb_speed075);
+        mRbSpeed075 = findViewById(R.id.superplayer_rb_speed075);
         mRbSpeed075.setOnClickListener(this);
-        mRbSpeed1 = contentView.findViewById(R.id.superplayer_rb_speed1);
+        mRbSpeed1 = findViewById(R.id.superplayer_rb_speed1);
         mRbSpeed1.setOnClickListener(this);
-        mRbSpeed125 = contentView.findViewById(R.id.superplayer_rb_speed125);
+        mRbSpeed125 = findViewById(R.id.superplayer_rb_speed125);
         mRbSpeed125.setOnClickListener(this);
-        mRbSpeed15 = contentView.findViewById(R.id.superplayer_rb_speed15);
+        mRbSpeed15 = findViewById(R.id.superplayer_rb_speed15);
         mRbSpeed15.setOnClickListener(this);
-        mRbSpeed2 = contentView.findViewById(R.id.superplayer_rb_speed2);
+        mRbSpeed2 = findViewById(R.id.superplayer_rb_speed2);
         mRbSpeed2.setOnClickListener(this);
         mRadioGroup.setOnCheckedChangeListener(this);
+        shareView = View.inflate(context, R.layout.share_popwindow, null);
+        translateAnimation();
 
-        mLayoutTop = (RelativeLayout) findViewById(R.id.superplayer_rl_top);
+        mLayoutTop = findViewById(R.id.superplayer_rl_top);
         mLayoutTop.setOnClickListener(this);
-        mLayoutBottom = (LinearLayout) findViewById(R.id.superplayer_ll_bottom);
+        mLayoutBottom = findViewById(R.id.superplayer_ll_bottom);
         mLayoutBottom.setOnClickListener(this);
         mLayoutReplay = (LinearLayout) findViewById(R.id.superplayer_ll_replay);
 
@@ -292,6 +319,10 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mTvTitle.setSelected(true);
         mIvPause = (ImageView) findViewById(R.id.superplayer_iv_pause);
         mIvMore = (ImageView) findViewById(R.id.superplayer_iv_more);
+        mLike = findViewById(R.id.fullscreen_like);
+        fullscreenLikeNum = findViewById(R.id.fullscreen_like_num);
+        mCollection = findViewById(R.id.fullscreen_collection);
+        mShare = findViewById(R.id.superplayer_fullscreen_share);
         mIvSnapshot = (ImageView) findViewById(R.id.superplayer_iv_snapshot);
         mTvCurrent = (TextView) findViewById(R.id.superplayer_tv_current);
         mTvDuration = (TextView) findViewById(R.id.superplayer_tv_duration);
@@ -318,6 +349,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mIvPause.setOnClickListener(this);
         mIvSnapshot.setOnClickListener(this);
         mIvMore.setOnClickListener(this);
+        mShare.setOnClickListener(this);
         mTvVttText = (TextView) findViewById(R.id.superplayer_large_tv_vtt_text);
         mTvVttText.setOnClickListener(this);
         mGestureVolumeBrightnessProgressLayout = (VolumeBrightnessProgressLayout) findViewById(R.id.superplayer_gesture_progress);
@@ -328,9 +360,87 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         superplayerSpeed.setOnClickListener(this);
     }
 
+
+    //位移动画
+    private void translateAnimation() {
+
+
+        //向左位移显示动画
+        translateAniRightShow = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF,//RELATIVE_TO_SELF表示操作自身
+                1,//fromXValue表示开始的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                0,//fromXValue表示结束的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                0,//fromXValue表示开始的Y轴位置
+                Animation.RELATIVE_TO_SELF,
+                0);//fromXValue表示结束的Y轴位置
+        translateAniRightShow.setRepeatMode(Animation.REVERSE);
+        translateAniRightShow.setDuration(500);
+
+        //向右位移隐藏动画
+        translateAniRightHide = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF,//RELATIVE_TO_SELF表示操作自身
+                0,//fromXValue表示开始的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                1,//fromXValue表示结束的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                0,//fromXValue表示开始的Y轴位置
+                Animation.RELATIVE_TO_SELF,
+                0);//fromXValue表示结束的Y轴位置
+        translateAniRightHide.setRepeatMode(Animation.REVERSE);
+        translateAniRightHide.setDuration(500);
+
+        translateAniBottomShow = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF,//RELATIVE_TO_SELF表示操作自身
+                0,//fromXValue表示开始的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                0,//fromXValue表示结束的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                0,//fromXValue表示开始的Y轴位置
+                Animation.RELATIVE_TO_SELF,
+                1);//fromXValue表示结束的Y轴位置
+        translateAniRightHide.setRepeatMode(Animation.REVERSE);
+        translateAniRightHide.setDuration(500);
+
+        translateAniBottomHide = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF,//RELATIVE_TO_SELF表示操作自身
+                0,//fromXValue表示开始的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                0,//fromXValue表示结束的X轴位置
+                Animation.RELATIVE_TO_SELF,
+                1,//fromXValue表示开始的Y轴位置
+                Animation.RELATIVE_TO_SELF,
+                0);//fromXValue表示结束的Y轴位置
+        translateAniRightHide.setRepeatMode(Animation.REVERSE);
+        translateAniRightHide.setDuration(500);
+
+
+    }
+
+    /**
+     * 弹出分享框
+     */
+    private void showSharePop(Context context) {
+        if (sharePop == null) {
+            //创建并显示popWindow
+            sharePop = new CustomPopWindow.PopupWindowBuilder(context)
+                    .setView(shareView)
+                    .setOutsideTouchable(true)
+                    .setFocusable(false)
+                    .size(phoneHeight, phoneWidth / 3)
+                    .setAnimationStyle(R.style.take_popwindow_anim)
+                    .create()
+                    .showAtLocation(((Activity) context).getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+        } else {
+            sharePop.showAtLocation(((Activity) context).getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+        }
+        toggle();
+    }
+
     /**
      * 切换播放状态
-     *
+     * <p>
      * 双击和点击播放/暂停按钮会触发此方法
      */
     private void togglePlayState() {
@@ -369,13 +479,19 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
         } else {
             mIvLock.setVisibility(VISIBLE);
-            if (mHideLockViewRunnable!=null) {
+            if (mHideLockViewRunnable != null) {
                 removeCallbacks(mHideLockViewRunnable);
                 postDelayed(mHideLockViewRunnable, Contants.delayMillis);
             }
         }
         if (mVodMoreView.getVisibility() == VISIBLE) {
+            mVodMoreView.startAnimation(translateAniRightHide);
             mVodMoreView.setVisibility(GONE);
+        }
+
+        if (mRadioGroup.getVisibility() == VISIBLE) {
+            mRadioGroup.startAnimation(translateAniRightHide);
+            mRadioGroup.setVisibility(GONE);
         }
     }
 
@@ -402,20 +518,22 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mLayoutTop.setVisibility(View.VISIBLE);
         mLayoutBottom.setVisibility(View.VISIBLE);
         superplayerSpeed.setVisibility(VISIBLE);
-        if (mHideLockViewRunnable!=null) {
+        if (mHideLockViewRunnable != null) {
             removeCallbacks(mHideLockViewRunnable);
         }
         mIvLock.setVisibility(VISIBLE);
         if (mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
-            if (mLayoutBottom.getVisibility() == VISIBLE)
+            if (mLayoutBottom.getVisibility() == VISIBLE) {
                 mTvBackToLive.setVisibility(View.VISIBLE);
+            }
         }
         List<PointSeekBar.PointParams> pointParams = new ArrayList<>();
-        if (mTXPlayKeyFrameDescInfoList != null)
+        if (mTXPlayKeyFrameDescInfoList != null) {
             for (PlayKeyFrameDescInfo info : mTXPlayKeyFrameDescInfoList) {
                 int progress = (int) (info.time / mDuration * mSeekBarProgress.getMax());
                 pointParams.add(new PointSeekBar.PointParams(progress, Color.WHITE));
             }
+        }
         mSeekBarProgress.setPointList(pointParams);
     }
 
@@ -517,8 +635,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
         if (percentage >= 0 && percentage <= 1) {
             int progress = Math.round(percentage * mSeekBarProgress.getMax());
-            if (!mIsChangingSeekBarProgress)
+            if (!mIsChangingSeekBarProgress) {
                 mSeekBarProgress.setProgress(progress);
+            }
             mTvDuration.setText(formattedTime(mDuration));
         }
     }
@@ -609,11 +728,11 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                 float percentage = progress * 1.0f / mSeekBarProgress.getMax();
                 if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
                     if (mLivePushDuration > MAX_SHIFT_TIME) {
-                        seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (1 - percentage));
+                        seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
                     } else {
-                        seekTime  = (int) (mLivePushDuration * percentage);
+                        seekTime = (int) (mLivePushDuration * percentage);
                     }
-                }else {
+                } else {
                     seekTime = (int) (percentage * mDuration);
                 }
                 if (mControllerCallback != null) {
@@ -623,9 +742,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
         }
 
-        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
             removeCallbacks(mHideViewRunnable);
-        } else if(event.getAction() == MotionEvent.ACTION_UP) {
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
             postDelayed(mHideViewRunnable, Contants.delayMillis);
         }
         return true;
@@ -644,6 +763,12 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
         } else if (i == R.id.superplayer_iv_pause) {            //暂停\播放按钮
             togglePlayState();
+        } else if (i == R.id.fullscreen_like) {
+
+        } else if (i == R.id.fullscreen_collection) {
+
+        } else if (i == R.id.superplayer_fullscreen_share) {    //分享
+            showSharePop(mContext);
         } else if (i == R.id.superplayer_iv_snapshot) {         //截屏按钮
             if (mControllerCallback != null) {
                 mControllerCallback.onSnapshot();
@@ -664,7 +789,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             seekToKeyFramePos();
         } else if (i == R.id.superplayer_speed) {               //调整倍速
             hide();
-            showPopWindow(mContext);
+//            showPopWindow(mContext);
+            mRadioGroup.startAnimation(translateAniRightShow);
+            mRadioGroup.setVisibility(VISIBLE);
         } else if (i == R.id.superplayer_rb_speed05) {
             mRbSpeed05.setChecked(true);
             strSpeed = "0.5";
@@ -712,31 +839,31 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
     /**
      * 从右侧弹出倍速选择框
+     *
      * @param context
      */
-    private void showPopWindow(Context context) {
-        if (popupWindow == null) {
-            //创建并显示popWindow
-            popupWindow = new CustomPopWindow.PopupWindowBuilder(context)
-                    .setView(contentView)
-                    .setOutsideTouchable(true)
-                    .setFocusable(true)
-                    .setBgDarkAlpha(0.7f) // 控制亮度
-                    .size(getResources().getDimensionPixelSize(R.dimen.privacy_dialog_width), phoneWidth)
-                    .setAnimationStyle(R.style.take_speed_popwindow_anim)
-                    .create()
-                    .showAtLocation(((Activity)mContext).getWindow().getDecorView(), Gravity.BOTTOM | Gravity.RIGHT, 0, 0);
-        } else {
-            popupWindow.showAtLocation(((Activity)mContext).getWindow().getDecorView(), Gravity.BOTTOM | Gravity.RIGHT, 0, 0);
-        }
-    }
-
+//    private void showPopWindow(Context context) {
+//        if (popupWindow == null) {
+//            //创建并显示popWindow
+//            popupWindow = new CustomPopWindow.PopupWindowBuilder(context)
+//                    .setView(contentView)
+//                    .setOutsideTouchable(true)
+//                    .setFocusable(false)
+//                    .size(getResources().getDimensionPixelSize(R.dimen.privacy_dialog_width), phoneWidth)
+//                    .setAnimationStyle(R.style.take_speed_popwindow_anim)
+//                    .create()
+//                    .showAtLocation(getRootView(), Gravity.RIGHT | Gravity.TOP, 0, 0);
+//        } else {
+//            popupWindow.showAtLocation(getRootView(), Gravity.RIGHT | Gravity.BOTTOM, 0, 0);
+//        }
+//    }
 
     /**
      * 显示更多设置弹窗
      */
     private void showMoreView() {
         hide();
+        mVodMoreView.startAnimation(translateAniRightShow);
         mVodMoreView.setVisibility(View.VISIBLE);
     }
 
@@ -747,15 +874,15 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         if (mVideoQualityList == null || mVideoQualityList.size() == 0) {
             return;
         }
-        if(mVideoQualityList.size()==1 && (mVideoQualityList.get(0)==null || TextUtils.isEmpty(mVideoQualityList.get(0).title))){
+        if (mVideoQualityList.size() == 1 && (mVideoQualityList.get(0) == null || TextUtils.isEmpty(mVideoQualityList.get(0).title))) {
             return;
         }
         // 设置默认显示分辨率文字
         mVodQualityView.setVisibility(View.VISIBLE);
         if (!mFirstShowQuality && mDefaultVideoQuality != null) {
-            for (int i = 0 ; i  < mVideoQualityList.size(); i++) {
+            for (int i = 0; i < mVideoQualityList.size(); i++) {
                 VideoQuality quality = mVideoQualityList.get(i);
-                if (quality!=null && quality.title!=null &&quality.title.equals(mDefaultVideoQuality.title)) {
+                if (quality != null && quality.title != null && quality.title.equals(mDefaultVideoQuality.title)) {
                     mVodQualityView.setDefaultSelectedQuality(i);
                     break;
                 }
@@ -771,7 +898,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private void toggleLockState() {
         mLockScreen = !mLockScreen;
         mIvLock.setVisibility(VISIBLE);
-        if (mHideLockViewRunnable!=null) {
+        if (mHideLockViewRunnable != null) {
             removeCallbacks(mHideLockViewRunnable);
             postDelayed(mHideLockViewRunnable, Contants.delayMillis);
         }
@@ -816,9 +943,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             float currentTime = (mDuration * percentage);
             if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
                 if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (1 - percentage));
+                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
                 } else {
-                    currentTime  = mLivePushDuration * percentage;
+                    currentTime = mLivePushDuration * percentage;
                 }
                 mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime));
             } else {
@@ -860,7 +987,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
                 toggleView(mPbLiveLoading, true);
                 int seekTime = (int) (mLivePushDuration * curProgress * 1.0f / maxProgress);
                 if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (maxProgress - curProgress) * 1.0f / maxProgress);
+                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (maxProgress - curProgress) * 1.0f / maxProgress);
                 }
                 if (mControllerCallback != null) {
                     mControllerCallback.onSeekTo(seekTime);
@@ -872,7 +999,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
     @Override
     public void onSeekBarPointClick(final View view, final int pos) {
-        if (mHideLockViewRunnable!=null) {
+        if (mHideLockViewRunnable != null) {
             removeCallbacks(mHideViewRunnable);
             postDelayed(mHideViewRunnable, Contants.delayMillis);
         }
@@ -1018,21 +1145,22 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed2.getText());
         }
-        popupWindow.dissmiss();
+        popupWindow.dismiss();
     }
 
     /**
      * 隐藏锁屏按钮的runnable
      */
-    private static class HideLockViewRunnable implements Runnable{
+    private static class HideLockViewRunnable implements Runnable {
         private WeakReference<FullScreenPlayer> mWefControllerFullScreen;
 
         public HideLockViewRunnable(FullScreenPlayer controller) {
             mWefControllerFullScreen = new WeakReference<>(controller);
         }
+
         @Override
         public void run() {
-            if (mWefControllerFullScreen!=null && mWefControllerFullScreen.get()!=null) {
+            if (mWefControllerFullScreen != null && mWefControllerFullScreen.get() != null) {
                 mWefControllerFullScreen.get().mIvLock.setVisibility(GONE);
             }
         }

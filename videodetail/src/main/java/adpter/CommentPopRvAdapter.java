@@ -11,25 +11,26 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.wdcs.model.CommentModel;
 import com.wdcs.videodetail.demo.R;
+
 
 import java.util.List;
 
-import model.CommentModel.DataDTO.RecordsDTO;
 import utils.DateUtils;
 import utils.GetTimeAgo;
 import widget.CircleImageView;
 @Keep
-public class CommentPopRvAdapter extends BaseQuickAdapter<RecordsDTO, BaseViewHolder> {
+public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.RecordsDTO, BaseViewHolder> {
     private Context mContext;
 
-    public CommentPopRvAdapter(int layoutResId, @Nullable List<RecordsDTO> data, Context context) {
+    public CommentPopRvAdapter(int layoutResId, @Nullable List<CommentModel.DataDTO.RecordsDTO> data, Context context) {
         super(layoutResId, data);
         this.mContext = context;
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, RecordsDTO item) {
+    protected void convert(BaseViewHolder helper, CommentModel.DataDTO.RecordsDTO item) {
         CircleImageView commentUserHead = helper.getView(R.id.comment_user_head);
         LinearLayout gmReback = helper.getView(R.id.gm_reback);
         if (null != item.getChildren() && item.getChildren().size() > 0) {

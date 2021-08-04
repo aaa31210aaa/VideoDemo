@@ -110,4 +110,11 @@ public class ApiConstants {
     public String mycsToken() {
         return getLoginBaseUrl() + "login/mycs/token";
     }
+
+    /**
+     * 浏览量+1接口
+     */
+    public String addViews() {
+        return getBaseUrl() + "client/contentStats/view/count/";
+    }
 }

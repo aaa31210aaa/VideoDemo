@@ -40,9 +40,16 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
-import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
+import com.wdcs.model.CommentModel;
+import com.wdcs.model.ContentStateModel;
+import com.wdcs.model.DataDTO;
+import com.wdcs.model.ShareInfo;
+import com.wdcs.model.TokenModel;
+import com.wdcs.model.VideoCollectionModel;
+import com.wdcs.model.VideoDetailModel;
+import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.videodetail.demo.R;
 
 import org.json.JSONException;
@@ -59,16 +66,7 @@ import callback.VideoInteractiveParam;
 import constants.Constants;
 import http.ApiConstants;
 import manager.PersonInfoManager;
-import model.CommentModel;
-import model.CommentModel.DataDTO.RecordsDTO;
-import model.ContentStateModel;
-import model.DataDTO;
-import model.ShareInfo;
-import model.TokenModel;
-import model.VideoCollectionModel;
-import model.VideoDetailModel;
 import utils.KeyboardUtils;
-import utils.NumberFormatTool;
 import utils.SPUtils;
 import utils.SoftKeyBoardListener;
 import utils.ToastUtils;
@@ -89,7 +87,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     //视频列表数据
     public List<DataDTO> mDatas;
     //评论列表数据
-    private List<RecordsDTO> mCommentPopRvData;
+    private List<CommentModel.DataDTO.RecordsDTO> mCommentPopRvData;
     private List<CommentModel.DataDTO> mCommentPopDtoData;
     private SuperPlayerView playerView;
     private ImageView videoStaticBg;
@@ -128,14 +126,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ViewPagerLayoutManager manager;
     private ImageView choosePopDismiss;
     private RefreshLayout refreshLayout;
-    private String token = "";
     private String transformationToken = "";
     private String contentId = "";
     private String panelId = "";
     private RelativeLayout commentListEmptyRl;
     private String recordContentId;//记录的内容id
     private boolean initialize = true;
-    private int mVideoSize = 10; //每页视频多少条
+    private int mVideoSize = 20; //每页视频多少条
     private int mPageIndex = 1; //评论列表页数
     private int mPageSize = 10; //评论列表每页多少条
     public String myContentId = ""; //记录当前视频id
@@ -145,7 +142,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView videoDetailCollectionImage; //收藏图标
     private ImageView videoDetailLikesImage; //点赞图标
     private TextView likesNum; //点赞数
-    private ContentStateModel.DataDTO contentStateModel;
+    public ContentStateModel.DataDTO contentStateModel;
     private ImageView videoDetailCommentCollectionImage; //评论弹窗收藏图标
     private ImageView videoDetailCommentLikesImage; //评论弹窗点赞图标
     private TextView videoDetailCommentLikesNum; //评论弹窗点赞数
@@ -164,7 +161,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private View noLoginTipsView;
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
-    private ImageView share;
+    private RelativeLayout share;
     private CustomPopWindow sharePop;
     private View sharePopView;
     private ImageView shareWxBtn;
@@ -200,7 +197,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         } else if (null == panelId || TextUtils.isEmpty(panelId)) {
             getOneVideo(contentId);
         } else {
-            getPullDownData(contentId, "10", panelId, "false");
+            getPullDownData(contentId, String.valueOf(mVideoSize), panelId, "false");
         }
     }
 
@@ -211,7 +208,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initView() {
-        token = getIntent().getStringExtra("token");
         panelId = getIntent().getStringExtra("panelId");
         contentId = getIntent().getStringExtra("contentId");
         param = VideoInteractiveParam.getInstance();
@@ -251,6 +247,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
                 mDataDTO = mDatas.get(0);
                 myContentId = String.valueOf(mDatas.get(0).getId());
+                addPageViews(myContentId);
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
                     getContentState(myContentId);
                 }
@@ -271,7 +268,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
-                playerView = new SuperPlayerView(VideoDetailActivity.this, decorView);
+                playerView = new SuperPlayerView(VideoDetailActivity.this, decorView, contentStateModel);
                 if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
                     SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                 } else {
@@ -339,6 +336,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 choosePopDatas.clear();
                 reset();
                 myContentId = String.valueOf(mDatas.get(position).getId());
+                addPageViews(myContentId);
                 videoDetailPopChooseAdapter.setContentId(myContentId);
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
@@ -398,8 +396,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 
         sharePopView = View.inflate(this, R.layout.share_pop_view, null);
         shareWxBtn = sharePopView.findViewById(R.id.share_wx_btn);
+        shareWxBtn.setOnClickListener(this);
         shareCircleBtn = sharePopView.findViewById(R.id.share_circle_btn);
+        shareCircleBtn.setOnClickListener(this);
         shareQqBtn = sharePopView.findViewById(R.id.share_qq_btn);
+        shareQqBtn.setOnClickListener(this);
 
         /**
          * 发送评论
@@ -455,7 +456,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //        Glide.with(VideoDetailActivity.this).load(mDatas.get(position).getThumbnailUrl()).into(videoStaticBg);
         RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, ButtonSpan.dip2px(200));
-        itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(50));
+        itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(30));
         RelativeLayout item = new RelativeLayout(VideoDetailActivity.this);
         startPlay = new ImageView(VideoDetailActivity.this);
         startPlay.setImageResource(R.drawable.play_start);
@@ -634,7 +635,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         if (null == sharePop) {
             sharePop = new CustomPopWindow.PopupWindowBuilder(this)
                     .setView(sharePopView)
-                    .setOutsideTouchable(false)
+                    .setOutsideTouchable(true)
                     .setFocusable(true)
                     .size(getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(150))
                     .setAnimationStyle(R.style.take_popwindow_anim)
@@ -1356,6 +1357,46 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 });
     }
 
+    /**
+     * 浏览量+1
+     */
+    private void addPageViews(String contentId) {
+        OkGo.<String>get(ApiConstants.getInstance().addViews() + contentId)
+                .tag(videoTag)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new StringCallback() {
+
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        try {
+                            JSONObject jsonObject = new JSONObject(response.body());
+                            Log.e("yqh",jsonObject.getString("message"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        try {
+                            JSONObject jsonObject = new JSONObject(response.body());
+                            ToastUtils.showShort(jsonObject.getString("message"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+    }
+
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -1406,6 +1447,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 return;
                             }
                             Log.d("mycs_token", "转换成功");
+                            try {
+                                PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             transformationToken = response.body().getData().getToken();
                             PersonInfoManager.getInstance().setTransformationToken(transformationToken);
                         } else {
@@ -1500,11 +1546,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 noLoginTipsPop.dissmiss();
             }
         } else if (id == R.id.no_login_tips_ok) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
             try {
                 param.toLogin();
-                if (null != noLoginTipsPop) {
-                    noLoginTipsPop.dissmiss();
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

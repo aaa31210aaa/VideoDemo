@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.net.Uri;
@@ -15,7 +16,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,9 +34,6 @@ import com.tencent.liteav.basic.log.TXCLog;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayer;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerObserver;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
 import com.tencent.liteav.demo.superplayer.model.net.LogReport;
 import com.tencent.liteav.demo.superplayer.model.utils.NetWatcher;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
@@ -48,6 +45,11 @@ import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.DanmuView;
 import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.wdcs.model.ContentStateModel;
+import com.wdcs.model.PlayImageSpriteInfo;
+import com.wdcs.model.PlayKeyFrameDescInfo;
+import com.wdcs.model.VideoQuality;
+import com.wdcs.utils.NumberFormatTool;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,6 +60,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE;
+import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE_REVERSE;
 
 /**
  * 超级播放器view
@@ -97,27 +100,19 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     protected OrientationHelper mOrientationHelper;
 
     private SuperPlayerDef.Orientation mDesiredOrientation = LANDSCAPE; // 横向需要的方向
-    //    private boolean sensorEnable = true;// 传感器是否可用
+    private boolean sensorEnable = true;// 传感器是否可用
     private SuperPlayerDef.PlayerMode mTargetPlayerMode; // 目标播放模式
     private int fullScreenWidth = getResources().getDisplayMetrics().widthPixels;
     private int fullScreenHeight = getResources().getDisplayMetrics().heightPixels;
     private View decorView;
     @Nullable
     protected View mHideNavBarView;
+    public ContentStateModel.DataDTO contentStateModel;
 
-    public SuperPlayerView(Context context, View decorView) {
+    public SuperPlayerView(Context context, View decorView, ContentStateModel.DataDTO model) {
         super(context);
         this.decorView = decorView;
-        initialize(context);
-    }
-
-    public SuperPlayerView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initialize(context);
-    }
-
-    public SuperPlayerView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this.contentStateModel = model;
         initialize(context);
     }
 
@@ -138,6 +133,41 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mRootView = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.superplayer_vod_view, null);
         mTXCloudVideoView = (TXCloudVideoView) mRootView.findViewById(R.id.superplayer_cloud_video_view);
         mFullScreenPlayer = (FullScreenPlayer) mRootView.findViewById(R.id.superplayer_controller_large);
+        //全屏模式下获取到的收藏点赞状态
+        if (null != contentStateModel) {
+            if (contentStateModel.getWhetherFavor().equals("true")) {
+                mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
+            } else {
+                mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
+            }
+
+            if (contentStateModel.getWhetherLike().equals("true")) {
+                mFullScreenPlayer.mLike.setImageResource(R.drawable.likes);
+                mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
+            } else {
+                mFullScreenPlayer.mLike.setImageResource(R.drawable.fullscreen_praise);
+                mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
+            }
+
+            mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+        }
+
+        //全屏点赞按钮
+        mFullScreenPlayer.mLike.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        //全屏收藏按钮
+        mFullScreenPlayer.mCollection.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+
         mWindowPlayer = (WindowPlayer) mRootView.findViewById(R.id.superplayer_controller_small);
         mFloatPlayer = (FloatPlayer) mRootView.findViewById(R.id.superplayer_controller_float);
         mDanmuView = (DanmuView) mRootView.findViewById(R.id.superplayer_danmuku_view);
@@ -356,12 +386,12 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             playModeCallBack.getPlayMode(playerMode);
             if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN && playerMode == SuperPlayerDef.PlayerMode.WINDOW) {
                 // 全屏到窗口
-//                sensorEnable = false;
+                sensorEnable = true;
                 mTargetPlayerMode = SuperPlayerDef.PlayerMode.WINDOW;
                 showBottomUIMenu();
             } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW && playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
                 // 窗口到全屏
-//                sensorEnable = false;
+                sensorEnable = false;
                 mTargetPlayerMode = SuperPlayerDef.PlayerMode.FULLSCREEN;
             }
             if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
@@ -382,7 +412,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 addView(mFullScreenPlayer, mVodControllerFullScreenParams);
                 setLayoutParams(mLayoutParamFullScreenMode);
                 //从窗口到全屏始终是横屏展示
-                rotateScreenOrientation(LANDSCAPE);
+                if (mDesiredOrientation == LANDSCAPE_REVERSE) {
+                    rotateScreenOrientation(LANDSCAPE_REVERSE);
+                } else {
+                    rotateScreenOrientation(LANDSCAPE);
+                }
                 if (mPlayerViewCallback != null) {
                     mPlayerViewCallback.onStartFullScreenPlay();
                 }
@@ -633,12 +667,14 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                if (mFullScreenPlayer.popupWindow != null) {
 //                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
 //                }
+//                if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
+//                    SystemUtils.hideSystemUI(decorView);
+//                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
-                    SystemUtils.hideSystemUI(decorView);
+
+                if (mControllerCallback != null && mTargetPlayerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                    mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.WINDOW);
                 }
-//                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-//                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
             case LANDSCAPE:
                 if (((Activity) mContext).getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
@@ -726,20 +762,28 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             return;
         }
 
+        if (null != mFullScreenPlayer.popupWindow && mFullScreenPlayer.popupWindow.isShowing()) {
+            return;
+        }
+
+        if (null != mFullScreenPlayer.sharePop && mFullScreenPlayer.sharePop.getPopupWindow().isShowing()) {
+            return;
+        }
+
         // 横竖屏切换结束，放开监听器
-//        if (!sensorEnable) {
-//
-//            if (mTargetPlayerMode == SuperPlayerDef.PlayerMode.WINDOW) {
-//                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-//                    sensorEnable = true;
-//                }
-//            } else if (mTargetPlayerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-//                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//                    sensorEnable = true;
-//                }
-//            }
-//            return;
-//        }
+        if (!sensorEnable) {
+
+            if (mTargetPlayerMode == SuperPlayerDef.PlayerMode.WINDOW) {
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    sensorEnable = true;
+                }
+            } else if (mTargetPlayerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    sensorEnable = true;
+                }
+            }
+            return;
+        }
         if (orientation >= 350 || orientation <= 10) { //屏幕顶部朝上
             if (getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW) {
                 // 同一类型不切换
@@ -765,7 +809,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             if (mSuperPlayer.getPlayerState().equals(SuperPlayerDef.PlayerState.END)) {
                 return;
             }
-            mDesiredOrientation = SuperPlayerDef.Orientation.LANDSCAPE_REVERSE;
+            mDesiredOrientation = LANDSCAPE_REVERSE;
             if (getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
                 // 同一类型只翻转
                 rotateScreenOrientation(mDesiredOrientation);

@@ -19,7 +19,7 @@ public final class OrientationHelper extends OrientationEventListener {
     @Override
     public void onOrientationChanged(int orientation) {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - mLastTime < 1500) return;//1500毫秒检测一次
+        if (currentTime - mLastTime < 1000) return;//1000毫秒检测一次
         if (mOnOrientationChangeListener != null) {
             mOnOrientationChangeListener.onOrientationChanged(orientation);
         }

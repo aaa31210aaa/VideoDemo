@@ -8,16 +8,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.wdcs.model.ShareInfo;
+
 import callback.VideoInteractiveParam;
 import callback.VideoParamCallBack;
-import model.ShareInfo;
 import ui.VideoDetailActivity;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv;
     private EditText panelId;
     private EditText contentId;
-    private EditText token;
     private TextView fxsys;
     private TextView setCode;
 
@@ -49,21 +49,18 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "fcc11156-be83-483c-b5f3-9827df0423b5";
+                        return "01161d2c-e9ef-4057-aa0b-f27503b9f7a8";
                     }
                 });
             }
         });
 
-        token = findViewById(R.id.token);
-        token.setText("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJ3ZWIiLCJpc3MiOiJmdXNlIiwiZXhwIjoxNjI0MzI2ODY4LCJpYXQiOjE2MjM3MjIwNjgsImp0aSI6ImM0NGNjMmEwNThlMDQ5YThiMTRmZTNjY2I3YWRmYTI5IiwidXNlcm5hbWUiOiJ5YW5xaWh1YW5nIn0.H3qZVUYqE85Yh1-hF_F8QFG2jOiVdaZ5leK8RRq_Dng");
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
                 intent.putExtra("panelId", panelId.getText().toString());
                 intent.putExtra("contentId", contentId.getText().toString());
-                intent.putExtra("token", token.getText().toString());
                 startActivity(intent);
             }
         });

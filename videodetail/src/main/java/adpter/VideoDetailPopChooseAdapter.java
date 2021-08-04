@@ -11,15 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
-import com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer;
+import com.wdcs.model.DataDTO;
 import com.wdcs.videodetail.demo.R;
+
 
 import java.util.List;
 
 import constants.Constants;
-import model.DataDTO;
 import ui.VideoDetailActivity;
-import utils.NetworkUtil;
 import utils.SPUtils;
 
 @Keep

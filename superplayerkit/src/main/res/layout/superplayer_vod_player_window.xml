@@ -86,7 +86,7 @@
                 app:psb_backgroundColor="@color/superplayer_transparent"
                 app:psb_max="100"
                 app:psb_progress="0"
-                app:psb_progressColor="#FF584C"
+                app:psb_progressColor="@color/superplayer_white"
                 app:psb_progressHeight="2dp"
                 app:psb_thumbBackground="@drawable/superplayer_ic_vod_thumb" />
 

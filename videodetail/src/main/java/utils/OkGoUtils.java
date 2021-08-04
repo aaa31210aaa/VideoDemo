@@ -7,11 +7,11 @@ import com.lzy.okgo.cache.CacheEntity;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
+import com.wdcs.utils.PersonInfoManager;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import manager.PersonInfoManager;
 import okhttp3.OkHttpClient;
 
 public class OkGoUtils {

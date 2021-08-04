@@ -1,7 +1,8 @@
 package com.tencent.liteav.demo.superplayer;
 
 
-import com.tencent.liteav.demo.superplayer.model.entity.SuperPlayerVideoIdV2;
+
+import com.wdcs.model.SuperPlayerVideoIdV2;
 
 import java.util.List;
 

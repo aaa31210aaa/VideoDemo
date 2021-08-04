@@ -1,10 +1,10 @@
 package com.tencent.liteav.demo.superplayer.model.utils;
 
 import com.tencent.liteav.basic.log.TXCLog;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayInfoStream;
-import com.tencent.liteav.demo.superplayer.model.entity.ResolutionName;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
 import com.tencent.rtmp.TXBitrateItem;
+import com.wdcs.model.PlayInfoStream;
+import com.wdcs.model.ResolutionName;
+import com.wdcs.model.VideoQuality;
 
 import java.util.ArrayList;
 import java.util.HashMap;

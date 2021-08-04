@@ -1,6 +1,7 @@
 package callback;
 
-import model.ShareInfo;
+
+import com.wdcs.model.ShareInfo;
 
 /**
  * 交互参数的接口

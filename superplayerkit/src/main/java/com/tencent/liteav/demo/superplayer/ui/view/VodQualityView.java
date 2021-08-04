@@ -12,7 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.tencent.liteav.demo.superplayer.R;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
+import com.wdcs.model.VideoQuality;
 
 import java.util.ArrayList;
 import java.util.List;

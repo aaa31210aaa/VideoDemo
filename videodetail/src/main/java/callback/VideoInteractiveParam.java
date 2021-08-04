@@ -1,8 +1,7 @@
 package callback;
 
-import model.ShareInfo;
-import utils.ToastUtils;
 
+import com.wdcs.model.ShareInfo;
 
 /**
  * 参数交互类

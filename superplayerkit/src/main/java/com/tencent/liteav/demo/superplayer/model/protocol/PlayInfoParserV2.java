@@ -3,13 +3,13 @@ package com.tencent.liteav.demo.superplayer.model.protocol;
 import android.util.Log;
 
 import com.tencent.liteav.basic.log.TXCLog;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayInfoStream;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.ResolutionName;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoClassification;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoQualityUtils;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
+import com.wdcs.model.PlayImageSpriteInfo;
+import com.wdcs.model.PlayInfoStream;
+import com.wdcs.model.PlayKeyFrameDescInfo;
+import com.wdcs.model.ResolutionName;
+import com.wdcs.model.VideoClassification;
+import com.wdcs.model.VideoQuality;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +35,7 @@ public class PlayInfoParserV2 implements IPlayInfoParser{
     private String                    mDefaultVideoClassification;  // 默认视频清晰度名称
     private List<VideoClassification> mVideoClassificationList;     // 视频清晰度信息列表
 
-    private PlayImageSpriteInfo        mImageSpriteInfo;            // 雪碧图信息
+    private PlayImageSpriteInfo mImageSpriteInfo;            // 雪碧图信息
     private List<PlayKeyFrameDescInfo> mKeyFrameDescInfo;           // 关键帧打点信息
     //视频信息
     private String         mName;                                   // 视频名称

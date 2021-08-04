@@ -2,9 +2,9 @@ package com.tencent.liteav.demo.superplayer.model;
 
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
 import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.wdcs.model.VideoQuality;
 
 import java.util.List;
 

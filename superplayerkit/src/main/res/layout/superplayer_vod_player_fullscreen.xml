@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:id="@+id/fullscreen_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/superplayer_rl_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,22 +25,22 @@
             <ImageView
                 android:id="@+id/superplayer_iv_back"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="10dp"
                 android:src="@drawable/superplayer_btn_back_play" />
 
             <TextView
                 android:id="@+id/superplayer_tv_title"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_toRightOf="@+id/superplayer_iv_back"
-                android:gravity="center_vertical"
+                android:layout_weight="3"
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:gravity="center_vertical"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
@@ -50,51 +51,86 @@
             </TextView>
 
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/right_setting"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/superplayer_media_controller_view_height"
                 android:layout_alignParentRight="true"
-                android:layout_gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="2">
+
+                <ImageView
+                    android:id="@+id/fullscreen_like"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@+id/fullscreen_collection"
+                    android:src="@drawable/fullscreen_praise">
+
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/fullscreen_like_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="-20dp"
+                    android:layout_toLeftOf="@+id/fullscreen_collection"
+                    android:textColor="@color/superplayer_white"
+                    android:textSize="8sp"
+                    tool:text="100W+"
+                    >
+
+                </TextView>
+
+
+                <ImageView
+                    android:id="@+id/fullscreen_collection"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="30dp"
+                    android:layout_toLeftOf="@+id/superplayer_fullscreen_share"
+                    android:src="@drawable/fullscreen_collection_unseletct">
+
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/superplayer_fullscreen_share"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="30dp"
+                    android:layout_toLeftOf="@+id/superplayer_iv_snapshot"
+                    android:src="@drawable/fullscreen_share">
+
+                </ImageView>
 
                 <ImageView
                     android:id="@+id/superplayer_iv_snapshot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="20dp"
-                    android:gravity="right"
-                    android:src="@drawable/superplayer_ic_vod_snapshot_normal" />
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="30dp"
+                    android:layout_toLeftOf="@+id/superplayer_iv_more"
+                    android:gravity="center"
+                    android:src="@drawable/fullscreen_screenshot" />
 
                 <ImageView
                     android:id="@+id/superplayer_iv_more"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="30dp"
                     android:layout_marginRight="20dp"
-                    android:gravity="right"
                     android:src="@drawable/superplayer_ic_vod_more_normal" />
 
-            </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/superplayer_ll_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/superplayer_bottom_shadow"
         android:orientation="horizontal">
-
-        <!--播放/暂停-->
-        <ImageView
-            android:id="@+id/superplayer_iv_pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="20dp"
-            android:src="@drawable/superplayer_ic_vod_pause_normal" />
 
         <!--播放位置-->
         <TextView
@@ -102,24 +138,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_marginLeft="23dp"
             android:text="00:00"
             android:textColor="@android:color/white"
             android:textSize="11.0sp" />
 
         <RelativeLayout
-            android:layout_width="0dp"
+            android:id="@+id/progress_rl"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/superplayer_tv_current"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1">
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
 
             <ProgressBar
                 android:id="@+id/superplayer_loadbar_progress"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="13.8dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginLeft="14dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginRight="14dp"
                 android:progressDrawable="@drawable/layer_list_progress_drawable" />
 
             <com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar
@@ -127,12 +167,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5.0dip"
-                android:layout_marginRight="5.0dip"
                 app:psb_backgroundColor="@color/superplayer_transparent"
                 app:psb_max="100"
                 app:psb_progress="0"
-                app:psb_progressColor="#FF584C"
+                app:psb_progressColor="@color/superplayer_white"
                 app:psb_progressHeight="2dp"
                 app:psb_thumbBackground="@drawable/superplayer_ic_vod_thumb" />
         </RelativeLayout>
@@ -142,24 +180,38 @@
             android:id="@+id/superplayer_tv_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:layout_gravity="center_vertical"
+            android:layout_marginRight="23dp"
             android:text="00:00"
             android:textColor="@android:color/white"
             android:textSize="11.0sp" />
 
-        <TextView
-            android:id="@+id/superplayer_speed"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_marginEnd="5dp"
-            android:gravity="center_vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/superplayer_speed"
-            android:textColor="@android:color/white"
-            android:textSize="11dp" />
-    </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progress_rl">
+            <!--播放/暂停-->
+            <ImageView
+                android:id="@+id/superplayer_iv_pause"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"
+                android:src="@drawable/superplayer_ic_vod_pause_normal" />
+            <!--倍速-->
+            <TextView
+                android:id="@+id/superplayer_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:paddingLeft="10dp"
+                android:paddingRight="25dp"
+                android:text="@string/superplayer_speed"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </RelativeLayout>
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/superplayer_large_tv_vtt_text"
@@ -191,6 +243,80 @@
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:visibility="gone" />
+
+    <RadioGroup
+        android:id="@+id/superplayer_rg"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/superplayer_super_vod_vtt_bg"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/superplayer_rb_speed05"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="0.5X"
+            android:textColor="@color/superplayer_vod_player_text_color" />
+
+        <RadioButton
+            android:id="@+id/superplayer_rb_speed075"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="0.75X"
+            android:textColor="@color/superplayer_vod_player_text_color" />
+
+        <RadioButton
+            android:id="@+id/superplayer_rb_speed1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="1.0X"
+            android:textColor="@color/superplayer_vod_player_text_color" />
+
+        <RadioButton
+            android:id="@+id/superplayer_rb_speed125"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="1.25X"
+            android:textColor="@color/superplayer_vod_player_text_color" />
+
+        <RadioButton
+            android:id="@+id/superplayer_rb_speed15"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="1.5X"
+            android:textColor="@color/superplayer_vod_player_text_color" />
+
+        <RadioButton
+            android:id="@+id/superplayer_rb_speed2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="2.0X"
+            android:textColor="@color/superplayer_vod_player_text_color" />
+    </RadioGroup>
 
     <!--    <LinearLayout-->
     <!--        android:layout_width="200dp"-->
@@ -281,7 +407,7 @@
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="30dp"
+        android:layout_marginLeft="10dp"
         android:src="@drawable/superplayer_ic_player_unlock" />
 
     <LinearLayout
@@ -310,7 +436,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
         android:background="@drawable/superplayer_shape_round_bg"
-        android:text="@string/superplayer_back_live"
+        android:text=""
         android:visibility="gone" />
 
     <ProgressBar

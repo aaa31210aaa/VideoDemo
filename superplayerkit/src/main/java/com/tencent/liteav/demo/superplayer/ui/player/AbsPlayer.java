@@ -7,9 +7,9 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
+import com.wdcs.model.PlayImageSpriteInfo;
+import com.wdcs.model.PlayKeyFrameDescInfo;
+import com.wdcs.model.VideoQuality;
 
 import java.util.List;
 

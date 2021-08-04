@@ -5,11 +5,11 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.tencent.liteav.basic.log.TXCLog;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.ResolutionName;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
 import com.tencent.liteav.demo.superplayer.model.net.HttpURLClient;
+import com.wdcs.model.PlayImageSpriteInfo;
+import com.wdcs.model.PlayKeyFrameDescInfo;
+import com.wdcs.model.ResolutionName;
+import com.wdcs.model.VideoQuality;
 
 import org.json.JSONException;
 import org.json.JSONObject;

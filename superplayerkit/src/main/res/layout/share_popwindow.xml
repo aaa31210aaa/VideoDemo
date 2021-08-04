@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@color/superplayer_super_vod_vtt_bg"
+    android:layout_height="120dp"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/fullscreen_share_wx"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="30dp"
+        android:src="@drawable/share_wechat_icon">
+
+    </ImageView>
+
+    <ImageView
+        android:id="@+id/fullscreen_share_circle"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="30dp"
+        android:src="@drawable/share_circle_icon"
+        >
+
+    </ImageView>
+
+    <ImageView
+        android:id="@+id/fullscreen_share_qq"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center"
+        android:src="@drawable/share_qq_icon"
+        >
+
+    </ImageView>
+
+
+</LinearLayout>

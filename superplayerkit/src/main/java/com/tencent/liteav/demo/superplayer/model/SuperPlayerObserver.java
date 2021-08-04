@@ -1,10 +1,10 @@
 package com.tencent.liteav.demo.superplayer.model;
 
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayImageSpriteInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.PlayKeyFrameDescInfo;
-import com.tencent.liteav.demo.superplayer.model.entity.VideoQuality;
 import com.tencent.rtmp.TXLivePlayer;
+import com.wdcs.model.PlayImageSpriteInfo;
+import com.wdcs.model.PlayKeyFrameDescInfo;
+import com.wdcs.model.VideoQuality;
 
 import java.util.List;
 

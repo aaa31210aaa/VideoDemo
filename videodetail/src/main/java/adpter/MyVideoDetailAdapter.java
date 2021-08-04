@@ -17,17 +17,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.wdcs.model.DataDTO;
+import com.wdcs.model.ShareInfo;
 import com.wdcs.videodetail.demo.R;
 
 
 import callback.VideoInteractiveParam;
 import constants.Constants;
-import model.DataDTO;
-import model.ShareInfo;
 
 import java.util.Arrays;
 import java.util.List;
 
+import manager.PersonInfoManager;
 import ui.ButtonSpan;
 import ui.VideoDetailActivity;
 import utils.DateUtils;
@@ -56,7 +57,8 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
             @Override
             public boolean onLongClick(View view) {
                 try {
-                    Log.e("tgt码：",VideoInteractiveParam.getInstance().getCode());
+                    Log.e("tgt码：",VideoInteractiveParam.getInstance().getCode()+"-----"
+                            + PersonInfoManager.getInstance().getToken());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -71,7 +73,8 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         TextView continuePlay = helper.getView(R.id.continue_play);
         noWifiText.setText(R.string.no_wifi);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(ButtonSpan.dip2px(10), mContext.getResources().getDisplayMetrics().heightPixels/2 + ButtonSpan.dip2px(15), ButtonSpan.dip2px(10), 0);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        layoutParams.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
         expandableTextLl.setLayoutParams(layoutParams);
 
         if (item.isWifi()) {

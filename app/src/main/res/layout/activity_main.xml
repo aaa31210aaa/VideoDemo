@@ -15,16 +15,15 @@
         android:padding="50dp"
         android:text="视频详情页面" />
 
-    <EditText
-        android:id="@+id/token"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/set_code"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:background="@drawable/shape_input_bg"
-        android:gravity="center"
-        android:hint="token"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"></EditText>
+        android:padding="30dp"
+        android:text="获取token值">
+
+    </TextView>
 
     <EditText
         android:id="@+id/panelid"
@@ -70,16 +69,6 @@
         android:layout_height="100dp"
         android:gravity="center_vertical"
         >
-
-        <TextView
-            android:id="@+id/set_code"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="30dp"
-            android:background="@drawable/shape_input_bg"
-            android:text="获取token值">
-
-        </TextView>
 
     </LinearLayout>
 

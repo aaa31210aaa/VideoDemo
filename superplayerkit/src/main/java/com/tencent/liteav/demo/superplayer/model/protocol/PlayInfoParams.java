@@ -1,7 +1,7 @@
 package com.tencent.liteav.demo.superplayer.model.protocol;
 
 import com.tencent.liteav.demo.superplayer.SuperPlayerVideoId;
-import com.tencent.liteav.demo.superplayer.model.entity.SuperPlayerVideoIdV2;
+import com.wdcs.model.SuperPlayerVideoIdV2;
 
 /**
  * 视频信息协议解析需要传入的参数
