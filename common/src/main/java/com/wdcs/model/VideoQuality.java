@@ -1,11 +1,13 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 /**
  * Created by yuejiaoli on 2018/7/7.
  * <p>
  * 清晰度
  */
-
+@Keep
 public class VideoQuality {
 
     public int index;

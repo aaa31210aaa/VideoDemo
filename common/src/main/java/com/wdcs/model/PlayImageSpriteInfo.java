@@ -1,10 +1,13 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 import java.util.List;
 
 /**
  * 视频雪碧图信息
  */
+@Keep
 public class PlayImageSpriteInfo {
 
     public List<String> imageUrls; // 图片链接URL

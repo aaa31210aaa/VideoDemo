@@ -8,10 +8,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.wdcs.callback.VideoInteractiveParam;
+import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.model.ShareInfo;
 
-import callback.VideoInteractiveParam;
-import callback.VideoParamCallBack;
 import ui.VideoDetailActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String setCode() {
                         return "01161d2c-e9ef-4057-aa0b-f27503b9f7a8";
+                    }
+
+                    @Override
+                    public void recommedUrl(String url) {
+
                     }
                 });
             }

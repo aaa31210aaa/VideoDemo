@@ -9,31 +9,38 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.wdcs.callback.VideoInteractiveParam;
+import com.wdcs.constants.Constants;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.RecommendModel;
 import com.wdcs.model.ShareInfo;
+import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.DateUtils;
+import com.wdcs.utils.PersonInfoManager;
+import com.wdcs.utils.SPUtils;
+import com.wdcs.utils.ShareUtils;
 import com.wdcs.videodetail.demo.R;
 
 
-import callback.VideoInteractiveParam;
-import constants.Constants;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import manager.PersonInfoManager;
-import ui.ButtonSpan;
 import ui.VideoDetailActivity;
-import utils.DateUtils;
-import utils.SPUtils;
 import widget.OverLineTextView;
+
+import static com.wdcs.callback.VideoInteractiveParam.param;
+import static com.wdcs.utils.ShareUtils.toShare;
 
 @Keep
 public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
@@ -42,6 +49,8 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
     private VideoDetailKeyWordAdapter keyWordAdapter;
     private List<String> keyWordDatas;
     private List<DataDTO> mDatas;
+    private List<RecommendModel.DataDTO.RecordsDTO> recommendList = new ArrayList<>();
+    private boolean mIsAuto;
 
     public MyVideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context) {
         super(layoutResId, data);
@@ -57,7 +66,9 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
             @Override
             public boolean onLongClick(View view) {
                 try {
-                    Log.e("tgt码：",VideoInteractiveParam.getInstance().getCode()+"-----"
+                    Log.e("tgt码：", VideoInteractiveParam.getInstance().getCode() + "-----"
+                            + PersonInfoManager.getInstance().getToken());
+                    System.out.println(VideoInteractiveParam.getInstance().getCode() + "-----"
                             + PersonInfoManager.getInstance().getToken());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -68,7 +79,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         helper.setText(R.id.video_detail_from_media, item.getSource());
         helper.setText(R.id.video_detail_date, DateUtils.utc2Local(item.getStartTime()));
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
-        LinearLayout expandableTextLl = helper.getView(R.id.expandable_text_ll);
+        RelativeLayout expandableTextLl = helper.getView(R.id.expandable_text_ll);
         TextView noWifiText = helper.getView(R.id.no_wifi_text);
         TextView continuePlay = helper.getView(R.id.continue_play);
         noWifiText.setText(R.string.no_wifi);
@@ -190,16 +201,67 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
                 ((VideoDetailActivity) mContext).getVideoCollection(String.valueOf(item.getPid()));
             }
         });
+
+        ViewFlipper viewFlipper = helper.getView(R.id.video_flipper);
+        getViewFlipperData(recommendList, viewFlipper);
     }
 
-    public void toShare(DataDTO item, String platform) {
-        VideoInteractiveParam param = VideoInteractiveParam.getInstance();
-        ShareInfo shareInfo = ShareInfo.getInstance(item.getShareUrl(), item.getShareImageUrl(),
-                item.getShareBrief(), item.getShareTitle(), platform);
-        try {
-            param.shared(shareInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
+    /**
+     * 获取首页滚动消息
+     */
+    private void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list, final ViewFlipper viewFlipper) {
+        if (!list.isEmpty()) {
+            viewFlipper.setVisibility(View.VISIBLE);
+            for (int i = 0; i < list.size(); i++) {
+                String item = list.get(i).getTitle();
+                View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
+                ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
+                Glide.with(mContext)
+                        .load(list.get(i).getThumbnailUrl())
+                        .into(viewFlipperIcon);
+                TextView textView = view.findViewById(R.id.view_flipper_content);
+                textView.setTextColor(mContext.getResources().getColor(R.color.white));
+                textView.setText(item);
+                ImageView cancel = view.findViewById(R.id.view_flipper_cancel);
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        viewFlipper.stopFlipping();
+                        viewFlipper.setVisibility(View.GONE);
+                    }
+                });
+                viewFlipper.addView(view);
+            }
+
+            //viewFlipper的点击事件
+            viewFlipper.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //获取子View的id
+                    int mPosition = viewFlipper.getDisplayedChild();
+                    Log.e("yqh", "子View的id:" + mPosition);
+                    try {
+                        param.recommendUrl(list.get(mPosition).getUrl());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+        } else {
+            viewFlipper.setVisibility(View.GONE);
         }
+
+        if (mIsAuto) {
+            viewFlipper.startFlipping();
+            viewFlipper.setAutoStart(true);
+        } else {
+            viewFlipper.setAutoStart(false);
+        }
+    }
+
+    public void setRecommendList(List<RecommendModel.DataDTO.RecordsDTO> mRecommendList, boolean isAuto) {
+        this.recommendList = mRecommendList;
+        this.mIsAuto = isAuto;
     }
 }

@@ -1,8 +1,11 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 /**
  * 分享四要素
  */
+@Keep
 public class ShareInfo {
     public String shareH5, shareImageUrl, shareBrief, shareTitle, platform;
 

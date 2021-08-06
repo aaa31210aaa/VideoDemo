@@ -52,6 +52,7 @@ public  class DataDTO {
     private String attachUrl;
     private String pid;
     private boolean isWifi;
+    private boolean oneRecommend;
 
     public String getShareTitle() {
         return shareTitle;
@@ -427,6 +428,14 @@ public  class DataDTO {
 
     public void setWifi(boolean wifi) {
         isWifi = wifi;
+    }
+
+    public boolean isOneRecommend() {
+        return oneRecommend;
+    }
+
+    public void setOneRecommend(boolean oneRecommend) {
+        this.oneRecommend = oneRecommend;
     }
 
     @Keep

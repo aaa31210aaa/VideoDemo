@@ -24,4 +24,9 @@
         <item name="android:windowEnterAnimation">@anim/anim_speed_popshow</item>
         <item name="android:windowExitAnimation">@anim/anim_speed_pophide</item>
     </style>
+
+    <style name="AnimCenter" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/pop_center_in</item>
+        <item name="android:windowExitAnimation">@anim/pop_center_out</item>
+    </style>
 </resources>

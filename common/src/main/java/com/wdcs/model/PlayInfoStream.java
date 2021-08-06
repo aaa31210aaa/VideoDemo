@@ -1,11 +1,13 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 /**
  * Created by annidy on 2017/12/20.
  * <p>
  * 视频播放信息
  */
-
+@Keep
 public class PlayInfoStream {
     public int height;
     public int width;

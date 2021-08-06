@@ -5,12 +5,13 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
+import com.wdcs.constants.Constants;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import constants.Constants;
 
 /**
  * Created by goldze on 2017/5/14.

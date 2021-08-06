@@ -1,4 +1,4 @@
-package constants;
+package com.wdcs.constants;
 
 public class Constants {
     public static final String success_code = "200";

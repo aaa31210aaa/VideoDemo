@@ -1,11 +1,13 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 /**
  * Created by hans on 2019/3/25.
  * <p>
  * 自适应码流信息
  */
-
+@Keep
 public class EncryptedStreamingInfo {
 
     public String drmType;

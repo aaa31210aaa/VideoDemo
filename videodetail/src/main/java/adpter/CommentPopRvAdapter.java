@@ -12,13 +12,13 @@ import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.wdcs.model.CommentModel;
+import com.wdcs.utils.DateUtils;
+import com.wdcs.utils.GetTimeAgo;
 import com.wdcs.videodetail.demo.R;
 
 
 import java.util.List;
 
-import utils.DateUtils;
-import utils.GetTimeAgo;
 import widget.CircleImageView;
 @Keep
 public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.RecordsDTO, BaseViewHolder> {

@@ -34,4 +34,7 @@ dependencies {
     implementation "com.tencent.liteav:LiteAVSDK_Player:latest.release"
     implementation 'com.github.ctiao:DanmakuFlameMaster:0.5.3'
     implementation 'com.github.pinguo-zhouwei:CustomPopwindow:2.1.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.lzy.net:okgo:3.0.4'
 }

@@ -11,15 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
+import com.wdcs.constants.Constants;
 import com.wdcs.model.DataDTO;
+import com.wdcs.utils.SPUtils;
 import com.wdcs.videodetail.demo.R;
 
 
 import java.util.List;
 
-import constants.Constants;
 import ui.VideoDetailActivity;
-import utils.SPUtils;
 
 @Keep
 public class VideoDetailPopChooseAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {

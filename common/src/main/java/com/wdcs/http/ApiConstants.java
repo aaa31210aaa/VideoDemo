@@ -1,4 +1,4 @@
-package http;
+package com.wdcs.http;
 
 public class ApiConstants {
     public String baseUrl;
@@ -116,5 +116,12 @@ public class ApiConstants {
      */
     public String addViews() {
         return getBaseUrl() + "client/contentStats/view/count/";
+    }
+
+    /**
+     * 获取推荐滚动列表
+     */
+    public String recommendList() {
+        return getBaseUrl() + "client/content/recommend";
     }
 }

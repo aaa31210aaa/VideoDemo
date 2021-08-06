@@ -35,6 +35,8 @@ import com.tencent.liteav.demo.superplayer.ui.view.VodMoreView;
 import com.tencent.liteav.demo.superplayer.ui.view.VodQualityView;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
 import com.tencent.rtmp.TXImageSprite;
+import com.wdcs.constants.Constants;
+import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;
@@ -42,6 +44,8 @@ import com.wdcs.model.VideoQuality;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.wdcs.utils.ShareUtils.toShare;
 
 /**
  * 全屏模式播放控件
@@ -139,6 +143,11 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     public String strSpeed;
     public CustomPopWindow sharePop;
     private View shareView;
+    private ImageView fullscreenShareWx;
+    private ImageView fullscreenShareCircle;
+    private ImageView fullscreenShareQq;
+    private DataDTO item;
+
     private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow,translateAniBottomHide;
 
     public FullScreenPlayer(Context context) {
@@ -305,6 +314,13 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mRbSpeed2.setOnClickListener(this);
         mRadioGroup.setOnCheckedChangeListener(this);
         shareView = View.inflate(context, R.layout.share_popwindow, null);
+        fullscreenShareWx = shareView.findViewById(R.id.fullscreen_share_wx);
+        fullscreenShareWx.setOnClickListener(this);
+        fullscreenShareCircle = shareView.findViewById(R.id.fullscreen_share_circle);
+        fullscreenShareCircle.setOnClickListener(this);
+        fullscreenShareQq = shareView.findViewById(R.id.fullscreen_share_qq);
+        fullscreenShareQq.setOnClickListener(this);
+
         translateAnimation();
 
         mLayoutTop = findViewById(R.id.superplayer_rl_top);
@@ -360,6 +376,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         superplayerSpeed.setOnClickListener(this);
     }
 
+    public void setDataDTO(DataDTO mItem){
+        this.item = mItem;
+    }
 
     //位移动画
     private void translateAnimation() {
@@ -763,12 +782,14 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
         } else if (i == R.id.superplayer_iv_pause) {            //暂停\播放按钮
             togglePlayState();
-        } else if (i == R.id.fullscreen_like) {
-
-        } else if (i == R.id.fullscreen_collection) {
-
         } else if (i == R.id.superplayer_fullscreen_share) {    //分享
             showSharePop(mContext);
+        } else if (i == R.id.fullscreen_share_wx) {
+            toShare(item, Constants.SHARE_WX);
+        } else if (i == R.id.fullscreen_share_circle) {
+            toShare(item, Constants.SHARE_CIRCLE);
+        } else if (i == R.id.fullscreen_share_qq) {
+            toShare(item, Constants.SHARE_QQ);
         } else if (i == R.id.superplayer_iv_snapshot) {         //截屏按钮
             if (mControllerCallback != null) {
                 mControllerCallback.onSnapshot();

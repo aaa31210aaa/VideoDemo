@@ -1,8 +1,11 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 /**
  * 自适应码流视频画质别名
  */
+@Keep
 public class ResolutionName {
 
     public String name; // 画质名称

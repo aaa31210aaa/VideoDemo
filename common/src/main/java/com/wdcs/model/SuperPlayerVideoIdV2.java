@@ -1,5 +1,8 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class SuperPlayerVideoIdV2 {
 
     public String fileId;   // 腾讯云视频fileId

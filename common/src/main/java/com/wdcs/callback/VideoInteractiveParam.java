@@ -1,4 +1,4 @@
-package callback;
+package com.wdcs.callback;
 
 
 import com.wdcs.model.ShareInfo;
@@ -65,6 +65,17 @@ public class VideoInteractiveParam {
             throw new Exception("获取失败,请重试");
         } else {
             return callBack.setCode();
+        }
+    }
+
+    /**
+     * 传递推荐跳转url
+     */
+    public void recommendUrl(String url) throws Exception{
+        if (callBack == null) {
+            throw new Exception("获取失败,请重试");
+        } else {
+            callBack.recommedUrl(url);
         }
     }
 }

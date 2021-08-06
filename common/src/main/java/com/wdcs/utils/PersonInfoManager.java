@@ -4,8 +4,9 @@ package com.wdcs.utils;
 import android.text.TextUtils;
 import android.util.Log;
 
-import callback.VideoInteractiveParam;
-import constants.Constants;
+import com.wdcs.callback.VideoInteractiveParam;
+import com.wdcs.constants.Constants;
+
 
 public class PersonInfoManager {
     private static PersonInfoManager instance;

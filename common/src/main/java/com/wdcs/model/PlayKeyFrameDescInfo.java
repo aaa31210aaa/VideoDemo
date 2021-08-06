@@ -1,8 +1,11 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 /**
  * 视频关键帧信息
  */
+@Keep
 public class PlayKeyFrameDescInfo {
 
     public String content;    // 描述信息

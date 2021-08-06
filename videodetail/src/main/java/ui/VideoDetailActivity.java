@@ -27,6 +27,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -42,14 +43,25 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
+import com.wdcs.callback.JsonCallback;
+import com.wdcs.callback.VideoInteractiveParam;
+import com.wdcs.constants.Constants;
+import com.wdcs.http.ApiConstants;
 import com.wdcs.model.CommentModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.RecommendModel;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoDetailModel;
+import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NumberFormatTool;
+import com.wdcs.utils.PersonInfoManager;
+import com.wdcs.utils.SPUtils;
+import com.wdcs.utils.SoftKeyBoardListener;
+import com.wdcs.utils.ToastUtils;
 import com.wdcs.videodetail.demo.R;
 
 import org.json.JSONException;
@@ -57,23 +69,17 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import adpter.CommentPopRvAdapter;
 import adpter.MyVideoDetailAdapter;
 import adpter.VideoDetailPopChooseAdapter;
-import callback.JsonCallback;
-import callback.VideoInteractiveParam;
-import constants.Constants;
-import http.ApiConstants;
-import manager.PersonInfoManager;
-import utils.KeyboardUtils;
-import utils.SPUtils;
-import utils.SoftKeyBoardListener;
-import utils.ToastUtils;
 import widget.LoadingView;
 
-import static constants.Constants.success_code;
-import static constants.Constants.token_error;
+import static com.wdcs.constants.Constants.success_code;
+import static com.wdcs.constants.Constants.token_error;
+
 
 /**
  * 视频详情页 可滑动查看视频
@@ -142,7 +148,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView videoDetailCollectionImage; //收藏图标
     private ImageView videoDetailLikesImage; //点赞图标
     private TextView likesNum; //点赞数
-    public ContentStateModel.DataDTO contentStateModel;
+//    public ContentStateModel.DataDTO contentStateModel;
     private ImageView videoDetailCommentCollectionImage; //评论弹窗收藏图标
     private ImageView videoDetailCommentLikesImage; //评论弹窗点赞图标
     private TextView videoDetailCommentLikesNum; //评论弹窗点赞数
@@ -168,6 +174,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView shareCircleBtn;
     private ImageView shareQqBtn;
     private DataDTO mDataDTO;
+    private List<RecommendModel.DataDTO.RecordsDTO> recommondList;
 
     @SuppressLint("NewApi")
     @Override
@@ -201,18 +208,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-//        SystemUtils.setNavbarColor(this, R.color.white);
-    }
-
     private void initView() {
         panelId = getIntent().getStringExtra("panelId");
         contentId = getIntent().getStringExtra("contentId");
         param = VideoInteractiveParam.getInstance();
-//        ScreenUtils.setStatusBarColor(this, R.color.black);
-//        PersonInfoManager.getInstance().setTransformationToken(token);
         backLl = findViewById(R.id.back_ll);
         back = (ImageView) findViewById(R.id.back);
         back.setOnClickListener(this);
@@ -220,6 +219,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         share.setOnClickListener(this);
         mDatas = new ArrayList<>();
         mDataDTO = new DataDTO();
+        recommondList = new ArrayList<>();
         loadingProgress = findViewById(R.id.loading_progress);
         loadingProgress.setVisibility(View.VISIBLE);
         commentEdittext = findViewById(R.id.comment_edittext);
@@ -229,8 +229,15 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         videoDetailCollectionImage = findViewById(R.id.video_detail_collection_image);
         videoDetailLikesImage = findViewById(R.id.video_detail_likes_image);
         likesNum = findViewById(R.id.likes_num);
+
         manager = new ViewPagerLayoutManager(this);
         videoDetailRv.setLayoutManager(manager);
+        adapter = new MyVideoDetailAdapter(R.layout.video_detail_item, mDatas, this);
+        adapter.openLoadAnimation();
+        View footView = View.inflate(this, R.layout.footer_view, null);
+        adapter.setFooterView(footView);
+        videoDetailRv.setAdapter(adapter);
+
         setSoftKeyBoardListener();
         manager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -246,13 +253,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     return;
                 }
                 mDataDTO = mDatas.get(0);
+                playerView = new SuperPlayerView(VideoDetailActivity.this, decorView);
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 myContentId = String.valueOf(mDatas.get(0).getId());
                 addPageViews(myContentId);
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
                     getContentState(myContentId);
                 }
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
-
+                //获取推荐列表
+                getRecommend(myContentId);
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
                     videoDetailWhiteCommentRl.setEnabled(false);
@@ -268,7 +278,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
-                playerView = new SuperPlayerView(VideoDetailActivity.this, decorView, contentStateModel);
+
                 if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
                     SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                 } else {
@@ -310,6 +320,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             refreshLayout.setEnableRefresh(true);
                             adapter.setEnableLoadMore(true);
                             videoDetailCommentBtn.setVisibility(View.VISIBLE);
+                            setLikeCollection(playerView.contentStateModel);
                         }
                     }
                 };
@@ -330,6 +341,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     return;
                 }
                 mDataDTO = mDatas.get(position);
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 currentIndex = position;
@@ -337,6 +349,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 reset();
                 myContentId = String.valueOf(mDatas.get(position).getId());
                 addPageViews(myContentId);
+                getRecommend(myContentId);
                 videoDetailPopChooseAdapter.setContentId(myContentId);
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
@@ -367,11 +380,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
-        adapter = new MyVideoDetailAdapter(R.layout.video_detail_item, mDatas, this);
-        adapter.openLoadAnimation();
-        View footView = View.inflate(this, R.layout.footer_view, null);
-        adapter.setFooterView(footView);
-        videoDetailRv.setAdapter(adapter);
+//        adapter = new MyVideoDetailAdapter(R.layout.video_detail_item, mDatas, this);
+//        adapter.openLoadAnimation();
+//        View footView = View.inflate(this, R.layout.footer_view, null);
+//        adapter.setFooterView(footView);
+//        videoDetailRv.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
         initSmartRefresh();
@@ -1172,29 +1185,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 return;
                             }
 
-                            contentStateModel = response.body().getData();
-                            if (contentStateModel.getWhetherFavor().equals("true")) {
-                                videoDetailCollectionImage.setImageResource(R.drawable.collection);
-                                videoDetailCommentCollectionImage.setImageResource(R.drawable.collection);
-                            } else {
-                                videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
-                                videoDetailCommentCollectionImage.setImageResource(R.drawable.collection_unseletct);
+                            playerView.contentStateModel = response.body().getData();
+                            if (null != playerView.contentStateModel) {
+                                setLikeCollection(playerView.contentStateModel);
+                                playerView.setContentStateModel(myContentId, videoType);
                             }
-
-                            if (contentStateModel.getWhetherLike().equals("true")) {
-                                videoDetailLikesImage.setImageResource(R.drawable.likes);
-                                videoDetailCommentLikesImage.setImageResource(R.drawable.likes);
-                                likesNum.setTextColor(getResources().getColor(R.color.bz_red));
-                                videoDetailCommentLikesNum.setTextColor(getResources().getColor(R.color.bz_red));
-                            } else {
-                                videoDetailLikesImage.setImageResource(R.drawable.likes_unselect);
-                                videoDetailCommentLikesImage.setImageResource(R.drawable.likes_unselect);
-                                likesNum.setTextColor(getResources().getColor(R.color.c9));
-                                videoDetailCommentLikesNum.setTextColor(getResources().getColor(R.color.c9));
-                            }
-
-                            likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
-                            videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
                         }
@@ -1209,6 +1204,31 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         ToastUtils.showShort(R.string.net_err);
                     }
                 });
+    }
+
+    private void setLikeCollection(ContentStateModel.DataDTO contentStateModel){
+        if (contentStateModel.getWhetherFavor().equals("true")) {
+            videoDetailCollectionImage.setImageResource(R.drawable.collection);
+            videoDetailCommentCollectionImage.setImageResource(R.drawable.collection);
+        } else {
+            videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
+            videoDetailCommentCollectionImage.setImageResource(R.drawable.collection_unseletct);
+        }
+
+        if (contentStateModel.getWhetherLike().equals("true")) {
+            videoDetailLikesImage.setImageResource(R.drawable.likes);
+            videoDetailCommentLikesImage.setImageResource(R.drawable.likes);
+            likesNum.setTextColor(getResources().getColor(R.color.bz_red));
+            videoDetailCommentLikesNum.setTextColor(getResources().getColor(R.color.bz_red));
+        } else {
+            videoDetailLikesImage.setImageResource(R.drawable.likes_unselect);
+            videoDetailCommentLikesImage.setImageResource(R.drawable.likes_unselect);
+            likesNum.setTextColor(getResources().getColor(R.color.c9));
+            videoDetailCommentLikesNum.setTextColor(getResources().getColor(R.color.c9));
+        }
+
+        likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+        videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
     }
 
     /**
@@ -1240,9 +1260,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 if (json.get("data").toString().equals("1")) {
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection);
                                     videoDetailCommentCollectionImage.setImageResource(R.drawable.collection);
+                                    playerView.contentStateModel.setWhetherFavor("true");
                                 } else {
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
                                     videoDetailCommentCollectionImage.setImageResource(R.drawable.collection_unseletct);
+                                    playerView.contentStateModel.setWhetherFavor("false");
+                                }
+                                if (null != playerView.contentStateModel) {
+                                    playerView.setContentStateModel(myContentId, videoType);
                                 }
                             } else if (json.get("code").toString().equals(token_error)) {
                                 Log.e("addOrCancelFavor", "无token 去跳登录");
@@ -1287,7 +1312,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 .tag(videoTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
-                .cacheMode(CacheMode.NO_CACHE)
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -1308,12 +1332,17 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     if (TextUtils.isEmpty(likesNum.getText().toString())) {
                                         num = 0;
                                     } else {
-                                        num = Integer.parseInt(likesNum.getText().toString());
+                                        if(NumberFormatTool.isNumeric(likesNum.getText().toString())){
+                                            num = Integer.parseInt(likesNum.getText().toString());
+                                        } else {
+                                            num = 0;
+                                        }
                                     }
-
                                     num++;
                                     likesNum.setText(NumberFormatTool.formatNum(num, false));
                                     videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    playerView.contentStateModel.setWhetherLike("true");
+                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
                                     int num;
                                     videoDetailLikesImage.setImageResource(R.drawable.likes_unselect);
@@ -1323,11 +1352,22 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     if (TextUtils.isEmpty(likesNum.getText().toString())) {
                                         num = 0;
                                     } else {
-                                        num = Integer.parseInt(likesNum.getText().toString());
+                                        if(NumberFormatTool.isNumeric(likesNum.getText().toString())){
+                                            num = Integer.parseInt(likesNum.getText().toString());
+                                        } else {
+                                            num = 0;
+                                        }
                                     }
-                                    num--;
+                                    if (num > 0) {
+                                        num--;
+                                    }
                                     likesNum.setText(NumberFormatTool.formatNum(num, false));
                                     videoDetailCommentLikesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    playerView.contentStateModel.setWhetherLike("false");
+                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                }
+                                if (null != playerView.contentStateModel) {
+                                    playerView.setContentStateModel(myContentId, videoType);
                                 }
                             } else if (json.get("code").toString().equals(token_error)) {
                                 Log.e("addOrCancelLike", "无token,跳转登录");
@@ -1417,6 +1457,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 e.printStackTrace();
             }
         }
+        if (null != playerView && playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+            SystemUtils.hideSystemUI(decorView);
+        }
     }
 
     /**
@@ -1493,6 +1536,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView.release();
             playerView.mSuperPlayer.destroy();
         }
+        OkGo.getInstance().cancelAll();
     }
 
     @Override
@@ -1600,7 +1644,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     .setOutsideTouchable(true)
                     .setFocusable(true)
                     .setAnimationStyle(R.style.AnimCenter)
-                    .size(getResources().getDisplayMetrics().widthPixels - ButtonSpan.dip2px(60), ButtonSpan.dip2px(180))
+                    .size(getResources().getDisplayMetrics().widthPixels - ButtonSpan.dip2px(60), ButtonSpan.dip2px(150))
                     .create()
                     .showAtLocation(rootView, Gravity.CENTER, 0, 0);
         } else {
@@ -1608,37 +1652,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-//    /**
-//     * 监听布局高度变化
-//     *
-//     * @param v
-//     * @param left
-//     * @param top
-//     * @param right
-//     * @param bottom
-//     * @param oldLeft
-//     * @param oldTop
-//     * @param oldRight
-//     * @param oldBottom
-//     */
-//    @Override
-//    public void onLayoutChange(View v, int left, int top, int right, int bottom,
-//                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
-//        //获取屏幕高度
-//        int screenHeight = getWindowManager().getDefaultDisplay().getHeight();
-//        //阀值设置为屏幕高度的1/3
-//        int keyHeight = screenHeight / 3;
-//        //old是改变前的左上右下坐标点值，没有old的是改变后的左上右下坐标点值
-//        //现在认为只要控件将Activity向上推的高度超过了1/3屏幕高，就认为软键盘弹起
-//        if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > keyHeight)) {
-//            Log.e("onLayoutChange", "=======软键盘弹起");
-//        } else if (oldBottom != 0 && bottom != 0 && (bottom - oldBottom > keyHeight)) {
-//            Log.e("onLayoutChange", "=======软键盘关闭");
-//            if (inputAndSendPop != null) {
-//                inputAndSendPop.dissmiss();
-//            }
-//        }
-//    }
 
     private void setDataWifiState(List<DataDTO> data) {
         if (SPUtils.isVisibleNoWifiView(this)) {
@@ -1675,5 +1688,55 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 Log.e("yqh", "软键盘已经隐藏,做逻辑");
             }
         });
+    }
+
+    /**
+     * 获取推荐列表数据
+     */
+    private void getRecommend(String contentId) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("current", "1");
+            jsonObject.put("pageSize","999");
+            jsonObject.put("contentId", contentId);
+            jsonObject.put("pageIndex","1");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<RecommendModel>post(ApiConstants.getInstance().recommendList())
+                .tag(videoTag)
+                .upJson(jsonObject)
+                .execute(new JsonCallback<RecommendModel>() {
+                    @Override
+                    public void onSuccess(Response<RecommendModel> response) {
+                        if (null == response.body().getData()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        if (response.body().getCode().equals("200")) {
+                            recommondList.clear();
+                            recommondList.addAll(response.body().getData().getRecords());
+                            if (recommondList.size() > 1) {
+
+                            } else {
+                                adapter.setRecommendList(recommondList, false);
+                            }
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Response<RecommendModel> response) {
+                        super.onError(response);
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                            return;
+                        }
+                        ToastUtils.showShort(R.string.net_err);
+                    }
+                });
     }
 }

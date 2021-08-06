@@ -1,4 +1,4 @@
-package ui;
+package com.wdcs.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -6,7 +6,7 @@ import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.View;
 
-import com.wdcs.videodetail.demo.R;
+import com.wdcs.common.R;
 
 
 public class ButtonSpan extends ClickableSpan {

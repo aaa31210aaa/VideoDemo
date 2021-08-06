@@ -1,4 +1,4 @@
-package callback;
+package com.wdcs.callback;
 
 
 import com.wdcs.model.ShareInfo;
@@ -23,4 +23,9 @@ public interface VideoParamCallBack {
      * 获取token值
      */
     String setCode();
+
+    /**
+     * 获取推荐跳转的url
+     */
+    void recommedUrl(String url);
 }

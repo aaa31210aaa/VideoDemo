@@ -16,6 +16,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,11 +26,17 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
 import androidx.annotation.Nullable;
 
+import com.example.zhouwei.library.CustomPopWindow;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.cache.CacheMode;
+import com.lzy.okgo.callback.StringCallback;
+import com.lzy.okgo.model.Response;
 import com.tencent.liteav.basic.log.TXCLog;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayer;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
@@ -45,11 +52,20 @@ import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.DanmuView;
 import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.wdcs.constants.Constants;
+import com.wdcs.http.ApiConstants;
 import com.wdcs.model.ContentStateModel;
+import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;
+import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
+import com.wdcs.utils.PersonInfoManager;
+import com.wdcs.utils.ToastUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,9 +74,15 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE_REVERSE;
+import static com.wdcs.callback.VideoInteractiveParam.param;
+import static com.wdcs.constants.Constants.success_code;
+import static com.wdcs.constants.Constants.token_error;
+import static com.wdcs.utils.ShareUtils.toShare;
 
 /**
  * 超级播放器view
@@ -73,7 +95,8 @@ import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LAN
  * 3、controller回调实现{@link #mControllerCallback}
  * 4、退出播放释放内存{@link #resetPlayer()}
  */
-public class SuperPlayerView extends RelativeLayout implements OrientationHelper.OnOrientationChangeListener {
+public class SuperPlayerView extends RelativeLayout implements OrientationHelper.OnOrientationChangeListener,
+        View.OnClickListener {
     private static final String TAG = "SuperPlayerView";
 
     private final int OP_SYSTEM_ALERT_WINDOW = 24;                      // 支持TYPE_TOAST悬浮窗的最高API版本
@@ -108,11 +131,17 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     @Nullable
     protected View mHideNavBarView;
     public ContentStateModel.DataDTO contentStateModel;
+    private String mContentId;
+    private String mVideoType;
+    private CustomPopWindow noLoginTipsPop;
+    private View noLoginTipsView;
+    private TextView noLoginTipsCancel;
+    private TextView noLoginTipsOk;
 
-    public SuperPlayerView(Context context, View decorView, ContentStateModel.DataDTO model) {
+
+    public SuperPlayerView(Context context, View decorView) {
         super(context);
         this.decorView = decorView;
-        this.contentStateModel = model;
         initialize(context);
     }
 
@@ -133,40 +162,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mRootView = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.superplayer_vod_view, null);
         mTXCloudVideoView = (TXCloudVideoView) mRootView.findViewById(R.id.superplayer_cloud_video_view);
         mFullScreenPlayer = (FullScreenPlayer) mRootView.findViewById(R.id.superplayer_controller_large);
-        //全屏模式下获取到的收藏点赞状态
-        if (null != contentStateModel) {
-            if (contentStateModel.getWhetherFavor().equals("true")) {
-                mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
-            } else {
-                mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
-            }
-
-            if (contentStateModel.getWhetherLike().equals("true")) {
-                mFullScreenPlayer.mLike.setImageResource(R.drawable.likes);
-                mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
-            } else {
-                mFullScreenPlayer.mLike.setImageResource(R.drawable.fullscreen_praise);
-                mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
-            }
-
-            mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
-        }
-
-        //全屏点赞按钮
-        mFullScreenPlayer.mLike.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-        //全屏收藏按钮
-        mFullScreenPlayer.mCollection.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
 
         mWindowPlayer = (WindowPlayer) mRootView.findViewById(R.id.superplayer_controller_small);
         mFloatPlayer = (FloatPlayer) mRootView.findViewById(R.id.superplayer_controller_float);
@@ -188,6 +183,13 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 
         addView(mTXCloudVideoView);
         addView(mDanmuView);
+
+        noLoginTipsView = View.inflate(mContext, R.layout.no_login_tips, null);
+        noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
+        noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
+        noLoginTipsCancel.setOnClickListener(this);
+        noLoginTipsOk.setOnClickListener(this);
+
     }
 
     private void initPlayer() {
@@ -226,6 +228,214 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             mWatcher = new NetWatcher(mContext);
         }
     }
+
+    /**
+     * 设置点赞收藏状态
+     */
+    public void setContentStateModel(String contentId, String videoType) {
+        this.mContentId = contentId;
+        this.mVideoType = videoType;
+
+        //全屏模式下获取到的收藏点赞状态
+        if (contentStateModel.getWhetherFavor().equals("true")) {
+            mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
+        } else {
+            mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
+        }
+
+        if (contentStateModel.getWhetherLike().equals("true")) {
+            mFullScreenPlayer.mLike.setImageResource(R.drawable.likes);
+            mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
+        } else {
+            mFullScreenPlayer.mLike.setImageResource(R.drawable.fullscreen_praise);
+            mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
+        }
+
+        mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+
+        //全屏点赞按钮
+        mFullScreenPlayer.mLike.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    addOrCancelLike(mContentId, mVideoType);
+                }
+            }
+        });
+
+        //全屏收藏按钮
+        mFullScreenPlayer.mCollection.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    addOrCancelFavor(mContentId, mVideoType);
+                }
+            }
+        });
+    }
+
+    public ContentStateModel.DataDTO getContentStateModel() {
+        return contentStateModel;
+    }
+
+
+    /**
+     * 点赞/取消点赞
+     */
+    private void addOrCancelLike(String targetId, String type) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("targetId", targetId);
+            jsonObject.put("type", type);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(ApiConstants.getInstance().addOrCancelLike())
+                .tag(this)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        try {
+                            JSONObject json = new JSONObject(response.body());
+                            if (null != json && json.get("code").toString().equals("200")) {
+                                if (json.get("data").toString().equals("1")) {
+                                    int num;
+                                    mFullScreenPlayer.mLike.setImageResource(R.drawable.likes);
+                                    mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
+                                    if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
+                                        num = 0;
+                                    } else {
+                                        if (NumberFormatTool.isNumeric(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
+                                            num = Integer.parseInt(mFullScreenPlayer.fullscreenLikeNum.getText().toString());
+                                        } else {
+                                            num = 0;
+                                        }
+                                    }
+                                    num++;
+                                    mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(num, false));
+                                    contentStateModel.setWhetherLike("true");
+                                    contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                } else {
+                                    int num;
+                                    mFullScreenPlayer.mLike.setImageResource(R.drawable.fullscreen_praise);
+                                    mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
+                                    if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
+                                        num = 0;
+                                    } else {
+                                        if (NumberFormatTool.isNumeric(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
+                                            num = Integer.parseInt(mFullScreenPlayer.fullscreenLikeNum.getText().toString());
+                                        } else {
+                                            num = 0;
+                                        }
+                                    }
+                                    if (num > 0) {
+                                        num--;
+                                    }
+                                    mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(num, false));
+                                    contentStateModel.setWhetherLike("false");
+                                    contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                }
+
+                            } else if (json.get("code").toString().equals(token_error)) {
+                                Log.e("addOrCancelLike", "无token,跳转登录");
+                                try {
+                                    param.toLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (null != json.get("message").toString()) {
+                                    ToastUtils.showShort(json.get("message").toString());
+                                } else {
+                                    ToastUtils.showShort("点赞失败");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showShort("点赞失败");
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        ToastUtils.showShort("点赞失败");
+                    }
+                });
+    }
+
+    /**
+     * 收藏/取消收藏
+     */
+    private void addOrCancelFavor(String contentId, String type) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("contentId", contentId);
+            jsonObject.put("type", type);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(ApiConstants.getInstance().addOrCancelFavor())
+                .tag(this)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        try {
+                            JSONObject json = new JSONObject(response.body());
+                            if (json.get("code").toString().equals(success_code)) {
+                                if (json.get("data").toString().equals("1")) {
+                                    mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
+                                    contentStateModel.setWhetherFavor("true");
+                                } else {
+                                    mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
+                                    contentStateModel.setWhetherFavor("false");
+                                }
+                            } else if (json.get("code").toString().equals(token_error)) {
+                                Log.e("addOrCancelFavor", "无token 去跳登录");
+                                try {
+                                    param.toLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (null != json.get("message").toString()) {
+                                    ToastUtils.showShort(json.get("message").toString());
+                                } else {
+                                    ToastUtils.showShort("收藏失败");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showShort("收藏失败");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        ToastUtils.showShort("收藏失败");
+                    }
+                });
+    }
+
 
     /**
      * 播放视频
@@ -372,6 +582,43 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     }
 
     public PlayModeCallBack playModeCallBack;
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.no_login_tips_cancel) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+        } else if (id == R.id.no_login_tips_ok) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+            try {
+                param.toLogin();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 没有登录情况下 点击点赞收藏评论 提示登录的提示框
+     */
+    private void noLoginTipsPop() {
+        if (null == noLoginTipsPop) {
+            noLoginTipsPop = new CustomPopWindow.PopupWindowBuilder(mContext)
+                    .setView(noLoginTipsView)
+                    .setOutsideTouchable(true)
+                    .setFocusable(false)
+                    .setAnimationStyle(R.style.AnimCenter)
+                    .size(getResources().getDisplayMetrics().widthPixels/2, ButtonSpan.dip2px(150))
+                    .create()
+                    .showAtLocation(mRootView, Gravity.CENTER, 0, 0);
+        } else {
+            noLoginTipsPop.showAtLocation(mRootView, Gravity.CENTER, 0, 0);
+        }
+    }
 
     public interface PlayModeCallBack {
         void getPlayMode(SuperPlayerDef.PlayerMode playerMode);
@@ -734,7 +981,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         addOnLayoutChangeListener(new OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                Log.e("T800", "onLayoutChange");
             }
         });
     }
@@ -767,6 +1013,10 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         }
 
         if (null != mFullScreenPlayer.sharePop && mFullScreenPlayer.sharePop.getPopupWindow().isShowing()) {
+            return;
+        }
+
+        if (null != noLoginTipsPop && noLoginTipsPop.getPopupWindow().isShowing()) {
             return;
         }
 

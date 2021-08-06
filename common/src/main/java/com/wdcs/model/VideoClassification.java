@@ -1,5 +1,7 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 import java.util.List;
 
 /**
@@ -7,7 +9,7 @@ import java.util.List;
  *
  * 视频画质信息
  */
-
+@Keep
 public class VideoClassification {
 
     private String id;
