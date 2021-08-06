@@ -1717,7 +1717,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             recommondList.clear();
                             recommondList.addAll(response.body().getData().getRecords());
                             if (recommondList.size() > 1) {
-
+                                adapter.setRecommendList(recommondList, true);
                             } else {
                                 adapter.setRecommendList(recommondList, false);
                             }

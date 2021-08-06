@@ -52,7 +52,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "com.tencent.liteav:LiteAVSDK_Player:latest.release"
     implementation project(':superplayerkit')
-    implementation project(':common')
+    implementation project(':video-common')
     implementation 'com.github.bumptech.glide:glide:4.10.0'
     implementation 'com.google.code.gson:gson:2.3.1'
     implementation 'androidx.appcompat:appcompat:1.0.0'

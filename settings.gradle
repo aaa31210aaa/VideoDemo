@@ -1,4 +1,4 @@
-include ':common'
+include ':video-common'
 include ':superplayerkit'
 include ':videodetail'
 include ':app'
