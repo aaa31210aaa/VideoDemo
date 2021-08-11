@@ -134,20 +134,12 @@
         android:layout_height="50dp"
         android:layout_marginLeft="@dimen/dp10"
         android:layout_marginRight="@dimen/dp10"
-        android:layout_below="@+id/agree_nowifi_play"
+        android:layout_above="@+id/expandable_text"
         android:flipInterval="4000"
         android:autoStart="false"
-        android:layout_marginBottom="100dp"
         android:inAnimation="@anim/vf_anim_in"
         android:outAnimation="@anim/vf_anim_out" />
 
-    <RelativeLayout
-        android:id="@+id/expandable_text_ll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
 
         <widget.OverLineTextView
             android:id="@+id/fold_text"
@@ -156,6 +148,9 @@
             android:layout_alignParentBottom="true"
             android:ellipsize="end"
             android:maxLines="3"
+            android:layout_marginBottom="@dimen/dp10"
+            android:layout_marginLeft="@dimen/dp10"
+            android:layout_marginRight="@dimen/dp10"
             android:textColor="@color/c9"
             android:textSize="12sp">
 
@@ -168,15 +163,17 @@
             android:layout_alignParentBottom="true"
             android:ellipsize="end"
             android:maxHeight="200dp"
+            android:layout_marginBottom="@dimen/dp10"
+            android:layout_marginLeft="@dimen/dp10"
+            android:layout_marginRight="@dimen/dp10"
             android:maxLines="5"
             android:text=""
             android:textColor="@color/c9"
             android:textSize="12sp"
-            android:visibility="gone">
+            android:visibility="invisible">
 
         </TextView>
 
-    </RelativeLayout>
 
     <!--            <RelativeLayout-->
     <!--                android:id="@+id/expand_rl"-->

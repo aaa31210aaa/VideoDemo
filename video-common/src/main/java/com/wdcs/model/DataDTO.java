@@ -53,6 +53,7 @@ public  class DataDTO {
     private String pid;
     private boolean isWifi;
     private boolean oneRecommend;
+    private boolean recommendVisible;
 
     public String getShareTitle() {
         return shareTitle;
@@ -436,6 +437,14 @@ public  class DataDTO {
 
     public void setOneRecommend(boolean oneRecommend) {
         this.oneRecommend = oneRecommend;
+    }
+
+    public boolean isRecommendVisible() {
+        return recommendVisible;
+    }
+
+    public void setRecommendVisible(boolean recommendVisible) {
+        this.recommendVisible = recommendVisible;
     }
 
     @Keep

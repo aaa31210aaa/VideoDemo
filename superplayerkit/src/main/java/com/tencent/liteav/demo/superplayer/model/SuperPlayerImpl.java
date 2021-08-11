@@ -616,7 +616,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 mObserver.onPlayPause();
                 break;
             case LOADING:
-                mObserver.onPlayLoading();
+                mObserver.onPlayLoading(getPlayName());
                 break;
             case END:
                 mObserver.onPlayStop();

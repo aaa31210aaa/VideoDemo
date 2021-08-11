@@ -79,14 +79,14 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         helper.setText(R.id.video_detail_from_media, item.getSource());
         helper.setText(R.id.video_detail_date, DateUtils.utc2Local(item.getStartTime()));
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
-        RelativeLayout expandableTextLl = helper.getView(R.id.expandable_text_ll);
+//        RelativeLayout expandableTextLl = helper.getView(R.id.expandable_text_ll);
         TextView noWifiText = helper.getView(R.id.no_wifi_text);
         TextView continuePlay = helper.getView(R.id.continue_play);
         noWifiText.setText(R.string.no_wifi);
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        layoutParams.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-        expandableTextLl.setLayoutParams(layoutParams);
+//        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+//        layoutParams.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
+//        expandableTextLl.setLayoutParams(layoutParams);
 
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
@@ -169,7 +169,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
             @Override
             public void onClick(View view) {
                 if (foldTextView.getVisibility() == View.VISIBLE) {
-                    foldTextView.setVisibility(View.GONE);
+                    foldTextView.setVisibility(View.INVISIBLE);
                     expandTextView.setVisibility(View.VISIBLE);
                     shareTitle.setVisibility(View.GONE);
                     shareLl.setVisibility(View.GONE);
@@ -181,7 +181,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
             @Override
             public void onClick(View view) {
                 foldTextView.setVisibility(View.VISIBLE);
-                expandTextView.setVisibility(View.GONE);
+                expandTextView.setVisibility(View.INVISIBLE);
                 shareTitle.setVisibility(View.VISIBLE);
                 shareLl.setVisibility(View.VISIBLE);
             }
@@ -203,6 +203,12 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         });
 
         ViewFlipper viewFlipper = helper.getView(R.id.video_flipper);
+
+        if (item.isRecommendVisible()) {
+            viewFlipper.setVisibility(View.VISIBLE);
+        } else {
+            viewFlipper.setVisibility(View.GONE);
+        }
         getViewFlipperData(recommendList, viewFlipper);
     }
 
@@ -210,8 +216,6 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
      * 获取首页滚动消息
      */
     private void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list, final ViewFlipper viewFlipper) {
-        if (!list.isEmpty()) {
-            viewFlipper.setVisibility(View.VISIBLE);
             for (int i = 0; i < list.size(); i++) {
                 String item = list.get(i).getTitle();
                 View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
@@ -248,9 +252,6 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
                 }
             });
 
-        } else {
-            viewFlipper.setVisibility(View.GONE);
-        }
 
         if (mIsAuto) {
             viewFlipper.startFlipping();

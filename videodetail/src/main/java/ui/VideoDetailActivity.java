@@ -148,7 +148,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView videoDetailCollectionImage; //收藏图标
     private ImageView videoDetailLikesImage; //点赞图标
     private TextView likesNum; //点赞数
-//    public ContentStateModel.DataDTO contentStateModel;
+    //    public ContentStateModel.DataDTO contentStateModel;
     private ImageView videoDetailCommentCollectionImage; //评论弹窗收藏图标
     private ImageView videoDetailCommentLikesImage; //评论弹窗点赞图标
     private TextView videoDetailCommentLikesNum; //评论弹窗点赞数
@@ -256,13 +256,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 playerView = new SuperPlayerView(VideoDetailActivity.this, decorView);
                 playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 myContentId = String.valueOf(mDatas.get(0).getId());
-                addPageViews(myContentId);
+//                addPageViews(myContentId);
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
                     getContentState(myContentId);
                 }
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
-                //获取推荐列表
-                getRecommend(myContentId);
+
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
                     videoDetailWhiteCommentRl.setEnabled(false);
@@ -279,11 +278,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
 
-                if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
-                    SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
-                } else {
-                    addPlayView(0);
-                }
+                //获取推荐列表
+                getRecommend(myContentId,0);
+
                 initChoosePop();
 
                 /**
@@ -340,6 +337,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 if (null != playerView.getTag() && position == (int) playerView.getTag()) {
                     return;
                 }
+                playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
                 playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
@@ -349,7 +347,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 reset();
                 myContentId = String.valueOf(mDatas.get(position).getId());
                 addPageViews(myContentId);
-                getRecommend(myContentId);
+
                 videoDetailPopChooseAdapter.setContentId(myContentId);
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
@@ -367,11 +365,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
 
-                if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
-                    SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
-                } else {
-                    addPlayView(position);
-                }
+                getRecommend(myContentId,position);
+
                 if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
                     playerView.mFullScreenPlayer.mVodMoreView.mCallback.onSpeedChange(1.0f);
                     playerView.mFullScreenPlayer.superplayerSpeed.setText("倍速");
@@ -385,7 +380,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //        View footView = View.inflate(this, R.layout.footer_view, null);
 //        adapter.setFooterView(footView);
 //        videoDetailRv.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+//        adapter.notifyDataSetChanged();
 
         initSmartRefresh();
         commentTotal = findViewById(R.id.comment_total);
@@ -676,10 +671,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      * @param playUrl
      */
     public void play(String playUrl, String title) {
-        if (null == playUrl || TextUtils.isEmpty(playUrl)) {
-            ToastUtils.showShort("当前播放地址(" + playUrl + "),是一个无效地址");
-            return;
-        }
+//        if (null == playUrl || TextUtils.isEmpty(playUrl)) {
+//            ToastUtils.showShort("当前播放地址(" + playUrl + "),是一个无效地址");
+//            return;
+//        }
         if (null != playerView) {
 //            videoStaticBg.setVisibility(View.GONE);
             SuperPlayerModel model = new SuperPlayerModel();
@@ -1206,7 +1201,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 });
     }
 
-    private void setLikeCollection(ContentStateModel.DataDTO contentStateModel){
+    private void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
         if (contentStateModel.getWhetherFavor().equals("true")) {
             videoDetailCollectionImage.setImageResource(R.drawable.collection);
             videoDetailCommentCollectionImage.setImageResource(R.drawable.collection);
@@ -1332,7 +1327,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     if (TextUtils.isEmpty(likesNum.getText().toString())) {
                                         num = 0;
                                     } else {
-                                        if(NumberFormatTool.isNumeric(likesNum.getText().toString())){
+                                        if (NumberFormatTool.isNumeric(likesNum.getText().toString())) {
                                             num = Integer.parseInt(likesNum.getText().toString());
                                         } else {
                                             num = 0;
@@ -1352,7 +1347,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     if (TextUtils.isEmpty(likesNum.getText().toString())) {
                                         num = 0;
                                     } else {
-                                        if(NumberFormatTool.isNumeric(likesNum.getText().toString())){
+                                        if (NumberFormatTool.isNumeric(likesNum.getText().toString())) {
                                             num = Integer.parseInt(likesNum.getText().toString());
                                         } else {
                                             num = 0;
@@ -1401,7 +1396,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      * 浏览量+1
      */
     private void addPageViews(String contentId) {
-        OkGo.<String>get(ApiConstants.getInstance().addViews() + contentId)
+        OkGo.<String>post(ApiConstants.getInstance().addViews() + contentId)
                 .tag(videoTag)
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new StringCallback() {
@@ -1414,7 +1409,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         }
                         try {
                             JSONObject jsonObject = new JSONObject(response.body());
-                            Log.e("yqh",jsonObject.getString("message"));
+                            Log.e("yqh", jsonObject.getString("message"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -1641,14 +1636,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         if (null == noLoginTipsPop) {
             noLoginTipsPop = new CustomPopWindow.PopupWindowBuilder(this)
                     .setView(noLoginTipsView)
+                    .enableBackgroundDark(true)
                     .setOutsideTouchable(true)
                     .setFocusable(true)
                     .setAnimationStyle(R.style.AnimCenter)
-                    .size(getResources().getDisplayMetrics().widthPixels - ButtonSpan.dip2px(60), ButtonSpan.dip2px(150))
+                    .size(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels)
                     .create()
-                    .showAtLocation(rootView, Gravity.CENTER, 0, 0);
-        } else {
-            noLoginTipsPop.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+                    .showAtLocation(decorView, Gravity.CENTER, 0, 0);
+        }
+        else {
+            noLoginTipsPop.showAtLocation(decorView, Gravity.CENTER, 0, 0);
         }
     }
 
@@ -1693,13 +1690,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     /**
      * 获取推荐列表数据
      */
-    private void getRecommend(String contentId) {
+    private void getRecommend(String contentId, final int position) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("current", "1");
-            jsonObject.put("pageSize","999");
+            jsonObject.put("pageSize", "999");
             jsonObject.put("contentId", contentId);
-            jsonObject.put("pageIndex","1");
+            jsonObject.put("pageIndex", "1");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -1718,8 +1715,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             recommondList.addAll(response.body().getData().getRecords());
                             if (recommondList.size() > 1) {
                                 adapter.setRecommendList(recommondList, true);
+                                mDatas.get(position).setRecommendVisible(true);
                             } else {
                                 adapter.setRecommendList(recommondList, false);
+                                mDatas.get(position).setRecommendVisible(false);
                             }
                             adapter.notifyDataSetChanged();
                         } else {
@@ -1736,6 +1735,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
                         ToastUtils.showShort(R.string.net_err);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
+                            SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
+                        } else {
+                            addPlayView(position);
+                        }
                     }
                 });
     }

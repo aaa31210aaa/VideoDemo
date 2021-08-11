@@ -8,7 +8,8 @@
     <color name="superplayer_biz_audio_progress_first">#ffffff</color>
     <color name="superplayer_biz_audio_progress_second">#6b6666</color>
 
-    <color name="superplayer_super_vod_vtt_bg">#7E000000</color>
+    <color name="superplayer_super_vod_vtt_bg">#99000000</color>
+    <color name="transfer40">#7f000000</color>
     <color name="bz_red">#DB0025</color>
     <color name="c9">#999999</color>
 

@@ -7,20 +7,20 @@
 
     <ImageView
         android:id="@+id/fullscreen_share_wx"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center"
-        android:layout_marginRight="30dp"
+        android:layout_marginRight="40dp"
         android:src="@drawable/share_wechat_icon">
 
     </ImageView>
 
     <ImageView
         android:id="@+id/fullscreen_share_circle"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center"
-        android:layout_marginRight="30dp"
+        android:layout_marginRight="40dp"
         android:src="@drawable/share_circle_icon"
         >
 
@@ -28,8 +28,8 @@
 
     <ImageView
         android:id="@+id/fullscreen_share_qq"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center"
         android:src="@drawable/share_qq_icon"
         >

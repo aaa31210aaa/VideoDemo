@@ -1184,9 +1184,10 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         }
 
         @Override
-        public void onPlayLoading() {
+        public void onPlayLoading(String name) {
             mWindowPlayer.updatePlayState(SuperPlayerDef.PlayerState.LOADING);
             mFullScreenPlayer.updatePlayState(SuperPlayerDef.PlayerState.LOADING);
+            updateTitle(name);
             if (mWatcher != null) {
                 mWatcher.enterLoading();
             }

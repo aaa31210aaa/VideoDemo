@@ -23,6 +23,7 @@ import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
 
+
 /**
  * 窗口模式播放控件
  * <p>
@@ -63,7 +64,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
     private boolean isShowing;                              // 自身是否可见
     private boolean mIsChangingSeekBarProgress;             // 进度条是否正在拖动，避免SeekBar由于视频播放的update而跳动
     private SuperPlayerDef.PlayerType mPlayType = SuperPlayerDef.PlayerType.VOD;                          // 当前播放视频类型
-    private SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
+    public SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
     public static long mDuration;                              // 视频总时长
     private long mLivePushDuration;                      // 直播推流总时长
     private long mProgress;                              // 当前播放进度
@@ -97,6 +98,9 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
         mGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
+                if (mCurrentPlayState == SuperPlayerDef.PlayerState.LOADING) {
+                    return false;
+                }
                 togglePlayState();
                 show();
                 if (mHideViewRunnable != null) {
@@ -108,6 +112,9 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (mCurrentPlayState == SuperPlayerDef.PlayerState.LOADING) {
+                    return false;
+                }
                 toggle();
                 return true;
             }

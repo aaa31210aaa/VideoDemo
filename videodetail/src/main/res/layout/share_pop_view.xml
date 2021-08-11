@@ -15,22 +15,22 @@
 
         <ImageView
             android:id="@+id/share_wx_btn"
-            android:layout_width="@dimen/dp60"
-            android:layout_height="@dimen/dp60"
+            android:layout_width="@dimen/dp50"
+            android:layout_height="@dimen/dp50"
             android:layout_weight="1"
             android:src="@drawable/share_wechat_icon"></ImageView>
 
         <ImageView
             android:id="@+id/share_circle_btn"
-            android:layout_width="@dimen/dp60"
-            android:layout_height="@dimen/dp60"
+            android:layout_width="@dimen/dp50"
+            android:layout_height="@dimen/dp50"
             android:layout_weight="1"
             android:src="@drawable/share_circle_icon"></ImageView>
 
         <ImageView
             android:id="@+id/share_qq_btn"
-            android:layout_width="@dimen/dp60"
-            android:layout_height="@dimen/dp60"
+            android:layout_width="@dimen/dp50"
+            android:layout_height="@dimen/dp50"
             android:layout_weight="1"
             android:src="@drawable/share_qq_icon"></ImageView>
     </LinearLayout>

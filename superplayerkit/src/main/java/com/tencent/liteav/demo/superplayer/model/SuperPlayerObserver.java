@@ -29,7 +29,7 @@ public abstract class SuperPlayerObserver {
     /**
      * 播放器进入Loading状态
      */
-    public void onPlayLoading() {}
+    public void onPlayLoading(String name) {}
 
     /**
      * 播放进度回调

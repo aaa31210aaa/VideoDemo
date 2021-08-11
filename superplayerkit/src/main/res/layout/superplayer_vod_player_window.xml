@@ -148,7 +148,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:visibility="gone" />
+        android:indeterminateTint="@color/white"
+        android:visibility="gone"
+         />
 
     <com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout
         android:id="@+id/superplayer_gesture_progress"
