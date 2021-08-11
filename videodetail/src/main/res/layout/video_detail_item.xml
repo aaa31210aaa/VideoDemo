@@ -135,8 +135,9 @@
         android:layout_marginLeft="@dimen/dp10"
         android:layout_marginRight="@dimen/dp10"
         android:layout_above="@+id/expandable_text"
-        android:flipInterval="4000"
+        android:flipInterval="2000"
         android:autoStart="false"
+        android:layout_marginBottom="@dimen/dp5"
         android:inAnimation="@anim/vf_anim_in"
         android:outAnimation="@anim/vf_anim_out" />
 
