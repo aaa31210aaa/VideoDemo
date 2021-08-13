@@ -22,7 +22,7 @@ import java.util.TimeZone;
 public final class Utils {
     private static SimpleDateFormat formatterYmd = new SimpleDateFormat("MM-dd");//初始化Formatter的转换格式。
     private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");//初始化Formatter的转换格式。
-
+    public static boolean mIsDebug;
     @SuppressLint("StaticFieldLeak")
     private static Context mContext;
 
@@ -37,7 +37,7 @@ public final class Utils {
      */
     public static void init(@NonNull final Context context, Boolean isDebug) {
         Utils.mContext = context.getApplicationContext();
-
+        mIsDebug = isDebug;
         if (isDebug) {
             //UAT测试环境
             ApiConstants.getInstance().setBaseUrl("https://uat-fuse-api-gw.zhcs.csbtv.com/api/cms/");

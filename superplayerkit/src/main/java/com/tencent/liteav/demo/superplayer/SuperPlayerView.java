@@ -52,10 +52,8 @@ import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.DanmuView;
 import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
-import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.ContentStateModel;
-import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;
@@ -74,15 +72,12 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE_REVERSE;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
-import static com.wdcs.utils.ShareUtils.toShare;
 
 /**
  * 超级播放器view
@@ -184,7 +179,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         addView(mTXCloudVideoView);
         addView(mDanmuView);
 
-        noLoginTipsView = View.inflate(mContext, R.layout.no_login_tips, null);
+        noLoginTipsView = View.inflate(mContext, R.layout.fullscreen_no_login_tips, null);
         noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
         noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
         noLoginTipsCancel.setOnClickListener(this);

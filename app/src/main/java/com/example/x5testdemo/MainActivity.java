@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "01161d2c-e9ef-4057-aa0b-f27503b9f7a8";
+                        return "c5fdc204-b730-4af7-b93d-5f790f3d334d";
                     }
 
                     @Override

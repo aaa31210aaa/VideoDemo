@@ -27,7 +27,6 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -69,8 +68,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import adpter.CommentPopRvAdapter;
 import adpter.MyVideoDetailAdapter;
@@ -159,6 +156,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public String playUrl;
     private TextView commentEdittext;
     private String videoTag = "videoTag";
+    private String recommendTag = "recommend";
     private boolean isLoadComplate = false;
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
     public View decorView;
@@ -175,6 +173,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView shareQqBtn;
     private DataDTO mDataDTO;
     private List<RecommendModel.DataDTO.RecordsDTO> recommondList;
+    private ViewGroup rlLp;
+
 
     @SuppressLint("NewApi")
     @Override
@@ -277,7 +277,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
-
+                rlLp = (ViewGroup) manager.findViewByPosition(0);
+                OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
                 getRecommend(myContentId,0);
 
@@ -364,7 +365,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
-
+                rlLp = (ViewGroup) manager.findViewByPosition(position);
+                OkGo.getInstance().cancelTag(recommendTag);
                 getRecommend(myContentId,position);
 
                 if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
@@ -455,44 +457,29 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      * @param position
      */
     public void addPlayView(final int position) {
-        final ViewGroup rlLp = (ViewGroup) manager.findViewByPosition(position);
         final RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-//        videoStaticBg = new ImageView(VideoDetailActivity.this);
-//        videoStaticBg.setScaleType(ImageView.ScaleType.FIT_XY);
-//        Glide.with(VideoDetailActivity.this).load(mDatas.get(position).getThumbnailUrl()).into(videoStaticBg);
         RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, ButtonSpan.dip2px(200));
         itemLp.setMargins(0, 0, 0, ButtonSpan.dip2px(30));
         RelativeLayout item = new RelativeLayout(VideoDetailActivity.this);
         startPlay = new ImageView(VideoDetailActivity.this);
         startPlay.setImageResource(R.drawable.play_start);
-        //外层设置在整个布局中 居中
-//        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
         RelativeLayout startRl = new RelativeLayout(VideoDetailActivity.this);
         RelativeLayout.LayoutParams startlp = new RelativeLayout.LayoutParams(ButtonSpan.dip2px(50),
                 ButtonSpan.dip2px(50));
-//        videoStaticBg.setTag(position);
         startPlay.setTag(position);
         playerView.setTag(position);
         playerView.setBackgroundColor(getResources().getColor(R.color.black));
         startlp.addRule(RelativeLayout.CENTER_IN_PARENT);
         startRl.addView(startPlay, startlp);
         item.addView(startRl, itemLp);
-        //里层rl添加view
-//        playerViewRl.addView(videoStaticBg, linLp);
-//        playerViewRl.addView(startRl, linLp);
-        //外层item view 添加里层的view
-//        item.addView(playerViewRl,lp);
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
         item.addView(playerView, itemLp);
-        rlLp.addView(item, lp);
-        play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
-//            }
-//        }, 200);
+        if (rlLp != null) {
+            rlLp.addView(item, lp);
+            play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
+        }
     }
 
     private void initSmartRefresh() {
@@ -1695,13 +1682,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         try {
             jsonObject.put("current", "1");
             jsonObject.put("pageSize", "999");
-            jsonObject.put("contentId", contentId);
+            jsonObject.put("contentId", contentId+"");
             jsonObject.put("pageIndex", "1");
         } catch (JSONException e) {
             e.printStackTrace();
         }
         OkGo.<RecommendModel>post(ApiConstants.getInstance().recommendList())
-                .tag(videoTag)
+                .tag(recommendTag)
                 .upJson(jsonObject)
                 .execute(new JsonCallback<RecommendModel>() {
                     @Override

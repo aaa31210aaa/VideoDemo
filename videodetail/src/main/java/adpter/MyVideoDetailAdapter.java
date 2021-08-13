@@ -1,7 +1,9 @@
 package adpter;
 
 import android.content.Context;
+import android.os.Debug;
 import android.text.TextUtils;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.ShareUtils;
+import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 
@@ -51,6 +54,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
     private List<DataDTO> mDatas;
     private List<RecommendModel.DataDTO.RecordsDTO> recommendList = new ArrayList<>();
     private boolean mIsAuto;
+    private boolean isExpend;
 
     public MyVideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context) {
         super(layoutResId, data);
@@ -66,10 +70,12 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
             @Override
             public boolean onLongClick(View view) {
                 try {
-                    Log.e("tgt码：", VideoInteractiveParam.getInstance().getCode() + "-----"
-                            + PersonInfoManager.getInstance().getToken());
-                    System.out.println(VideoInteractiveParam.getInstance().getCode() + "-----"
-                            + PersonInfoManager.getInstance().getToken());
+                    if (Utils.mIsDebug){
+                        Log.e("tgt码：", VideoInteractiveParam.getInstance().getCode() + "-----"
+                                + PersonInfoManager.getInstance().getToken());
+                        System.out.println(VideoInteractiveParam.getInstance().getCode() + "-----"
+                                + PersonInfoManager.getInstance().getToken());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -120,37 +126,8 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         }
 
         final OverLineTextView foldTextView = helper.getView(R.id.fold_text);
-        final TextView expandTextView = helper.getView(R.id.expandable_text);
-//        final ImageView expandArrow = helper.getView(R.id.expand_arrow);
-//        final TextView expandTipsText = helper.getView(R.id.expand_tips_text);
-        final TextView shareTitle = helper.getView(R.id.share_title);
-        final LinearLayout shareLl = helper.getView(R.id.share_ll);
-        final ImageView shareWx = helper.getView(R.id.share_wx);
-        final ImageView shareCircle = helper.getView(R.id.share_circle);
-        final ImageView shareQQ = helper.getView(R.id.share_qq);
-        shareWx.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toShare(item, Constants.SHARE_WX);
-            }
-        });
-        shareCircle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toShare(item, Constants.SHARE_CIRCLE);
-            }
-        });
-
-        shareQQ.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toShare(item, Constants.SHARE_QQ);
-            }
-        });
-
         foldTextView.setText(item.getBrief());
-        expandTextView.setText(item.getBrief());
-//        final RelativeLayout expandRl = helper.getView(R.id.expand_rl);
+
         /**
          * 判断获取的文本是否超过限制行数
          */
@@ -168,24 +145,16 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (foldTextView.getVisibility() == View.VISIBLE) {
-                    foldTextView.setVisibility(View.INVISIBLE);
-                    expandTextView.setVisibility(View.VISIBLE);
-                    shareTitle.setVisibility(View.GONE);
-                    shareLl.setVisibility(View.GONE);
+                if (isExpend) {
+                    foldTextView.setMaxLines(3);
+                    isExpend = false;
+                } else {
+                    foldTextView.setMaxLines(5);
+                    isExpend = true;
                 }
             }
         });
 
-        expandTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                foldTextView.setVisibility(View.VISIBLE);
-                expandTextView.setVisibility(View.INVISIBLE);
-                shareTitle.setVisibility(View.VISIBLE);
-                shareLl.setVisibility(View.VISIBLE);
-            }
-        });
         TextView videoDetailItemChooseBtn = helper.getView(R.id.video_detail_item_choose_btn);
         if (null == item.getPid() || TextUtils.isEmpty(String.valueOf(item.getPid()))) {
             videoDetailItemChooseBtn.setVisibility(View.INVISIBLE);
