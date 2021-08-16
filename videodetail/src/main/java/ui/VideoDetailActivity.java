@@ -1703,7 +1703,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             if (recommondList.size() > 1) {
                                 adapter.setRecommendList(recommondList, true);
                                 mDatas.get(position).setRecommendVisible(true);
-                            } else {
+                            } else if (recommondList.size() == 1) {
+                                adapter.setRecommendList(recommondList, false);
+                                mDatas.get(position).setRecommendVisible(true);
+                            } else if (recommondList.size() == 0){
                                 adapter.setRecommendList(recommondList, false);
                                 mDatas.get(position).setRecommendVisible(false);
                             }

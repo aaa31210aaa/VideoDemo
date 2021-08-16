@@ -85,14 +85,9 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
         helper.setText(R.id.video_detail_from_media, item.getSource());
         helper.setText(R.id.video_detail_date, DateUtils.utc2Local(item.getStartTime()));
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
-//        RelativeLayout expandableTextLl = helper.getView(R.id.expandable_text_ll);
         TextView noWifiText = helper.getView(R.id.no_wifi_text);
         TextView continuePlay = helper.getView(R.id.continue_play);
         noWifiText.setText(R.string.no_wifi);
-//        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-//        layoutParams.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-//        expandableTextLl.setLayoutParams(layoutParams);
 
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
@@ -173,18 +168,18 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
 
         ViewFlipper viewFlipper = helper.getView(R.id.video_flipper);
 
-        if (item.isRecommendVisible()) {
+        if (item.isRecommendVisible() && !item.isClosed()) {
             viewFlipper.setVisibility(View.VISIBLE);
         } else {
             viewFlipper.setVisibility(View.GONE);
         }
-        getViewFlipperData(recommendList, viewFlipper);
+        getViewFlipperData(recommendList, viewFlipper, item);
     }
 
     /**
      * 获取首页滚动消息
      */
-    private void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list, final ViewFlipper viewFlipper) {
+    private void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list, final ViewFlipper viewFlipper, final DataDTO mItem) {
             for (int i = 0; i < list.size(); i++) {
                 String item = list.get(i).getTitle();
                 View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
@@ -201,6 +196,7 @@ public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHold
                     public void onClick(View view) {
                         viewFlipper.stopFlipping();
                         viewFlipper.setVisibility(View.GONE);
+                        mItem.setClosed(true);
                     }
                 });
                 viewFlipper.addView(view);

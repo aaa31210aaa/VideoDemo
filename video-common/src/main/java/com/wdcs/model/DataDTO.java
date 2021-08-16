@@ -54,6 +54,7 @@ public  class DataDTO {
     private boolean isWifi;
     private boolean oneRecommend;
     private boolean recommendVisible;
+    private boolean isClosed;
 
     public String getShareTitle() {
         return shareTitle;
@@ -445,6 +446,14 @@ public  class DataDTO {
 
     public void setRecommendVisible(boolean recommendVisible) {
         this.recommendVisible = recommendVisible;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
     }
 
     @Keep

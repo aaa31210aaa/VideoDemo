@@ -124,4 +124,11 @@ public class ApiConstants {
     public String recommendList() {
         return getBaseUrl() + "client/content/recommend";
     }
+
+    /**
+     * 埋点上报接口
+     */
+    public String trackingUpload() {
+        return getBaseUrl() + "client/tracking/upload";
+    }
 }
