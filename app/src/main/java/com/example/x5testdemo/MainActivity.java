@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
+import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
 
 import ui.VideoDetailActivity;
@@ -49,11 +50,16 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "c5fdc204-b730-4af7-b93d-5f790f3d334d";
+                        return "c2eb46a0-80e9-4539-b5f9-df4b4cb9dd08";
                     }
 
                     @Override
                     public void recommedUrl(String url) {
+
+                    }
+
+                    @Override
+                    public void buriedPoint(BuriedPointModel buriedPointModel) {
 
                     }
                 });

@@ -46,6 +46,8 @@ import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
+import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.CommentModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
@@ -111,6 +113,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private RelativeLayout collectionBtn;
     private RelativeLayout likesBtn;
     private RelativeLayout commentPopRl;
+    private RelativeLayout commentShare;
     //附着在软键盘上的输入弹出窗
     private CustomPopWindow inputAndSendPop;
     private View sendPopContentView;
@@ -175,7 +178,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private List<RecommendModel.DataDTO.RecordsDTO> recommondList;
     private ViewGroup rlLp;
 
-
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,9 +185,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setContentView(R.layout.activity_video_detail);
         decorView = getWindow().getDecorView();
-//        SystemUtils.hideSystemUI(decorView);
         SystemUtils.setNavbarColor(this, R.color.black);
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION);
         initView();
         if ((null == panelId || TextUtils.isEmpty(panelId)) &&
                 (null == contentId || TextUtils.isEmpty(contentId))) {
@@ -254,7 +254,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
                 mDataDTO = mDatas.get(0);
                 playerView = new SuperPlayerView(VideoDetailActivity.this, decorView);
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO, mDataDTO);
                 myContentId = String.valueOf(mDatas.get(0).getId());
 //                addPageViews(myContentId);
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
@@ -280,7 +281,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 rlLp = (ViewGroup) manager.findViewByPosition(0);
                 OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
-                getRecommend(myContentId,0);
+                getRecommend(myContentId, 0);
 
                 initChoosePop();
 
@@ -340,9 +341,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
+                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
+                playerView.mWindowPlayer.setIsTurnPages(true);
+                playerView.mFullScreenPlayer.setIsTurnPages(true);
                 currentIndex = position;
                 choosePopDatas.clear();
                 reset();
@@ -367,7 +371,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 getContentState(myContentId);
                 rlLp = (ViewGroup) manager.findViewByPosition(position);
                 OkGo.getInstance().cancelTag(recommendTag);
-                getRecommend(myContentId,position);
+                getRecommend(myContentId, position);
 
                 if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
                     playerView.mFullScreenPlayer.mVodMoreView.mCallback.onSpeedChange(1.0f);
@@ -438,9 +442,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         collectionBtn.setOnClickListener(this);
         likesBtn = contentView.findViewById(R.id.video_detail_comment_likes_btn);
         likesBtn.setOnClickListener(this);
+        commentShare = contentView.findViewById(R.id.comment_share);
+        commentShare.setOnClickListener(this);
         videoDetailCommentCollectionImage = contentView.findViewById(R.id.video_detail_comment_collection_image);
         videoDetailCommentLikesImage = contentView.findViewById(R.id.video_detail_comment_likes_image);
         videoDetailCommentLikesNum = contentView.findViewById(R.id.video_detail_comment_likes_num);
+
 
         initCommentPopRv();
 
@@ -667,6 +674,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             SuperPlayerModel model = new SuperPlayerModel();
             model.url = playUrl;
             model.title = title;
+            model.contentId = myContentId;
             playerView.playWithModel(model);
         }
     }
@@ -1103,6 +1111,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             String code = mJsonObject.get("code").toString();
 
                             if (code.equals(success_code)) {
+                                String jsonString = BuriedPointModelManager.getVideoComment(myContentId, mDatas.get(currentIndex).getTitle(),"","",
+                                "","",mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE);
+                                Log.e("埋点", "埋点：评论---" + jsonString);
                                 ToastUtils.showShort("评论已提交，请等待审核通过！");
                                 if (null != inputAndSendPop) {
                                     inputAndSendPop.dissmiss();
@@ -1239,6 +1250,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (json.get("code").toString().equals(success_code)) {
+                                String jsonString = BuriedPointModelManager.getLikeAndFavorBuriedPointData(myContentId, mDatas.get(currentIndex).getTitle(),
+                                        "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
+                                        Constants.CONTENT_TYPE);
+                                Log.e("埋点", "埋点：收藏---" + jsonString);
+
                                 if (json.get("data").toString().equals("1")) {
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection);
                                     videoDetailCommentCollectionImage.setImageResource(R.drawable.collection);
@@ -1305,6 +1321,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (null != json && json.get("code").toString().equals("200")) {
+                                String jsonString = BuriedPointModelManager.getLikeAndFavorBuriedPointData(myContentId, mDatas.get(currentIndex).getTitle(),
+                                        "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
+                                        Constants.CONTENT_TYPE);
+                                Log.e("埋点", "埋点：点赞---" + jsonString);
+
                                 if (json.get("data").toString().equals("1")) {
                                     int num;
                                     videoDetailLikesImage.setImageResource(R.drawable.likes);
@@ -1514,7 +1535,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         super.onDestroy();
         SuperPlayerImpl.mCurrentPlayVideoURL = null;
         if (playerView != null) {
-            playerView.stopPlay();
+//            playerView.stopPlay();
             playerView.release();
             playerView.mSuperPlayer.destroy();
         }
@@ -1580,13 +1601,25 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (id == R.id.share) {
+        } else if (id == R.id.share || id == R.id.comment_share) {
+            String jsonString = BuriedPointModelManager.getShareClick(myContentId, mDatas.get(currentIndex).getTitle(), "",
+                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, "");
+            Log.e("埋点", "埋点：分享按钮---" + jsonString);
             sharePop();
         } else if (id == R.id.share_wx_btn) {
+            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
+                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.WX_STRING);
+            Log.e("埋点", "埋点：分享到微信朋友---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_WX);
         } else if (id == R.id.share_circle_btn) {
+            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
+                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.CIRCLE_STRING);
+            Log.e("埋点", "埋点：分享到微信朋友圈---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_CIRCLE);
         } else if (id == R.id.share_qq_btn) {
+            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
+                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.QQ_STRING);
+            Log.e("埋点", "埋点：分享到QQ---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_QQ);
         }
     }
@@ -1630,8 +1663,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     .size(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels)
                     .create()
                     .showAtLocation(decorView, Gravity.CENTER, 0, 0);
-        }
-        else {
+        } else {
             noLoginTipsPop.showAtLocation(decorView, Gravity.CENTER, 0, 0);
         }
     }
@@ -1682,7 +1714,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         try {
             jsonObject.put("current", "1");
             jsonObject.put("pageSize", "999");
-            jsonObject.put("contentId", contentId+"");
+            jsonObject.put("contentId", contentId + "");
             jsonObject.put("pageIndex", "1");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1706,7 +1738,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             } else if (recommondList.size() == 1) {
                                 adapter.setRecommendList(recommondList, false);
                                 mDatas.get(position).setRecommendVisible(true);
-                            } else if (recommondList.size() == 0){
+                            } else if (recommondList.size() == 0) {
                                 adapter.setRecommendList(recommondList, false);
                                 mDatas.get(position).setRecommendVisible(false);
                             }

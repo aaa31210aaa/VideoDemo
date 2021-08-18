@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.tencent.liteav.basic.log.TXCLog;
+import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerCode;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerGlobalConfig;
@@ -31,6 +32,8 @@ import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.TXVodPlayConfig;
 import com.tencent.rtmp.TXVodPlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.wdcs.constants.Constants;
+import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.ResolutionName;
@@ -74,7 +77,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     private int mSeekPos;                   // 记录切换硬解时的播放时间
 
     private long mReportLiveStartTime = -1; // 直播开始时间，用于上报使用时长
-    private long mReportVodStartTime = -1;  // 点播开始时间，用于上报使用时长
+    public long mReportVodStartTime = -1;  // 点播开始时间，用于上报使用时长
     private long mMaxLiveProgressTime;      // 观看直播的最大时长
 
     private boolean mIsMultiBitrateStream;  // 是否是多码流url播放
@@ -306,7 +309,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
      */
     public void playWithModel(final SuperPlayerModel model) {
         mCurrentModel = model;
-        stop();
+//        stop();
         PlayInfoParams params = new PlayInfoParams();
         params.appId = model.appId;
         if (model.videoId != null) {
@@ -544,7 +547,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     /**
      * 上报播放时长
      */
-    private void reportPlayTime() {
+    public void reportPlayTime() {
         if (mReportLiveStartTime != -1) {
             long reportEndTime = System.currentTimeMillis();
             long diff = (reportEndTime - mReportLiveStartTime) / 1000;
@@ -685,13 +688,9 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 || videoURL.startsWith("https://")) && videoURL.contains(".flv");
     }
 
-
     @Override
-    public void play(String url, String title) {
-        SuperPlayerModel model = new SuperPlayerModel();
-        model.url = url;
-        model.title = title;
-        playWithModel(model);
+    public void play(SuperPlayerModel superPlayerModel) {
+        playWithModel(superPlayerModel);
     }
 
     @Override
@@ -735,6 +734,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 }
             }
         } else {
+            //埋点  视频-开始播放  重播
             playVodURL(mCurrentPlayVideoURL);
         }
     }
@@ -785,7 +785,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             mVideoView.removeVideoView();
         }
         updatePlayerState(SuperPlayerDef.PlayerState.END);
-        reportPlayTime();
+//        reportPlayTime();
     }
 
     @Override

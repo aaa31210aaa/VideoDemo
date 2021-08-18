@@ -38,6 +38,7 @@ import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 import com.tencent.liteav.basic.log.TXCLog;
+import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayer;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerObserver;
@@ -52,7 +53,9 @@ import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.DanmuView;
 import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
+import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
@@ -75,6 +78,7 @@ import java.util.List;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE_REVERSE;
+import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
@@ -444,17 +448,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         } else if (model.multiURLs != null && !model.multiURLs.isEmpty()) {
             mSuperPlayer.play(model.appId, model.multiURLs, model.playDefaultIndex);
         } else {
-            mSuperPlayer.play(model.url, model.title);
+            String jsonString = BuriedPointModelManager.getVideoStartPlay("", "false", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
+                    "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
+            Log.e("埋点", "埋点：视频开始播放---" + jsonString);
+            mSuperPlayer.play(model);
         }
-    }
-
-    /**
-     * 开始播放
-     *
-     * @param url 视频地址
-     */
-    public void play(String url, String title) {
-        mSuperPlayer.play(url, title);
     }
 
     /**
@@ -527,7 +525,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             mDanmuView.release();
             mDanmuView = null;
         }
-        stopPlay();
+//        stopPlay();
     }
 
     /**
@@ -607,7 +605,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                     .setOutsideTouchable(true)
                     .setFocusable(false)
                     .setAnimationStyle(R.style.AnimCenter)
-                    .size(getResources().getDisplayMetrics().widthPixels/2, ButtonSpan.dip2px(150))
+                    .size(getResources().getDisplayMetrics().widthPixels / 2, ButtonSpan.dip2px(150))
                     .create()
                     .showAtLocation(mRootView, Gravity.CENTER, 0, 0);
         } else {
@@ -810,6 +808,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         public void onResume() {
             if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) { //重播
                 mSuperPlayer.reStart();
+                String jsonString = BuriedPointModelManager.getVideoStartPlay("", "true", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
+                        "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
+                Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
             } else if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PAUSE) { //继续播放
                 mSuperPlayer.resume();
             }

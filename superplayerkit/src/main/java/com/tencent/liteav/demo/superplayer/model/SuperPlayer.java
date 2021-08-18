@@ -12,11 +12,8 @@ public interface SuperPlayer {
 
     /**
      * 开始播放
-     *
-     * @param url 视频地址
-     * @param title
      */
-    void play(String url,String title);
+    void play(SuperPlayerModel superPlayerModel);
 
     /**
      * 开始播放

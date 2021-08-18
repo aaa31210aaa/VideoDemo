@@ -4,6 +4,7 @@ package com.wdcs.utils;
 import android.text.TextUtils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 public class NumberFormatTool {
     public static boolean isNumeric(String str) {
@@ -128,5 +129,14 @@ public class NumberFormatTool {
         }
         return sb;
     }
+
+    /**
+     * DecimalFormat转换最简便
+     */
+    public static String save2Num(double f) {
+        DecimalFormat df = new DecimalFormat("#.00");
+        return df.format(f);
+    }
+
 
 }

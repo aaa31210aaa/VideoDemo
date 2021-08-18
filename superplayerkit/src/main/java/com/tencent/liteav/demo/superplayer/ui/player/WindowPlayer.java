@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,6 +23,9 @@ import com.tencent.liteav.demo.superplayer.model.utils.VideoGestureDetector;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
+import com.wdcs.constants.Constants;
+import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.model.DataDTO;
 
 
 /**
@@ -52,7 +56,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
     private TextView mTvCurrent;                             // 当前进度文本
     private TextView mTvDuration;                            // 总时长文本
     private PointSeekBar mSeekBarProgress;                       // 播放进度条
-    public  ProgressBar mLoadBar;
+    public ProgressBar mLoadBar;
     private LinearLayout mLayoutReplay;                          // 重播按钮所在布局
     private ProgressBar mPbLiveLoading;                         // 加载圈
     private VolumeBrightnessProgressLayout mGestureVolumeBrightnessProgressLayout; // 音量亮度调节布局
@@ -74,6 +78,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
     private float mWaterMarkBmpX;                         // 水印x坐标
     private float mWaterMarkBmpY;                         // 水印y坐标
     private long mLastClickTime;                         // 上次点击事件的时间
+    private DataDTO item;
+    private double mReportVodStartTime = -1;  //播放状态记录的当前时间戳
+    private double mReportVodNoPlayingTime = -1; //非播放状态纪录当前时间戳
+    private boolean mIsTurnPage; //是否为翻页
+    private DataDTO mPreviousDTO;
 
     public WindowPlayer(Context context) {
         super(context);
@@ -239,6 +248,19 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
         mIvWatermark = (ImageView) findViewById(R.id.superplayer_small_iv_water_mark);
     }
 
+    public void setDataDTO(DataDTO mItem, DataDTO previousDTO) {
+        this.item = mItem;
+        this.mPreviousDTO = previousDTO;
+    }
+
+    public DataDTO getDataDTO() {
+        return item;
+    }
+
+    public void setIsTurnPages(boolean isTurnPages) {
+        this.mIsTurnPage = isTurnPages;
+    }
+
     /**
      * 切换播放状态
      * <p>
@@ -344,21 +366,47 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
     public void updatePlayState(SuperPlayerDef.PlayerState playState) {
         switch (playState) {
             case PLAYING:
+                mReportVodStartTime = System.currentTimeMillis();
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_pause_normal);
                 toggleView(mPbLiveLoading, false);
                 toggleView(mLayoutReplay, false);
                 break;
             case LOADING:
+                if (mIsTurnPage) {
+                    BuriedPointModelManager.reportPlayTime(mReportVodStartTime, mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "",
+                            "", "", "", mPreviousDTO.getIssueTimeStamp());
+                } else {
+                    BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
+                            "", "", "", item.getIssueTimeStamp());
+                }
+                mIsTurnPage = false;
+                mReportVodStartTime = -1;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_pause_normal);
                 toggleView(mPbLiveLoading, true);
                 toggleView(mLayoutReplay, false);
                 break;
             case PAUSE:
+                BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
+                        "", "", "", item.getIssueTimeStamp());
+                mIsTurnPage = false;
+                mReportVodStartTime = -1;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_play_normal);
                 toggleView(mPbLiveLoading, false);
                 toggleView(mLayoutReplay, false);
                 break;
             case END:
+                if (mIsTurnPage) {
+                    double reportEndTime = System.currentTimeMillis();
+                    double diff = (reportEndTime - mReportVodStartTime) / 1000;
+                    String jsonString = BuriedPointModelManager.getVideoPlayComplate(mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "", "", "", ""
+                            , mPreviousDTO.getIssueTimeStamp(), Constants.CONTENT_TYPE, diff + "");
+                    Log.e("埋点", "埋点：视频播放完成---" + jsonString);
+                } else {
+                    String jsonString = BuriedPointModelManager.getVideoPlayComplate(item.getId() + "", item.getTitle(), "", "", "", ""
+                            , item.getIssueTimeStamp(), Constants.CONTENT_TYPE, mDuration + "");
+                    Log.e("埋点", "埋点：视频播放完成---" + jsonString);
+                }
+                mIsTurnPage = false;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_play_normal);
                 toggleView(mPbLiveLoading, false);
                 toggleView(mLayoutReplay, true);
@@ -366,6 +414,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
         }
         mCurrentPlayState = playState;
     }
+
 
     /**
      * 更新视频名称

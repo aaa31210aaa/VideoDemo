@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ import com.tencent.liteav.demo.superplayer.ui.view.VodQualityView;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
 import com.tencent.rtmp.TXImageSprite;
 import com.wdcs.constants.Constants;
+import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
@@ -129,7 +131,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private boolean mFirstShowQuality;                      // 是都是首次显示画质信息
     public TextView superplayerSpeed;                       // 倍速按钮
     public PopupWindow popupWindow;
-//    private View contentView;
+    //    private View contentView;
     private RadioGroup mRadioGroup;                            // 倍速选择radioGroup
     private RadioButton mRbSpeed05;                              // 0.5倍速按钮
     private RadioButton mRbSpeed075;                            // 0.75倍速按钮
@@ -147,8 +149,10 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private ImageView fullscreenShareCircle;
     private ImageView fullscreenShareQq;
     private DataDTO item;
+    private boolean mIsTurnPage;
+    private DataDTO mPreviousDTO;
 
-    private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow,translateAniBottomHide;
+    private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow, translateAniBottomHide;
 
     public FullScreenPlayer(Context context) {
         super(context);
@@ -285,20 +289,6 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         phoneHeight = getResources().getDisplayMetrics().heightPixels;
         mHideLockViewRunnable = new HideLockViewRunnable(this);
         LayoutInflater.from(context).inflate(R.layout.superplayer_vod_player_fullscreen, this);
-//        contentView = View.inflate(context, R.layout.speed_popwindow, null);
-//        mRadioGroup = contentView.findViewById(R.id.superplayer_rg);
-//        mRbSpeed05 = contentView.findViewById(R.id.superplayer_rb_speed05);
-//        mRbSpeed05.setOnClickListener(this);
-//        mRbSpeed075 = contentView.findViewById(R.id.superplayer_rb_speed075);
-//        mRbSpeed075.setOnClickListener(this);
-//        mRbSpeed1 = contentView.findViewById(R.id.superplayer_rb_speed1);
-//        mRbSpeed1.setOnClickListener(this);
-//        mRbSpeed125 = contentView.findViewById(R.id.superplayer_rb_speed125);
-//        mRbSpeed125.setOnClickListener(this);
-//        mRbSpeed15 = contentView.findViewById(R.id.superplayer_rb_speed15);
-//        mRbSpeed15.setOnClickListener(this);
-//        mRbSpeed2 = contentView.findViewById(R.id.superplayer_rb_speed2);
-//        mRbSpeed2.setOnClickListener(this);
         mRadioGroup = findViewById(R.id.superplayer_rg);
         mRbSpeed05 = findViewById(R.id.superplayer_rb_speed05);
         mRbSpeed05.setOnClickListener(this);
@@ -376,9 +366,19 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         superplayerSpeed.setOnClickListener(this);
     }
 
-    public void setDataDTO(DataDTO mItem){
+    public void setDataDTO(DataDTO mItem, DataDTO previousDTO) {
         this.item = mItem;
+        this.mPreviousDTO = previousDTO;
     }
+
+    public DataDTO getDataDTO() {
+        return item;
+    }
+
+    public void setIsTurnPages(boolean isTurnPages){
+        this.mIsTurnPage = isTurnPages;
+    }
+
 
     //位移动画
     private void translateAnimation() {
@@ -814,6 +814,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             mRadioGroup.startAnimation(translateAniRightShow);
             mRadioGroup.setVisibility(VISIBLE);
         } else if (i == R.id.superplayer_rb_speed05) {
+            pointSpeed(0.5+"");
             mRbSpeed05.setChecked(true);
             strSpeed = "0.5";
             if (mVodMoreView.mCallback != null) {
@@ -821,6 +822,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed05.getText());
         } else if (i == R.id.superplayer_rb_speed075) {
+            pointSpeed(0.75+"");
             mRbSpeed075.setChecked(true);
             strSpeed = "0.75";
             if (mVodMoreView.mCallback != null) {
@@ -835,6 +837,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText("倍速");
         } else if (i == R.id.superplayer_rb_speed125) {
+            pointSpeed(1.25+"");
             mRbSpeed125.setChecked(true);
             strSpeed = "1.25";
             if (mVodMoreView.mCallback != null) {
@@ -842,6 +845,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed125.getText());
         } else if (i == R.id.superplayer_rb_speed15) {
+            pointSpeed(1.5+"");
             mRbSpeed15.setChecked(true);
             strSpeed = "1.5";
             if (mVodMoreView.mCallback != null) {
@@ -849,6 +853,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed15.getText());
         } else if (i == R.id.superplayer_rb_speed2) {
+            pointSpeed(2+"");
             mRbSpeed2.setChecked(true);
             strSpeed = "2";
             if (mVodMoreView.mCallback != null) {
@@ -856,6 +861,12 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed2.getText());
         }
+    }
+
+    private void pointSpeed(String speed) {
+        String jsonString = BuriedPointModelManager.getVideoPlaySpeed(speed, item.getId() + "", item.getTitle(), "", "",
+                "", "", item.getIssueTimeStamp());
+        Log.e("埋点", "埋点：" + speed + "倍速---" + jsonString);
     }
 
     /**

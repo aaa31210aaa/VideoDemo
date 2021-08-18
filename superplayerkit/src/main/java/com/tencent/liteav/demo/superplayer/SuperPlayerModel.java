@@ -57,6 +57,8 @@ public class SuperPlayerModel {
 
     public String title = "";             // 视频文件名 （用于显示在UI层);使用file id播放，若未指定title，则使用FileId返回的Title；使用url播放需要指定title，否则title显示为空
 
+    public String contentId = "";  //播放视频的id
+
     public static class SuperPlayerURL {
         public SuperPlayerURL(String url, String qualityName) {
             this.qualityName = qualityName;

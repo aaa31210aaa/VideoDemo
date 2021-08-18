@@ -3,6 +3,7 @@ package com.wdcs.callback;
 
 import androidx.annotation.NonNull;
 
+import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
 
 /**
@@ -30,4 +31,9 @@ public interface VideoParamCallBack {
      * 获取推荐跳转的url
      */
     void recommedUrl(@NonNull String url);
+
+    /**
+     * 获取视频埋点信息
+     */
+    void buriedPoint(BuriedPointModel buriedPointModel);
 }

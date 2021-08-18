@@ -1,6 +1,7 @@
 package com.wdcs.callback;
 
 
+import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
 
 /**
@@ -76,6 +77,17 @@ public class VideoInteractiveParam {
             throw new Exception("获取失败,请重试");
         } else {
             callBack.recommedUrl(url);
+        }
+    }
+
+    /**
+     * 传递视频埋点的信息
+     */
+    public void buriedPoint(BuriedPointModel buriedPointModel) throws Exception{
+        if (callBack == null) {
+            throw new Exception("获取失败,请重试");
+        } else {
+            callBack.buriedPoint(buriedPointModel);
         }
     }
 }

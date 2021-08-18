@@ -15,4 +15,8 @@ public class Constants {
     public static final String SHARE_CIRCLE = "circle";
     public static final String SHARE_QQ = "qq";
     public static final String AGREE_NETWORK = "agree_network";
+    public static final String CONTENT_TYPE = "视频";
+    public static final String WX_STRING = "朋友";
+    public static final String CIRCLE_STRING = "朋友圈";
+    public static final String QQ_STRING = "qq";
 }
