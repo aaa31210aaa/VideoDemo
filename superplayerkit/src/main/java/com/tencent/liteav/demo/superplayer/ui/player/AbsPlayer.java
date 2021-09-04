@@ -20,9 +20,9 @@ public abstract class AbsPlayer extends RelativeLayout implements Player {
 
     protected static final int MAX_SHIFT_TIME = 7200; // demo演示直播时移是MAX_SHIFT_TIMEs，即2小时
 
-    protected Callback mControllerCallback; // 播放控制回调
+    public Callback mControllerCallback; // 播放控制回调
 
-    protected Runnable mHideViewRunnable = new Runnable() {
+    public Runnable mHideViewRunnable = new Runnable() {
         @Override
         public void run() {
             hide();
@@ -126,7 +126,7 @@ public abstract class AbsPlayer extends RelativeLayout implements Player {
      * @param view      目标控件
      * @param isVisible 显示：true 隐藏：false
      */
-    protected void toggleView(View view, boolean isVisible) {
+    public void toggleView(View view, boolean isVisible) {
         view.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
@@ -136,7 +136,7 @@ public abstract class AbsPlayer extends RelativeLayout implements Player {
      * @param second
      * @return
      */
-    protected String formattedTime(long second) {
+    public static String formattedTime(long second) {
         String formatTime;
         long h, m, s;
         h = second / 3600;
@@ -150,7 +150,7 @@ public abstract class AbsPlayer extends RelativeLayout implements Player {
         return formatTime;
     }
 
-    protected String asTwoDigit(long digit) {
+    public static String asTwoDigit(long digit) {
         String value = "";
         if (digit < 10) {
             value = "0";

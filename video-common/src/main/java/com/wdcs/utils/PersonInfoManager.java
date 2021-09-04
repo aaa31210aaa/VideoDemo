@@ -1,15 +1,20 @@
 package com.wdcs.utils;
 
 
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class PersonInfoManager {
     private static PersonInfoManager instance;
+    private Map headMap;
 
     public static PersonInfoManager getInstance() {
         if (instance == null) {
@@ -22,6 +27,19 @@ public class PersonInfoManager {
         return instance;
     }
 
+    public Map getHeadMap() {
+        headMap = new HashMap();
+        headMap.put("deviceId", getANDROID_ID());
+        return headMap;
+    }
+
+    public String getANDROID_ID() {
+        String ANDROID_ID = Settings.System.getString(Utils.getContext().getContentResolver(), Settings.System.ANDROID_ID);
+        if (TextUtils.isEmpty(ANDROID_ID)) {
+            return SPUtils.getInstance().getString(Constants.PUSH_TOKEN, "");
+        }
+        return ANDROID_ID;
+    }
 
     /**
      * 保存用户token
@@ -40,6 +58,36 @@ public class PersonInfoManager {
     public String getToken() {
         return SPUtils.getInstance().getString(Constants.TYPE_TOKEN, "");
     }
+
+    /**
+     * 获取用户id
+     */
+    public String getUserId() {
+        return SPUtils.getInstance().getString(Constants.LOCAL_USER_ID, "");
+    }
+
+    /**
+     * 保存用户id
+     */
+    public void setUserId(String userId) {
+        SPUtils.getInstance().put(Constants.LOCAL_USER_ID, userId);
+    }
+
+    /**
+     * 获取光电云token
+     */
+    public String getGdyToken() {
+        return SPUtils.getInstance().getString(Constants.GDY_TOKEN, "");
+    }
+
+    /**
+     * 保存
+     */
+    public void setGdyToken(String userId) {
+        SPUtils.getInstance().put(Constants.GDY_TOKEN, userId);
+    }
+
+
 
     /**
      * 保存转换后的用户token
@@ -61,7 +109,7 @@ public class PersonInfoManager {
     /**
      * 清空本地token
      */
-    public void clearToken(){
+    public void clearToken() {
         PersonInfoManager.getInstance().setToken("");
         PersonInfoManager.getInstance().setTransformationToken("");
     }

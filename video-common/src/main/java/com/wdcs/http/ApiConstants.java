@@ -3,6 +3,7 @@ package com.wdcs.http;
 public class ApiConstants {
     public String baseUrl;
     public String loginBaseUrl;
+    public String uploadBaseUrl;
 
     private static ApiConstants instance;
 
@@ -26,109 +27,138 @@ public class ApiConstants {
         this.baseUrl = baseUrl;
     }
 
-    public String getLoginBaseUrl() {
-        return loginBaseUrl;
-    }
-
-    public void setLoginBaseUrl(String loginBaseUrl) {
-        this.loginBaseUrl = loginBaseUrl;
-    }
-
     /**
      * 获取视频下拉列表
      */
     public String getVideoDetailListUrl() {
-        return getBaseUrl() + "client/video/queryVideoPullDownList";
-    }
-
-    /**
-     * 获取随机推荐视频列表
-     */
-    public String getVideDetailRandomListUrl() {
-        return getBaseUrl() + "client/video/queryRandomVideoList";
+        return getBaseUrl() + "api/cms/client/video/queryVideoPullDownList";
     }
 
     /**
      * 获取视频详情
      */
     public String getVideoDetailUrl() {
-        return getBaseUrl() + "client/video/getVideoDetails/";
+        return getBaseUrl() + "api/cms/client/video/getVideoDetails/";
     }
 
     /**
      * 获取视频合集
      */
     public String getVideoCollectionUrl() {
-        return getBaseUrl() + "client/video/getVideoCollect/";
+        return getBaseUrl() + "api/cms/client/video/getVideoCollect/";
     }
 
     /**
      * 获取视频评论列表
      */
     public String getCommentListUrl() {
-        return getBaseUrl() + "client/comment/getCommentByContent";
+        return getBaseUrl() + "api/cms/client/comment/getCommentByContent";
     }
 
     /**
      * 添加评论
      */
     public String addComment() {
-        return getBaseUrl() + "client/comment/add";
+        return getBaseUrl() + "api/cms/client/comment/add";
     }
 
     /**
      * 查询统计数据
      */
     public String queryStatsData() {
-        return getBaseUrl() + "client/contentStats/queryStatsData";
+        return getBaseUrl() + "api/cms/client/contentStats/queryStatsData";
     }
 
     /**
      * 收藏/取消收藏
      */
     public String addOrCancelFavor() {
-        return getBaseUrl() + "client/favor/addOrCancelFavor";
+        return getBaseUrl() + "api/cms/client/favor/addOrCancelFavor";
     }
 
     /**
      * 点赞/取消点赞
      */
     public String addOrCancelLike() {
-        return getBaseUrl() + "client/like/likeOrCancel";
+        return getBaseUrl() + "api/cms/client/like/likeOrCancel";
     }
 
     /**
      * 获取token值
      */
     public String getToken() {
-        return getLoginBaseUrl() + "login/mycs";
+        return getBaseUrl() + "api/sys/login/mycs";
     }
 
     /**
      * 我的长沙token登录
      */
     public String mycsToken() {
-        return getLoginBaseUrl() + "login/mycs/token";
+        return getBaseUrl() + "api/sys/login/mycs/token";
     }
 
     /**
      * 浏览量+1接口
      */
     public String addViews() {
-        return getBaseUrl() + "client/contentStats/view/count/";
+        return getBaseUrl() + "api/cms/client/contentStats/view/count/";
     }
 
     /**
      * 获取推荐滚动列表
      */
     public String recommendList() {
-        return getBaseUrl() + "client/content/recommend";
+        return getBaseUrl() + "api/cms/client/content/recommend";
     }
 
     /**
      * 埋点上报接口
      */
     public String trackingUpload() {
-        return getBaseUrl() + "client/tracking/upload";
+        return getBaseUrl() + "api/cms/client/tracking/upload";
+    }
+
+    /**
+     * 上传视频
+     * @return
+     */
+    public String uploadVideo() {
+        return getBaseUrl() + "api/media/file/upload";
+    }
+
+    /**
+     * 获取话题
+     * @return
+     */
+    public String topicData(){
+        return getBaseUrl()+"api/cms/client/content/page";
+    }
+
+    /**
+     * 发布内容
+     */
+    public String releaseContent(){
+        return getBaseUrl() +"api/cms/client/content/activity/works/create";
+    }
+
+    /**
+     * 关注
+     */
+    public String toFollow() {
+        return getBaseUrl() + "api/sys/user/me/follow/";
+    }
+
+    /**
+     * 取消关注
+     */
+    public String cancelFollow(){
+        return getBaseUrl() + "api/sys/user/me/unfollow/";
+    }
+
+    /**
+     * 活动规则
+     */
+    public String panelInfo() {
+        return getBaseUrl() + "api/cms/client/panel/info/";
     }
 }

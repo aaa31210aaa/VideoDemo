@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
@@ -25,7 +27,11 @@ import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
+import com.wdcs.utils.NoScrollViewPager;
+
+import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 
 
 /**
@@ -41,33 +47,32 @@ import com.wdcs.model.DataDTO;
  * {@link #onStartTrackingTouch(PointSeekBar)}
  * {@link #onStopTrackingTouch(PointSeekBar)}
  */
-public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
-        PointSeekBar.OnSeekBarChangeListener {
+public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
 
     // UI控件
     private LinearLayout mLayoutTop;                             // 顶部标题栏布局
-    private LinearLayout mLayoutBottom;                          // 底部进度条所在布局
-    private ImageView mIvPause;                               // 暂停播放按钮
-    private ImageView mIvFullScreen;                          // 全屏按钮
+    public LinearLayout mLayoutBottom;                          // 底部进度条所在布局
+    public ImageView mIvPause;                               // 暂停播放按钮
+    public ImageView mIvFullScreen;                          // 全屏按钮
     private TextView mTvTitle;                               // 视频名称文本
     private TextView mTvBackToLive;                          // 返回直播文本
     private ImageView mBackground;                            // 背景
     private ImageView mIvWatermark;                           // 水印
     private TextView mTvCurrent;                             // 当前进度文本
     private TextView mTvDuration;                            // 总时长文本
-    private PointSeekBar mSeekBarProgress;                       // 播放进度条
+    public PointSeekBar mSeekBarProgress;                       // 播放进度条
     public ProgressBar mLoadBar;
-    private LinearLayout mLayoutReplay;                          // 重播按钮所在布局
+    public LinearLayout mLayoutReplay;                          // 重播按钮所在布局
     private ProgressBar mPbLiveLoading;                         // 加载圈
     private VolumeBrightnessProgressLayout mGestureVolumeBrightnessProgressLayout; // 音量亮度调节布局
-    private VideoProgressLayout mGestureVideoProgressLayout;            // 手势快进提示布局
+    public VideoProgressLayout mGestureVideoProgressLayout;            // 手势快进提示布局
 
     private GestureDetector mGestureDetector;                       // 手势检测监听器
     private VideoGestureDetector mVideoGestureDetector;                      // 手势控制工具
 
     private boolean isShowing;                              // 自身是否可见
     private boolean mIsChangingSeekBarProgress;             // 进度条是否正在拖动，避免SeekBar由于视频播放的update而跳动
-    private SuperPlayerDef.PlayerType mPlayType = SuperPlayerDef.PlayerType.VOD;                          // 当前播放视频类型
+    public SuperPlayerDef.PlayerType mPlayType = SuperPlayerDef.PlayerType.VOD;                          // 当前播放视频类型
     public SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
     public static long mDuration;                              // 视频总时长
     private long mLivePushDuration;                      // 直播推流总时长
@@ -83,6 +88,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
     private double mReportVodNoPlayingTime = -1; //非播放状态纪录当前时间戳
     private boolean mIsTurnPage; //是否为翻页
     private DataDTO mPreviousDTO;
+    private boolean isShowSelfProgress;
+    private ImageView zdyIvPause;
+    private ViewPagerLayoutManager myManager;
+    private NoScrollViewPager mViewpager;
+    private boolean mIsFragmentShow;
 
     public WindowPlayer(Context context) {
         super(context);
@@ -124,7 +134,10 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
                 if (mCurrentPlayState == SuperPlayerDef.PlayerState.LOADING) {
                     return false;
                 }
-                toggle();
+//                if (isShowSelfProgress) {
+                    toggle();
+//                }
+
                 return true;
             }
 
@@ -217,6 +230,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
         mLayoutReplay = (LinearLayout) findViewById(R.id.superplayer_ll_replay);
         mTvTitle = (TextView) findViewById(R.id.superplayer_tv_title);
         mIvPause = (ImageView) findViewById(R.id.superplayer_iv_pause);
+        zdyIvPause = findViewById(R.id.zdy_iv_pause);
         mTvCurrent = (TextView) findViewById(R.id.superplayer_tv_current);
         mTvDuration = (TextView) findViewById(R.id.superplayer_tv_duration);
         mSeekBarProgress = (PointSeekBar) findViewById(R.id.superplayer_seekbar_progress);
@@ -232,11 +246,12 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
 
         mTvBackToLive.setOnClickListener(this);
         mIvPause.setOnClickListener(this);
+        zdyIvPause.setOnClickListener(this);
         mIvFullScreen.setOnClickListener(this);
         mLayoutTop.setOnClickListener(this);
         mLayoutReplay.setOnClickListener(this);
 
-        mSeekBarProgress.setOnSeekBarChangeListener(this);
+//        mSeekBarProgress.setOnSeekBarChangeListener(this);
 
         mGestureVolumeBrightnessProgressLayout = (VolumeBrightnessProgressLayout) findViewById(R.id.superplayer_gesture_progress);
 
@@ -259,6 +274,14 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
 
     public void setIsTurnPages(boolean isTurnPages) {
         this.mIsTurnPage = isTurnPages;
+    }
+
+    public void setManager(ViewPagerLayoutManager manager){
+        this.myManager = manager;
+    }
+
+    public void setViewpager(NoScrollViewPager viewpager){
+        this.mViewpager = viewpager;
     }
 
     /**
@@ -298,6 +321,13 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
                 postDelayed(mHideViewRunnable, Contants.delayMillis);
             }
         }
+    }
+
+    /**
+     * 设置本身的进度条展示与否
+     */
+    public void setIsSelfProgress(boolean isSelfProgress) {
+        this.isShowSelfProgress = isSelfProgress;
     }
 
     /**
@@ -368,46 +398,63 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
             case PLAYING:
                 mReportVodStartTime = System.currentTimeMillis();
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_pause_normal);
+                zdyIvPause.setVisibility(GONE);
                 toggleView(mPbLiveLoading, false);
                 toggleView(mLayoutReplay, false);
                 break;
             case LOADING:
-                if (mIsTurnPage) {
-                    BuriedPointModelManager.reportPlayTime(mReportVodStartTime, mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "",
-                            "", "", "", mPreviousDTO.getIssueTimeStamp());
-                } else {
-                    BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
-                            "", "", "", item.getIssueTimeStamp());
+                if (null != item) {
+                    if (mIsTurnPage) {
+                        BuriedPointModelManager.reportPlayTime(mReportVodStartTime, mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "",
+                                "", "", "", mPreviousDTO.getIssueTimeStamp());
+                    } else {
+                        BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
+                                "", "", "", item.getIssueTimeStamp());
+                    }
                 }
+
                 mIsTurnPage = false;
                 mReportVodStartTime = -1;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_pause_normal);
+                zdyIvPause.setVisibility(GONE);
                 toggleView(mPbLiveLoading, true);
                 toggleView(mLayoutReplay, false);
                 break;
             case PAUSE:
-                BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
-                        "", "", "", item.getIssueTimeStamp());
+                if (null != item) {
+                    BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
+                            "", "", "", item.getIssueTimeStamp());
+                }
+
                 mIsTurnPage = false;
                 mReportVodStartTime = -1;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_play_normal);
+                zdyIvPause.setVisibility(VISIBLE);
                 toggleView(mPbLiveLoading, false);
                 toggleView(mLayoutReplay, false);
                 break;
             case END:
-                if (mIsTurnPage) {
-                    double reportEndTime = System.currentTimeMillis();
-                    double diff = (reportEndTime - mReportVodStartTime) / 1000;
-                    String jsonString = BuriedPointModelManager.getVideoPlayComplate(mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "", "", "", ""
-                            , mPreviousDTO.getIssueTimeStamp(), Constants.CONTENT_TYPE, diff + "");
-                    Log.e("埋点", "埋点：视频播放完成---" + jsonString);
-                } else {
-                    String jsonString = BuriedPointModelManager.getVideoPlayComplate(item.getId() + "", item.getTitle(), "", "", "", ""
-                            , item.getIssueTimeStamp(), Constants.CONTENT_TYPE, mDuration + "");
-                    Log.e("埋点", "埋点：视频播放完成---" + jsonString);
+                if (null != item) {
+                    if (mIsTurnPage) {
+                        double reportEndTime = System.currentTimeMillis();
+                        double diff = (reportEndTime - mReportVodStartTime) / 1000;
+                        if (null != mPreviousDTO) {
+                            String jsonString = BuriedPointModelManager.getVideoPlayComplate(mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "", "", "", ""
+                                    , mPreviousDTO.getIssueTimeStamp(), Constants.CONTENT_TYPE, diff + "");
+                            Log.e("埋点", "埋点：视频播放完成---" + jsonString);
+                        }
+                    } else {
+                        if (null != item) {
+                            String jsonString = BuriedPointModelManager.getVideoPlayComplate(item.getId() + "", item.getTitle(), "", "", "", ""
+                                    , item.getIssueTimeStamp(), Constants.CONTENT_TYPE, mDuration + "");
+                            Log.e("埋点", "埋点：视频播放完成---" + jsonString);
+                        }
+                    }
                 }
+
                 mIsTurnPage = false;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_play_normal);
+                zdyIvPause.setVisibility(GONE);
                 toggleView(mPbLiveLoading, false);
                 toggleView(mLayoutReplay, true);
                 break;
@@ -436,8 +483,8 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
     public void updateVideoProgress(long current, long duration) {
         mProgress = current < 0 ? 0 : current;
         mDuration = duration < 0 ? 0 : duration;
+        Log.e("yqh",mProgress+"-------"+mDuration);
         mTvCurrent.setText(formattedTime(mProgress));
-
         float percentage = mDuration > 0 ? ((float) mProgress / (float) mDuration) : 1.0f;
         if (mProgress == 0) {
             mLivePushDuration = 0;
@@ -630,7 +677,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
             if (mControllerCallback != null) {
                 mControllerCallback.onBackPressed(SuperPlayerDef.PlayerMode.WINDOW);
             }
-        } else if (id == R.id.superplayer_iv_pause) { //暂停\播放按钮
+        } else if (id == R.id.superplayer_iv_pause || id == R.id.zdy_iv_pause) { //暂停\播放按钮
             togglePlayState();
         } else if (id == R.id.superplayer_iv_fullscreen) { //全屏按钮
             if (mControllerCallback != null) {
@@ -647,61 +694,74 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener,
         }
     }
 
-    @Override
-    public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
-        if (mGestureVideoProgressLayout != null && fromUser) {
-            mGestureVideoProgressLayout.show();
-            float percentage = ((float) progress) / seekBar.getMax();
-            float currentTime = (mDuration * percentage);
-            if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
-                if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
-                } else {
-                    currentTime = mLivePushDuration * percentage;
-                }
-                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime));
-            } else {
-                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
-            }
-            mGestureVideoProgressLayout.setProgress(progress);
-        }
-    }
-
-    @Override
-    public void onStartTrackingTouch(PointSeekBar seekBar) {
-        removeCallbacks(mHideViewRunnable);
-    }
-
-    @Override
-    public void onStopTrackingTouch(PointSeekBar seekBar) {
-        int curProgress = seekBar.getProgress();
-        int maxProgress = seekBar.getMax();
-
-        switch (mPlayType) {
-            case VOD:
-                if (curProgress >= 0 && curProgress <= maxProgress) {
-                    // 关闭重播按钮
-                    toggleView(mLayoutReplay, false);
-                    float percentage = ((float) curProgress) / maxProgress;
-                    int position = (int) (mDuration * percentage);
-                    if (mControllerCallback != null) {
-                        mControllerCallback.onSeekTo(position);
-                        mControllerCallback.onResume();
-                    }
-                }
-                break;
-            case LIVE:
-            case LIVE_SHIFT:
-                toggleView(mPbLiveLoading, true);
-                int seekTime = (int) (mLivePushDuration * curProgress * 1.0f / maxProgress);
-                if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (maxProgress - curProgress) * 1.0f / maxProgress);
-                }
-                if (mControllerCallback != null) {
-                    mControllerCallback.onSeekTo(seekTime);
-                }
-                break;
-        }
-        postDelayed(mHideViewRunnable, Contants.delayMillis);
-    }
+//    @Override
+//    public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
+//        if (mGestureVideoProgressLayout != null && fromUser) {
+//            mGestureVideoProgressLayout.show();
+//            float percentage = ((float) progress) / seekBar.getMax();
+//            float currentTime = (mDuration * percentage);
+//            if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
+//                if (mLivePushDuration > MAX_SHIFT_TIME) {
+//                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
+//                } else {
+//                    currentTime = mLivePushDuration * percentage;
+//                }
+//                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime));
+//            } else {
+//
+//                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
+//            }
+//            mGestureVideoProgressLayout.setProgress(progress);
+//        }
+//    }
+//
+//
+//    @Override
+//    public void onStartTrackingTouch(PointSeekBar seekBar) {
+//        removeCallbacks(mHideViewRunnable);
+//        mViewpager.setScroll(false);
+//        myManager.setCanScoll(false);
+//        Log.e("Touch", "onStartTrackingTouch------");
+//    }
+//
+//    @Override
+//    public void onStopTrackingTouch(PointSeekBar seekBar) {
+//        int curProgress = seekBar.getProgress();
+//        int maxProgress = seekBar.getMax();
+//        Log.e("Touch", "onStopTrackingTouch------");
+//        if (mTargetPlayerMode == SuperPlayerDef.PlayerMode.WINDOW) {
+//            mViewpager.setScroll(true);
+//            myManager.setCanScoll(true);
+//        } else {
+//            mViewpager.setScroll(false);
+//            myManager.setCanScoll(false);
+//        }
+//
+//        switch (mPlayType) {
+//            case VOD:
+//                if (curProgress >= 0 && curProgress <= maxProgress) {
+//                    // 关闭重播按钮
+//                    toggleView(mLayoutReplay, false);
+//                    float percentage = ((float) curProgress) / maxProgress;
+//                    int position = (int) (mDuration * percentage);
+//                    if (mControllerCallback != null) {
+//                        mControllerCallback.onSeekTo(position);
+//                        mControllerCallback.onResume();
+//                    }
+//                }
+//                break;
+//            case LIVE:
+//            case LIVE_SHIFT:
+//                toggleView(mPbLiveLoading, true);
+//                int seekTime = (int) (mLivePushDuration * curProgress * 1.0f / maxProgress);
+//                if (mLivePushDuration > MAX_SHIFT_TIME) {
+//                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (maxProgress - curProgress) * 1.0f / maxProgress);
+//                }
+//                if (mControllerCallback != null) {
+//                    mControllerCallback.onSeekTo(seekTime);
+//                }
+//                break;
+//        }
+//        postDelayed(mHideViewRunnable, Contants.delayMillis);
+//    }
 }

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:id="@+id/item_relativelayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+
+    <RelativeLayout
+        android:id="@+id/agree_nowifi_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/no_wifi_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp_10"
+                android:text="@string/no_wifi"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_16"></TextView>
+
+            <TextView
+                android:id="@+id/continue_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/anthology_bg"
+                android:drawableLeft="@drawable/play_wifi"
+                android:drawablePadding="@dimen/dp_10"
+                android:padding="@dimen/dp_10"
+                android:text="继续播放"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_16"></TextView>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <LinearLayout
+            android:id="@+id/superplayer_iv_fullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="260dp"
+            android:visibility="gone"
+            android:background="@drawable/full_watch_btn_bg"
+            android:padding="7dp">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/superplayer_ic_vod_fullscreen"></ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="全屏观看"
+                android:textColor="@color/white"
+                android:textSize="10sp"></TextView>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/introduce_lin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/dp10"
+        android:layout_marginRight="@dimen/dp10"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/introduce_lin"
+            android:layout_marginBottom="@dimen/dp10">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/publisher_bg">
+
+                <TextView
+                    android:id="@+id/publisher_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/dp25"
+                    android:text="软装设计"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_16">
+
+                </TextView>
+
+
+                <ImageView
+                    android:id="@+id/official_certification_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/dp5"
+                    android:layout_toRightOf="@+id/publisher_name"
+                    android:src="@drawable/official_certification">
+
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/follow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/dp5"
+                    android:layout_marginRight="@dimen/dp5"
+                    android:layout_toRightOf="@+id/official_certification_img"
+                    android:background="@drawable/follow_bg"
+                    android:paddingLeft="@dimen/dp10"
+                    android:paddingTop="@dimen/dp5"
+                    android:paddingRight="@dimen/dp10"
+                    android:paddingBottom="@dimen/dp5"
+                    android:text="关注"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_12">
+
+                </TextView>
+            </RelativeLayout>
+
+            <widget.CircleImageView
+                android:id="@+id/publisher_headimg"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true">
+
+            </widget.CircleImageView>
+
+            <TextView
+                android:id="@+id/watched"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/number_of_visitors_title"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_12"
+                tool:text="1.1万"></TextView>
+
+            <TextView
+                android:id="@+id/number_of_visitors_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="人看过"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_12">
+
+            </TextView>
+        </RelativeLayout>
+
+
+        <ViewFlipper
+            android:id="@+id/video_flipper"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="@dimen/dp5"
+            android:autoStart="false"
+            android:flipInterval="2000"
+            android:inAnimation="@anim/vf_anim_in"
+            android:outAnimation="@anim/vf_anim_out"
+            android:visibility="gone" />
+
+        <widget.SpannableTextView
+            android:id="@+id/fold_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/p80_opacity_white"
+            android:textSize="15sp"
+            tool:text="66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666">
+
+        </widget.SpannableTextView>
+
+        <TextView
+            android:id="@+id/expend_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/p80_opacity_white"
+            android:textSize="15sp"
+            android:visibility="gone"></TextView>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -51,8 +51,11 @@ import com.tencent.liteav.demo.superplayer.ui.player.OrientationHelper;
 import com.tencent.liteav.demo.superplayer.ui.player.Player;
 import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.DanmuView;
+import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.rtmp.TXLivePlayer;
+import com.tencent.rtmp.TXVodPlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
+import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
@@ -78,6 +81,7 @@ import java.util.List;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LANDSCAPE_REVERSE;
+import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.success_code;
@@ -117,13 +121,13 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     private WindowManager.LayoutParams mWindowParams;                   // 悬浮窗布局参数
 
     private OnSuperPlayerViewCallback mPlayerViewCallback;              // SuperPlayerView回调
-    private NetWatcher mWatcher;                         // 网络质量监视器
+    public NetWatcher mWatcher;                         // 网络质量监视器
     public SuperPlayer mSuperPlayer;
     protected OrientationHelper mOrientationHelper;
 
-    private SuperPlayerDef.Orientation mDesiredOrientation = LANDSCAPE; // 横向需要的方向
+    private SuperPlayerDef.Orientation mDesiredOrientation; // 横向需要的方向
     private boolean sensorEnable = true;// 传感器是否可用
-    private SuperPlayerDef.PlayerMode mTargetPlayerMode; // 目标播放模式
+    public static SuperPlayerDef.PlayerMode mTargetPlayerMode = SuperPlayerDef.PlayerMode.WINDOW; // 目标播放模式
     private int fullScreenWidth = getResources().getDisplayMetrics().widthPixels;
     private int fullScreenHeight = getResources().getDisplayMetrics().heightPixels;
     private View decorView;
@@ -136,17 +140,34 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     private View noLoginTipsView;
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
+    public boolean isOrientation;
+    private boolean isMainbool;
 
+    public static SuperPlayerView instance;
+    public boolean isLoad;//播放器是否已经准备完毕
 
-    public SuperPlayerView(Context context, View decorView) {
+    public static SuperPlayerView getInstance(Context context, View decorView, Boolean isMain) {
+        if (instance == null) {
+            synchronized (SuperPlayerView.class) {
+                if (instance == null) {
+                    instance = new SuperPlayerView(context, decorView, isMain);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public SuperPlayerView(Context context, View decorView, Boolean isMain) {
         super(context);
         this.decorView = decorView;
+        this.isMainbool = isMain;
         initialize(context);
     }
 
+
     private void initialize(Context context) {
         mContext = context;
-        addOnLayoutChangeListener();
+//        addOnLayoutChangeListener();
         initView();
         initPlayer();
     }
@@ -165,6 +186,10 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mWindowPlayer = (WindowPlayer) mRootView.findViewById(R.id.superplayer_controller_small);
         mFloatPlayer = (FloatPlayer) mRootView.findViewById(R.id.superplayer_controller_float);
         mDanmuView = (DanmuView) mRootView.findViewById(R.id.superplayer_danmuku_view);
+        if (isMainbool) {
+            mWindowPlayer.mIvPause.setVisibility(GONE);
+            mWindowPlayer.mIvFullScreen.setVisibility(GONE);
+        }
 
         mVodControllerWindowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mVodControllerFullScreenParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -188,14 +213,12 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
         noLoginTipsCancel.setOnClickListener(this);
         noLoginTipsOk.setOnClickListener(this);
-
     }
 
     private void initPlayer() {
         mSuperPlayer = new SuperPlayerImpl(mContext, mTXCloudVideoView, this);
-
         mSuperPlayer.setObserver(mSuperPlayerObserver);
-
+        Log.e("mSuperPlayerObserver", "mSuperPlayerObserver");
         if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
             addView(mFullScreenPlayer);
             mFullScreenPlayer.hide();
@@ -448,9 +471,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         } else if (model.multiURLs != null && !model.multiURLs.isEmpty()) {
             mSuperPlayer.play(model.appId, model.multiURLs, model.playDefaultIndex);
         } else {
-            String jsonString = BuriedPointModelManager.getVideoStartPlay("", "false", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
-                    "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
-            Log.e("埋点", "埋点：视频开始播放---" + jsonString);
+            if (null != mWindowPlayer.getDataDTO()) {
+                String jsonString = BuriedPointModelManager.getVideoStartPlay("", "false", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
+                        "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
+                Log.e("埋点", "埋点：视频开始播放---" + jsonString);
+            }
             mSuperPlayer.play(model);
         }
     }
@@ -508,16 +533,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     }
 
     /**
-     * pause生命周期回调
-     */
-    public void onPause() {
-        if (mDanmuView != null && mDanmuView.isPrepared()) {
-            mDanmuView.pause();
-        }
-        mSuperPlayer.pauseVod();
-    }
-
-    /**
      * 重置播放器
      */
     public void resetPlayer() {
@@ -525,7 +540,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             mDanmuView.release();
             mDanmuView = null;
         }
-//        stopPlay();
+        stopPlay();
     }
 
     /**
@@ -798,9 +813,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         public void onPause() {
             mSuperPlayer.pause();
             if (mSuperPlayer.getPlayerType() != SuperPlayerDef.PlayerType.VOD) {
-                if (mWatcher != null) {
-                    mWatcher.stop();
-                }
+//                if (mWatcher != null) {
+//                    mWatcher.stop();
+//                }
             }
         }
 
@@ -808,9 +823,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         public void onResume() {
             if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) { //重播
                 mSuperPlayer.reStart();
-                String jsonString = BuriedPointModelManager.getVideoStartPlay("", "true", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
-                        "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
-                Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
+                if (null != mWindowPlayer.getDataDTO()) {
+                    String jsonString = BuriedPointModelManager.getVideoStartPlay("", "true", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
+                            "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
+                    Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
+                }
             } else if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PAUSE) { //继续播放
                 mSuperPlayer.resume();
             }
@@ -907,12 +924,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         switch (orientation) {
             case PORTRAIT:
                 Log.e("T800", "PORTRAIT");
-//                if (mFullScreenPlayer.popupWindow != null) {
-//                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
-//                }
-//                if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
-//                    SystemUtils.hideSystemUI(decorView);
-//                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
                 if (mControllerCallback != null && mTargetPlayerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
@@ -924,30 +935,20 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                     return;
                 }
                 Log.e("T800", "LANDSCAPE");
-//                if (mFullScreenPlayer.popupWindow != null) {
-//                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
-//                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
                     SystemUtils.hideSystemUI(decorView);
                 }
-//                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-//                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
             case LANDSCAPE_REVERSE:
                 if (((Activity) mContext).getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
                     return;
                 }
                 Log.e("T800", "LANDSCAPE_REVERSE");
-//                if (mFullScreenPlayer.popupWindow != null) {
-//                    mFullScreenPlayer.popupWindow.getPopupWindow().setHeight(getResources().getDisplayMetrics().widthPixels);
-//                }
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
                 if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
                     SystemUtils.hideSystemUI(decorView);
                 }
-//                ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-//                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
                 break;
         }
     }
@@ -973,16 +974,27 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         return true;
     }
 
-    private void addOnLayoutChangeListener() {
-        addOnLayoutChangeListener(new OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-            }
-        });
+    /**
+     * 设置是否可以旋转
+     */
+    public void setOrientation(boolean mIsOrientation) {
+        this.isOrientation = mIsOrientation;
     }
+
+//    private void addOnLayoutChangeListener() {
+//        addOnLayoutChangeListener(new OnLayoutChangeListener() {
+//            @Override
+//            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+//            }
+//        });
+//    }
 
     @Override
     public void onOrientationChanged(int orientation) {
+        if (!isOrientation) {
+            return;
+        }
+
         if (mFullScreenPlayer == null) {
             return;
         }
@@ -1015,6 +1027,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         if (null != noLoginTipsPop && noLoginTipsPop.getPopupWindow().isShowing()) {
             return;
         }
+
 
         // 横竖屏切换结束，放开监听器
         if (!sensorEnable) {
@@ -1158,9 +1171,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             if (mDanmuView != null && mDanmuView.isPrepared() && mDanmuView.isPaused()) {
                 mDanmuView.resume();
             }
-            if (mWatcher != null) {
-                mWatcher.exitLoading();
-            }
+//            if (mWatcher != null) {
+//                mWatcher.exitLoading();
+//            }
         }
 
         @Override
@@ -1174,9 +1187,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             mWindowPlayer.updatePlayState(SuperPlayerDef.PlayerState.END);
             mFullScreenPlayer.updatePlayState(SuperPlayerDef.PlayerState.END);
             // 清空关键帧和视频打点信息
-            if (mWatcher != null) {
-                mWatcher.stop();
-            }
+//            if (mWatcher != null) {
+//                mWatcher.stop();
+//            }
         }
 
         @Override
@@ -1197,11 +1210,16 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 
         @Override
         public void onSeek(int position) {
-            if (mSuperPlayer.getPlayerType() != SuperPlayerDef.PlayerType.VOD) {
+            if (mSuperPlayer.getPlayerType() == SuperPlayerDef.PlayerType.VOD) {
+//                if (mWatcher != null) {
+//                    mWatcher.stop();
+//                }
+                mWindowPlayer.updatePlayState(SuperPlayerDef.PlayerState.LOADING);
                 if (mWatcher != null) {
-                    mWatcher.stop();
+                    mWatcher.enterLoading();
                 }
             }
+
         }
 
         @Override
@@ -1234,6 +1252,14 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 
         @Override
         public void onPlayTimeShiftLive(TXLivePlayer player, String url) {
+            if (mWatcher == null) {
+                mWatcher = new NetWatcher(mContext);
+            }
+            mWatcher.start(url, player);
+        }
+
+        @Override
+        public void onPlayTimeShiftVod(TXVodPlayer player, String url) {
             if (mWatcher == null) {
                 mWatcher = new NetWatcher(mContext);
             }

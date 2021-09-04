@@ -336,4 +336,12 @@ public class ScreenUtils {
             e.printStackTrace();
         }
     }
+
+    public static int getPhoneWidth(Context context){
+        return context.getResources().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getPhoneHeight(Context context){
+        return context.getResources().getDisplayMetrics().heightPixels;
+    }
 }

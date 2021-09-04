@@ -23,7 +23,7 @@
     <color name="d4">#D4D4D4</color>
     <color name="btn_red">#D63F41</color>
     <color name="video_detail_bottom_color">#111111</color>
-    <color name="white_comment_btn_bg">#1B1B1B</color>
+    <color name="white_comment_btn_bg">#33000000</color>
     <color name="choose_pop_checked_textcolor">#404040</color>
     <color name="choose_pop_bg">#313131</color>
 
@@ -90,5 +90,4 @@
     <color name="textColorSecond">#37465F</color>
     <color name="video_background_color">#96000000</color>
     <color name="video_theme_color">#39C5BB</color>
-
 </resources>

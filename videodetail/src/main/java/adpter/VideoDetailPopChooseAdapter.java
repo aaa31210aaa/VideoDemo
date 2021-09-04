@@ -19,7 +19,7 @@ import com.wdcs.videodetail.demo.R;
 
 import java.util.List;
 
-import ui.VideoDetailActivity;
+import ui.activity.VideoDetailActivity;
 
 @Keep
 public class VideoDetailPopChooseAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {

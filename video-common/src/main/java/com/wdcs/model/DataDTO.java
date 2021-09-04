@@ -46,18 +46,42 @@ public  class DataDTO {
     private Boolean whetherFavor;
     private String pId;
     private String isTop;
+    private String leftTag;
     private String sort;
     private ExtendDTO extend;
+    private String vernier;
+    private String advert;
+    private String newsId;
+    private String belongActivityId;
+    private String belongActivityName;
+    private String belongTopicId;
+    private String belongTopicName;
+    private String width;
+    private String height;
+    private String creatorId;
+    private String creatorUsername;
+    private String creatorNickname;
+    private String creatorHead;
+    private String creatorGender;
+    private String creatorCertMark;
+    private String creatorCertDomain;
+    private String rejectReason;
     private String endTime;
     private String attachUrl;
     private String pid;
-    private boolean isWifi;
-    private boolean oneRecommend;
-    private boolean recommendVisible;
-    private boolean isClosed;
+    private Boolean isWifi;
+    private Boolean oneRecommend;
+    private Boolean recommendVisible;
+    private Boolean isClosed;
+    private String videoType;
+    private String createBy;
 
     public String getShareTitle() {
-        return shareTitle;
+        if (null == shareTitle) {
+            return "";
+        } else {
+            return shareTitle;
+        }
     }
 
     public void setShareTitle(String shareTitle) {
@@ -65,7 +89,11 @@ public  class DataDTO {
     }
 
     public String getShareUrl() {
-        return shareUrl;
+        if (null == shareUrl) {
+            return "";
+        } else {
+            return shareUrl;
+        }
     }
 
     public void setShareUrl(String shareUrl) {
@@ -73,7 +101,11 @@ public  class DataDTO {
     }
 
     public String getShareImageUrl() {
-        return shareImageUrl;
+        if (null == shareImageUrl) {
+            return "";
+        } else {
+            return shareImageUrl;
+        }
     }
 
     public void setShareImageUrl(String shareImageUrl) {
@@ -81,7 +113,11 @@ public  class DataDTO {
     }
 
     public String getShareBrief() {
-        return shareBrief;
+        if (null == shareBrief) {
+            return "";
+        } else {
+            return shareBrief;
+        }
     }
 
     public void setShareBrief(String shareBrief) {
@@ -89,7 +125,11 @@ public  class DataDTO {
     }
 
     public String getTimeDif() {
-        return timeDif;
+        if (null == timeDif) {
+            return "";
+        } else {
+            return timeDif;
+        }
     }
 
     public void setTimeDif(String timeDif) {
@@ -97,7 +137,11 @@ public  class DataDTO {
     }
 
     public String getIssueTimeStamp() {
-        return issueTimeStamp;
+        if (null == issueTimeStamp) {
+            return "";
+        } else {
+            return issueTimeStamp;
+        }
     }
 
     public void setIssueTimeStamp(String issueTimeStamp) {
@@ -105,7 +149,11 @@ public  class DataDTO {
     }
 
     public String getStartTime() {
-        return startTime;
+        if (null == startTime) {
+            return "";
+        } else {
+            return startTime;
+        }
     }
 
     public void setStartTime(String startTime) {
@@ -113,7 +161,11 @@ public  class DataDTO {
     }
 
     public Integer getId() {
-        return id;
+        if (null == id) {
+            return 0;
+        } else {
+            return id;
+        }
     }
 
     public void setId(Integer id) {
@@ -121,7 +173,11 @@ public  class DataDTO {
     }
 
     public String getReadCount() {
-        return readCount;
+        if (null == readCount) {
+            return "";
+        } else {
+            return readCount;
+        }
     }
 
     public void setReadCount(String readCount) {
@@ -129,7 +185,11 @@ public  class DataDTO {
     }
 
     public String getCommentCount() {
-        return commentCount;
+        if (null == commentCount) {
+            return "";
+        } else {
+            return commentCount;
+        }
     }
 
     public void setCommentCount(String commentCount) {
@@ -137,7 +197,11 @@ public  class DataDTO {
     }
 
     public Integer getCommentCountShow() {
-        return commentCountShow;
+        if (null == commentCountShow) {
+            return 0;
+        } else {
+            return commentCountShow;
+        }
     }
 
     public void setCommentCountShow(Integer commentCountShow) {
@@ -145,7 +209,11 @@ public  class DataDTO {
     }
 
     public Integer getLikeCountShow() {
-        return likeCountShow;
+        if (null == likeCountShow) {
+            return 0;
+        } else {
+            return likeCountShow;
+        }
     }
 
     public void setLikeCountShow(Integer likeCountShow) {
@@ -153,7 +221,11 @@ public  class DataDTO {
     }
 
     public Integer getFavorCountShow() {
-        return favorCountShow;
+        if (null == favorCountShow) {
+            return 0;
+        } else {
+            return favorCountShow;
+        }
     }
 
     public void setFavorCountShow(Integer favorCountShow) {
@@ -161,7 +233,11 @@ public  class DataDTO {
     }
 
     public Integer getViewCountShow() {
-        return viewCountShow;
+        if (null == viewCountShow) {
+            return 0;
+        } else {
+            return viewCountShow;
+        }
     }
 
     public void setViewCountShow(Integer viewCountShow) {
@@ -169,7 +245,11 @@ public  class DataDTO {
     }
 
     public Integer getPlayCountShow() {
-        return playCountShow;
+        if (null == playCountShow) {
+            return 0;
+        } else {
+            return playCountShow;
+        }
     }
 
     public void setPlayCountShow(Integer playCountShow) {
@@ -177,7 +257,11 @@ public  class DataDTO {
     }
 
     public String getType() {
-        return type;
+        if (null == type) {
+            return "";
+        } else {
+            return type;
+        }
     }
 
     public void setType(String type) {
@@ -185,7 +269,11 @@ public  class DataDTO {
     }
 
     public String getTitle() {
-        return title;
+        if (null == title) {
+            return "";
+        } else {
+            return title;
+        }
     }
 
     public void setTitle(String title) {
@@ -193,7 +281,11 @@ public  class DataDTO {
     }
 
     public String getThumbnailUrl() {
-        return thumbnailUrl;
+        if (null == thumbnailUrl) {
+            return "";
+        } else {
+            return thumbnailUrl;
+        }
     }
 
     public void setThumbnailUrl(String thumbnailUrl) {
@@ -201,7 +293,11 @@ public  class DataDTO {
     }
 
     public String getBrief() {
-        return brief;
+        if (null == brief) {
+            return "";
+        } else {
+            return brief;
+        }
     }
 
     public void setBrief(String brief) {
@@ -209,7 +305,11 @@ public  class DataDTO {
     }
 
     public String getDetailUrl() {
-        return detailUrl;
+        if (null == detailUrl) {
+            return "";
+        } else {
+            return detailUrl;
+        }
     }
 
     public void setDetailUrl(String detailUrl) {
@@ -217,7 +317,11 @@ public  class DataDTO {
     }
 
     public String getExternalUrl() {
-        return externalUrl;
+        if (null == externalUrl) {
+            return "";
+        } else {
+            return externalUrl;
+        }
     }
 
     public void setExternalUrl(String externalUrl) {
@@ -225,7 +329,11 @@ public  class DataDTO {
     }
 
     public String getSource() {
-        return source;
+        if (null == source) {
+            return "";
+        } else {
+            return source;
+        }
     }
 
     public void setSource(String source) {
@@ -233,7 +341,11 @@ public  class DataDTO {
     }
 
     public String getKeywords() {
-        return keywords;
+        if (null == keywords) {
+            return "";
+        } else {
+            return keywords;
+        }
     }
 
     public void setKeywords(String keywords) {
@@ -241,7 +353,11 @@ public  class DataDTO {
     }
 
     public String getTags() {
-        return tags;
+        if (null == tags) {
+            return "";
+        } else {
+            return tags;
+        }
     }
 
     public void setTags(String tags) {
@@ -249,7 +365,11 @@ public  class DataDTO {
     }
 
     public String getClassification() {
-        return classification;
+        if (null == classification) {
+            return "";
+        } else {
+            return classification;
+        }
     }
 
     public void setClassification(String classification) {
@@ -257,7 +377,11 @@ public  class DataDTO {
     }
 
     public String getImagesUrl() {
-        return imagesUrl;
+        if (null == imagesUrl) {
+            return "";
+        } else {
+            return imagesUrl;
+        }
     }
 
     public void setImagesUrl(String imagesUrl) {
@@ -265,7 +389,11 @@ public  class DataDTO {
     }
 
     public String getPlayUrl() {
-        return playUrl;
+        if (null == playUrl) {
+            return "";
+        } else {
+            return playUrl;
+        }
     }
 
     public void setPlayUrl(String playUrl) {
@@ -273,7 +401,11 @@ public  class DataDTO {
     }
 
     public Integer getPlayDuration() {
-        return playDuration;
+        if (null == playDuration) {
+            return 0;
+        } else {
+            return playDuration;
+        }
     }
 
     public void setPlayDuration(Integer playDuration) {
@@ -281,7 +413,11 @@ public  class DataDTO {
     }
 
     public String getLiveStatus() {
-        return liveStatus;
+        if (null == liveStatus) {
+            return "";
+        } else {
+            return liveStatus;
+        }
     }
 
     public void setLiveStatus(String liveStatus) {
@@ -289,7 +425,11 @@ public  class DataDTO {
     }
 
     public String getLiveStartTime() {
-        return liveStartTime;
+        if (null == liveStartTime) {
+            return "";
+        } else {
+            return liveStartTime;
+        }
     }
 
     public void setLiveStartTime(String liveStartTime) {
@@ -297,7 +437,11 @@ public  class DataDTO {
     }
 
     public String getIssuerId() {
-        return issuerId;
+        if (null == issuerId) {
+            return "";
+        } else {
+            return issuerId;
+        }
     }
 
     public void setIssuerId(String issuerId) {
@@ -305,7 +449,11 @@ public  class DataDTO {
     }
 
     public String getListStyle() {
-        return listStyle;
+        if (null == listStyle) {
+            return "";
+        } else {
+            return listStyle;
+        }
     }
 
     public void setListStyle(String listStyle) {
@@ -313,7 +461,11 @@ public  class DataDTO {
     }
 
     public String getIssuerName() {
-        return issuerName;
+        if (null == issuerName) {
+            return "";
+        } else {
+            return issuerName;
+        }
     }
 
     public void setIssuerName(String issuerName) {
@@ -321,7 +473,11 @@ public  class DataDTO {
     }
 
     public String getIssuerImageUrl() {
-        return issuerImageUrl;
+        if (null == issuerImageUrl) {
+            return "";
+        } else {
+            return issuerImageUrl;
+        }
     }
 
     public void setIssuerImageUrl(String issuerImageUrl) {
@@ -329,7 +485,11 @@ public  class DataDTO {
     }
 
     public Boolean getDisableComment() {
-        return disableComment;
+        if (null == disableComment) {
+            return false;
+        } else {
+            return disableComment;
+        }
     }
 
     public void setDisableComment(Boolean disableComment) {
@@ -337,7 +497,11 @@ public  class DataDTO {
     }
 
     public String getLabel() {
-        return label;
+        if (null == label) {
+            return "";
+        } else {
+            return label;
+        }
     }
 
     public void setLabel(String label) {
@@ -345,7 +509,11 @@ public  class DataDTO {
     }
 
     public String getOrientation() {
-        return orientation;
+        if (null == orientation) {
+            return "";
+        } else {
+            return orientation;
+        }
     }
 
     public void setOrientation(String orientation) {
@@ -353,7 +521,11 @@ public  class DataDTO {
     }
 
     public Boolean getWhetherLike() {
-        return whetherLike;
+        if (null == whetherLike) {
+            return false;
+        } else {
+            return whetherLike;
+        }
     }
 
     public void setWhetherLike(Boolean whetherLike) {
@@ -361,7 +533,11 @@ public  class DataDTO {
     }
 
     public Boolean getWhetherFavor() {
-        return whetherFavor;
+        if (null == whetherFavor) {
+            return false;
+        } else {
+            return whetherFavor;
+        }
     }
 
     public void setWhetherFavor(Boolean whetherFavor) {
@@ -369,7 +545,11 @@ public  class DataDTO {
     }
 
     public String getPId() {
-        return pId;
+        if (null == pId) {
+            return "";
+        } else {
+            return pId;
+        }
     }
 
     public void setPId(String pId) {
@@ -377,7 +557,11 @@ public  class DataDTO {
     }
 
     public String getIsTop() {
-        return isTop;
+        if (null == isTop) {
+            return "";
+        } else {
+            return isTop;
+        }
     }
 
     public void setIsTop(String isTop) {
@@ -385,7 +569,11 @@ public  class DataDTO {
     }
 
     public String getSort() {
-        return sort;
+        if (null == sort) {
+            return "";
+        } else {
+            return sort;
+        }
     }
 
     public void setSort(String sort) {
@@ -401,7 +589,11 @@ public  class DataDTO {
     }
 
     public String getEndTime() {
-        return endTime;
+        if (null == endTime) {
+            return "";
+        } else {
+            return endTime;
+        }
     }
 
     public void setEndTime(String endTime) {
@@ -409,7 +601,11 @@ public  class DataDTO {
     }
 
     public String getAttachUrl() {
-        return attachUrl;
+        if (null == attachUrl) {
+            return "";
+        } else {
+            return attachUrl;
+        }
     }
 
     public void setAttachUrl(String attachUrl) {
@@ -417,15 +613,23 @@ public  class DataDTO {
     }
 
     public String getPid() {
-        return pid;
+        if (null == pid) {
+            return "";
+        } else {
+            return pid;
+        }
     }
 
     public void setPid(String pid) {
         this.pid = pid;
     }
 
-    public boolean isWifi() {
-        return isWifi;
+    public Boolean isWifi() {
+        if (null == isWifi) {
+            return false;
+        } else {
+            return isWifi;
+        }
     }
 
     public void setWifi(boolean wifi) {
@@ -433,7 +637,11 @@ public  class DataDTO {
     }
 
     public boolean isOneRecommend() {
-        return oneRecommend;
+        if (null == oneRecommend) {
+            return false;
+        } else {
+            return oneRecommend;
+        }
     }
 
     public void setOneRecommend(boolean oneRecommend) {
@@ -441,7 +649,11 @@ public  class DataDTO {
     }
 
     public boolean isRecommendVisible() {
-        return recommendVisible;
+        if (null == recommendVisible) {
+            return false;
+        } else {
+            return recommendVisible;
+        }
     }
 
     public void setRecommendVisible(boolean recommendVisible) {
@@ -449,11 +661,255 @@ public  class DataDTO {
     }
 
     public boolean isClosed() {
-        return isClosed;
+        if (null == isClosed) {
+            return false;
+        } else {
+            return isClosed;
+        }
     }
 
     public void setClosed(boolean closed) {
         isClosed = closed;
+    }
+
+    public String getLeftTag() {
+        if (null == leftTag) {
+            return "";
+        } else {
+            return leftTag;
+        }
+    }
+
+    public void setLeftTag(String leftTag) {
+        this.leftTag = leftTag;
+    }
+
+    public String getVernier() {
+        if (null == vernier) {
+            return "";
+        } else {
+            return vernier;
+        }
+    }
+
+    public void setVernier(String vernier) {
+        this.vernier = vernier;
+    }
+
+    public String getAdvert() {
+        if (null == advert) {
+            return "";
+        } else {
+            return advert;
+        }
+    }
+
+    public void setAdvert(String advert) {
+        this.advert = advert;
+    }
+
+    public String getNewsId() {
+        if (null == newsId) {
+            return "";
+        } else {
+            return newsId;
+        }
+    }
+
+    public void setNewsId(String newsId) {
+        this.newsId = newsId;
+    }
+
+    public String getBelongActivityId() {
+        if (null == belongActivityId) {
+            return "";
+        } else {
+            return belongActivityId;
+        }
+    }
+
+    public void setBelongActivityId(String belongActivityId) {
+        this.belongActivityId = belongActivityId;
+    }
+
+    public String getBelongActivityName() {
+        if (null == belongActivityName) {
+            return "";
+        } else {
+            return belongActivityName;
+        }
+    }
+
+    public void setBelongActivityName(String belongActivityName) {
+        this.belongActivityName = belongActivityName;
+    }
+
+    public String getBelongTopicId() {
+        if (null == belongTopicId) {
+            return "";
+        } else {
+            return belongTopicId;
+        }
+    }
+
+    public void setBelongTopicId(String belongTopicId) {
+        this.belongTopicId = belongTopicId;
+    }
+
+    public String getBelongTopicName() {
+        if (null == belongTopicName) {
+            return "";
+        } else {
+            return belongTopicName;
+        }
+    }
+
+    public void setBelongTopicName(String belongTopicName) {
+        this.belongTopicName = belongTopicName;
+    }
+
+    public String getWidth() {
+        if (null == width) {
+            return "";
+        } else {
+            return width;
+        }
+    }
+
+    public void setWidth(String width) {
+        this.width = width;
+    }
+
+    public String getHeight() {
+        if (null == height) {
+            return "";
+        } else {
+            return height;
+        }
+    }
+
+    public void setHeight(String height) {
+        this.height = height;
+    }
+
+    public String getCreatorId() {
+        if (null == creatorId) {
+            return "";
+        } else {
+            return creatorId;
+        }
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public String getCreatorUsername() {
+        if (null == creatorUsername) {
+            return "";
+        } else {
+            return creatorUsername;
+        }
+    }
+
+    public void setCreatorUsername(String creatorUsername) {
+        this.creatorUsername = creatorUsername;
+    }
+
+    public String getCreatorNickname() {
+        if (null == creatorNickname) {
+            return "";
+        } else {
+            return creatorNickname;
+        }
+    }
+
+    public void setCreatorNickname(String creatorNickname) {
+        this.creatorNickname = creatorNickname;
+    }
+
+    public String getCreatorHead() {
+        if (null == creatorHead) {
+            return "";
+        } else {
+            return creatorHead;
+        }
+    }
+
+    public void setCreatorHead(String creatorHead) {
+        this.creatorHead = creatorHead;
+    }
+
+    public String getCreatorGender() {
+        if (null == creatorGender) {
+            return "";
+        } else {
+            return creatorGender;
+        }
+    }
+
+    public void setCreatorGender(String creatorGender) {
+        this.creatorGender = creatorGender;
+    }
+
+    public String getCreatorCertMark() {
+        if (null == creatorCertMark) {
+            return "";
+        } else {
+            return creatorCertMark;
+        }
+    }
+
+    public void setCreatorCertMark(String creatorCertMark) {
+        this.creatorCertMark = creatorCertMark;
+    }
+
+    public String getCreatorCertDomain() {
+        if (null == creatorCertDomain) {
+            return "";
+        } else {
+            return creatorCertDomain;
+        }
+    }
+
+    public void setCreatorCertDomain(String creatorCertDomain) {
+        this.creatorCertDomain = creatorCertDomain;
+    }
+
+    public String getRejectReason() {
+        if (null == rejectReason) {
+            return "";
+        } else {
+            return rejectReason;
+        }
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
+    }
+
+    public String getVideoType() {
+        if (null == videoType) {
+            return "";
+        } else {
+            return videoType;
+        }
+    }
+
+    public void setVideoType(String videoType) {
+        this.videoType = videoType;
+    }
+
+    public String getCreateBy() {
+        if (null == createBy) {
+            return "";
+        } else {
+            return createBy;
+        }
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
     }
 
     @Keep

@@ -65,7 +65,7 @@ public class TokenModel {
     public static class DataDTO {
         private String token;
         private LoginSysUserVoDTO loginSysUserVo;
-        private Object gdyToken;
+        private String gdyToken;
 
         public String getToken() {
             return token;
@@ -83,29 +83,29 @@ public class TokenModel {
             this.loginSysUserVo = loginSysUserVo;
         }
 
-        public Object getGdyToken() {
+        public String getGdyToken() {
             return gdyToken;
         }
 
-        public void setGdyToken(Object gdyToken) {
+        public void setGdyToken(String gdyToken) {
             this.gdyToken = gdyToken;
         }
 
         @Keep
         public static class LoginSysUserVoDTO {
-            private Integer id;
+            private String id;
             private String username;
             private String nickname;
             private String head;
-            private Integer gender;
-            private Integer state;
-            private Object permissionCodes;
+            private String gender;
+            private String state;
+            private String permissionCodes;
 
-            public Integer getId() {
+            public String getId() {
                 return id;
             }
 
-            public void setId(Integer id) {
+            public void setId(String id) {
                 this.id = id;
             }
 
@@ -133,27 +133,27 @@ public class TokenModel {
                 this.head = head;
             }
 
-            public Integer getGender() {
+            public String getGender() {
                 return gender;
             }
 
-            public void setGender(Integer gender) {
+            public void setGender(String gender) {
                 this.gender = gender;
             }
 
-            public Integer getState() {
+            public String getState() {
                 return state;
             }
 
-            public void setState(Integer state) {
+            public void setState(String state) {
                 this.state = state;
             }
 
-            public Object getPermissionCodes() {
+            public String getPermissionCodes() {
                 return permissionCodes;
             }
 
-            public void setPermissionCodes(Object permissionCodes) {
+            public void setPermissionCodes(String permissionCodes) {
                 this.permissionCodes = permissionCodes;
             }
         }

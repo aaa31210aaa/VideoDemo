@@ -40,12 +40,10 @@ public final class Utils {
         mIsDebug = isDebug;
         if (isDebug) {
             //UAT测试环境
-            ApiConstants.getInstance().setBaseUrl("https://uat-fuse-api-gw.zhcs.csbtv.com/api/cms/");
-            ApiConstants.getInstance().setLoginBaseUrl("https://uat-fuse-api-gw.zhcs.csbtv.com/api/sys/");
+            ApiConstants.getInstance().setBaseUrl("https://uat-fuse-api-gw.zhcs.csbtv.com/");
         } else {
             //正式环境
-            ApiConstants.getInstance().setBaseUrl("https://fuse-api-gw.zhcs.csbtv.com/api/cms/");
-            ApiConstants.getInstance().setLoginBaseUrl("https://fuse-api-gw.zhcs.csbtv.com/api/sys/");
+            ApiConstants.getInstance().setBaseUrl("https://fuse-api-gw.zhcs.csbtv.com/");
         }
     }
 

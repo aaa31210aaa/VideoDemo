@@ -6,5 +6,5 @@
     <corners android:topLeftRadius="10dp"
         android:topRightRadius="10dp"
         ></corners>
-    <solid android:color="@color/white_comment_btn_bg"></solid>
+    <solid android:color="@color/p20_opacity_black"></solid>
 </shape>

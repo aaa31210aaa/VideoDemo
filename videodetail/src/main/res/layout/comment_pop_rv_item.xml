@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    xmlns:tool="http://schemas.android.com/tools">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/comment_head"
@@ -20,32 +20,64 @@
 
         <LinearLayout
             android:id="@+id/comment_head_ll"
-            android:layout_toRightOf="@+id/comment_user_head"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/comment_user_head"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/comment_pop_username"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="漫国神卡密撒嘛"
-                android:layout_marginTop="5dp"
-                android:textSize="12sp"
-                android:textColor="@color/comment_pop_user_nam">
+                android:layout_height="wrap_content">
 
-            </TextView>
+                <TextView
+                    android:id="@+id/comment_pop_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="漫国神卡密撒嘛"
+                    android:textColor="@color/comment_pop_user_nam"
+                    android:textSize="12sp">
+
+                </TextView>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="@dimen/dp5">
+
+                    <ImageView
+                        android:id="@+id/comment_top_label"
+                        android:layout_width="25dp"
+                        android:layout_height="15dp"
+                        android:visibility="gone"
+                        android:src="@drawable/comment_top"></ImageView>
+
+
+                    <TextView
+                        android:id="@+id/under_review"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#3E85ED"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tool:text="(审核中)">
+
+                    </TextView>
+
+                </RelativeLayout>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/comment_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="9sp"
-                android:text="18分钟前"
                 android:layout_marginTop="5dp"
-                android:textColor="@color/c9">
+                android:text="18分钟前"
+                android:textColor="@color/c9"
+                android:textSize="9sp">
 
             </TextView>
 
@@ -54,10 +86,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/comment_head_ll"
+                android:layout_marginTop="10dp"
                 android:layout_toRightOf="@+id/comment_user_head"
                 android:text="6666666666666666666"
-                android:textColor="@color/black"
-                android:layout_marginTop="10dp">
+                android:textColor="@color/black">
 
             </TextView>
 
@@ -66,8 +98,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp_10"
-                android:visibility="gone"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -82,19 +114,19 @@
                     android:id="@+id/gm_reback_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tool:text="1小时前"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/c9"
-                    android:textSize="9sp"></TextView>
+                    android:textSize="9sp"
+                    tool:text="1小时前"></TextView>
 
                 <TextView
                     android:id="@+id/gm_reback_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tool:text="官方回复官方回复"
-                    android:textSize="13sp"
                     android:layout_marginTop="5dp"
-                    android:textColor="@color/black">
+                    android:textColor="@color/black"
+                    android:textSize="13sp"
+                    tool:text="官方回复官方回复">
 
                 </TextView>
             </LinearLayout>

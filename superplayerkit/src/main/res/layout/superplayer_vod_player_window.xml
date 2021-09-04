@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/zdy_iv_pause"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/play_icon"
+        android:visibility="gone"
+        android:layout_centerInParent="true"></ImageView>
+
     <!--标题-->
     <LinearLayout
         android:id="@+id/superplayer_rl_top"
@@ -33,11 +41,75 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/zdy_ll_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <!--播放位置-->
+        <TextView
+            android:id="@+id/zdy_tv_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="00:00"
+            android:textColor="@android:color/white"
+            android:textSize="11.0sp" />
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
+
+            <ProgressBar
+                android:id="@+id/zdy_loadbar_progress"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="13.8dp"
+                android:progressDrawable="@drawable/layer_list_progress_drawable" />
+
+            <com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar
+                android:id="@+id/zdy_seekbar_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5.0dip"
+                android:layout_marginRight="5.0dip"
+                app:psb_backgroundColor="@color/superplayer_transparent"
+                app:psb_max="100"
+                app:psb_progress="0"
+                app:psb_progressColor="@color/superplayer_white"
+                app:psb_progressHeight="2dp"
+                app:psb_thumbBackground="@drawable/superplayer_ic_vod_thumb" />
+
+
+        </RelativeLayout>
+        <!--总时长-->
+        <TextView
+            android:id="@+id/zdy_tv_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="00:00"
+            android:textColor="@android:color/white"
+            android:textSize="11.0sp" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
         android:id="@+id/superplayer_ll_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/superplayer_bottom_shadow"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
         android:orientation="horizontal">
 
         <!--播放/暂停-->
@@ -65,15 +137,14 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1">
 
-
             <ProgressBar
                 android:id="@+id/superplayer_loadbar_progress"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="13.8dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="2.5dp"
                 android:progressDrawable="@drawable/layer_list_progress_drawable" />
 
             <com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar
@@ -88,7 +159,7 @@
                 app:psb_progress="0"
                 app:psb_progressColor="@color/superplayer_white"
                 app:psb_progressHeight="2dp"
-                app:psb_thumbBackground="@drawable/superplayer_ic_vod_thumb" />
+                app:psb_thumbBackground="@drawable/superplayer_vod_thumb" />
 
 
         </RelativeLayout>

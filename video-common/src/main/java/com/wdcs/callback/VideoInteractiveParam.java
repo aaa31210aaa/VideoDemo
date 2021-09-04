@@ -7,7 +7,7 @@ import com.wdcs.model.ShareInfo;
 /**
  * 参数交互类
  */
-public class VideoInteractiveParam {
+public class VideoInteractiveParam{
     public VideoParamCallBack callBack;
     public static VideoInteractiveParam param;
 
@@ -29,6 +29,7 @@ public class VideoInteractiveParam {
     public void setCallBack(VideoParamCallBack callBack) {
         this.callBack = callBack;
     }
+
 
     /**
      * 传递分享对象
@@ -70,7 +71,7 @@ public class VideoInteractiveParam {
     }
 
     /**
-     * 传递推荐跳转url
+     * 传递跳转url
      */
     public void recommendUrl(String url) throws Exception{
         if (callBack == null) {
@@ -90,4 +91,5 @@ public class VideoInteractiveParam {
             callBack.buriedPoint(buriedPointModel);
         }
     }
+
 }

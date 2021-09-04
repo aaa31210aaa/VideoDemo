@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#ffffff</color>
+    <color name="follow_bg_color">#DB0025</color>
+
+    <color name="p10_opacity_white">#19ffffff</color>
+    <color name="p20_opacity_white">#33ffffff</color>
+    <color name="p30_opacity_white">#4cffffff</color>
+    <color name="p40_opacity_white">#66ffffff</color>
+    <color name="p50_opacity_white">#7fffffff</color>
+    <color name="p60_opacity_white">#99ffffff</color>
+    <color name="p80_opacity_white">#ccffffff</color>
+
+    <color name="p10_opacity_black">#19000000</color>
+    <color name="p20_opacity_black">#33000000</color>
+    <color name="p30_opacity_black">#4c000000</color>
+    <color name="p40_opacity_black">#66000000</color>
+    <color name="p50_opacity_black">#7f000000</color>
+    <color name="p60_opacity_black">#99000000</color>
 </resources>

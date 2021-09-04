@@ -1,4 +1,4 @@
-package ui;
+package com.wdcs.manager;
 
 public interface OnViewPagerListener {
     /*初始化完成*/

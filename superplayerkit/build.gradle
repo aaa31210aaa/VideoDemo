@@ -5,14 +5,19 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
+        ndk {
+            abiFilters "armeabi-v7a","arm64-v8a"
+        }
     }
+
+
 
     buildTypes {
         release {
@@ -24,12 +29,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
+    dataBinding {
+        enabled true
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-//    compile project(':liteav_sdk')
     implementation project(':video-common')
     implementation "com.tencent.liteav:LiteAVSDK_Player:latest.release"
     implementation 'com.github.ctiao:DanmakuFlameMaster:0.5.3'
@@ -37,4 +43,5 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.lzy.net:okgo:3.0.4'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }

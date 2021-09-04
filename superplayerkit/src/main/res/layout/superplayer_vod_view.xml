@@ -20,6 +20,7 @@
         android:layout_height="match_parent"
         />
 
+
     <com.tencent.liteav.demo.superplayer.ui.view.DanmuView
         android:id="@+id/superplayer_danmuku_view"
         android:layout_width="match_parent"

@@ -21,6 +21,7 @@ public class OkGoUtils {
             //---------这里给出的是示例代码,告诉你可以这么传,实际使用的时候,根据需要传,不需要就不传-------------//
         HttpHeaders headers = new HttpHeaders();
         headers.put("authorization", PersonInfoManager.getInstance().getTransformationToken());    //header不支持中文，不允许有特殊字符
+        headers.put("Connection","close");
 //        headers.put("commonHeaderKey2", "commonHeaderValue2");
 //        HttpParams params = new HttpParams();
 //        params.put("commonParamsKey1", "commonParamsValue1");     //param支持中文,直接传,不要自己编码

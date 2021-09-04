@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.x5testdemo"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -26,11 +26,17 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    dataBinding {
+        enabled true
+    }
 }
 
 dependencies {
     implementation project(':videodetail')
     implementation project(':video-common')
+    implementation "com.tencent.liteav:LiteAVSDK_Player:latest.release"
+    implementation project(':superplayerkit')
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'

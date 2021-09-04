@@ -3,7 +3,9 @@ package adpter;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
@@ -56,5 +58,10 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
         }
 
         helper.setText(R.id.comment_content, item.getContent());
+
+        ImageView commentTopLabel = helper.getView(R.id.comment_top_label);
+        TextView underReview = helper.getView(R.id.under_review);
+
+
     }
 }

@@ -8,8 +8,10 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.TXLog;
+import com.tencent.rtmp.TXVodPlayer;
 
 import java.lang.ref.WeakReference;
 
@@ -27,6 +29,7 @@ public class NetWatcher {
 
     private WeakReference<Context>      mContext;
     private WeakReference<TXLivePlayer> mLivePlayer;    // 直播播放器
+    private WeakReference<TXVodPlayer> mVodPlayer;      // 点播播放器
 
     private String mPlayURL        = "";    // 播放的url
 
@@ -60,14 +63,43 @@ public class NetWatcher {
             @Override
             public void run() {
                 TXLog.w("NetWatcher", "net check loading count = "+mLoadingCount+" loading time = "+mLoadingTime);
-                if (mLoadingCount >= MAX_LOADING_COUNT || mLoadingTime >= MAX_LOADING_TIME) {
-                    showSwitchStreamDialog();
-                }
+//                if (mLoadingCount >= MAX_LOADING_COUNT || mLoadingTime >= MAX_LOADING_TIME) {
+//                    showSwitchStreamDialog();
+//                }
                 mLoadingCount = 0;
                 mLoadingTime = 0;
             }
         }, WATCH_TIME);
     }
+
+    /**
+     * 开始监控网络
+     *
+     * @param playUrl 播放的url
+     * @param player  播放器
+     */
+    public void start(String playUrl, TXVodPlayer player) {
+        mWatching = true;
+        mVodPlayer = new WeakReference<>(player);
+        mPlayURL = playUrl;
+        mLoadingCount = 0;
+        mLoadingTime= 0;
+        mLoadingStartTime = 0;
+        TXLog.w("NetWatcher", "net check start watch ");
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                TXLog.w("NetWatcher", "net check loading count = "+mLoadingCount+" loading time = "+mLoadingTime);
+//                if (mLoadingCount >= MAX_LOADING_COUNT || mLoadingTime >= MAX_LOADING_TIME) {
+//                    showSwitchStreamDialog();
+//                }
+                mLoadingCount = 0;
+                mLoadingTime = 0;
+            }
+        }, WATCH_TIME);
+    }
+
 
     /**
      * 停止监控

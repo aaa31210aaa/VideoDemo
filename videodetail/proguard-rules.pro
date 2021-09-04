@@ -31,4 +31,4 @@
 -keep class com.tencent.** { *; }
 -keep class model.** { *; }
 -keep class adpter.** { *; }
--keep class ui.VideoDetailActivity.**
+-keep class ui.activity.VideoDetailActivity.**

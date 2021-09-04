@@ -42,6 +42,7 @@ import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;
+import com.wdcs.utils.NoScrollViewPager;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -864,9 +865,11 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     }
 
     private void pointSpeed(String speed) {
-        String jsonString = BuriedPointModelManager.getVideoPlaySpeed(speed, item.getId() + "", item.getTitle(), "", "",
-                "", "", item.getIssueTimeStamp());
-        Log.e("埋点", "埋点：" + speed + "倍速---" + jsonString);
+        if (null != item) {
+            String jsonString = BuriedPointModelManager.getVideoPlaySpeed(speed, item.getId() + "", item.getTitle(), "", "",
+                    "", "", item.getIssueTimeStamp());
+            Log.e("埋点", "埋点：" + speed + "倍速---" + jsonString);
+        }
     }
 
     /**

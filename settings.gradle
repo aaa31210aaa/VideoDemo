@@ -2,4 +2,5 @@ include ':video-common'
 include ':superplayerkit'
 include ':videodetail'
 include ':app'
+include ':FlycoTabLayout_Lib'
 rootProject.name = "X5TestDemo"

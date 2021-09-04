@@ -1,14 +1,10 @@
 package adpter;
 
 import android.content.Context;
-import android.os.Debug;
 import android.text.TextUtils;
-import android.util.DebugUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -25,12 +21,9 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
-import com.wdcs.model.ShareInfo;
-import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
-import com.wdcs.utils.ShareUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
@@ -39,11 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ui.VideoDetailActivity;
+import ui.activity.VideoDetailActivity;
 import widget.OverLineTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
-import static com.wdcs.utils.ShareUtils.toShare;
 
 @Keep
 public class MyVideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {

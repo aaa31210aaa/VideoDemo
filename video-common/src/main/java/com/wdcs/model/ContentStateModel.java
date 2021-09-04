@@ -71,6 +71,7 @@ public class ContentStateModel {
         private String contentId;
         private String whetherLike;
         private String whetherFavor;
+        private String whetherFollow;
 
         public String getId() {
             return id;
@@ -142,6 +143,14 @@ public class ContentStateModel {
 
         public void setWhetherFavor(String whetherFavor) {
             this.whetherFavor = whetherFavor;
+        }
+
+        public String getWhetherFollow() {
+            return whetherFollow;
+        }
+
+        public void setWhetherFollow(String whetherFollow) {
+            this.whetherFollow = whetherFollow;
         }
     }
 }

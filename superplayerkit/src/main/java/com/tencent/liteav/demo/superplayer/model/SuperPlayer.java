@@ -134,4 +134,10 @@ public interface SuperPlayer {
      * @param observer {@link SuperPlayerObserver}
      */
     void setObserver(SuperPlayerObserver observer);
+
+    /**
+     * 设置视频显示模式
+     */
+    void setRenderMode(int renderMode);
+
 }

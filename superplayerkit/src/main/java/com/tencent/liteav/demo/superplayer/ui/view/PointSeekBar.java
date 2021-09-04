@@ -70,12 +70,12 @@ public class PointSeekBar extends RelativeLayout {
     private static PointSeekBar instance;
 
 
-    public static PointSeekBar getInstance(Context context) {
-        if (instance == null) {
-            instance = new PointSeekBar(context);
-        }
-        return instance;
-    }
+//    public static PointSeekBar getInstance(Context context) {
+//        if (instance == null) {
+//            instance = new PointSeekBar(context);
+//        }
+//        return instance;
+//    }
 
     public PointSeekBar(Context context) {
         super(context);

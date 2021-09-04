@@ -13,7 +13,9 @@ import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
 
-import ui.VideoDetailActivity;
+import ui.activity.VideoDetailActivity;
+import ui.activity.VideoDetailSimpleActivity;
+import ui.activity.VideoMainActivity;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv;
@@ -31,6 +33,15 @@ public class MainActivity extends AppCompatActivity {
         panelId.setText("48662");
         contentId = findViewById(R.id.contentid);
         fxsys = findViewById(R.id.fxsys);
+
+        fxsys.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, VideoDetailSimpleActivity.class);
+                intent.putExtra("contentId", "93459");
+                startActivity(intent);
+            }
+        });
         setCode = findViewById(R.id.set_code);
 
         setCode.setOnClickListener(new View.OnClickListener() {
@@ -50,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "c2eb46a0-80e9-4539-b5f9-df4b4cb9dd08";
+                        return "9bcf9f3c-91ba-4d4d-b233-fb8f98582105";
                     }
 
                     @Override
@@ -69,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
+                Intent intent = new Intent(MainActivity.this, VideoMainActivity.class);
                 intent.putExtra("panelId", panelId.getText().toString());
                 intent.putExtra("contentId", contentId.getText().toString());
                 startActivity(intent);

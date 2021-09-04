@@ -1,4 +1,4 @@
-package ui;
+package com.wdcs.manager;
 
 import android.content.Context;
 import android.view.View;
