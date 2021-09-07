@@ -46,7 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:layout_marginLeft="@dimen/dp5">
+                    android:layout_marginLeft="@dimen/video_dp5">
 
                     <ImageView
                         android:id="@+id/comment_top_label"
@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="18分钟前"
-                android:textColor="@color/c9"
+                android:textColor="@color/video_c9"
                 android:textSize="9sp">
 
             </TextView>
@@ -88,8 +88,8 @@
                 android:layout_below="@+id/comment_head_ll"
                 android:layout_marginTop="10dp"
                 android:layout_toRightOf="@+id/comment_user_head"
-                android:text="6666666666666666666"
-                android:textColor="@color/black">
+                android:text=""
+                android:textColor="@color/video_black">
 
             </TextView>
 
@@ -97,7 +97,7 @@
                 android:id="@+id/gm_reback"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_10"
+                android:layout_marginTop="@dimen/video_dp10"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -115,7 +115,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:textColor="@color/c9"
+                    android:textColor="@color/video_c9"
                     android:textSize="9sp"
                     tool:text="1小时前"></TextView>
 
@@ -124,7 +124,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/video_black"
                     android:textSize="13sp"
                     tool:text="官方回复官方回复">
 

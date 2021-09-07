@@ -8,8 +8,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/dp_40"
-        android:layout_marginRight="@dimen/dp_40"
+        android:layout_marginLeft="@dimen/video_dp40"
+        android:layout_marginRight="@dimen/video_dp40"
         android:background="@drawable/anthology_bg"
         android:orientation="vertical">
 
@@ -17,9 +17,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:padding="@dimen/dp_10"
+            android:padding="@dimen/video_dp10"
             android:text="提示"
-            android:textColor="@color/black"
+            android:textColor="@color/video_black"
             android:textSize="20sp"></TextView>
 
         <TextView
@@ -28,13 +28,13 @@
             android:layout_gravity="center_horizontal"
             android:padding="5dp"
             android:text="您还未登录，请立即登录"
-            android:textColor="@color/black"
+            android:textColor="@color/video_black"
             android:textSize="@dimen/sp_16"></TextView>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:background="@color/c9">
+            android:background="@color/video_c9">
 
         </View>
 
@@ -51,7 +51,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="取消"
-                android:textColor="@color/c9"
+                android:textColor="@color/video_c9"
                 android:textSize="@dimen/sp_16">
 
             </TextView>
@@ -59,7 +59,7 @@
             <View
                 android:layout_width="1px"
                 android:layout_height="match_parent"
-                android:background="@color/c9"></View>
+                android:background="@color/video_c9"></View>
 
             <TextView
                 android:id="@+id/no_login_tips_ok"

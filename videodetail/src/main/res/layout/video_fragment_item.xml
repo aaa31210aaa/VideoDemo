@@ -5,7 +5,7 @@
     android:id="@+id/item_relativelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/video_black">
 
 
     <RelativeLayout
@@ -25,9 +25,9 @@
                 android:id="@+id/no_wifi_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dp_10"
+                android:layout_marginBottom="@dimen/video_dp10"
                 android:text="@string/no_wifi"
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="@dimen/sp_16"></TextView>
 
             <TextView
@@ -36,10 +36,10 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/anthology_bg"
                 android:drawableLeft="@drawable/play_wifi"
-                android:drawablePadding="@dimen/dp_10"
-                android:padding="@dimen/dp_10"
+                android:drawablePadding="@dimen/video_dp10"
+                android:padding="@dimen/video_dp10"
                 android:text="继续播放"
-                android:textColor="@color/black"
+                android:textColor="@color/video_black"
                 android:textSize="@dimen/sp_16"></TextView>
         </LinearLayout>
 
@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="全屏观看"
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="10sp"></TextView>
         </LinearLayout>
     </LinearLayout>
@@ -82,17 +82,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="@dimen/dp10"
-        android:layout_marginRight="@dimen/dp10"
-        android:layout_marginBottom="@dimen/dp_10"
-        android:visibility="gone"
+        android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginRight="@dimen/video_dp10"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/introduce_lin"
-            android:layout_marginBottom="@dimen/dp10">
+            android:layout_marginBottom="@dimen/video_dp10">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -106,9 +105,9 @@
                     android:layout_height="28dp"
                     android:layout_centerVertical="true"
                     android:gravity="center"
-                    android:paddingLeft="@dimen/dp25"
+                    android:paddingLeft="@dimen/video_dp25"
                     android:text="软装设计"
-                    android:textColor="@color/white"
+                    android:textColor="@color/video_white"
                     android:textSize="@dimen/sp_16">
 
                 </TextView>
@@ -119,30 +118,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="@dimen/dp5"
+                    android:layout_marginLeft="@dimen/video_dp5"
                     android:layout_toRightOf="@+id/publisher_name"
                     android:src="@drawable/official_certification">
 
                 </ImageView>
 
-                <TextView
-                    android:id="@+id/follow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="@dimen/dp5"
-                    android:layout_marginRight="@dimen/dp5"
-                    android:layout_toRightOf="@+id/official_certification_img"
-                    android:background="@drawable/follow_bg"
-                    android:paddingLeft="@dimen/dp10"
-                    android:paddingTop="@dimen/dp5"
-                    android:paddingRight="@dimen/dp10"
-                    android:paddingBottom="@dimen/dp5"
-                    android:text="关注"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/sp_12">
-
-                </TextView>
             </RelativeLayout>
 
             <widget.CircleImageView
@@ -159,7 +140,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@+id/number_of_visitors_title"
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="@dimen/sp_12"
                 tool:text="1.1万"></TextView>
 
@@ -170,7 +151,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:text="人看过"
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="@dimen/sp_12">
 
             </TextView>
@@ -181,7 +162,7 @@
             android:id="@+id/video_flipper"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="@dimen/dp5"
+            android:layout_marginBottom="@dimen/video_dp5"
             android:autoStart="false"
             android:flipInterval="2000"
             android:inAnimation="@anim/vf_anim_in"

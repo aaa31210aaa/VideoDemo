@@ -1,13 +1,11 @@
 package ui.fragment;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +31,7 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
@@ -46,14 +45,15 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.manager.ContentBuriedPointManager;
 import com.wdcs.model.CommentModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
+import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
-import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.KeyboardUtils;
@@ -73,23 +73,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.CommentPopRvAdapter;
-import adpter.VideoAdapter;
-import adpter.VideoDetailPopChooseAdapter;
-import base.BaseResponse;
+import adpter.XkshVideoAdapter;
 import ui.activity.UploadActivity;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 
+import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
+import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static utils.NetworkUtil.setDataWifiState;
 
-public class XkshFragment extends Fragment implements View.OnClickListener{
+public class XkshFragment extends Fragment implements View.OnClickListener {
     private RecyclerView videoDetailRv;
-    public VideoAdapter adapter;
+    public XkshVideoAdapter adapter;
     private CommentPopRvAdapter commentPopRvAdapter;
     //视频列表数据
     public List<DataDTO> mDatas = new ArrayList<>();
@@ -122,15 +123,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
     private RelativeLayout videoDetailWhiteCommentRl;
     //选择集数弹窗
     public CustomPopWindow choosePop;
-    private RecyclerView videoDetailChoosePopRv;
-    private VideoDetailPopChooseAdapter videoDetailPopChooseAdapter;
-    private List<DataDTO> choosePopDatas;
 
     public ViewPagerLayoutManager xkshManager;
     private ImageView choosePopDismiss;
-    public RefreshLayout refreshLayout;
+    public SmartRefreshLayout refreshLayout;
     private String transformationToken = "";
-    private String panelId = "";
+    private String panelCode = "";
     private RelativeLayout commentListEmptyRl;
     private String recordContentId;//记录的内容id
     private boolean initialize = true;
@@ -171,17 +169,22 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
     private ViewGroup rlLp;
     private VideoChannelModel videoChannelModel;
 
-    private static final String PANELID = "panelId";
     private VideoChannelModel channelModel;
     private Bundle args;
-    private boolean mIsVisibleToUser;
+    public boolean mIsVisibleToUser;
     private SlidingTabLayout mVideoTab;
     public RelativeLayout mVideoTitleView;
     private LinearLayout shotAlike;
     private LoadingView loadingProgress;
     private RelativeLayout.LayoutParams lp;
     private boolean isFollow; //是否关注
-
+    public ImageView rankList; //排行榜
+    public ImageView activityRuleImg; //活动规则图
+    public ImageView activityRuleAbbreviation;
+    public ImageView activityToAbbreviation; //变为缩略图按钮
+    public LinearLayout fullLin;
+    public float pointPercent;                         // 每一次记录的节点播放百分比
+    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
 
     public XkshFragment(SlidingTabLayout videoTab, RelativeLayout videoTitleView, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -191,7 +194,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
 
     public XkshFragment newInstance(XkshFragment fragment, VideoChannelModel videoChannelModel) {
         args = new Bundle();
-        args.putString(PANELID, videoChannelModel.getColumnBean().getPanelId());
+        args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         fragment.setArguments(args);
         return fragment;
     }
@@ -200,7 +203,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            panelId = getArguments().getString(PANELID);
+            panelCode = getArguments().getString(PANELCODE);
         }
     }
 
@@ -211,7 +214,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         View view = inflater.inflate(R.layout.fragment_xksh, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        getPullDownData(String.valueOf(mVideoSize), panelId, "false");
+        getPullDownData(String.valueOf(mVideoSize), panelCode, "false");
         return view;
     }
 
@@ -233,41 +236,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         collectionNum = view.findViewById(R.id.collection_num);
         shotAlike = view.findViewById(R.id.shot_alike);
         shotAlike.setOnClickListener(this);
+        rankList = view.findViewById(R.id.rank_list);
+        rankList.setOnClickListener(this);
+        activityRuleImg = view.findViewById(R.id.activity_rule_img);
+        activityRuleImg.setOnClickListener(this);
+        activityToAbbreviation = view.findViewById(R.id.activity_to_abbreviation);
+        activityToAbbreviation.setOnClickListener(this);
+        activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
+        activityRuleAbbreviation.setOnClickListener(this);
         xkshManager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(xkshManager);
-        adapter = new VideoAdapter(R.layout.video_item_layout, mDatas, getActivity(), playerView);
-        /**
-         * 无wifi 继续播放点击
-         */
-        adapter.setToAddPlayerViewClick(new VideoAdapter.ToAddPlayerViewClick() {
-            @Override
-            public void clickNoWifi(int position) {
-                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
-                for (int i = 0; i < mDatas.size(); i++) {
-                    mDatas.get(i).setWifi(true);
-                }
-                addPlayView(position);
-                adapter.notifyDataSetChanged();
-            }
-        });
-
-        /**
-         * 关注按钮
-         */
-        adapter.setFollowViewClick(new VideoAdapter.FollowViewClick() {
-            @Override
-            public void followClick(int position) {
-                if (isFollow) {
-                    //调用取消关注接口
-                    cancelFollow(mDatas.get(position).getCreateBy());
-                } else {
-                    //调用关注接口
-                    toFollow(mDatas.get(position).getCreateBy());
-                }
-            }
-        });
-        adapter.openLoadAnimation();
-        videoDetailRv.setAdapter(adapter);
 
         setSoftKeyBoardListener();
         xkshManager.setOnViewPagerListener(new OnViewPagerListener() {
@@ -293,6 +271,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                 myContentId = String.valueOf(mDatas.get(0).getId());
 //                addPageViews(myContentId);
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
+                    OkGo.getInstance().cancelTag("contentState");
                     getContentState(myContentId);
                 }
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
@@ -313,12 +292,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
                 rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
-//                OkGo.getInstance().cancelTag(recommendTag);
+                OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
                 if (mIsVisibleToUser) {
                     getRecommend(myContentId, 0);
                 }
-                initChoosePop();
+//                initChoosePop();
             }
 
             @Override
@@ -344,12 +323,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                 playerView.mWindowPlayer.setIsTurnPages(true);
                 playerView.mFullScreenPlayer.setIsTurnPages(true);
                 currentIndex = position;
-                choosePopDatas.clear();
                 reset();
                 myContentId = String.valueOf(mDatas.get(position).getId());
+                //重置重播标识
+                playerView.buriedPointModel.setIs_renew("false");
                 addPageViews(myContentId);
-
-                videoDetailPopChooseAdapter.setContentId(myContentId);
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
                 if (mDatas.get(position).getDisableComment()) {
@@ -384,7 +362,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         videoDetailLikes = view.findViewById(R.id.video_detail_likes);
         videoDetailLikes.setOnClickListener(this);
 
-        contentView = View.inflate(getActivity(), R.layout.video_detail_comment_pop, null);
+        contentView = View.inflate(getActivity(), R.layout.fragment_video_comment_pop, null);
         sendPopContentView = View.inflate(getActivity(), R.layout.layout_input_window, null);
         commentPopCommentTotal = contentView.findViewById(R.id.comment_pop_comment_total);
         edtParent = sendPopContentView.findViewById(R.id.edt_parent);
@@ -432,7 +410,43 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         videoDetailCommentBtn.setOnClickListener(this);
         videoDetailWhiteCommentRl = view.findViewById(R.id.video_detail_white_comment_rl);
         videoDetailWhiteCommentRl.setOnClickListener(this);
+        adapter = new XkshVideoAdapter(R.layout.xksh_video_item_layout, mDatas, getActivity(),
+                playerView, refreshLayout, videoDetailCommentBtn, xkshManager);
+        adapter.setPreLoadNumber(2);
+        adapter.openLoadAnimation();
+        adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
+        /**
+         * 无wifi 继续播放点击
+         */
+        adapter.setToAddPlayerViewClick(new XkshVideoAdapter.ToAddPlayerViewClick() {
+            @Override
+            public void clickNoWifi(int position) {
+                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
+                for (int i = 0; i < mDatas.size(); i++) {
+                    mDatas.get(i).setWifi(true);
+                }
+                addPlayView(position);
+                adapter.notifyDataSetChanged();
+            }
+        });
 
+        /**
+         * 关注按钮
+         */
+        adapter.setFollowViewClick(new XkshVideoAdapter.FollowViewClick() {
+            @Override
+            public void followClick(int position) {
+                if (isFollow) {
+                    //调用取消关注接口
+                    cancelFollow(mDatas.get(position).getCreateBy());
+                } else {
+                    //调用关注接口
+                    toFollow(mDatas.get(position).getCreateBy());
+                }
+            }
+        });
+
+        videoDetailRv.setAdapter(adapter);
     }
 
     /**
@@ -454,9 +468,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
             addPlayView(currentIndex);
         } else {
             playerView.mSuperPlayer.pause();
-            if (null != playerView && null != playerView.getParent()) {
-                ((ViewGroup) playerView.getParent()).removeView(playerView);
-            }
         }
     }
 
@@ -474,7 +485,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        LinearLayout fullLin = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.superplayer_iv_fullscreen);
+        fullLin = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.superplayer_iv_fullscreen);
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
@@ -522,12 +533,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         RelativeLayout item = new RelativeLayout(getActivity());
         playerView.setTag(position);
-        playerView.setBackgroundColor(getResources().getColor(R.color.black));
+        playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
 
         item.addView(playerView, itemLp);
         if (rlLp != null && mIsVisibleToUser) {
             linearLayout.setVisibility(View.VISIBLE);
             rlLp.addView(item, 0, lp);
+            //露出即上报
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
     }
@@ -538,12 +551,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
+                    playerView.mSuperPlayer.pause();
+                }
                 isLoadComplate = false;
                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
-                getPullDownData(String.valueOf(mVideoSize), panelId, "false");
+                getPullDownData(String.valueOf(mVideoSize), panelCode, "false");
             }
         });
-        adapter.setPreLoadNumber(2);
         requestLoadMoreListener = new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
@@ -555,13 +570,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                                 adapter.loadMoreFail();
                                 return;
                             }
-                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", panelId, "true");
+                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true");
                         }
                     });
                 }
             }
         };
-        adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
     }
 
     /**
@@ -572,7 +586,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
      */
     private String videoIsNormal(int videoWidth, int videoHeight) {
         if (videoWidth == 0 && videoHeight == 0) {
-            return "0";
+            return "2";
         }
 
         if (videoWidth > videoHeight) {
@@ -635,28 +649,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         }, commentPopRv);
     }
 
-    private void initChoosePop() {
-        choosePopDatas = new ArrayList<>();
-        chooseContentView = View.inflate(getActivity(), R.layout.video_detail_choose_pop, null);
-        choosePopDismiss = chooseContentView.findViewById(R.id.choose_pop_dismiss);
-        choosePopDismiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (null != choosePop) {
-                    choosePop.dissmiss();
-                }
-            }
-        });
-        videoDetailChoosePopRv = chooseContentView.findViewById(R.id.video_detail_choose_pop_rv);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 6);
-        videoDetailChoosePopRv.setLayoutManager(gridLayoutManager);
-
-        videoDetailPopChooseAdapter = new VideoDetailPopChooseAdapter(R.layout.video_detail_choose_pop_rv_item,
-                getActivity(), choosePopDatas, videoDetailChoosePopRv, myContentId, playerView);
-        videoDetailChoosePopRv.setAdapter(videoDetailPopChooseAdapter);
-        videoDetailPopChooseAdapter.notifyDataSetChanged();
-
-    }
 
     /**
      * 评论列表弹出框
@@ -780,18 +772,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
     /**
      * 获取下拉列表数据
      *
-     * @param panelId
      * @param removeFirst
      */
-    private void getPullDownData(String pageSize, String panelId, String removeFirst) {
+    private void getPullDownData(String pageSize, String panelCode, String removeFirst) {
         if (null != playerView && null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
         mDatas.clear();
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .params("pageSize", pageSize)
-                .params("panelId", panelId)
+                .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
@@ -810,6 +801,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                             }
 
                             mDatas.addAll(response.body().getData());
+                            for (int i = 0; i < mDatas.size(); i++) {
+                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+                                mDatas.get(i).setVideoType(videoType);
+                                mDatas.get(i).setFollowShow(true);
+                            }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
                             if (mDatas.size() > 0) {
@@ -825,9 +822,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                         if (null != refreshLayout) {
                             refreshLayout.finishRefresh();
                         }
-                        if (null != playerView) {
-                            playerView.resetPlayer();
-                        }
+//                        if (null != playerView) {
+//                            playerView.resetPlayer();
+//                        }
                     }
 
                     @Override
@@ -850,13 +847,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
     /**
      * 获取更多数据
      */
-    private void loadMoreData(String url, String contentId, String panelId, String removeFirst) {
+    private void loadMoreData(String url, String contentId, String panelCode, String removeFirst) {
 
         OkGo.<VideoDetailModel>get(url)
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .params("contentId", contentId)
                 .params("pageSize", 10)
-                .params("panelId", panelId)
+                .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
@@ -913,49 +910,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                 });
     }
 
-    /**
-     * 获取视频合集
-     */
-    public void getVideoCollection(final String pid) {
-        if (choosePopDatas.size() > 0) {
-            showChoosePop();
-        } else {
-            OkGo.<VideoCollectionModel>get(ApiConstants.getInstance().getVideoCollectionUrl() + pid)
-                    .tag(videoTag)
-                    .execute(new JsonCallback<VideoCollectionModel>(VideoCollectionModel.class) {
-                        @Override
-                        public void onSuccess(Response<VideoCollectionModel> response) {
-                            if (null == response.body()) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
-
-                            if (response.body().getCode().equals("200")) {
-                                if (null == response.body().getDatas()) {
-                                    ToastUtils.showShort(R.string.data_err);
-                                    return;
-                                }
-                                choosePopDatas.clear();
-                                choosePopDatas.addAll(response.body().getDatas().getChildren());
-                                videoDetailPopChooseAdapter.setNewData(choosePopDatas);
-                                showChoosePop();
-                            } else {
-                                ToastUtils.showShort(response.body().getMessage());
-                            }
-                        }
-
-                        @Override
-                        public void onError(Response<VideoCollectionModel> response) {
-                            if (null != response.body()) {
-                                ToastUtils.showShort(response.body().getMessage());
-                                return;
-                            }
-                            ToastUtils.showShort(R.string.net_err);
-                        }
-                    });
-        }
-    }
-
 
     /**
      * 获取评论列表
@@ -972,7 +926,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         }
 
         OkGo.<CommentModel>post(ApiConstants.getInstance().getCommentListUrl())
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1037,7 +991,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addComment())
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1104,7 +1058,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
      */
     public void getContentState(String contentId) {
         OkGo.<ContentStateModel>get(ApiConstants.getInstance().queryStatsData())
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .params("contentId", contentId)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1168,7 +1122,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
     /**
      * 设置关注
      */
-    private void setFollowView(String whetherFollow){
+    private void setFollowView(String whetherFollow) {
         /**
          * 设置关注
          */
@@ -1375,7 +1329,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
      */
     private void addPageViews(String contentId) {
         OkGo.<String>post(ApiConstants.getInstance().addViews() + contentId)
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new StringCallback() {
 
@@ -1446,7 +1400,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         }
 
         OkGo.<TokenModel>post(ApiConstants.getInstance().mycsToken())
-                .tag(videoTag)
+                .tag(VIDEOTAG)
                 .upJson(jsonObject)
                 .execute(new JsonCallback<TokenModel>(TokenModel.class) {
                     @Override
@@ -1496,6 +1450,30 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
         super.onPause();
         if (playerView != null) {
             playerView.mSuperPlayer.pause();
+        }
+
+        //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
+        if (mDuration != 0) {
+            /**
+             * 上报内容埋点 视频播放时长
+             * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+             */
+            if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
+                return;
+            }
+            everyOneDuration = playerView.mWindowPlayer.mProgress - playerView.mWindowPlayer.getRecordDuration();
+            pointPercent = everyOneDuration / mDuration;
+            playerView.mWindowPlayer.setRecordDuration(mDuration);
+            String event;
+            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                //不为重播
+                event = Constants.CMS_VIDEO_OVER;
+            } else {
+                //重播
+                event = Constants.CMS_VIDEO_OVER_AUTO;
+            }
+            //上报埋点
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, String.valueOf(everyOneDuration), String.valueOf(pointPercent), event), event);
         }
     }
 
@@ -1603,7 +1581,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
             } else {
                 startActivity(new Intent(getActivity(), UploadActivity.class));
             }
-
+        } else if (id == R.id.rank_list) {
+            //跳转H5排行榜
+            try {
+                param.recommendUrl(Constants.RANKING_LIST);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1723,12 +1707,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                     @Override
                     public void onError(Response<RecommendModel> response) {
                         super.onError(response);
-                        loadingProgress.setVisibility(View.GONE);
-                        if (SPUtils.isVisibleNoWifiView(getActivity())) {
-                            SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
-                        } else {
-                            addPlayView(position);
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                            return;
                         }
+                        ToastUtils.showShort(R.string.net_err);
                     }
 
                     @Override
@@ -1752,21 +1735,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
             playerView.release();
             playerView.mSuperPlayer.destroy();
         }
-        OkGo.getInstance().cancelAll();
     }
 
     /**
      * 关注
+     *
      * @param targetUserId
      */
-    private void toFollow(String targetUserId){
-        OkGo.<BaseResponse>post(ApiConstants.getInstance().toFollow())
+    private void toFollow(String targetUserId) {
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow())
                 .tag(VIDEOTAG)
                 .params("targetUserId", targetUserId)
-                .execute(new JsonCallback<BaseResponse>() {
+                .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
-                    public void onSuccess(Response<BaseResponse> response) {
-                        if (TextUtils.equals("200",response.body().getCode())) {
+                    public void onSuccess(Response<TrackingUploadModel> response) {
+                        if (200 == response.body().getCode()) {
                             setFollowView("true");
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
@@ -1774,7 +1757,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                     }
 
                     @Override
-                    public void onError(Response<BaseResponse> response) {
+                    public void onError(Response<TrackingUploadModel> response) {
                         super.onError(response);
                         if (null != response.body()) {
                             ToastUtils.showShort(response.body().getMessage());
@@ -1791,16 +1774,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
 
     /**
      * 取消关注
+     *
      * @param targetUserId
      */
-    private void cancelFollow(String targetUserId){
-        OkGo.<BaseResponse>post(ApiConstants.getInstance().toFollow())
+    private void cancelFollow(String targetUserId) {
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow())
                 .tag(VIDEOTAG)
                 .params("targetUserId", targetUserId)
-                .execute(new JsonCallback<BaseResponse>() {
+                .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
-                    public void onSuccess(Response<BaseResponse> response) {
-                        if (TextUtils.equals("200",response.body().getCode())) {
+                    public void onSuccess(Response<TrackingUploadModel> response) {
+                        if (200 == response.body().getCode()) {
                             setFollowView("false");
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
@@ -1808,7 +1792,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener{
                     }
 
                     @Override
-                    public void onError(Response<BaseResponse> response) {
+                    public void onError(Response<TrackingUploadModel> response) {
                         super.onError(response);
                         if (null != response.body()) {
                             ToastUtils.showShort(response.body().getMessage());

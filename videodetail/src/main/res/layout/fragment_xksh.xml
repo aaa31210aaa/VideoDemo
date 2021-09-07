@@ -5,7 +5,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/video_black"
     android:keepScreenOn="true"
     android:orientation="vertical"
     tools:context="ui.activity.VideoDetailActivity">
@@ -47,6 +47,47 @@
         <!--            android:layout_height="wrap_content" />-->
     </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
+    <ImageView
+        android:id="@+id/rank_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/video_title_view"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="120dp"
+        android:layout_marginRight="@dimen/video_dp5"
+        android:src="@drawable/ranking_list"></ImageView>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/video_title_view">
+
+        <ImageView
+            android:id="@+id/activity_rule_abbreviation"
+            android:layout_width="30dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="120dp"
+            android:visibility="gone"
+            >
+
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/activity_rule_img"
+            android:layout_width="100dp"
+            android:layout_height="@dimen/video_dp50"
+            android:layout_marginTop="120dp"></ImageView>
+
+        <ImageView
+            android:id="@+id/activity_to_abbreviation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="70dp"
+            android:padding="@dimen/video_dp20"
+            android:layout_marginTop="110dp"></ImageView>
+
+    </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/video_detail_comment_btn"
         android:layout_width="match_parent"
@@ -66,7 +107,7 @@
                 android:layout_marginTop="15dp"
                 android:paddingRight="5dp"
                 android:text="最新评论"
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="12sp">
 
             </TextView>
@@ -77,7 +118,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:text=""
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="10sp">
 
             </TextView>
@@ -96,7 +137,7 @@
                 android:id="@+id/video_detail_white_comment_rl"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/dp10"
+                android:layout_marginRight="@dimen/video_dp10"
                 android:layout_weight="1"
                 android:background="@drawable/shape_input_bg"
                 android:paddingLeft="10dp"

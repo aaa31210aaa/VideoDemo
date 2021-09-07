@@ -75,6 +75,7 @@ public  class DataDTO {
     private Boolean isClosed;
     private String videoType;
     private String createBy;
+    private boolean followShow;
 
     public String getShareTitle() {
         if (null == shareTitle) {
@@ -910,6 +911,14 @@ public  class DataDTO {
 
     public void setCreateBy(String createBy) {
         this.createBy = createBy;
+    }
+
+    public boolean isFollowShow() {
+        return followShow;
+    }
+
+    public void setFollowShow(boolean followShow) {
+        this.followShow = followShow;
     }
 
     @Keep

@@ -18,7 +18,7 @@ public class ColumnModel implements Serializable {
     private String crtUserCode;
     private String id;
     private String isDefault;
-    private String panelId;
+    private String panelCode;
 
     public String getSkipUrl() {
         return skipUrl;
@@ -224,11 +224,11 @@ public class ColumnModel implements Serializable {
         this.updUserCode = updUserCode;
     }
 
-    public String getPanelId() {
-        return panelId;
+    public String getPanelCode() {
+        return panelCode;
     }
 
-    public void setPanelId(String panelId) {
-        this.panelId = panelId;
+    public void setPanelCode(String panelCode) {
+        this.panelCode = panelCode;
     }
 }

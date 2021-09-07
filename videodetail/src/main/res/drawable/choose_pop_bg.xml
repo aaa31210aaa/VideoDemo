@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     tools:ignore="MissingDefaultResource">
 
-    <corners android:radius="@dimen/dp_10"></corners>
+    <corners android:radius="@dimen/video_dp10"></corners>
     <solid android:color="@color/choose_pop_bg"></solid>
 </shape>

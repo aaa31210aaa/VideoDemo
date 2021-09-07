@@ -14,12 +14,11 @@ import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
 
 import ui.activity.VideoDetailActivity;
-import ui.activity.VideoDetailSimpleActivity;
-import ui.activity.VideoMainActivity;
+import ui.activity.VideoHomeActivity;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv;
-    private EditText panelId;
+    private EditText panelCode;
     private EditText contentId;
     private TextView fxsys;
     private TextView setCode;
@@ -29,15 +28,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tv = findViewById(R.id.tv);
-        panelId = findViewById(R.id.panelid);
-        panelId.setText("48662");
+        panelCode = findViewById(R.id.panelid);
+        panelCode.setText("48662");
         contentId = findViewById(R.id.contentid);
         fxsys = findViewById(R.id.fxsys);
 
         fxsys.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, VideoDetailSimpleActivity.class);
+                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
                 intent.putExtra("contentId", "93459");
                 startActivity(intent);
             }
@@ -70,8 +69,13 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void buriedPoint(BuriedPointModel buriedPointModel) {
+                    public void trackingPoint(BuriedPointModel buriedPointModel) {
 
+                    }
+
+                    @Override
+                    public String setDeviceId() {
+                        return "998877665544332212";
                     }
                 });
             }
@@ -80,8 +84,8 @@ public class MainActivity extends AppCompatActivity {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, VideoMainActivity.class);
-                intent.putExtra("panelId", panelId.getText().toString());
+                Intent intent = new Intent(MainActivity.this, VideoHomeActivity.class);
+                intent.putExtra("panelId", panelCode.getText().toString());
                 intent.putExtra("contentId", contentId.getText().toString());
                 startActivity(intent);
             }

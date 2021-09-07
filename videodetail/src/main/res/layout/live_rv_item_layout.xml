@@ -35,10 +35,10 @@
         android:id="@+id/live_item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/dp_10"
-        android:background="@color/black"
-        android:padding="@dimen/dp_10"
-        android:textColor="@color/white"
+        android:layout_marginBottom="@dimen/video_dp10"
+        android:background="@color/video_black"
+        android:padding="@dimen/video_dp10"
+        android:textColor="@color/video_white"
         android:textSize="17sp"
         tool:text="直播间：互动聊天留言">
 

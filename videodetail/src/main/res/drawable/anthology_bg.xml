@@ -4,5 +4,5 @@
     tools:ignore="MissingDefaultResource">
 
     <corners android:radius="20dp"></corners>
-    <solid android:color="@color/white"></solid>
+    <solid android:color="@color/video_white"></solid>
 </shape>

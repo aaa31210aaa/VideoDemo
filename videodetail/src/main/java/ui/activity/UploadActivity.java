@@ -2,7 +2,9 @@ package ui.activity;
 
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,33 +18,31 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
-import com.alibaba.fastjson.JSON;
 import com.bumptech.glide.Glide;
 import com.example.zhouwei.library.CustomPopWindow;
-import com.google.gson.JsonObject;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
-import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.model.Progress;
 import com.lzy.okgo.model.Response;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.http.ApiConstants;
-import com.wdcs.model.VideoCommonModel.DataDTO.RecordsDTO;
-import com.wdcs.model.VideoCommonModel.DataDTO;
+import com.wdcs.model.TopicModel;
+import com.wdcs.model.TopicModel.DataDTO.RecordsDTO;
 import com.wdcs.utils.FileUtils;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
-import com.wdcs.videodetail.demo.BR;
 import com.wdcs.videodetail.demo.R;
-import com.wdcs.videodetail.demo.databinding.ActivityUploadBinding;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
+import com.zhihu.matisse.internal.entity.IncapableCause;
+import com.zhihu.matisse.internal.entity.Item;
 import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
@@ -52,21 +52,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import base.BaseActivity;
-import config.MineViewModelFactory;
 import io.reactivex.functions.Consumer;
 import model.bean.ResponseBean;
 import model.bean.UploadVideoBean;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import viewmodel.VideoViewModel;
 
-public class UploadActivity extends BaseActivity<ActivityUploadBinding, VideoViewModel> implements View.OnClickListener {
+public class UploadActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "UploadActivity";
     /**
      * 话题标签
@@ -97,25 +94,22 @@ public class UploadActivity extends BaseActivity<ActivityUploadBinding, VideoVie
     private ImageView releaseImg;
     private boolean isSelected;
     private EditText briefIntroduction;
+    private List<RecordsDTO> uploadTagFlow;
 
     @Override
-    public int initContentView(Bundle savedInstanceState) {
-        return R.layout.activity_upload;
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_upload);
+        initView();
     }
 
-    @Override
-    public int initVariableId() {
-        return BR.viewModel;
-    }
-
-    @Override
-    public void initData() {
+    private void initView() {
         tagFlow = findViewById(R.id.uploadTagFlow);
+        uploadTagFlow = new ArrayList<>();
         uploadProgress = findViewById(R.id.upload_progress);
         uploadBtn = findViewById(R.id.upload_btn);
         uploadBtn.setOnClickListener(this);
         chooseVideoView = View.inflate(this, R.layout.mine_layout_imagetype, null);
-        chooseVideoView.findViewById(R.id.tvTakePhoto).setOnClickListener(this);
         chooseVideoView.findViewById(R.id.tvChooseImage).setOnClickListener(this);
         chooseVideoView.findViewById(R.id.tvDismiss).setOnClickListener(this);
         uploadCompleteTip = findViewById(R.id.upload_complete_tip);
@@ -126,24 +120,46 @@ public class UploadActivity extends BaseActivity<ActivityUploadBinding, VideoVie
         releaseImg = findViewById(R.id.release_img);
         releaseImg.setOnClickListener(this);
         briefIntroduction = findViewById(R.id.brief_introduction);
-        viewModel.getTopicData();
+        getTopicData();
     }
 
-    @Override
-    public VideoViewModel initViewModel() {
-        MineViewModelFactory factory = MineViewModelFactory.getInstance(getApplication());
-        return ViewModelProviders.of(this, factory).get(VideoViewModel.class);
+    /**
+     * 获取话题
+     */
+    private void getTopicData() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("activityCode", "xksh");
+            jsonObject.put("type","activity.topic");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<TopicModel>post(ApiConstants.getInstance().getTopic())
+                .tag(TAG)
+                .upJson(jsonObject)
+                .execute(new JsonCallback<TopicModel>() {
+                    @Override
+                    public void onSuccess(Response<TopicModel> response) {
+                        if (null != response.body()) {
+                            uploadTagFlow = response.body().getData().getRecords();
+                            setTagFlowData(uploadTagFlow);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<TopicModel> response) {
+                        super.onError(response);
+                        ToastUtils.showShort(response.message());
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
     }
 
-    @Override
-    public void initViewObservable() {
-        viewModel.uploadTagFlow.observe(this, new Observer<List<RecordsDTO>>() {
-            @Override
-            public void onChanged(List<RecordsDTO> recordsDTOS) {
-                setTagFlowData(recordsDTOS);
-            }
-        });
-    }
+
 
     /**
      * 获取话题数据
@@ -163,7 +179,7 @@ public class UploadActivity extends BaseActivity<ActivityUploadBinding, VideoVie
             @Override
             public boolean onTagClick(View view, int position, FlowLayout parent) {
                 Log.e("onTagClick", list.get(position).getTitle());
-                topicSelectId = list.get(position).getId();
+                topicSelectId = list.get(position).getId()+"";
                 return true;
             }
         });
@@ -185,11 +201,8 @@ public class UploadActivity extends BaseActivity<ActivityUploadBinding, VideoVie
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        if (id == R.id.tvTakePhoto) {
-            chooseVideo(true);
-            uploadVideoWindow.dissmiss();
-        } else if (id == R.id.tvChooseImage) {
-            chooseVideo(false);
+        if  (id == R.id.tvChooseImage) {
+            chooseVideo();
             uploadVideoWindow.dissmiss();
         } else if (id == R.id.tvDismiss) {
             uploadVideoWindow.dissmiss();
@@ -234,26 +247,67 @@ public class UploadActivity extends BaseActivity<ActivityUploadBinding, VideoVie
                 .setView(chooseVideoView)
                 .enableBackgroundDark(true) //弹出popWindow时，背景是否变暗
                 .setBgDarkAlpha(0.7f) // 控制亮度
-                .size(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.chooseimage_heigt))
+                .size(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .create()
                 .showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
     }
 
+//    private Set<MimeType> mimeTypes;
     /**
      * 选择视频
      *
-     * @param needTakePhoto
      */
-    private void chooseVideo(final boolean needTakePhoto) {
+    private void chooseVideo() {
         new RxPermissions(this).request(permissionsGroup).subscribe(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) throws Exception {
+//                //自定义添加所有的视频文件格式
+//                mimeTypes.add(MimeType.MP4);
+//                mimeTypes.add(MimeType.AVI);
+//                mimeTypes.add(MimeType.MKV);
+//                mimeTypes.add(MimeType.MPEG);
+//                mimeTypes.add(MimeType.QUICKTIME);
+//                mimeTypes.add(MimeType.THREEGPP);
+//                mimeTypes.add(MimeType.THREEGPP2);
+//                mimeTypes.add(MimeType.MKV);
+//                mimeTypes.add(MimeType.WEBM);
+//                mimeTypes.add(MimeType.TS);
                 if (aBoolean) {
                     Matisse.from(UploadActivity.this)
-                            .choose(MimeType.ofAll())//图片类型
+                            .choose(MimeType.ofVideo())
                             .countable(true)//true:选中后显示数字;false:选中后显示对号
                             .maxSelectable(1)//可选的最大数
-                            .capture(needTakePhoto)//选择照片时，是否显示拍照
+                            .showSingleMediaType(true)
+                            .capture(false)//选择照片时，是否显示拍照
+                            .addFilter(new Filter() {
+                                @Override
+                                protected Set<MimeType> constraintTypes() {
+                                    return new HashSet<MimeType>() {{
+                                        add(MimeType.PNG);
+                                        add(MimeType.JPEG);
+                                        add(MimeType.WEBP);
+                                    }};
+                                }
+
+                                @Override
+                                public IncapableCause filter(Context context, Item item) {
+                                    try {
+                                        InputStream inputStream = getContentResolver().openInputStream(item.getContentUri());
+                                        BitmapFactory.Options options = new BitmapFactory.Options();
+                                        options.inJustDecodeBounds = true;
+                                        BitmapFactory.decodeStream(inputStream, null, options);
+                                        int width = options.outWidth;
+                                        int height = options.outHeight;
+
+                                        if (width >= 50)
+                                            return new IncapableCause("宽度超过500px");
+
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+                                    return null;
+                                }
+                            })
                             //参数1 true表示拍照存储在共有目录，false表示存储在私有目录；参数2与 AndroidManifest中authorities值相同，用于适配7.0系统 必须设置
                             .captureStrategy(new CaptureStrategy(true, "com.changsha.apps.android.mycs"))
                             .imageEngine(new GlideEngine())//图片加载引擎

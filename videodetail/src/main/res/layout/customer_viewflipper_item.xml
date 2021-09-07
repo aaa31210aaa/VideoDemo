@@ -8,8 +8,8 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:layout_marginTop="@dimen/dp10"
-        android:layout_marginBottom="@dimen/dp10"
+        android:layout_marginTop="@dimen/video_dp10"
+        android:layout_marginBottom="@dimen/video_dp10"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="@drawable/video_flipper_bg"
@@ -19,7 +19,7 @@
             android:id="@+id/view_flipper_icon"
             android:layout_width="13dp"
             android:layout_height="13dp"
-            android:layout_marginLeft="@dimen/dp15"
+            android:layout_marginLeft="@dimen/video_dp15"
             android:layout_centerVertical="true"
              />
 
@@ -34,7 +34,7 @@
             android:maxLines="1"
             android:textColor="#ccffffff"
             android:textSize="12sp"
-            android:layout_marginLeft="@dimen/dp10"
+            android:layout_marginLeft="@dimen/video_dp10"
             android:text=""/>
 
         <ImageView
@@ -42,9 +42,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/dp10"
+            android:layout_marginLeft="@dimen/video_dp10"
             android:layout_toRightOf="@+id/view_flipper_content"
-            android:paddingRight="@dimen/dp10"
+            android:paddingRight="@dimen/video_dp10"
             android:src="@drawable/cancel_collect">
 
         </ImageView>

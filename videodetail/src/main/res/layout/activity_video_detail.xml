@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tool="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/video_black"
+    android:id="@+id/rootview"
     android:keepScreenOn="true"
-    android:orientation="vertical"
     tools:context="ui.activity.VideoDetailActivity">
 
+
+    <widget.LoadingView
+        android:id="@+id/video_loading_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+    </widget.LoadingView>
 
     <RelativeLayout
         android:id="@+id/back_ll"
@@ -22,176 +29,162 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="20dp"
-            android:paddingTop="@dimen/dp_10"
-            android:paddingBottom="@dimen/dp_10"
+            android:paddingTop="@dimen/video_dp10"
+            android:paddingBottom="@dimen/video_dp10"
             android:src="@drawable/superplayer_btn_back_play">
 
         </ImageView>
 
     </RelativeLayout>
 
-    <include
-        layout="@layout/comment_list_empty"
-        android:visibility="gone"></include>
-
-        <widget.LoadingView
-            android:id="@+id/loading_progress"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-
-        </widget.LoadingView>
-
-    <com.scwang.smart.refresh.layout.SmartRefreshLayout
-        android:id="@+id/refreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
-
-        <com.scwang.smart.refresh.header.ClassicsHeader
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/video_detail_rv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </androidx.recyclerview.widget.RecyclerView>
-
-        <!--        <com.scwang.smart.refresh.footer.ClassicsFooter-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content" />-->
-    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
     <RelativeLayout
-        android:id="@+id/video_detail_comment_btn"
+        android:id="@+id/agree_nowifi_play"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/video_detail_bottom_bg">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible">
 
         <LinearLayout
-            android:id="@+id/new_comment_title"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="200dp"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
+                android:id="@+id/no_wifi_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="15dp"
-                android:paddingRight="5dp"
-                android:text="最新评论"
-                android:textColor="@color/white"
-                android:textSize="12sp">
-
-            </TextView>
+                android:layout_marginBottom="@dimen/video_dp10"
+                android:text="@string/no_wifi"
+                android:textColor="@color/video_white"
+                android:textSize="@dimen/sp_16"></TextView>
 
             <TextView
-                android:id="@+id/comment_total"
+                android:id="@+id/continue_play"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text=""
-                android:textColor="@color/white"
-                android:textSize="10sp">
-
-            </TextView>
+                android:background="@drawable/anthology_bg"
+                android:drawableLeft="@drawable/play_wifi"
+                android:drawablePadding="@dimen/video_dp10"
+                android:padding="@dimen/video_dp10"
+                android:text="继续播放"
+                android:textColor="@color/video_black"
+                android:textSize="@dimen/sp_16"></TextView>
         </LinearLayout>
 
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
         <LinearLayout
+            android:id="@+id/superplayer_iv_fullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="260dp"
+            android:visibility="gone"
+            android:background="@drawable/full_watch_btn_bg"
+            android:padding="7dp">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/superplayer_ic_vod_fullscreen"></ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="全屏观看"
+                android:textColor="@color/video_white"
+                android:textSize="10sp"></TextView>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/introduce_lin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginRight="@dimen/video_dp10"
+        android:visibility="gone"
+        android:layout_marginBottom="@dimen/video_dp10"
+        android:orientation="vertical">
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_below="@+id/new_comment_title"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/introduce_lin"
+            android:layout_marginBottom="@dimen/video_dp10">
 
             <RelativeLayout
-                android:id="@+id/video_detail_white_comment_rl"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/dp10"
-                android:layout_weight="1"
-                android:background="@drawable/shape_input_bg"
-                android:paddingLeft="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp">
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/publisher_bg">
 
                 <TextView
-                    android:id="@+id/comment_edittext"
+                    android:id="@+id/publisher_name"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/white_comment_icon"
-                    android:drawablePadding="10dp"
-                    android:text="写评论..."
-                    android:textColor="@color/white">
+                    android:layout_height="28dp"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/video_dp25"
+                    android:text=""
+                    android:textColor="@color/video_white"
+                    android:textSize="@dimen/sp_16">
 
                 </TextView>
 
 
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/video_detail_collection"
-                android:layout_width="60dp"
-                android:layout_height="match_parent"
-                android:gravity="right">
-
                 <ImageView
-                    android:id="@+id/video_detail_collection_image"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:layout_marginRight="20dp"
-                    android:src="@drawable/collection_unseletct"></ImageView>
-            </LinearLayout>
-
-            <RelativeLayout
-                android:id="@+id/video_detail_likes"
-                android:layout_width="60dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/video_detail_likes_image"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:id="@+id/official_certification_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="20dp"
-                    android:src="@drawable/likes_unselect">
+                    android:visibility="gone"
+                    android:layout_marginLeft="@dimen/video_dp5"
+                    android:layout_toRightOf="@+id/publisher_name"
+                    android:src="@drawable/official_certification">
 
                 </ImageView>
 
-                <TextView
-                    android:id="@+id/likes_num"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="38dp"
-                    android:layout_marginTop="8dp"
-                    android:text=""
-                    android:textColor="@color/c9"
-                    android:textSize="6sp">
-
-                </TextView>
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/share"
-                android:layout_width="50dp"
-                android:layout_height="match_parent">
+            <widget.CircleImageView
+                android:id="@+id/publisher_headimg"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_centerInParent="true"
-                    android:layout_marginRight="@dimen/dp_10"
-                    android:src="@drawable/share_icon"></ImageView>
-            </RelativeLayout>
-        </LinearLayout>
-    </RelativeLayout>
+            </widget.CircleImageView>
+        </RelativeLayout>
 
-</LinearLayout>
+        <widget.SpannableTextView
+            android:id="@+id/fold_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/p80_opacity_white"
+            android:textSize="15sp">
+
+        </widget.SpannableTextView>
+
+        <TextView
+            android:id="@+id/expend_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/p80_opacity_white"
+            android:textSize="15sp"
+            android:visibility="gone"></TextView>
+
+    </LinearLayout>
+
+</RelativeLayout>

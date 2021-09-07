@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,6 +30,7 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
@@ -44,14 +44,15 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.manager.ContentBuriedPointManager;
 import com.wdcs.model.CommentModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
+import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
-import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.KeyboardUtils;
@@ -70,25 +71,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.CommentPopRvAdapter;
-import adpter.VideoAdapter;
-import adpter.VideoDetailPopChooseAdapter;
-import base.BaseResponse;
-import ui.activity.VideoDetailActivity;
+import adpter.VideoDetailAdapter;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.utils.NoScrollViewPager;
 
-import static com.wdcs.constants.Constants.PANELID;
+import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
+import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailFragment extends Fragment implements View.OnClickListener {
     private RecyclerView videoDetailRv;
-    public VideoAdapter adapter;
+    public VideoDetailAdapter adapter;
     private CommentPopRvAdapter commentPopRvAdapter;
     //视频列表数据
     public List<DataDTO> mDatas = new ArrayList<>();
@@ -127,14 +127,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     //选择集数弹窗
     public CustomPopWindow choosePop;
     private RecyclerView videoDetailChoosePopRv;
-    private VideoDetailPopChooseAdapter videoDetailPopChooseAdapter;
-    private List<DataDTO> choosePopDatas;
 
     public ViewPagerLayoutManager videoDetailmanager;
     private ImageView choosePopDismiss;
-    public RefreshLayout refreshLayout;
+    public SmartRefreshLayout refreshLayout;
     private String transformationToken = "";
-    private String panelId = "";
+    private String panelCode = "";
     private RelativeLayout commentListEmptyRl;
     private String recordContentId;//记录的内容id
     private boolean initialize = true;
@@ -176,12 +174,15 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
     private VideoChannelModel channelModel;
     private Bundle args;
-    private boolean videoFragmentIsVisibleToUser;
+    public boolean videoFragmentIsVisibleToUser;
     private SlidingTabLayout mVideoTab;
     public RelativeLayout mVideoTitleView;
     private RelativeLayout.LayoutParams lp;
     private LoadingView loadingProgress;
     private boolean isFollow; //是否关注
+    public LinearLayout fullLin;
+    public double pointPercent;                         // 每一次记录的节点播放百分比
+    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
 
 
     public VideoDetailFragment(SlidingTabLayout videoTab, RelativeLayout videoTitleView, SuperPlayerView mPlayerView) {
@@ -192,7 +193,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
     public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel) {
         args = new Bundle();
-        args.putString(PANELID, videoChannelModel.getColumnBean().getPanelId());
+        args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         fragment.setArguments(args);
         return fragment;
     }
@@ -201,7 +202,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            panelId = getArguments().getString(PANELID);
+            panelCode = getArguments().getString(PANELCODE);
         }
     }
 
@@ -212,7 +213,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_video_detail, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        getPullDownData(mVideoSize, panelId, "false", Constants.SSID, Constants.REFRESH_TYPE);
+        getPullDownData(mVideoSize, panelCode, "false", Constants.SSID, Constants.REFRESH_TYPE);
         return view;
     }
 
@@ -234,44 +235,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         likesNum = view.findViewById(R.id.likes_num);
         collectionNum = view.findViewById(R.id.collection_num);
 
-
         videoDetailmanager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(videoDetailmanager);
-        adapter = new VideoAdapter(R.layout.video_item_layout, mDatas, getActivity(), playerView);
-
-        /**
-         * 无wifi 继续播放点击
-         */
-        adapter.setToAddPlayerViewClick(new VideoAdapter.ToAddPlayerViewClick() {
-            @Override
-            public void clickNoWifi(int position) {
-                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
-                for (int i = 0; i < mDatas.size(); i++) {
-                    mDatas.get(i).setWifi(true);
-                }
-                addPlayView(position);
-                adapter.notifyDataSetChanged();
-            }
-        });
-
-        /**
-         * 关注按钮
-         */
-        adapter.setFollowViewClick(new VideoAdapter.FollowViewClick() {
-            @Override
-            public void followClick(int position) {
-                if (isFollow) {
-                    //调用取消关注接口
-                    cancelFollow(mDatas.get(position).getCreateBy());
-                } else {
-                    //调用关注接口
-                    toFollow(mDatas.get(position).getCreateBy());
-                }
-            }
-        });
-
-        adapter.openLoadAnimation();
-        videoDetailRv.setAdapter(adapter);
 
         setSoftKeyBoardListener();
         videoDetailmanager.setOnViewPagerListener(new OnViewPagerListener() {
@@ -288,7 +253,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     return;
                 }
                 mDataDTO = mDatas.get(0);
-//                playerView = SuperPlayerView.getInstance(getActivity(), decorView);
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
                 playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
                 playerView.mWindowPlayer.setIsTurnPages(false);
@@ -297,6 +261,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 myContentId = String.valueOf(mDatas.get(0).getId());
                 addPageViews(myContentId);
                 if (!PersonInfoManager.getInstance().isRequestToken()) {
+                    OkGo.getInstance().cancelTag("contentState");
                     getContentState(myContentId);
                 }
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
@@ -317,13 +282,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 videoType = mDatas.get(0).getType();
                 Log.e("T8000", "onInitComplete");
                 rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
-//                OkGo.getInstance().cancelTag(recommendTag);
+                OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
                 if (videoFragmentIsVisibleToUser) {
                     getRecommend(myContentId, 0);
                 }
 
-                initChoosePop();
+//                initChoosePop();
 
             }
 
@@ -341,6 +306,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 if (null != playerView.getTag() && position == (int) playerView.getTag()) {
                     return;
                 }
+                //露出 即上报
+//              ContentBuriedPointManager.setContentBuriedPoint();
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
@@ -349,12 +316,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 playerView.mFullScreenPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
                 playerView.mWindowPlayer.setIsTurnPages(true);
                 currentIndex = position;
-                choosePopDatas.clear();
+//                choosePopDatas.clear();
                 reset();
                 myContentId = String.valueOf(mDatas.get(position).getId());
+                //重置重播标识
+                playerView.buriedPointModel.setIs_renew("false");
                 addPageViews(myContentId);
-
-                videoDetailPopChooseAdapter.setContentId(myContentId);
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
                 if (mDatas.get(position).getDisableComment()) {
@@ -432,12 +399,32 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         commentEdtInput = contentView.findViewById(R.id.comment_edtInput);
         commentPopRl = contentView.findViewById(R.id.comment_pop_rl);
         commentPopRl.setOnClickListener(this);
-        initCommentPopRv();
         videoDetailCommentBtn = view.findViewById(R.id.video_detail_comment_btn);
         videoDetailCommentBtn.setOnClickListener(this);
         videoDetailWhiteCommentRl = view.findViewById(R.id.video_detail_white_comment_rl);
         videoDetailWhiteCommentRl.setOnClickListener(this);
+        initCommentPopRv();
+        adapter = new VideoDetailAdapter(R.layout.video_fragment_item, mDatas, getActivity(),
+                playerView, refreshLayout, videoDetailCommentBtn, videoDetailmanager);
+        adapter.setPreLoadNumber(2);
+        adapter.openLoadAnimation();
+        adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
+        /**
+         * 无wifi 继续播放点击
+         */
+        adapter.setToAddPlayerViewClick(new VideoDetailAdapter.ToAddPlayerViewClick() {
+            @Override
+            public void clickNoWifi(int position) {
+                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
+                for (int i = 0; i < mDatas.size(); i++) {
+                    mDatas.get(i).setWifi(true);
+                }
+                addPlayView(position);
+                adapter.notifyDataSetChanged();
+            }
+        });
 
+        videoDetailRv.setAdapter(adapter);
     }
 
     /**
@@ -459,9 +446,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             addPlayView(currentIndex);
         } else {
             playerView.mSuperPlayer.pause();
-            if (null != playerView && null != playerView.getParent()) {
-                ((ViewGroup) playerView.getParent()).removeView(playerView);
-            }
         }
     }
 
@@ -477,7 +461,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        LinearLayout fullLin = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.superplayer_iv_fullscreen);
+        fullLin = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.superplayer_iv_fullscreen);
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
@@ -522,12 +506,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         RelativeLayout item = new RelativeLayout(getActivity());
         playerView.setTag(position);
-        playerView.setBackgroundColor(getResources().getColor(R.color.black));
+        playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
 
         item.addView(playerView, itemLp);
         if (rlLp != null && videoFragmentIsVisibleToUser) {
-            linearLayout.setVisibility(View.VISIBLE);
             rlLp.addView(item, 0, lp);
+            linearLayout.setVisibility(View.VISIBLE);
+            //露出即上报
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
     }
@@ -541,7 +527,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     private String videoIsNormal(int videoWidth, int videoHeight) {
         if (videoWidth == 0 && videoHeight == 0) {
-            return "0";
+            return "2";
         }
 
         if (videoWidth > videoHeight) {
@@ -582,12 +568,15 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
+                    playerView.mSuperPlayer.pause();
+                }
                 isLoadComplate = false;
                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
-                getPullDownData(mVideoSize, panelId, "false", Constants.SSID, Constants.REFRESH_TYPE);
+                getPullDownData(mVideoSize, panelCode, "false", Constants.SSID, Constants.REFRESH_TYPE);
             }
         });
-        adapter.setPreLoadNumber(2);
+
         requestLoadMoreListener = new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
@@ -599,13 +588,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 adapter.loadMoreFail();
                                 return;
                             }
-                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", mVideoSize, panelId, "true", Constants.SSID, Constants.LOADMORE_TYPE);
+                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", mVideoSize, panelCode, "true", Constants.SSID, Constants.LOADMORE_TYPE);
                         }
                     });
                 }
             }
         };
-        adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
     }
 
 
@@ -637,28 +625,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }, commentPopRv);
     }
 
-    private void initChoosePop() {
-        choosePopDatas = new ArrayList<>();
-        chooseContentView = View.inflate(getActivity(), R.layout.video_detail_choose_pop, null);
-        choosePopDismiss = chooseContentView.findViewById(R.id.choose_pop_dismiss);
-        choosePopDismiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (null != choosePop) {
-                    choosePop.dissmiss();
-                }
-            }
-        });
-        videoDetailChoosePopRv = chooseContentView.findViewById(R.id.video_detail_choose_pop_rv);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 6);
-        videoDetailChoosePopRv.setLayoutManager(gridLayoutManager);
-
-        videoDetailPopChooseAdapter = new VideoDetailPopChooseAdapter(R.layout.video_detail_choose_pop_rv_item,
-                getActivity(), choosePopDatas, videoDetailChoosePopRv, myContentId, playerView);
-        videoDetailChoosePopRv.setAdapter(videoDetailPopChooseAdapter);
-        videoDetailPopChooseAdapter.notifyDataSetChanged();
-
-    }
 
     /**
      * 评论列表弹出框
@@ -777,10 +743,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     /**
      * 获取下拉列表数据
      *
-     * @param panelId
+     * @param panelCode
      * @param removeFirst
      */
-    private void getPullDownData(String pageSize, String panelId, String removeFirst, String ssid, String refreshType) {
+    private void getPullDownData(String pageSize, String panelCode, String removeFirst, String ssid, String refreshType) {
         if (null != playerView && null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
@@ -788,9 +754,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
                 .params("pageSize", pageSize)
-                .params("panelId", panelId)
+                .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
-                .params("ssid",ssid)
+                .params("ssid", ssid)
                 .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
@@ -809,6 +775,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             }
 
                             mDatas.addAll(response.body().getData());
+                            for (int i = 0; i < mDatas.size(); i++) {
+                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+                                mDatas.get(i).setVideoType(videoType);
+                                mDatas.get(i).setFollowShow(false);
+                            }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
                             if (mDatas.size() > 0) {
@@ -823,9 +795,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         }
                         if (null != refreshLayout) {
                             refreshLayout.finishRefresh();
-                        }
-                        if (null != playerView) {
-                            playerView.resetPlayer();
                         }
                     }
 
@@ -849,13 +818,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     /**
      * 获取更多数据
      */
-    private void loadMoreData(String url, String contentId, String pageSize, String panelId, String removeFirst, String ssid, String refreshType) {
+    private void loadMoreData(String url, String contentId, String pageSize, String panelCode, String removeFirst, String ssid, String refreshType) {
 
         OkGo.<VideoDetailModel>get(url)
                 .tag(VIDEOTAG)
                 .params("contentId", contentId)
                 .params("pageSize", pageSize)
-                .params("panelId", panelId)
+                .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
                 .params("ssid", ssid)
                 .params("refreshType", refreshType)
@@ -912,49 +881,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         refreshLayout.setEnableRefresh(true);
                     }
                 });
-    }
-
-    /**
-     * 获取视频合集
-     */
-    public void getVideoCollection(final String pid) {
-        if (choosePopDatas.size() > 0) {
-            showChoosePop();
-        } else {
-            OkGo.<VideoCollectionModel>get(ApiConstants.getInstance().getVideoCollectionUrl() + pid)
-                    .tag(VIDEOTAG)
-                    .execute(new JsonCallback<VideoCollectionModel>(VideoCollectionModel.class) {
-                        @Override
-                        public void onSuccess(Response<VideoCollectionModel> response) {
-                            if (null == response.body()) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
-
-                            if (response.body().getCode().equals("200")) {
-                                if (null == response.body().getDatas()) {
-                                    ToastUtils.showShort(R.string.data_err);
-                                    return;
-                                }
-                                choosePopDatas.clear();
-                                choosePopDatas.addAll(response.body().getDatas().getChildren());
-                                videoDetailPopChooseAdapter.setNewData(choosePopDatas);
-                                showChoosePop();
-                            } else {
-                                ToastUtils.showShort(response.body().getMessage());
-                            }
-                        }
-
-                        @Override
-                        public void onError(Response<VideoCollectionModel> response) {
-                            if (null != response.body()) {
-                                ToastUtils.showShort(response.body().getMessage());
-                                return;
-                            }
-                            ToastUtils.showShort(R.string.net_err);
-                        }
-                    });
-        }
     }
 
 
@@ -1106,7 +1032,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     public void getContentState(String contentId) {
         OkGo.<ContentStateModel>get(ApiConstants.getInstance().queryStatsData())
-                .tag(VIDEOTAG)
+                .tag("contentState")
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .params("contentId", contentId)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1164,42 +1090,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         } else {
             likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
         }
-        setFollowView(contentStateModel.getWhetherFollow());
     }
-
-    /**
-     * 设置关注
-     */
-    private void setFollowView(String whetherFollow) {
-        /**
-         * 设置关注
-         */
-        TextView followText = (TextView) adapter.getViewByPosition(currentIndex, R.id.follow);
-        String localUserId = PersonInfoManager.getInstance().getUserId();
-        String userId = mDataDTO.getCreateBy();
-        if (TextUtils.isEmpty(localUserId) && TextUtils.isEmpty(userId)) {
-            followText.setVisibility(View.VISIBLE);
-        } else {
-            if (TextUtils.equals(localUserId, userId)) {
-                //如果发布者是本人  不显示关注按钮
-                followText.setVisibility(View.GONE);
-            } else {
-                followText.setVisibility(View.VISIBLE);
-                if (TextUtils.equals(whetherFollow, "true")) {
-                    //已关注
-                    isFollow = true;
-                    followText.setText("已关注");
-                    followText.setBackgroundResource(R.drawable.followed_bg);
-                } else {
-                    //未关注
-                    isFollow = false;
-                    followText.setText("关注");
-                    followText.setBackgroundResource(R.drawable.follow_bg);
-                }
-            }
-        }
-    }
-
 
     /**
      * 收藏/取消收藏
@@ -1505,6 +1396,38 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (playerView != null) {
             playerView.mSuperPlayer.pause();
         }
+
+        /**
+         * 上报内容埋点 视频播放时长
+         * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+         */
+        if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
+            return;
+        }
+
+        //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
+        if (mDuration != 0) {
+            /**
+             * 上报内容埋点 视频播放时长
+             * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+             */
+            if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
+                return;
+            }
+            everyOneDuration = playerView.mWindowPlayer.mProgress - playerView.mWindowPlayer.getRecordDuration();
+            pointPercent = everyOneDuration / mDuration;
+            playerView.mWindowPlayer.setRecordDuration(mDuration);
+            String event;
+            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                //不为重播
+                event = Constants.CMS_VIDEO_OVER;
+            } else {
+                //重播
+                event = Constants.CMS_VIDEO_OVER_AUTO;
+            }
+            //上报埋点
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, String.valueOf(everyOneDuration), String.valueOf(pointPercent), event), event);
+        }
     }
 
     @Override
@@ -1740,76 +1663,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 });
     }
 
-    /**
-     * 关注
-     *
-     * @param targetUserId
-     */
-    private void toFollow(String targetUserId) {
-        OkGo.<BaseResponse>post(ApiConstants.getInstance().toFollow() + targetUserId)
-                .tag(VIDEOTAG)
-                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
-                .execute(new JsonCallback<BaseResponse>() {
-                    @Override
-                    public void onSuccess(Response<BaseResponse> response) {
-                        if (TextUtils.equals("200", response.body().getCode())) {
-                            setFollowView("true");
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onError(Response<BaseResponse> response) {
-                        super.onError(response);
-                        if (null != response.body()) {
-                            ToastUtils.showShort(response.body().getMessage());
-                        }
-                        ToastUtils.showShort(R.string.net_err);
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                    }
-                });
-    }
-
-    /**
-     * 取消关注
-     *
-     * @param targetUserId
-     */
-    private void cancelFollow(String targetUserId) {
-        OkGo.<BaseResponse>post(ApiConstants.getInstance().cancelFollow() + targetUserId)
-                .tag(VIDEOTAG)
-                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
-                .execute(new JsonCallback<BaseResponse>() {
-                    @Override
-                    public void onSuccess(Response<BaseResponse> response) {
-                        if (TextUtils.equals("200", response.body().getCode())) {
-                            setFollowView("false");
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onError(Response<BaseResponse> response) {
-                        super.onError(response);
-                        if (null != response.body()) {
-                            ToastUtils.showShort(response.body().getMessage());
-                        }
-                        ToastUtils.showShort(R.string.net_err);
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                    }
-                });
-    }
-
 
     @Override
     public void onDestroyView() {
@@ -1820,7 +1673,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             playerView.release();
             playerView.mSuperPlayer.destroy();
         }
-        OkGo.getInstance().cancelAll();
     }
 
 }

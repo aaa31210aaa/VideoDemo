@@ -7,7 +7,7 @@ import com.wdcs.model.ShareInfo;
 /**
  * 参数交互类
  */
-public class VideoInteractiveParam{
+public class VideoInteractiveParam {
     public VideoParamCallBack callBack;
     public static VideoInteractiveParam param;
 
@@ -73,7 +73,7 @@ public class VideoInteractiveParam{
     /**
      * 传递跳转url
      */
-    public void recommendUrl(String url) throws Exception{
+    public void recommendUrl(String url) throws Exception {
         if (callBack == null) {
             throw new Exception("获取失败,请重试");
         } else {
@@ -84,12 +84,23 @@ public class VideoInteractiveParam{
     /**
      * 传递视频埋点的信息
      */
-    public void buriedPoint(BuriedPointModel buriedPointModel) throws Exception{
+    public void trackingPoint(BuriedPointModel buriedPointModel) throws Exception {
         if (callBack == null) {
             throw new Exception("获取失败,请重试");
         } else {
-            callBack.buriedPoint(buriedPointModel);
+            callBack.trackingPoint(buriedPointModel);
         }
     }
 
+
+    /**
+     * 获取设备id
+     */
+    public String getDeviceId() throws Exception {
+        if (callBack == null) {
+            throw new Exception("获取失败,请重试");
+        } else {
+            return callBack.setDeviceId();
+        }
+    }
 }

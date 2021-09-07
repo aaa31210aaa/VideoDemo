@@ -1,29 +1,31 @@
 package com.wdcs.model;
 
+
 import java.util.List;
 
-public class VideoCommonModel {
+public class TopicModel {
 
-    private String code;
-    private String success;
+
+    private Integer code;
+    private Boolean success;
     private String message;
-    private String detail;
+    private Object detail;
     private DataDTO data;
     private String time;
 
-    public String getCode() {
+    public Integer getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(Integer code) {
         this.code = code;
     }
 
-    public String getSuccess() {
+    public Boolean getSuccess() {
         return success;
     }
 
-    public void setSuccess(String success) {
+    public void setSuccess(Boolean success) {
         this.success = success;
     }
 
@@ -35,11 +37,11 @@ public class VideoCommonModel {
         this.message = message;
     }
 
-    public String getDetail() {
+    public Object getDetail() {
         return detail;
     }
 
-    public void setDetail(String detail) {
+    public void setDetail(Object detail) {
         this.detail = detail;
     }
 
@@ -60,16 +62,16 @@ public class VideoCommonModel {
     }
 
     public static class DataDTO {
-        private String total;
+        private Integer total;
         private List<RecordsDTO> records;
-        private String pageIndex;
-        private String pageSize;
+        private Integer pageIndex;
+        private Integer pageSize;
 
-        public String getTotal() {
+        public Integer getTotal() {
             return total;
         }
 
-        public void setTotal(String total) {
+        public void setTotal(Integer total) {
             this.total = total;
         }
 
@@ -81,19 +83,19 @@ public class VideoCommonModel {
             this.records = records;
         }
 
-        public String getPageIndex() {
+        public Integer getPageIndex() {
             return pageIndex;
         }
 
-        public void setPageIndex(String pageIndex) {
+        public void setPageIndex(Integer pageIndex) {
             this.pageIndex = pageIndex;
         }
 
-        public String getPageSize() {
+        public Integer getPageSize() {
             return pageSize;
         }
 
-        public void setPageSize(String pageSize) {
+        public void setPageSize(Integer pageSize) {
             this.pageSize = pageSize;
         }
 
@@ -105,63 +107,63 @@ public class VideoCommonModel {
             private String timeDif;
             private String issueTimeStamp;
             private String startTime;
-            private String id;
-            private String readCount;
-            private String commentCountShow;
-            private String likeCountShow;
-            private String favorCountShow;
-            private String viewCountShow;
+            private Integer id;
+            private Integer createBy;
+            private Object readCount;
+            private Integer commentCountShow;
+            private Integer likeCountShow;
+            private Integer favorCountShow;
+            private Integer viewCountShow;
             private String type;
+            private Object subType;
             private String title;
             private String thumbnailUrl;
             private String brief;
             private String detailUrl;
-            private String externalUrl;
-            private String isExternal;
+            private Object externalUrl;
+            private Boolean isExternal;
             private String playUrl;
-            private String source;
-            private String keywords;
-            private String tags;
-            private String classification;
-            private String imagesUrl;
-            private String playDuration;
-            private String status;
-            private String liveStatus;
-            private String liveStartTime;
-            private String issuerId;
-            private String listStyle;
-            private String issuerName;
-            private String issuerImageUrl;
-            private String disableComment;
-            private String label;
-            private String orientation;
-            private String whetherLike;
-            private String whetherFavor;
-            private String whetherFollow;
-            private String pId;
-            private String isTop;
-            private String leftTag;
+            private Object source;
+            private Object keywords;
+            private Object tags;
+            private Object classification;
+            private Object imagesUrl;
+            private Integer playDuration;
+            private Integer status;
+            private Object liveStatus;
+            private Object liveStartTime;
+            private Object issuerId;
+            private Integer listStyle;
+            private Object issuerName;
+            private Object issuerImageUrl;
+            private Boolean disableComment;
+            private Object label;
+            private Object orientation;
+            private Boolean whetherLike;
+            private Boolean whetherFavor;
+            private Boolean whetherFollow;
+            private Object isTop;
+            private Object leftTag;
             private ExtendDTO extend;
-            private String vernier;
-            private String advert;
-            private String newsId;
-            private String belongActivityId;
+            private Object vernier;
+            private Object advert;
+            private Object newsId;
+            private Integer belongActivityId;
             private String belongActivityName;
-            private String belongTopicId;
-            private String belongTopicName;
-            private String width;
-            private String height;
+            private Object belongTopicId;
+            private Object belongTopicName;
+            private Integer width;
+            private Integer height;
             private String creatorUsername;
             private String creatorNickname;
             private String creatorHead;
-            private String creatorGender;
-            private String creatorCertMark;
-            private String creatorCertDomain;
+            private Integer creatorGender;
+            private Object creatorCertMark;
+            private Object creatorCertDomain;
             private String rejectReason;
-            private String thirdPartyId;
-            private String createBy;
-            private String thirdPartyCode;
-            private String pid;
+            private Object thirdPartyId;
+            private Object thirdPartyCode;
+            private Object pid;
 
             public String getShareTitle() {
                 return shareTitle;
@@ -219,51 +221,59 @@ public class VideoCommonModel {
                 this.startTime = startTime;
             }
 
-            public String getId() {
+            public Integer getId() {
                 return id;
             }
 
-            public void setId(String id) {
+            public void setId(Integer id) {
                 this.id = id;
             }
 
-            public String getReadCount() {
+            public Integer getCreateBy() {
+                return createBy;
+            }
+
+            public void setCreateBy(Integer createBy) {
+                this.createBy = createBy;
+            }
+
+            public Object getReadCount() {
                 return readCount;
             }
 
-            public void setReadCount(String readCount) {
+            public void setReadCount(Object readCount) {
                 this.readCount = readCount;
             }
 
-            public String getCommentCountShow() {
+            public Integer getCommentCountShow() {
                 return commentCountShow;
             }
 
-            public void setCommentCountShow(String commentCountShow) {
+            public void setCommentCountShow(Integer commentCountShow) {
                 this.commentCountShow = commentCountShow;
             }
 
-            public String getLikeCountShow() {
+            public Integer getLikeCountShow() {
                 return likeCountShow;
             }
 
-            public void setLikeCountShow(String likeCountShow) {
+            public void setLikeCountShow(Integer likeCountShow) {
                 this.likeCountShow = likeCountShow;
             }
 
-            public String getFavorCountShow() {
+            public Integer getFavorCountShow() {
                 return favorCountShow;
             }
 
-            public void setFavorCountShow(String favorCountShow) {
+            public void setFavorCountShow(Integer favorCountShow) {
                 this.favorCountShow = favorCountShow;
             }
 
-            public String getViewCountShow() {
+            public Integer getViewCountShow() {
                 return viewCountShow;
             }
 
-            public void setViewCountShow(String viewCountShow) {
+            public void setViewCountShow(Integer viewCountShow) {
                 this.viewCountShow = viewCountShow;
             }
 
@@ -273,6 +283,14 @@ public class VideoCommonModel {
 
             public void setType(String type) {
                 this.type = type;
+            }
+
+            public Object getSubType() {
+                return subType;
+            }
+
+            public void setSubType(Object subType) {
+                this.subType = subType;
             }
 
             public String getTitle() {
@@ -307,19 +325,19 @@ public class VideoCommonModel {
                 this.detailUrl = detailUrl;
             }
 
-            public String getExternalUrl() {
+            public Object getExternalUrl() {
                 return externalUrl;
             }
 
-            public void setExternalUrl(String externalUrl) {
+            public void setExternalUrl(Object externalUrl) {
                 this.externalUrl = externalUrl;
             }
 
-            public String getIsExternal() {
+            public Boolean getIsExternal() {
                 return isExternal;
             }
 
-            public void setIsExternal(String isExternal) {
+            public void setIsExternal(Boolean isExternal) {
                 this.isExternal = isExternal;
             }
 
@@ -331,179 +349,171 @@ public class VideoCommonModel {
                 this.playUrl = playUrl;
             }
 
-            public String getSource() {
+            public Object getSource() {
                 return source;
             }
 
-            public void setSource(String source) {
+            public void setSource(Object source) {
                 this.source = source;
             }
 
-            public String getKeywords() {
+            public Object getKeywords() {
                 return keywords;
             }
 
-            public void setKeywords(String keywords) {
+            public void setKeywords(Object keywords) {
                 this.keywords = keywords;
             }
 
-            public String getTags() {
+            public Object getTags() {
                 return tags;
             }
 
-            public void setTags(String tags) {
+            public void setTags(Object tags) {
                 this.tags = tags;
             }
 
-            public String getClassification() {
+            public Object getClassification() {
                 return classification;
             }
 
-            public void setClassification(String classification) {
+            public void setClassification(Object classification) {
                 this.classification = classification;
             }
 
-            public String getImagesUrl() {
+            public Object getImagesUrl() {
                 return imagesUrl;
             }
 
-            public void setImagesUrl(String imagesUrl) {
+            public void setImagesUrl(Object imagesUrl) {
                 this.imagesUrl = imagesUrl;
             }
 
-            public String getPlayDuration() {
+            public Integer getPlayDuration() {
                 return playDuration;
             }
 
-            public void setPlayDuration(String playDuration) {
+            public void setPlayDuration(Integer playDuration) {
                 this.playDuration = playDuration;
             }
 
-            public String getStatus() {
+            public Integer getStatus() {
                 return status;
             }
 
-            public void setStatus(String status) {
+            public void setStatus(Integer status) {
                 this.status = status;
             }
 
-            public String getLiveStatus() {
+            public Object getLiveStatus() {
                 return liveStatus;
             }
 
-            public void setLiveStatus(String liveStatus) {
+            public void setLiveStatus(Object liveStatus) {
                 this.liveStatus = liveStatus;
             }
 
-            public String getLiveStartTime() {
+            public Object getLiveStartTime() {
                 return liveStartTime;
             }
 
-            public void setLiveStartTime(String liveStartTime) {
+            public void setLiveStartTime(Object liveStartTime) {
                 this.liveStartTime = liveStartTime;
             }
 
-            public String getIssuerId() {
+            public Object getIssuerId() {
                 return issuerId;
             }
 
-            public void setIssuerId(String issuerId) {
+            public void setIssuerId(Object issuerId) {
                 this.issuerId = issuerId;
             }
 
-            public String getListStyle() {
+            public Integer getListStyle() {
                 return listStyle;
             }
 
-            public void setListStyle(String listStyle) {
+            public void setListStyle(Integer listStyle) {
                 this.listStyle = listStyle;
             }
 
-            public String getIssuerName() {
+            public Object getIssuerName() {
                 return issuerName;
             }
 
-            public void setIssuerName(String issuerName) {
+            public void setIssuerName(Object issuerName) {
                 this.issuerName = issuerName;
             }
 
-            public String getIssuerImageUrl() {
+            public Object getIssuerImageUrl() {
                 return issuerImageUrl;
             }
 
-            public void setIssuerImageUrl(String issuerImageUrl) {
+            public void setIssuerImageUrl(Object issuerImageUrl) {
                 this.issuerImageUrl = issuerImageUrl;
             }
 
-            public String getDisableComment() {
+            public Boolean getDisableComment() {
                 return disableComment;
             }
 
-            public void setDisableComment(String disableComment) {
+            public void setDisableComment(Boolean disableComment) {
                 this.disableComment = disableComment;
             }
 
-            public String getLabel() {
+            public Object getLabel() {
                 return label;
             }
 
-            public void setLabel(String label) {
+            public void setLabel(Object label) {
                 this.label = label;
             }
 
-            public String getOrientation() {
+            public Object getOrientation() {
                 return orientation;
             }
 
-            public void setOrientation(String orientation) {
+            public void setOrientation(Object orientation) {
                 this.orientation = orientation;
             }
 
-            public String getWhetherLike() {
+            public Boolean getWhetherLike() {
                 return whetherLike;
             }
 
-            public void setWhetherLike(String whetherLike) {
+            public void setWhetherLike(Boolean whetherLike) {
                 this.whetherLike = whetherLike;
             }
 
-            public String getWhetherFavor() {
+            public Boolean getWhetherFavor() {
                 return whetherFavor;
             }
 
-            public void setWhetherFavor(String whetherFavor) {
+            public void setWhetherFavor(Boolean whetherFavor) {
                 this.whetherFavor = whetherFavor;
             }
 
-            public String getWhetherFollow() {
+            public Boolean getWhetherFollow() {
                 return whetherFollow;
             }
 
-            public void setWhetherFollow(String whetherFollow) {
+            public void setWhetherFollow(Boolean whetherFollow) {
                 this.whetherFollow = whetherFollow;
             }
 
-            public String getPId() {
-                return pId;
-            }
-
-            public void setPId(String pId) {
-                this.pId = pId;
-            }
-
-            public String getIsTop() {
+            public Object getIsTop() {
                 return isTop;
             }
 
-            public void setIsTop(String isTop) {
+            public void setIsTop(Object isTop) {
                 this.isTop = isTop;
             }
 
-            public String getLeftTag() {
+            public Object getLeftTag() {
                 return leftTag;
             }
 
-            public void setLeftTag(String leftTag) {
+            public void setLeftTag(Object leftTag) {
                 this.leftTag = leftTag;
             }
 
@@ -519,31 +529,31 @@ public class VideoCommonModel {
                 return vernier;
             }
 
-            public void setVernier(String vernier) {
+            public void setVernier(Object vernier) {
                 this.vernier = vernier;
             }
 
-            public String getAdvert() {
+            public Object getAdvert() {
                 return advert;
             }
 
-            public void setAdvert(String advert) {
+            public void setAdvert(Object advert) {
                 this.advert = advert;
             }
 
-            public String getNewsId() {
+            public Object getNewsId() {
                 return newsId;
             }
 
-            public void setNewsId(String newsId) {
+            public void setNewsId(Object newsId) {
                 this.newsId = newsId;
             }
 
-            public String getBelongActivityId() {
+            public Integer getBelongActivityId() {
                 return belongActivityId;
             }
 
-            public void setBelongActivityId(String belongActivityId) {
+            public void setBelongActivityId(Integer belongActivityId) {
                 this.belongActivityId = belongActivityId;
             }
 
@@ -555,35 +565,35 @@ public class VideoCommonModel {
                 this.belongActivityName = belongActivityName;
             }
 
-            public String getBelongTopicId() {
+            public Object getBelongTopicId() {
                 return belongTopicId;
             }
 
-            public void setBelongTopicId(String belongTopicId) {
+            public void setBelongTopicId(Object belongTopicId) {
                 this.belongTopicId = belongTopicId;
             }
 
-            public String getBelongTopicName() {
+            public Object getBelongTopicName() {
                 return belongTopicName;
             }
 
-            public void setBelongTopicName(String belongTopicName) {
+            public void setBelongTopicName(Object belongTopicName) {
                 this.belongTopicName = belongTopicName;
             }
 
-            public String getWidth() {
+            public Integer getWidth() {
                 return width;
             }
 
-            public void setWidth(String width) {
+            public void setWidth(Integer width) {
                 this.width = width;
             }
 
-            public String getHeight() {
+            public Integer getHeight() {
                 return height;
             }
 
-            public void setHeight(String height) {
+            public void setHeight(Integer height) {
                 this.height = height;
             }
 
@@ -611,11 +621,11 @@ public class VideoCommonModel {
                 this.creatorHead = creatorHead;
             }
 
-            public String getCreatorGender() {
+            public Integer getCreatorGender() {
                 return creatorGender;
             }
 
-            public void setCreatorGender(String creatorGender) {
+            public void setCreatorGender(Integer creatorGender) {
                 this.creatorGender = creatorGender;
             }
 
@@ -623,15 +633,15 @@ public class VideoCommonModel {
                 return creatorCertMark;
             }
 
-            public void setCreatorCertMark(String creatorCertMark) {
+            public void setCreatorCertMark(Object creatorCertMark) {
                 this.creatorCertMark = creatorCertMark;
             }
 
-            public String getCreatorCertDomain() {
+            public Object getCreatorCertDomain() {
                 return creatorCertDomain;
             }
 
-            public void setCreatorCertDomain(String creatorCertDomain) {
+            public void setCreatorCertDomain(Object creatorCertDomain) {
                 this.creatorCertDomain = creatorCertDomain;
             }
 
@@ -643,35 +653,27 @@ public class VideoCommonModel {
                 this.rejectReason = rejectReason;
             }
 
-            public String getThirdPartyId() {
+            public Object getThirdPartyId() {
                 return thirdPartyId;
             }
 
-            public void setThirdPartyId(String thirdPartyId) {
+            public void setThirdPartyId(Object thirdPartyId) {
                 this.thirdPartyId = thirdPartyId;
             }
 
-            public String getCreateBy() {
-                return createBy;
-            }
-
-            public void setCreateBy(String createBy) {
-                this.createBy = createBy;
-            }
-
-            public String getThirdPartyCode() {
+            public Object getThirdPartyCode() {
                 return thirdPartyCode;
             }
 
-            public void setThirdPartyCode(String thirdPartyCode) {
+            public void setThirdPartyCode(Object thirdPartyCode) {
                 this.thirdPartyCode = thirdPartyCode;
             }
 
-            public String getPid() {
+            public Object getPid() {
                 return pid;
             }
 
-            public void setPid(String pid) {
+            public void setPid(Object pid) {
                 this.pid = pid;
             }
 

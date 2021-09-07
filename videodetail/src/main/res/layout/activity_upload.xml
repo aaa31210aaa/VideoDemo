@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:binding="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="viewmodel.VideoViewModel" />
-    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/video_white"
         android:orientation="vertical"
         tools:context="ui.activity.UploadActivity">
 
@@ -27,7 +22,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/dp25"
+                android:layout_marginLeft="@dimen/video_dp25"
                 android:gravity="center"
                 android:text="取消"
                 android:textColor="#3E3A39">
@@ -46,11 +41,11 @@
 
             <ImageView
                 android:id="@+id/release_img"
-                android:layout_width="@dimen/dp50"
+                android:layout_width="@dimen/video_dp50"
                 android:layout_height="25dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/dp15"
+                android:layout_marginRight="@dimen/video_dp15"
                 android:src="@drawable/release_bg">
 
             </ImageView>
@@ -69,8 +64,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="@dimen/dp15">
+                    android:layout_marginLeft="@dimen/video_dp15"
+                    android:layout_marginRight="@dimen/video_dp15">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -82,9 +77,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/dp15"
+                        android:layout_marginLeft="@dimen/video_dp15"
                         android:text="必选，作品必须符合话题其中之一"
-                        android:textColor="@color/c9"
+                        android:textColor="@color/video_c9"
                         android:textSize="13sp"></TextView>
                 </LinearLayout>
 
@@ -92,7 +87,7 @@
                     android:id="@+id/uploadTagFlow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="@dimen/dp20"
+                    android:padding="@dimen/video_dp20"
                     app:max_select="1">
 
                 </com.zhy.view.flowlayout.TagFlowLayout>
@@ -100,10 +95,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/dp15"
-                    android:layout_marginTop="@dimen/dp30"
+                    android:layout_marginLeft="@dimen/video_dp15"
+                    android:layout_marginTop="@dimen/video_dp30"
                     android:text="视频简介"
-                    android:textColor="@color/black"
+                    android:textColor="@color/video_black"
                     android:textSize="18sp">
 
                 </TextView>
@@ -112,15 +107,15 @@
                     android:id="@+id/brief_introduction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/dp15"
+                    android:layout_margin="@dimen/video_dp15"
                     android:background="@drawable/brief_introduction_bg"
                     android:gravity="top"
                     android:hint="填写视频介绍，让更多人了解你的作品，最多120个字符"
                     android:maxLength="120"
                     android:minHeight="150dp"
-                    android:padding="@dimen/dp5"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/c9"
+                    android:padding="@dimen/video_dp5"
+                    android:textColor="@color/video_black"
+                    android:textColorHint="@color/video_c9"
                     android:textSize="15sp">
 
                 </EditText>
@@ -141,17 +136,18 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/dp15"
+                        android:layout_marginLeft="@dimen/video_dp15"
                         android:text="视频时长建议不超过180秒"
-                        android:textColor="@color/c9"
+                        android:textColor="@color/video_c9"
                         android:textSize="13sp"></TextView>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/dp15"
-                    android:layout_marginTop="@dimen/dp15"
+                    android:layout_marginLeft="@dimen/video_dp15"
+                    android:layout_marginTop="@dimen/video_dp15"
+                    android:layout_marginBottom="@dimen/video_dp50"
                     android:orientation="vertical">
 
                     <RelativeLayout
@@ -164,7 +160,7 @@
                             android:layout_height="95dp"
                             android:src="@drawable/upload_btn"
                             android:scaleType="fitXY"
-                            android:paddingTop="@dimen/dp10">
+                            android:paddingTop="@dimen/video_dp10">
 
                         </ImageView>
 
@@ -183,7 +179,7 @@
                         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                         android:layout_width="95dp"
                         android:layout_height="4dp"
-                        android:layout_marginTop="@dimen/dp10"
+                        android:layout_marginTop="@dimen/video_dp10"
                         android:max="100"
                         android:progressDrawable="@drawable/upload_progress_bg"
                         android:visibility="gone">
@@ -197,7 +193,7 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text="上传完成"
-                        android:textColor="@color/c9"
+                        android:textColor="@color/video_c9"
                         android:textSize="11sp"
                         android:visibility="gone"></TextView>
                 </LinearLayout>
@@ -207,4 +203,4 @@
 
         </ScrollView>
     </LinearLayout>
-</layout>
+</RelativeLayout>

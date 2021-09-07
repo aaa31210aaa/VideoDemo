@@ -19,7 +19,7 @@
             android:paddingRight="10dp"
             android:paddingBottom="20dp"
             android:text="最新评论"
-            android:textColor="@color/black">
+            android:textColor="@color/video_black">
 
         </TextView>
 
@@ -30,7 +30,7 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/comment_title"
             android:text=""
-            android:textColor="@color/black"
+            android:textColor="@color/video_black"
             tool:text="666">
 
         </TextView>
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/comment_input_bg"
             android:paddingLeft="10dp"
-            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginLeft="@dimen/video_dp10"
             android:paddingTop="5dp"
             android:paddingBottom="5dp">
 
@@ -93,7 +93,7 @@
                 android:layout_toRightOf="@+id/white_comment"
                 android:gravity="center_vertical"
                 android:hint="写评论..."
-                android:textColorHint="@color/c9"
+                android:textColorHint="@color/video_c9"
                 android:textSize="15sp" />
 
         </RelativeLayout>
@@ -136,7 +136,7 @@
                 android:layout_marginLeft="35dp"
                 android:layout_marginTop="10dp"
                 tool:text="6666万"
-                android:textColor="@color/c9"
+                android:textColor="@color/video_c9"
                 android:textSize="6sp">
 
             </TextView>
@@ -151,7 +151,7 @@
                 android:layout_width="20dp"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
-                android:layout_marginRight="@dimen/dp_10"
+                android:layout_marginRight="@dimen/video_dp10"
                 android:src="@drawable/share_icon"></ImageView>
         </RelativeLayout>
     </LinearLayout>

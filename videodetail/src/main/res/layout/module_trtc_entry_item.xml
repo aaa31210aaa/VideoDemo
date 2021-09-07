@@ -39,7 +39,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="30dp"
-        android:textColor="@color/white"
+        android:textColor="@color/video_white"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

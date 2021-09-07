@@ -30,7 +30,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/c9">
+        android:background="@color/video_c9">
 
     </View>
 
@@ -47,7 +47,7 @@
             android:textSize="16sp"
             android:gravity="center"
             android:padding="15dp"
-            android:textColor="@color/c9"
+            android:textColor="@color/video_c9"
             android:layout_centerInParent="true"
             android:layout_gravity="center"
             >
@@ -57,7 +57,7 @@
         <View
             android:layout_width="1px"
             android:layout_height="match_parent"
-            android:background="@color/c9"></View>
+            android:background="@color/video_c9"></View>
 
         <TextView
             android:id="@+id/no_login_tips_ok"

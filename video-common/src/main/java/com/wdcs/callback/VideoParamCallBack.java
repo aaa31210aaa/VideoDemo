@@ -35,5 +35,10 @@ public interface VideoParamCallBack {
     /**
      * 获取视频埋点信息
      */
-    void buriedPoint(BuriedPointModel buriedPointModel);
+    void trackingPoint(BuriedPointModel buriedPointModel);
+
+    /**
+     * 获取设备id
+     */
+    String setDeviceId();
 }

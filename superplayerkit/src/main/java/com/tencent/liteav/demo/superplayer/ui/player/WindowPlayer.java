@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
+import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoGestureDetector;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
@@ -74,9 +75,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private boolean mIsChangingSeekBarProgress;             // 进度条是否正在拖动，避免SeekBar由于视频播放的update而跳动
     public SuperPlayerDef.PlayerType mPlayType = SuperPlayerDef.PlayerType.VOD;                          // 当前播放视频类型
     public SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
+    public long mLivePushDuration;                      // 直播推流总时长
     public static long mDuration;                              // 视频总时长
-    private long mLivePushDuration;                      // 直播推流总时长
-    private long mProgress;                              // 当前播放进度
+    public long mProgress;                              // 当前播放进度
+    public double percent;                              // 当前播放进度百分比
+    public long reportDuration = 0;                       //记录上报埋点时的进度
 
     private Bitmap mBackgroundBmp;                         // 背景图
     private Bitmap mWaterMarkBmp;                          // 水印图
@@ -285,6 +288,18 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     }
 
     /**
+     * 记录上报时的播放时长
+     * @param duration
+     */
+    public void setRecordDuration(long duration){
+        this.reportDuration = duration;
+    }
+
+    public long getRecordDuration(){
+       return reportDuration;
+    }
+
+    /**
      * 切换播放状态
      * <p>
      * 双击和点击播放/暂停按钮会触发此方法
@@ -483,7 +498,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public void updateVideoProgress(long current, long duration) {
         mProgress = current < 0 ? 0 : current;
         mDuration = duration < 0 ? 0 : duration;
-        Log.e("yqh",mProgress+"-------"+mDuration);
+        if (mDuration != 0) {
+            percent = mProgress / mDuration;  //需要记录每一次上报时的播放进度和播放进度百分比
+        }
+
+        Log.e("yqh",mProgress+"-------"+mDuration+"---当前播放到百分比:"+ percent);
         mTvCurrent.setText(formattedTime(mProgress));
         float percentage = mDuration > 0 ? ((float) mProgress / (float) mDuration) : 1.0f;
         if (mProgress == 0) {
@@ -663,6 +682,12 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         return true;
     }
 
+    public IsReplayClick isReplayClick;
+
+    public interface IsReplayClick {
+        void getReplayClick();
+    }
+
     /**
      * 设置点击事件监听
      */
@@ -684,6 +709,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
             }
         } else if (id == R.id.superplayer_ll_replay) { //重播按钮
+            isReplayClick.getReplayClick();
             if (mControllerCallback != null) {
                 mControllerCallback.onResume();
             }

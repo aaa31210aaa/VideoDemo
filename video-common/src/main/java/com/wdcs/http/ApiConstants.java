@@ -2,8 +2,6 @@ package com.wdcs.http;
 
 public class ApiConstants {
     public String baseUrl;
-    public String loginBaseUrl;
-    public String uploadBaseUrl;
 
     private static ApiConstants instance;
 
@@ -158,7 +156,14 @@ public class ApiConstants {
     /**
      * 活动规则
      */
-    public String panelInfo() {
-        return getBaseUrl() + "api/cms/client/panel/info/";
+    public String getActivityRule() {
+        return getBaseUrl() + "api/cms/client/panel/info";
+    }
+
+    /**
+     * 话题
+     */
+    public String getTopic(){
+        return getBaseUrl() + "api/cms/client/content/page";
     }
 }

@@ -20,37 +20,35 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
+import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.constants.Constants;
+import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
-import com.wdcs.utils.SPUtils;
+import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.ToastUtils;
 import com.wdcs.videodetail.demo.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ui.activity.VideoDetailActivity;
-import ui.activity.VideoMainActivity;
-import widget.OverLineTextView;
 import widget.SpannableTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
 
-@Keep
-public class VideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
+public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private Context mContext;
     private List<DataDTO> mDatas;
     private List<RecommendModel.DataDTO.RecordsDTO> recommendList = new ArrayList<>();
@@ -59,27 +57,37 @@ public class VideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private SuperPlayerView superPlayerView;
     private ToAddPlayerViewClick click;
     private FollowViewClick followViewClick;
+    private SmartRefreshLayout mRefreshlayout;
+    private RelativeLayout mVideoDetailCommentBtn;
+    private ViewPagerLayoutManager mVideoDetailmanager;
 
-    public VideoAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context, SuperPlayerView playerView) {
+
+    public VideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
+                            SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
         super(layoutResId, data);
         this.mContext = context;
         this.mDatas = data;
         this.superPlayerView = playerView;
+        this.mRefreshlayout = refreshLayout;
+        this.mVideoDetailCommentBtn = videoDetailCommentBtn;
+        this.mVideoDetailmanager = videoDetailmanager;
     }
+
 
     @Override
     protected void convert(final BaseViewHolder helper, final DataDTO item) {
+        RelativeLayout itemRootView = helper.getView(R.id.item_relativelayout);
         LinearLayout introduceLin = helper.getView(R.id.introduce_lin);
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
         TextView continuePlay = helper.getView(R.id.continue_play);
         LinearLayout fullLin = helper.getView(R.id.superplayer_iv_fullscreen);
         ImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
         TextView publisherName = helper.getView(R.id.publisher_name);
-        TextView follow = helper.getView(R.id.follow);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
         final SpannableTextView foldTextView = helper.getView(R.id.fold_text);
         final TextView expendText = helper.getView(R.id.expend_text);
+
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
         } else {
@@ -94,16 +102,6 @@ public class VideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
                 click.clickNoWifi(helper.getAdapterPosition());
             }
         });
-
-        //关注按钮
-        follow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                followViewClick.followClick(helper.getAdapterPosition());
-            }
-        });
-
-
 
         //全屏按钮
         fullLin.setOnClickListener(new View.OnClickListener() {
@@ -404,5 +402,97 @@ public class VideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
 
     public void setFollowViewClick(FollowViewClick mFollow){
         this.followViewClick = mFollow;
+    }
+
+    /**
+     * 手机是否为16：9
+     *
+     * @return
+     */
+    private boolean phoneIsNormal(Context context) {
+        int phoneWidth = ScreenUtils.getPhoneWidth(context);
+        int phoneHeight = ScreenUtils.getPhoneHeight(context);
+        if (phoneHeight * 9 == phoneWidth * 16) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+//    public void addPlayView(Context context, DataDTO item, LinearLayout introduceLin, LinearLayout fullLin,
+//                            SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn,ViewPagerLayoutManager viewPagerLayoutManager
+//                            ,int position, RelativeLayout itemRoot) {
+//        if (null != superPlayerView && null != superPlayerView.getParent()) {
+//            ((ViewGroup) superPlayerView.getParent()).removeView(superPlayerView);
+//        }
+//        if (null != superPlayerView.mWindowPlayer && null != superPlayerView.mWindowPlayer.mLayoutBottom && null != superPlayerView.mWindowPlayer.mLayoutBottom.getParent()) {
+//            ((ViewGroup) superPlayerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(superPlayerView.mWindowPlayer.mLayoutBottom);
+//        }
+//        //子布局最外层params
+//        RelativeLayout.LayoutParams rootParams = (RelativeLayout.LayoutParams) itemRoot.getLayoutParams();
+//        //子布局底部布局 params
+//        RelativeLayout.LayoutParams bottomLp = (RelativeLayout.LayoutParams) introduceLin.getLayoutParams();
+//
+//        if (item.getVideoType().equals("1")) { //竖版视频16:9
+//            if (phoneIsNormal(context)) { //手机也是16:9
+//                fullLin.setVisibility(View.GONE); //隐藏全屏按钮
+//                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
+//                rootParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//                ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
+//                superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+//                superPlayerView.setOrientation(false);
+//            } else {
+//                fullLin.setVisibility(View.GONE);
+//                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
+//                rootParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+//                ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
+//                superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
+//                superPlayerView.setOrientation(false);
+//            }
+//        } else if (item.getVideoType().equals("0")) {
+//            fullLin.setVisibility(View.GONE);
+//            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
+//            rootParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+//            ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
+//            superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+//            superPlayerView.setOrientation(false);
+//        } else {
+//            fullLin.setVisibility(View.VISIBLE);
+//            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
+//            rootParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//            ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
+//            superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+//            superPlayerView.setOrientation(true);
+//        }
+//        introduceLin.addView(superPlayerView.mWindowPlayer.mLayoutBottom, 0);
+//        introduceLin.setLayoutParams(bottomLp);
+//
+//        RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+//        RelativeLayout itemRl = new RelativeLayout(context);
+//        superPlayerView.setBackgroundColor(context.getResources().getColor(R.color.black));
+//        ViewGroup rlLp = (ViewGroup) viewPagerLayoutManager.findViewByPosition(position);
+//        itemRl.addView(superPlayerView, itemLp);
+//        if (rlLp != null) {
+//            rlLp.addView(itemRl, 0, rootParams);
+//            //露出即上报
+//            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(context, String.valueOf(item.getId()), "", "", Constants.CMS_CLIENT_SHOW),Constants.CMS_CLIENT_SHOW);
+//            play(item.getPlayUrl(), item.getTitle(), String.valueOf(item.getId()));
+//        }
+//    }
+
+    /**
+     * 播放视频
+     *
+     * @param playUrl
+     */
+    public void play(String playUrl, String title, String contentId) {
+        if (null != superPlayerView) {
+            SuperPlayerModel model = new SuperPlayerModel();
+            model.url = playUrl;
+            model.title = title;
+            model.contentId = contentId;
+            superPlayerView.playWithModel(model);
+        }
     }
 }

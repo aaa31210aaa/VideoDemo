@@ -4,19 +4,19 @@
     android:id="@+id/item_relativelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/video_black">
 
     <TextView
         android:id="@+id/video_detail_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="@dimen/layout_margin_left"
-        android:layout_marginTop="@dimen/dp_10"
-        android:layout_marginRight="@dimen/layout_margin_left"
+        android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginTop="@dimen/video_dp10"
+        android:layout_marginRight="@dimen/video_dp10"
         android:ellipsize="end"
         android:maxLines="3"
-        android:textColor="@color/white"
+        android:textColor="@color/video_white"
         android:textSize="18sp"
         tool:text="长沙实景交响诗MV丨红色经典激荡起“一身挂满音符的河红色经典激荡起“一身挂满音符的河”一身挂满音符的河红色经典激荡起“一身挂满音符的河" />
 
@@ -31,7 +31,7 @@
             android:id="@+id/video_detail_from_media"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/layout_margin_left"
+            android:layout_marginLeft="@dimen/video_dp10"
             android:textColor="@color/record_settings_tip"
             android:textSize="12sp"
             tool:text="湖南">
@@ -70,7 +70,7 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginLeft="@dimen/video_dp10"
             android:layout_marginRight="15dp"
             android:background="@drawable/anthology_bg"
             android:drawableLeft="@drawable/choose_icon"
@@ -81,7 +81,7 @@
             android:paddingRight="15dp"
             android:paddingBottom="5dp"
             android:text="选集"
-            android:textColor="@color/black"
+            android:textColor="@color/video_black"
             android:textSize="12sp"
             tool:text="选集">
 
@@ -108,9 +108,9 @@
                 android:id="@+id/no_wifi_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dp_10"
+                android:layout_marginBottom="@dimen/video_dp10"
                 android:text="@string/no_wifi"
-                android:textColor="@color/white"
+                android:textColor="@color/video_white"
                 android:textSize="@dimen/sp_16"></TextView>
 
             <TextView
@@ -119,10 +119,10 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/anthology_bg"
                 android:drawableLeft="@drawable/play_wifi"
-                android:drawablePadding="@dimen/dp_10"
-                android:padding="@dimen/dp_10"
+                android:drawablePadding="@dimen/video_dp10"
+                android:padding="@dimen/video_dp10"
                 android:text="继续播放"
-                android:textColor="@color/black"
+                android:textColor="@color/video_black"
                 android:textSize="@dimen/sp_16"></TextView>
         </LinearLayout>
 
@@ -132,12 +132,12 @@
         android:id="@+id/video_flipper"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginLeft="@dimen/dp10"
-        android:layout_marginRight="@dimen/dp10"
+        android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginRight="@dimen/video_dp10"
         android:layout_above="@+id/fold_text"
         android:flipInterval="2000"
         android:autoStart="false"
-        android:layout_marginBottom="@dimen/dp5"
+        android:layout_marginBottom="@dimen/video_dp5"
         android:inAnimation="@anim/vf_anim_in"
         android:outAnimation="@anim/vf_anim_out" />
 
@@ -149,10 +149,10 @@
             android:layout_alignParentBottom="true"
             android:ellipsize="end"
             android:maxLines="3"
-            android:layout_marginBottom="@dimen/dp10"
-            android:layout_marginLeft="@dimen/dp10"
-            android:layout_marginRight="@dimen/dp10"
-            android:textColor="@color/c9"
+            android:layout_marginBottom="@dimen/video_dp10"
+            android:layout_marginLeft="@dimen/video_dp10"
+            android:layout_marginRight="@dimen/video_dp10"
+            android:textColor="@color/video_c9"
             android:textSize="12sp">
 
         </widget.OverLineTextView>
@@ -169,7 +169,7 @@
 <!--            android:layout_marginRight="@dimen/dp10"-->
 <!--            android:maxLines="5"-->
 <!--            android:text=""-->
-<!--            android:textColor="@color/c9"-->
+<!--            android:textColor="@color/video_c9"-->
 <!--            android:textSize="12sp"-->
 <!--            android:visibility="invisible">-->
 

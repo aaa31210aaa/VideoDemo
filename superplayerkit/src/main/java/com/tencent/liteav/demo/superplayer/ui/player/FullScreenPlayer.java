@@ -640,7 +640,6 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mProgress = current < 0 ? 0 : current;
         mDuration = duration < 0 ? 0 : duration;
         mTvCurrent.setText(formattedTime(mProgress));
-
         float percentage = mDuration > 0 ? ((float) mProgress / (float) mDuration) : 1.0f;
         if (mProgress == 0) {
             mLivePushDuration = 0;
@@ -770,6 +769,12 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         return true;
     }
 
+    public FullIsReplayClick isReplayClick;
+
+    public interface FullIsReplayClick {
+        void getFullReplayClick();
+    }
+
     /**
      * 设置点击事件监听
      */
@@ -802,6 +807,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         } else if (i == R.id.superplayer_iv_lock) {             //锁屏按钮
             toggleLockState();
         } else if (i == R.id.superplayer_ll_replay) {           //重播按钮
+            isReplayClick.getFullReplayClick();
             replay();
         } else if (i == R.id.superplayer_tv_back_to_live) {     //返回直播按钮
             if (mControllerCallback != null) {

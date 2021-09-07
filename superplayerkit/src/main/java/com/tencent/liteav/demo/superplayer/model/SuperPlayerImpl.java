@@ -160,6 +160,13 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
 
     }
 
+
+    public static ReadPlayCallBack readPlayCallBack;
+    public interface ReadPlayCallBack {
+        void ReadPlayCallback();
+    }
+
+
     /**
      * 点播播放器事件回调
      *
@@ -222,6 +229,9 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 }
                 break;
             case TXLiveConstants.PLAY_EVT_RCV_FIRST_I_FRAME:
+                //视频自动播放埋点上报 在内流中滑动播放视频时上报
+                readPlayCallBack.ReadPlayCallback();
+
                 instance.isLoad = true;
                 if (mChangeHWAcceleration) { //切换软硬解码器后，重新seek位置
                     TXCLog.i(TAG, "seek pos:" + mSeekPos);
@@ -252,6 +262,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             } else {
                 onError(SuperPlayerCode.LIVE_PLAY_END, param.getString(TXLiveConstants.EVT_DESCRIPTION));
             }
+
         }
     }
 

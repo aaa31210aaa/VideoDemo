@@ -59,6 +59,8 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
@@ -142,9 +144,10 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     private TextView noLoginTipsOk;
     public boolean isOrientation;
     private boolean isMainbool;
-
-    public static SuperPlayerView instance;
     public boolean isLoad;//播放器是否已经准备完毕
+    public BuriedPointModel buriedPointModel;
+    public static SuperPlayerView instance;
+
 
     public static SuperPlayerView getInstance(Context context, View decorView, Boolean isMain) {
         if (instance == null) {
@@ -213,6 +216,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
         noLoginTipsCancel.setOnClickListener(this);
         noLoginTipsOk.setOnClickListener(this);
+        buriedPointModel = new BuriedPointModel();
     }
 
     private void initPlayer() {
@@ -823,11 +827,13 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         public void onResume() {
             if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) { //重播
                 mSuperPlayer.reStart();
+                buriedPointModel.setIs_renew("true");
                 if (null != mWindowPlayer.getDataDTO()) {
                     String jsonString = BuriedPointModelManager.getVideoStartPlay("", "true", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
                             "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
                     Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
                 }
+//                ContentBuriedPointManager.setContentBuriedPoint();
             } else if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PAUSE) { //继续播放
                 mSuperPlayer.resume();
             }

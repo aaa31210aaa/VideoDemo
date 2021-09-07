@@ -11,26 +11,26 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="@dimen/dp20">
+        android:padding="@dimen/video_dp20">
 
         <ImageView
             android:id="@+id/share_wx_btn"
-            android:layout_width="@dimen/dp50"
-            android:layout_height="@dimen/dp50"
+            android:layout_width="@dimen/video_dp50"
+            android:layout_height="@dimen/video_dp50"
             android:layout_weight="1"
             android:src="@drawable/share_wechat_icon"></ImageView>
 
         <ImageView
             android:id="@+id/share_circle_btn"
-            android:layout_width="@dimen/dp50"
-            android:layout_height="@dimen/dp50"
+            android:layout_width="@dimen/video_dp50"
+            android:layout_height="@dimen/video_dp50"
             android:layout_weight="1"
             android:src="@drawable/share_circle_icon"></ImageView>
 
         <ImageView
             android:id="@+id/share_qq_btn"
-            android:layout_width="@dimen/dp50"
-            android:layout_height="@dimen/dp50"
+            android:layout_width="@dimen/video_dp50"
+            android:layout_height="@dimen/video_dp50"
             android:layout_weight="1"
             android:src="@drawable/share_qq_icon"></ImageView>
     </LinearLayout>
