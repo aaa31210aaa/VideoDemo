@@ -84,7 +84,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/video_dp10"
         android:layout_marginRight="@dimen/video_dp10"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="90dp"
         android:orientation="vertical">
 
         <RelativeLayout
@@ -132,7 +132,6 @@
                     android:layout_marginLeft="@dimen/video_dp5"
                     android:layout_marginRight="@dimen/video_dp5"
                     android:layout_toRightOf="@+id/official_certification_img"
-                    android:background="@drawable/follow_bg"
                     android:paddingLeft="@dimen/video_dp10"
                     android:paddingTop="@dimen/video_dp5"
                     android:paddingRight="@dimen/video_dp10"
@@ -195,7 +194,7 @@
             android:maxLines="2"
             android:textColor="@color/p80_opacity_white"
             android:textSize="15sp"
-            tool:text="66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666">
+            tool:text="">
 
         </widget.SpannableTextView>
 

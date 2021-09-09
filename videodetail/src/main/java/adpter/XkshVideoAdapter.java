@@ -51,6 +51,7 @@ import widget.SpannableTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
+import static com.wdcs.constants.Constants.YELLOW_V;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 
 @Keep
@@ -66,7 +67,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
     private SmartRefreshLayout mRefreshlayout;
     private RelativeLayout mVideoDetailCommentBtn;
     private ViewPagerLayoutManager mVideoDetailmanager;
-
 
     public XkshVideoAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
                             SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
@@ -118,8 +118,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-
-
         //全屏按钮
         fullLin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,13 +143,19 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-
         publisherName.setText(item.getCreatorNickname());
-        if (TextUtils.equals(item.getCreatorCertMark(), BLUE_V)) {
-            officialCertificationImg.setVisibility(View.VISIBLE);
-        } else {
+
+        if (TextUtils.isEmpty(item.getCreatorCertMark())) {
             officialCertificationImg.setVisibility(View.GONE);
+        } else {
+            officialCertificationImg.setVisibility(View.VISIBLE);
+            if (TextUtils.equals(item.getCreatorCertMark(), BLUE_V)) {
+                officialCertificationImg.setImageResource(R.drawable.official_certification);
+            } else if (TextUtils.equals(item.getCreatorCertMark(), YELLOW_V)){
+                officialCertificationImg.setImageResource(R.drawable.yellow_v);
+            }
         }
+
         watched.setText(NumberFormatTool.formatNum(item.getViewCountShow(), false));
         String topicNameStr;
         if (TextUtils.isEmpty(item.getBelongTopicName()) || null == item.getBelongTopicName()) {
@@ -160,6 +164,11 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             topicNameStr = "#" + item.getBelongTopicName()+"  ";
         }
         brief = topicNameStr + item.getBrief();
+        if (TextUtils.isEmpty(brief)) {
+            foldTextView.setVisibility(View.GONE);
+        } else {
+            foldTextView.setVisibility(View.VISIBLE);
+        }
 
         final SpannableStringBuilder foldTextBuilder = new SpannableStringBuilder(brief);
         //单独设置字体大小
@@ -420,98 +429,5 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
     public void setFollowViewClick(FollowViewClick mFollow){
         this.followViewClick = mFollow;
     }
-
-    /**
-     * 手机是否为16：9
-     *
-     * @return
-     */
-    private boolean phoneIsNormal(Context context) {
-        int phoneWidth = ScreenUtils.getPhoneWidth(context);
-        int phoneHeight = ScreenUtils.getPhoneHeight(context);
-        if (phoneHeight * 9 == phoneWidth * 16) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-//    public void addPlayView(Context context, DataDTO item, LinearLayout introduceLin, LinearLayout fullLin,
-//                            SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn,ViewPagerLayoutManager viewPagerLayoutManager
-//                            ,int position, RelativeLayout itemRoot) {
-//        if (null != superPlayerView && null != superPlayerView.getParent()) {
-//            ((ViewGroup) superPlayerView.getParent()).removeView(superPlayerView);
-//        }
-//        if (null != superPlayerView.mWindowPlayer && null != superPlayerView.mWindowPlayer.mLayoutBottom && null != superPlayerView.mWindowPlayer.mLayoutBottom.getParent()) {
-//            ((ViewGroup) superPlayerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(superPlayerView.mWindowPlayer.mLayoutBottom);
-//        }
-//        //子布局最外层params
-//        RelativeLayout.LayoutParams rootParams = (RelativeLayout.LayoutParams) itemRoot.getLayoutParams();
-//        //子布局底部布局 params
-//        RelativeLayout.LayoutParams bottomLp = (RelativeLayout.LayoutParams) introduceLin.getLayoutParams();
-//
-//        if (item.getVideoType().equals("1")) { //竖版视频16:9
-//            if (phoneIsNormal(context)) { //手机也是16:9
-//                fullLin.setVisibility(View.GONE); //隐藏全屏按钮
-//                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
-//                rootParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-//                ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
-//                superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-//                superPlayerView.setOrientation(false);
-//            } else {
-//                fullLin.setVisibility(View.GONE);
-//                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-//                rootParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
-//                ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
-//                superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
-//                superPlayerView.setOrientation(false);
-//            }
-//        } else if (item.getVideoType().equals("0")) {
-//            fullLin.setVisibility(View.GONE);
-//            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-//            rootParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
-//            ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
-//            superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-//            superPlayerView.setOrientation(false);
-//        } else {
-//            fullLin.setVisibility(View.VISIBLE);
-//            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
-//            rootParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-//            ((ViewGroup) refreshLayout).setLayoutParams(rootParams);
-//            superPlayerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-//            superPlayerView.setOrientation(true);
-//        }
-//        introduceLin.addView(superPlayerView.mWindowPlayer.mLayoutBottom, 0);
-//        introduceLin.setLayoutParams(bottomLp);
-//
-//        RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
-//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-//        RelativeLayout itemRl = new RelativeLayout(context);
-//        superPlayerView.setBackgroundColor(context.getResources().getColor(R.color.black));
-//        ViewGroup rlLp = (ViewGroup) viewPagerLayoutManager.findViewByPosition(position);
-//        itemRl.addView(superPlayerView, itemLp);
-//        if (rlLp != null) {
-//            rlLp.addView(itemRl, 0, rootParams);
-//            //露出即上报
-//            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(context, String.valueOf(item.getId()), "", "", Constants.CMS_CLIENT_SHOW),Constants.CMS_CLIENT_SHOW);
-//            play(item.getPlayUrl(), item.getTitle(), String.valueOf(item.getId()));
-//        }
-//    }
-
-    /**
-     * 播放视频
-     *
-     * @param playUrl
-     */
-    public void play(String playUrl, String title, String contentId) {
-        if (null != superPlayerView) {
-            SuperPlayerModel model = new SuperPlayerModel();
-            model.url = playUrl;
-            model.title = title;
-            model.contentId = contentId;
-            superPlayerView.playWithModel(model);
-        }
-    }
-
 
 }

@@ -86,6 +86,7 @@ import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.Orientation.LAN
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
+import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 
@@ -265,19 +266,22 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         //全屏模式下获取到的收藏点赞状态
         if (contentStateModel.getWhetherFavor().equals("true")) {
             mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
+            mFullScreenPlayer.fullscreenCollection.setTextColor(mContext.getResources().getColor(R.color.superplayer_yellow));
         } else {
             mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
+            mFullScreenPlayer.fullscreenCollection.setTextColor(mContext.getResources().getColor(R.color.c9));
         }
 
         if (contentStateModel.getWhetherLike().equals("true")) {
-            mFullScreenPlayer.mLike.setImageResource(R.drawable.likes);
+            mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite_select);
             mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
         } else {
-            mFullScreenPlayer.mLike.setImageResource(R.drawable.fullscreen_praise);
+            mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite);
             mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
         }
 
         mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+        mFullScreenPlayer.fullscreenCollection.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
 
         //全屏点赞按钮
         mFullScreenPlayer.mLike.setOnClickListener(new OnClickListener() {
@@ -338,7 +342,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                             if (null != json && json.get("code").toString().equals("200")) {
                                 if (json.get("data").toString().equals("1")) {
                                     int num;
-                                    mFullScreenPlayer.mLike.setImageResource(R.drawable.likes);
+                                    mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite_select);
                                     mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
                                     if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
                                         num = 0;
@@ -355,7 +359,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                     contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
                                     int num;
-                                    mFullScreenPlayer.mLike.setImageResource(R.drawable.fullscreen_praise);
+                                    mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite);
                                     mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
                                     if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
                                         num = 0;
@@ -414,7 +418,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelFavor())
-                .tag(this)
+                .tag(VIDEOTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -428,12 +432,27 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (json.get("code").toString().equals(success_code)) {
+
                                 if (json.get("data").toString().equals("1")) {
+                                    int num;
+                                    num = Integer.parseInt(NumberFormatTool.getNumStr(mFullScreenPlayer.fullscreenCollection.getText().toString()));
+                                    num++;
+                                    mFullScreenPlayer.fullscreenCollection.setText(NumberFormatTool.formatNum(num, false));
                                     mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
+                                    mFullScreenPlayer.fullscreenCollection.setTextColor(getResources().getColor(R.color.superplayer_yellow));
                                     contentStateModel.setWhetherFavor("true");
+                                    contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
-                                    mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
+                                    int num;
+                                    num = Integer.parseInt(NumberFormatTool.getNumStr( mFullScreenPlayer.fullscreenCollection.getText().toString()));
+                                    if (num > 0) {
+                                        num--;
+                                    }
+                                    mFullScreenPlayer.fullscreenCollection.setText(NumberFormatTool.formatNum(num, false));
+                                    mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection_icon);
+                                    mFullScreenPlayer.fullscreenCollection.setTextColor(getResources().getColor(R.color.c9));
                                     contentStateModel.setWhetherFavor("false");
+                                    contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
                             } else if (json.get("code").toString().equals(token_error)) {
                                 Log.e("addOrCancelFavor", "无token 去跳登录");
@@ -453,6 +472,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                             e.printStackTrace();
                             ToastUtils.showShort("收藏失败");
                         }
+
                     }
 
                     @Override
@@ -461,7 +481,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                     }
                 });
     }
-
 
     /**
      * 播放视频

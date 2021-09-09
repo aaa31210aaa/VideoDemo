@@ -2,10 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/video_black"
-    android:id="@+id/rootview"
     android:keepScreenOn="true"
     tools:context="ui.activity.VideoDetailActivity">
 
@@ -85,9 +85,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="260dp"
-            android:visibility="gone"
             android:background="@drawable/full_watch_btn_bg"
-            android:padding="7dp">
+            android:padding="7dp"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="10dp"
@@ -105,86 +105,258 @@
         </LinearLayout>
     </LinearLayout>
 
-
     <LinearLayout
-        android:id="@+id/introduce_lin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="@dimen/video_dp10"
-        android:layout_marginRight="@dimen/video_dp10"
-        android:visibility="gone"
-        android:layout_marginBottom="@dimen/video_dp10"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/introduce_lin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/introduce_lin"
-            android:layout_marginBottom="@dimen/video_dp10">
+            android:layout_marginLeft="@dimen/video_dp10"
+            android:layout_marginRight="@dimen/video_dp10"
+            android:layout_marginBottom="@dimen/video_dp10"
+            android:orientation="vertical">
 
             <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/video_dp10">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="16dp"
+                    android:background="@drawable/publisher_bg">
+
+                    <TextView
+                        android:id="@+id/publisher_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="28dp"
+                        android:layout_centerVertical="true"
+                        android:gravity="center"
+                        android:paddingLeft="@dimen/video_dp25"
+                        android:text=""
+                        android:textColor="@color/video_white"
+                        android:textSize="@dimen/sp_16">
+
+                    </TextView>
+
+
+                    <ImageView
+                        android:id="@+id/official_certification_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/video_dp5"
+                        android:layout_toRightOf="@+id/publisher_name"
+                        android:src="@drawable/official_certification"
+                        android:visibility="gone">
+
+                    </ImageView>
+
+                </RelativeLayout>
+
+                <widget.CircleImageView
+                    android:id="@+id/publisher_headimg"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_centerVertical="true">
+
+                </widget.CircleImageView>
+            </RelativeLayout>
+
+            <ViewFlipper
+                android:id="@+id/video_flipper"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="@dimen/video_dp5"
+                android:autoStart="false"
+                android:flipInterval="2000"
+                android:inAnimation="@anim/vf_anim_in"
+                android:outAnimation="@anim/vf_anim_out"
+                android:visibility="gone" />
+
+            <widget.SpannableTextView
+                android:id="@+id/fold_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp">
+
+            </widget.SpannableTextView>
+
+            <TextView
+                android:id="@+id/expend_text"
                 android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginLeft="16dp"
-                android:background="@drawable/publisher_bg">
+                android:layout_height="wrap_content"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                android:visibility="gone"></TextView>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/video_detail_comment_btn"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@drawable/video_detail_bottom_bg">
+
+            <LinearLayout
+                android:id="@+id/new_comment_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/publisher_name"
                     android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:layout_centerVertical="true"
-                    android:gravity="center"
-                    android:paddingLeft="@dimen/video_dp25"
-                    android:text=""
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="15dp"
+                    android:paddingRight="5dp"
+                    android:text="最新评论"
                     android:textColor="@color/video_white"
-                    android:textSize="@dimen/sp_16">
+                    android:textSize="12sp">
 
                 </TextView>
 
-
-                <ImageView
-                    android:id="@+id/official_certification_img"
+                <TextView
+                    android:id="@+id/comment_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:visibility="gone"
-                    android:layout_marginLeft="@dimen/video_dp5"
-                    android:layout_toRightOf="@+id/publisher_name"
-                    android:src="@drawable/official_certification">
+                    android:layout_marginTop="15dp"
+                    android:text=""
+                    android:textColor="@color/video_white"
+                    android:textSize="10sp">
 
-                </ImageView>
+                </TextView>
+            </LinearLayout>
 
-            </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_below="@+id/new_comment_title"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-            <widget.CircleImageView
-                android:id="@+id/publisher_headimg"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_centerVertical="true">
+                <RelativeLayout
+                    android:id="@+id/video_detail_white_comment_rl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/video_dp10"
+                    android:layout_weight="1"
+                    android:background="@drawable/shape_input_bg"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp">
 
-            </widget.CircleImageView>
+                    <ImageView
+                        android:id="@+id/comment_icon"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/white_comment_icon">
+
+                    </ImageView>
+
+                    <TextView
+                        android:id="@+id/comment_edittext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="7dp"
+                        android:layout_toRightOf="@+id/comment_icon"
+                        android:text="写评论..."
+                        android:textColor="@color/p60_opacity_white"
+                        android:textSize="@dimen/sp_14">
+
+                    </TextView>
+
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/video_detail_collection"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/video_detail_collection_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/collection_icon"></ImageView>
+
+                    <TextView
+                        android:id="@+id/collection_num"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/video_dp5"
+                        android:gravity="center"
+                        android:textColor="@color/p60_opacity_white"
+                        android:textSize="@dimen/sp_12">
+
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/video_detail_likes"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/video_detail_likes_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:src="@drawable/favourite">
+
+                    </ImageView>
+
+                    <TextView
+                        android:id="@+id/likes_num"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/video_dp5"
+                        android:gravity="center"
+                        android:textColor="@color/p60_opacity_white"
+                        android:textSize="@dimen/sp_12">
+
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/share"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/share_icon"></ImageView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/video_dp5"
+                        android:gravity="center"
+                        android:text="转发"
+                        android:textColor="@color/p60_opacity_white"
+                        android:textSize="@dimen/sp_12"></TextView>
+                </LinearLayout>
+
+            </LinearLayout>
         </RelativeLayout>
-
-        <widget.SpannableTextView
-            android:id="@+id/fold_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="@color/p80_opacity_white"
-            android:textSize="15sp">
-
-        </widget.SpannableTextView>
-
-        <TextView
-            android:id="@+id/expend_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/p80_opacity_white"
-            android:textSize="15sp"
-            android:visibility="gone"></TextView>
-
     </LinearLayout>
-
 </RelativeLayout>

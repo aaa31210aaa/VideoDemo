@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -12,8 +14,10 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
@@ -79,6 +83,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private ActivityRuleBean activityRuleBean;
     private boolean isAbbreviation; //当前是否是缩略图
     private TranslateAnimation translateAniLeftShow, translateAniLeftHide;
+    public CustomPopWindow noLoginTipsPop;
+    private View noLoginTipsView;
+    private TextView noLoginTipsCancel;
+    private TextView noLoginTipsOk;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +108,11 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         searchIcon.setOnClickListener(this);
         personalCenter = findViewById(R.id.personal_center);
         personalCenter.setOnClickListener(this);
+        noLoginTipsView = View.inflate(this, R.layout.no_login_tips, null);
+        noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
+        noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
+        noLoginTipsCancel.setOnClickListener(this);
+        noLoginTipsOk.setOnClickListener(this);
 
         playerView = SuperPlayerView.getInstance(this, getWindow().getDecorView(), true);
         initViewPager();
@@ -176,6 +189,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         playerView.playModeCallBack = new SuperPlayerView.PlayModeCallBack() {
             @Override
             public void getPlayMode(SuperPlayerDef.PlayerMode playerMode) {
+                LinearLayout videoFragmentFullLin = (LinearLayout) videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.superplayer_iv_fullscreen);
+                LinearLayout xkshFullLin = (LinearLayout) xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.superplayer_iv_fullscreen);
                 if (playerMode.equals(SuperPlayerDef.PlayerMode.FULLSCREEN)) {
                     videoDetailFragment.videoDetailmanager.setCanScoll(false);
                     videoDetailFragment.refreshLayout.setEnableRefresh(false);
@@ -236,13 +251,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
                     xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
                     videoVp.setScroll(false);
-                    if (null != videoDetailFragment.fullLin) {
-                        videoDetailFragment.fullLin.setVisibility(View.GONE);
-                    }
-                    if (null != xkshFragment.fullLin) {
-                        xkshFragment.fullLin.setVisibility(View.GONE);
+
+                    if (null != videoFragmentFullLin) {
+                        videoFragmentFullLin.setVisibility(View.GONE);
                     }
 
+                    if (null != xkshFullLin) {
+                        xkshFullLin.setVisibility(View.GONE);
+                    }
                     xkshFragment.rankList.setVisibility(View.GONE);
                     if (isAbbreviation) {
                         xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
@@ -275,16 +291,17 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     if (null != xkshFragment.mVideoTitleView) {
                         xkshFragment.mVideoTitleView.setVisibility(View.VISIBLE);
                     }
-                    if (null != videoDetailFragment.fullLin) {
-                        videoDetailFragment.fullLin.setVisibility(View.VISIBLE);
+                    if (null != videoFragmentFullLin) {
+                        videoFragmentFullLin.setVisibility(View.VISIBLE);
                     }
-                    if (null != xkshFragment.fullLin) {
-                        xkshFragment.fullLin.setVisibility(View.VISIBLE);
+                    if (null != xkshFullLin) {
+                        xkshFullLin.setVisibility(View.VISIBLE);
                     }
 
                     videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                     xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                     videoVp.setScroll(true);
+                    xkshFragment.rankList.setVisibility(View.VISIBLE);
                     if (isAbbreviation) {
                         xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
                     } else {
@@ -524,9 +541,26 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 e.printStackTrace();
             }
         } else if (id == R.id.personal_center) {
-            //跳转H5个人中心
+            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                noLoginTipsPop();
+            } else {
+                //跳转H5个人中心
+                try {
+                    param.recommendUrl(Constants.PERSONAL_CENTER);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (id == R.id.no_login_tips_cancel) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+        } else if (id == R.id.no_login_tips_ok) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
             try {
-                param.recommendUrl(Constants.PERSONAL_CENTER);
+                param.toLogin();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -548,7 +582,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             instance.mSuperPlayer.destroy();
             instance = null;
         }
-        OkGo.getInstance().cancelTag(VIDEOTAG);
+//        OkGo.getInstance().cancelTag(VIDEOTAG);
     }
 
     /**
@@ -582,5 +616,24 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         super.onFinish();
                     }
                 });
+    }
+
+    /**
+     * 没有登录情况下 点击点赞收藏评论 提示登录的提示框
+     */
+    private void noLoginTipsPop() {
+        if (null == noLoginTipsPop) {
+            noLoginTipsPop = new CustomPopWindow.PopupWindowBuilder(this)
+                    .setView(noLoginTipsView)
+                    .enableBackgroundDark(true)
+                    .setOutsideTouchable(true)
+                    .setFocusable(true)
+                    .setAnimationStyle(R.style.AnimCenter)
+                    .size(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels)
+                    .create()
+                    .showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+        } else {
+            noLoginTipsPop.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+        }
     }
 }

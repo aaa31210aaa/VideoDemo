@@ -137,6 +137,12 @@ public class NetworkUtil {
      * @return boolean
      */
     public static boolean isWifi(Context context) {
+        if (null == context) {
+            return false;
+        }
+        if (null == context.getSystemService(Context.CONNECTIVITY_SERVICE)) {
+            return false;
+        }
         ConnectivityManager connectivityManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();

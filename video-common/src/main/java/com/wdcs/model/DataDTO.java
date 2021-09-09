@@ -75,7 +75,7 @@ public  class DataDTO {
     private Boolean isClosed;
     private String videoType;
     private String createBy;
-    private boolean followShow;
+    private boolean fullBtnIsShow;
 
     public String getShareTitle() {
         if (null == shareTitle) {
@@ -913,12 +913,12 @@ public  class DataDTO {
         this.createBy = createBy;
     }
 
-    public boolean isFollowShow() {
-        return followShow;
+    public boolean isFullBtnIsShow() {
+        return fullBtnIsShow;
     }
 
-    public void setFollowShow(boolean followShow) {
-        this.followShow = followShow;
+    public void setFullBtnIsShow(boolean fullBtnIsShow) {
+        this.fullBtnIsShow = fullBtnIsShow;
     }
 
     @Keep

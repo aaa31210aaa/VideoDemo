@@ -222,7 +222,7 @@
 
             <LinearLayout
                 android:id="@+id/share"
-                android:layout_width="50dp"
+                android:layout_width="60dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="vertical">
@@ -258,7 +258,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="拍同款"
+                    android:text="上传视频"
                     android:textColor="@color/p60_opacity_white"
                     android:textSize="@dimen/sp_12">
 

@@ -269,11 +269,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mWindowPlayer.setManager(xkshManager);
                 playerView.mFullScreenPlayer.setDataDTO(mDataDTO, mDataDTO);
                 myContentId = String.valueOf(mDatas.get(0).getId());
-//                addPageViews(myContentId);
-                if (!PersonInfoManager.getInstance().isRequestToken()) {
-                    OkGo.getInstance().cancelTag("contentState");
-                    getContentState(myContentId);
-                }
+                addPageViews(myContentId);
+                OkGo.getInstance().cancelTag("contentState");
+                getContentState(myContentId);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
 
                 mPageIndex = 1;
@@ -436,12 +434,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         adapter.setFollowViewClick(new XkshVideoAdapter.FollowViewClick() {
             @Override
             public void followClick(int position) {
-                if (isFollow) {
-                    //调用取消关注接口
-                    cancelFollow(mDatas.get(position).getCreateBy());
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
                 } else {
-                    //调用关注接口
-                    toFollow(mDatas.get(position).getCreateBy());
+                    if (isFollow) {
+                        //调用取消关注接口
+                        cancelFollow(mDatas.get(position).getCreateBy());
+                    } else {
+                        //调用关注接口
+                        toFollow(mDatas.get(position).getCreateBy());
+                    }
                 }
             }
         });
@@ -468,6 +470,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             addPlayView(currentIndex);
         } else {
             playerView.mSuperPlayer.pause();
+            if (null != rlLp) {
+                rlLp.removeView(playerView);
+            }
         }
     }
 
@@ -477,72 +482,45 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param position
      */
     public void addPlayView(final int position) {
-        if (null != playerView && null != playerView.getParent()) {
-            ((ViewGroup) playerView.getParent()).removeView(playerView);
-        }
-        int videoWidth = Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth()));
-        int videoHeight = Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()));
-        lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        fullLin = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.superplayer_iv_fullscreen);
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
-        RelativeLayout.LayoutParams bottomLp = (RelativeLayout.LayoutParams) linearLayout.getLayoutParams();
-//        LinearLayout.LayoutParams fullLp = (LinearLayout.LayoutParams) fullLin.getLayoutParams();
-        String videoType = videoIsNormal(videoWidth, videoHeight);
-        if (videoType.equals("1")) {
+        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
+        linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+        RelativeLayout.LayoutParams playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+        if (TextUtils.equals("0", videoType)) {
+            playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+            playerView.setOrientation(false);
+        } else if (TextUtils.equals("1", videoType)) {
             if (phoneIsNormal()) {
-                fullLin.setVisibility(View.GONE);
-                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
-                lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-                ((ViewGroup) refreshLayout).setLayoutParams(lp);
+                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
                 playerView.setOrientation(false);
             } else {
-                fullLin.setVisibility(View.GONE);
-                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-                lp.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
-                ((ViewGroup) refreshLayout).setLayoutParams(lp);
+                playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
-        } else if (videoType.equals("0")) {
-            fullLin.setVisibility(View.GONE);
-            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-            lp.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
-            ((ViewGroup) refreshLayout).setLayoutParams(lp);
-            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-            playerView.setOrientation(false);
         } else {
-//            fullLp.setMargins(0,ButtonSpan.px2dip(ScreenUtils.getPhoneHeight(getActivity()))/2 +
-//                    ButtonSpan.px2dip(videoHeight) ,0,0);
-            fullLin.setVisibility(View.VISIBLE);
-//            fullLin.setLayoutParams(fullLp);
-            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
-            lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-            ((ViewGroup) refreshLayout).setLayoutParams(lp);
+            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
         }
-        linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
-        linearLayout.setLayoutParams(bottomLp);
-
-        RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        RelativeLayout item = new RelativeLayout(getActivity());
+        playerView.setLayoutParams(playViewParams);
         playerView.setTag(position);
         playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
 
-        item.addView(playerView, itemLp);
         if (rlLp != null && mIsVisibleToUser) {
-            linearLayout.setVisibility(View.VISIBLE);
-            rlLp.addView(item, 0, lp);
+            rlLp.addView(playerView, 0);
             //露出即上报
             uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
+
+
     }
 
     private void initSmartRefresh(View view) {
@@ -805,7 +783,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
                                         Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
                                 mDatas.get(i).setVideoType(videoType);
-                                mDatas.get(i).setFollowShow(true);
                             }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
@@ -1100,15 +1077,20 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
         if (contentStateModel.getWhetherFavor().equals("true")) {
             videoDetailCollectionImage.setImageResource(R.drawable.collection);
+            collectionNum.setTextColor(getResources().getColor(R.color.superplayer_yellow));
         } else {
             videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
+            collectionNum.setTextColor(getResources().getColor(R.color.video_c9));
         }
+
         collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
 
         if (contentStateModel.getWhetherLike().equals("true")) {
-            videoDetailLikesImage.setImageResource(R.drawable.likes);
+            videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
+            likesNum.setTextColor(getResources().getColor(R.color.bz_red));
         } else {
-            videoDetailLikesImage.setImageResource(R.drawable.likes_unselect);
+            videoDetailLikesImage.setImageResource(R.drawable.favourite);
+            likesNum.setTextColor(getResources().getColor(R.color.video_c9));
         }
 
         if (contentStateModel.getLikeCountShow().equals("0")) {
@@ -1116,7 +1098,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         } else {
             likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
         }
-        setFollowView(contentStateModel.getWhetherFollow());
     }
 
     /**
@@ -1184,7 +1165,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                             "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
                                             Constants.CONTENT_TYPE);
                                     Log.e("埋点", "埋点：收藏---" + jsonString);
-
                                 }
 
                                 if (json.get("data").toString().equals("1")) {
@@ -1192,17 +1172,18 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-
+                                    collectionNum.setTextColor(getResources().getColor(R.color.superplayer_yellow));
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                 } else {
                                     int num;
-                                    num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
+                                    num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
                                     if (num > 0) {
                                         num--;
                                     }
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
+                                    collectionNum.setTextColor(getResources().getColor(R.color.video_c9));
                                     playerView.contentStateModel.setWhetherFavor("false");
                                 }
                                 if (null != playerView.contentStateModel) {
@@ -1271,15 +1252,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                                 if (json.get("data").toString().equals("1")) {
                                     int num;
-                                    videoDetailLikesImage.setImageResource(R.drawable.likes);
+                                    videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     num++;
                                     likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    likesNum.setTextColor(getResources().getColor(R.color.bz_red));
                                     playerView.contentStateModel.setWhetherLike("true");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
                                     int num;
-                                    videoDetailLikesImage.setImageResource(R.drawable.likes_unselect);
+                                    videoDetailLikesImage.setImageResource(R.drawable.favourite);
                                     likesNum.setTextColor(getResources().getColor(R.color.c9));
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     if (num > 0) {
@@ -1364,7 +1346,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
     }
 
-
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -1373,9 +1354,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+        if (!mIsVisibleToUser) {
+            return;
+        }
         if (playerView != null) {
             playerView.mSuperPlayer.resume();
         }
+
+        if (!TextUtils.isEmpty(myContentId)) {
+            getContentState(myContentId);
+        }
+
         if (PersonInfoManager.getInstance().isRequestToken()) {
             try {
                 getUserToken(VideoInteractiveParam.getInstance().getCode());
@@ -1400,7 +1389,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
 
         OkGo.<TokenModel>post(ApiConstants.getInstance().mycsToken())
-                .tag(VIDEOTAG)
+                .tag("userToken")
                 .upJson(jsonObject)
                 .execute(new JsonCallback<TokenModel>(TokenModel.class) {
                     @Override
@@ -1440,7 +1429,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onFinish() {
                         super.onFinish();
-                        getContentState(myContentId);
                     }
                 });
     }
@@ -1743,9 +1731,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param targetUserId
      */
     private void toFollow(String targetUserId) {
-        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow())
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow() + targetUserId)
                 .tag(VIDEOTAG)
-                .params("targetUserId", targetUserId)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
                     public void onSuccess(Response<TrackingUploadModel> response) {
@@ -1778,9 +1766,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param targetUserId
      */
     private void cancelFollow(String targetUserId) {
-        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow())
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().cancelFollow() + targetUserId)
                 .tag(VIDEOTAG)
-                .params("targetUserId", targetUserId)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
                     public void onSuccess(Response<TrackingUploadModel> response) {
