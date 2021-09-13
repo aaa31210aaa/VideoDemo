@@ -21,9 +21,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/shape_input_bg"
         android:padding="30dp"
-        android:text="获取token值">
-
-    </TextView>
+        android:text="获取token值"></TextView>
 
     <EditText
         android:id="@+id/panelid"

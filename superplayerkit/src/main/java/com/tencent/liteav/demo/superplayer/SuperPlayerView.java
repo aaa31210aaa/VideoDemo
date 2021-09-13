@@ -266,18 +266,14 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         //全屏模式下获取到的收藏点赞状态
         if (contentStateModel.getWhetherFavor().equals("true")) {
             mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
-            mFullScreenPlayer.fullscreenCollection.setTextColor(mContext.getResources().getColor(R.color.superplayer_yellow));
         } else {
-            mFullScreenPlayer.mCollection.setImageResource(R.drawable.fullscreen_collection_unseletct);
-            mFullScreenPlayer.fullscreenCollection.setTextColor(mContext.getResources().getColor(R.color.c9));
+            mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection_icon);
         }
 
         if (contentStateModel.getWhetherLike().equals("true")) {
             mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite_select);
-            mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
         } else {
             mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite);
-            mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
         }
 
         mFullScreenPlayer.fullscreenLikeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
@@ -343,7 +339,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                 if (json.get("data").toString().equals("1")) {
                                     int num;
                                     mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite_select);
-                                    mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.bz_red));
                                     if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
                                         num = 0;
                                     } else {
@@ -360,7 +355,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                 } else {
                                     int num;
                                     mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite);
-                                    mFullScreenPlayer.fullscreenLikeNum.setTextColor(getResources().getColor(R.color.c9));
                                     if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
                                         num = 0;
                                     } else {
@@ -439,7 +433,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                     num++;
                                     mFullScreenPlayer.fullscreenCollection.setText(NumberFormatTool.formatNum(num, false));
                                     mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
-                                    mFullScreenPlayer.fullscreenCollection.setTextColor(getResources().getColor(R.color.superplayer_yellow));
                                     contentStateModel.setWhetherFavor("true");
                                     contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
@@ -450,7 +443,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                     }
                                     mFullScreenPlayer.fullscreenCollection.setText(NumberFormatTool.formatNum(num, false));
                                     mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection_icon);
-                                    mFullScreenPlayer.fullscreenCollection.setTextColor(getResources().getColor(R.color.c9));
                                     contentStateModel.setWhetherFavor("false");
                                     contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
@@ -852,7 +844,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                             "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
                     Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
                 }
-//                ContentBuriedPointManager.setContentBuriedPoint();
             } else if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PAUSE) { //继续播放
                 mSuperPlayer.resume();
             }
@@ -1144,6 +1135,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         if (mFloatPlayer != null) {
             mFloatPlayer.release();
         }
+        mOrientationHelper.disable();
     }
 
     @Override

@@ -13,65 +13,73 @@
         android:layout_height="match_parent" />
 
     <RelativeLayout
-        android:id="@+id/video_title_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/video_dp50"
-        android:background="@color/transparent"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/back_lin"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginLeft="@dimen/video_dp20">
-
-            <ImageView
-                android:layout_width="10dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/video_back"></ImageView>
-        </LinearLayout>
+        android:background="@drawable/video_home_title_bg">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/video_title_view"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+            android:layout_marginTop="@dimen/video_dp50"
+            android:background="@color/transparent"
+            android:orientation="horizontal">
 
-            <com.flyco.tablayout.SlidingTabLayout
-                android:id="@+id/video_tab"
+            <RelativeLayout
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true">
+
+                <com.flyco.tablayout.SlidingTabLayout
+                    android:id="@+id/video_tab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_marginRight="@dimen/video_dp25"
+                    android:background="@color/transparent"
+                    android:gravity="center"
+                    app:tl_indicator_corner_radius="2dp"
+                    app:tl_indicator_height="2dp"
+                    app:tl_indicator_width="20dp"
+                    app:tl_textSelectColor="@color/video_white"
+                    app:tl_textSelsize="15sp"
+                    app:tl_textUnselectColor="#7fffffff"
+                    app:tl_textsize="13sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/back_lin"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="@dimen/video_dp20"
+                    android:paddingRight="@dimen/video_dp20"
+                    android:src="@drawable/video_back"></ImageView>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/search_icon"
+                android:layout_width="17dp"
                 android:layout_height="50dp"
-                android:layout_marginRight="@dimen/video_dp30"
-                android:background="@color/transparent"
-                android:gravity="center"
-                app:tl_indicator_height="2dp"
-                app:tl_indicator_width="20dp"
-                app:tl_textSelectColor="@color/video_white"
-                app:tl_textSelsize="14sp"
-                app:tl_textUnselectColor="#7fffffff"
-                app:tl_textsize="13sp" />
+                android:layout_marginRight="@dimen/video_dp20"
+                android:layout_toLeftOf="@+id/personal_center"
+                android:src="@drawable/video_search"></ImageView>
+
+            <ImageView
+                android:id="@+id/personal_center"
+                android:layout_width="17dp"
+                android:layout_height="50dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="@dimen/video_dp15"
+                android:src="@drawable/video_user">
+
+
+            </ImageView>
+
         </RelativeLayout>
-
-        <ImageView
-            android:id="@+id/search_icon"
-            android:layout_width="17dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="@dimen/video_dp20"
-            android:layout_marginRight="@dimen/video_dp15"
-            android:layout_toLeftOf="@+id/personal_center"
-            android:src="@drawable/video_search"></ImageView>
-
-        <ImageView
-            android:id="@+id/personal_center"
-            android:layout_width="17dp"
-            android:layout_height="50dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/video_dp15"
-            android:src="@drawable/video_user">
-
-
-        </ImageView>
-
     </RelativeLayout>
+
 
 </RelativeLayout>

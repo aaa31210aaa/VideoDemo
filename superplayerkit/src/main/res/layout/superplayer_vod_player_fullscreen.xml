@@ -88,7 +88,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="30dp"
                     android:layout_toLeftOf="@+id/superplayer_fullscreen_share"
-                    android:src="@drawable/fullscreen_collection_unseletct">
+                    android:src="@drawable/collection_icon">
 
                 </ImageView>
 

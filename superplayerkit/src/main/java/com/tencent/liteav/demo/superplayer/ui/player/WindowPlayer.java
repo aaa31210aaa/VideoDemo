@@ -26,6 +26,7 @@ import com.tencent.liteav.demo.superplayer.model.utils.VideoGestureDetector;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
+import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
@@ -240,7 +241,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         mSeekBarProgress.setProgress(0);
         mSeekBarProgress.setMax(100);
         mLoadBar = findViewById(R.id.superplayer_loadbar_progress);
-        mLoadBar.setProgress(0);
+        mLoadBar.setProgress(100);
         mLoadBar.setMax(100);
 
         mIvFullScreen = (ImageView) findViewById(R.id.superplayer_iv_fullscreen);
@@ -687,6 +688,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public interface IsReplayClick {
         void getReplayClick();
     }
+
+    public void setIsReplayClick(IsReplayClick callBack) {
+        this.isReplayClick = callBack;
+    }
+
 
     /**
      * 设置点击事件监听

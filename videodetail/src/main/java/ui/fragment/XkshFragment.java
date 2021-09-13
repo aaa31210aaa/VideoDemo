@@ -57,6 +57,7 @@ import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.KeyboardUtils;
+import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NoScrollViewPager;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
@@ -64,22 +65,26 @@ import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.SoftKeyBoardListener;
 import com.wdcs.utils.ToastUtils;
+import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import adpter.CommentPopRvAdapter;
 import adpter.XkshVideoAdapter;
 import ui.activity.UploadActivity;
+import ui.activity.VideoHomeActivity;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 
+import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
@@ -164,7 +169,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private ImageView shareWxBtn;
     private ImageView shareCircleBtn;
     private ImageView shareQqBtn;
-    private DataDTO mDataDTO;
+    public DataDTO mDataDTO;
     private List<RecommendModel.DataDTO.RecordsDTO> recommondList;
     private ViewGroup rlLp;
     private VideoChannelModel videoChannelModel;
@@ -173,7 +178,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private Bundle args;
     public boolean mIsVisibleToUser;
     private SlidingTabLayout mVideoTab;
-    public RelativeLayout mVideoTitleView;
     private LinearLayout shotAlike;
     private LoadingView loadingProgress;
     private RelativeLayout.LayoutParams lp;
@@ -183,12 +187,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public ImageView activityRuleAbbreviation;
     public ImageView activityToAbbreviation; //变为缩略图按钮
     public LinearLayout fullLin;
-    public float pointPercent;                         // 每一次记录的节点播放百分比
+    public double pointPercent;                         // 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
 
-    public XkshFragment(SlidingTabLayout videoTab, RelativeLayout videoTitleView, SuperPlayerView mPlayerView) {
+    public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
-        this.mVideoTitleView = videoTitleView;
         this.playerView = mPlayerView;
     }
 
@@ -240,6 +243,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         rankList.setOnClickListener(this);
         activityRuleImg = view.findViewById(R.id.activity_rule_img);
         activityRuleImg.setOnClickListener(this);
+
+        //如果活动没有跳转URL 隐藏
+            activityRuleImg.setVisibility(View.GONE);
+
         activityToAbbreviation = view.findViewById(R.id.activity_to_abbreviation);
         activityToAbbreviation.setOnClickListener(this);
         activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
@@ -267,7 +274,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
                 playerView.mWindowPlayer.setIsTurnPages(false);
                 playerView.mWindowPlayer.setManager(xkshManager);
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO, mDataDTO);
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 myContentId = String.valueOf(mDatas.get(0).getId());
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
@@ -317,7 +324,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
                 playerView.mWindowPlayer.setIsTurnPages(true);
                 playerView.mFullScreenPlayer.setIsTurnPages(true);
                 currentIndex = position;
@@ -423,8 +430,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 for (int i = 0; i < mDatas.size(); i++) {
                     mDatas.get(i).setWifi(true);
                 }
+
+                for (int i = 0; i < ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.size(); i++) {
+                    ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i).setWifi(true);
+                }
                 addPlayView(position);
                 adapter.notifyDataSetChanged();
+                ((VideoHomeActivity) getActivity()).videoDetailFragment.adapter.notifyDataSetChanged();
             }
         });
 
@@ -463,10 +475,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (null == playerView || mDatas.isEmpty()) {
             return;
         }
+        if (null == adapter) {
+            return;
+        }
+
         if (isVisibleToUser) {
             if (null != playerView && null != playerView.getParent()) {
                 ((ViewGroup) playerView.getParent()).removeView(playerView);
             }
+            //重置重播标识
+            playerView.buriedPointModel.setIs_renew("false");
             addPlayView(currentIndex);
         } else {
             playerView.mSuperPlayer.pause();
@@ -482,18 +500,26 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param position
      */
     public void addPlayView(final int position) {
+        if (SPUtils.isVisibleNoWifiView(getActivity())) {
+            return;
+        }
+
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
             playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(false);
+            if (linearLayout != null) {
+                linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            }
         } else if (TextUtils.equals("1", videoType)) {
             if (phoneIsNormal()) {
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -504,19 +530,28 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
+            if (linearLayout != null) {
+                linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            }
         } else {
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
+            mLayoutBottomParams.addRule(BELOW, playerView.getId());
+            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
+            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
+            if (null != itemRelativelayout) {
+                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
+            }
         }
         playerView.setLayoutParams(playViewParams);
         playerView.setTag(position);
-        playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
+        playerView.setBackgroundColor(Utils.getContext().getResources().getColor(R.color.video_black));
 
         if (rlLp != null && mIsVisibleToUser) {
             rlLp.addView(playerView, 0);
             //露出即上报
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
 
@@ -564,9 +599,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      */
     private String videoIsNormal(int videoWidth, int videoHeight) {
         if (videoWidth == 0 && videoHeight == 0) {
-            return "2";
+            return "0";
         }
-
         if (videoWidth > videoHeight) {
             //横板
             if (videoWidth * 9 == videoHeight * 16) {
@@ -639,7 +673,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .setOutsideTouchable(false)
                     .setFocusable(true)
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-                    .size(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
                     .showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
@@ -690,7 +724,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .setView(sharePopView)
                     .setOutsideTouchable(true)
                     .setFocusable(true)
-                    .size(getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(150))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(150))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
                     .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
@@ -782,7 +816,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             for (int i = 0; i < mDatas.size(); i++) {
                                 String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
                                         Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-                                mDatas.get(i).setVideoType(videoType);
+                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
+                                    mDatas.get(i).setFullBtnIsShow(false);
+                                } else {
+                                    mDatas.get(i).setFullBtnIsShow(true);
+                                }
                             }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
@@ -1077,26 +1115,35 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
         if (contentStateModel.getWhetherFavor().equals("true")) {
             videoDetailCollectionImage.setImageResource(R.drawable.collection);
-            collectionNum.setTextColor(getResources().getColor(R.color.superplayer_yellow));
         } else {
-            videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
-            collectionNum.setTextColor(getResources().getColor(R.color.video_c9));
+            videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
         }
 
         collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
 
         if (contentStateModel.getWhetherLike().equals("true")) {
             videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
-            likesNum.setTextColor(getResources().getColor(R.color.bz_red));
         } else {
             videoDetailLikesImage.setImageResource(R.drawable.favourite);
-            likesNum.setTextColor(getResources().getColor(R.color.video_c9));
         }
 
         if (contentStateModel.getLikeCountShow().equals("0")) {
             likesNum.setText("赞");
         } else {
             likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+        }
+
+        TextView followView = (TextView) adapter.getViewByPosition(currentIndex, R.id.follow);
+        if (null != followView) {
+            if (contentStateModel.getWhetherFollow().equals("true")) {
+                followView.setBackgroundResource(R.drawable.followed_bg);
+                followView.setText("已关注");
+                isFollow = true;
+            } else {
+                adapter.getViewByPosition(currentIndex, R.id.follow).setBackgroundResource(R.drawable.follow_bg);
+                followView.setText("关注");
+                isFollow = false;
+            }
         }
     }
 
@@ -1172,7 +1219,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    collectionNum.setTextColor(getResources().getColor(R.color.superplayer_yellow));
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                 } else {
@@ -1182,8 +1228,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                         num--;
                                     }
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
-                                    collectionNum.setTextColor(getResources().getColor(R.color.video_c9));
+                                    videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
                                     playerView.contentStateModel.setWhetherFavor("false");
                                 }
                                 if (null != playerView.contentStateModel) {
@@ -1256,13 +1301,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     num++;
                                     likesNum.setText(NumberFormatTool.formatNum(num, false));
-                                    likesNum.setTextColor(getResources().getColor(R.color.bz_red));
                                     playerView.contentStateModel.setWhetherLike("true");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
                                     int num;
                                     videoDetailLikesImage.setImageResource(R.drawable.favourite);
-                                    likesNum.setTextColor(getResources().getColor(R.color.c9));
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     if (num > 0) {
                                         num--;
@@ -1440,6 +1483,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             playerView.mSuperPlayer.pause();
         }
 
+        if (!mIsVisibleToUser) {
+            return;
+        }
+
         //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
         if (mDuration != 0) {
             /**
@@ -1450,18 +1497,20 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 return;
             }
             everyOneDuration = playerView.mWindowPlayer.mProgress - playerView.mWindowPlayer.getRecordDuration();
-            pointPercent = everyOneDuration / mDuration;
-            playerView.mWindowPlayer.setRecordDuration(mDuration);
+            pointPercent = (double) everyOneDuration / mDuration;
+            BigDecimal two = new BigDecimal(pointPercent);
+            double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+            playerView.mWindowPlayer.setRecordDuration(everyOneDuration);
             String event;
             if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                 //不为重播
-                event = Constants.CMS_VIDEO_OVER;
+                event = Constants.CMS_VIDEO_OVER_AUTO;
             } else {
                 //重播
-                event = Constants.CMS_VIDEO_OVER_AUTO;
+                event = Constants.CMS_VIDEO_OVER;
             }
             //上报埋点
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), myContentId, String.valueOf(everyOneDuration), String.valueOf(pointPercent), event), event);
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(pointPercentTwo * 100), event), event);
         }
     }
 
@@ -1592,7 +1641,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .setFocusable(true)
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                     .setAnimationStyle(R.style.take_popwindow_anim)
-                    .size(getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(50))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(50))
                     .create()
                     .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
         } else {
@@ -1615,7 +1664,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .setOutsideTouchable(true)
                     .setFocusable(true)
                     .setAnimationStyle(R.style.AnimCenter)
-                    .size(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels)
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels)
                     .create()
                     .showAtLocation(decorView, Gravity.CENTER, 0, 0);
         } else {

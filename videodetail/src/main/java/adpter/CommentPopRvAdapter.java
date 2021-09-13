@@ -47,9 +47,12 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
         } else {
             gmReback.setVisibility(View.GONE);
         }
-        Glide.with(mContext)
-                .load(item.getHead())
-                .into(commentUserHead);
+        if (null != mContext) {
+            Glide.with(mContext)
+                    .load(item.getHead())
+                    .into(commentUserHead);
+        }
+
         helper.setText(R.id.comment_pop_username, item.getNickname());
         if (null == item.getCreateTime() || TextUtils.isEmpty(item.getCreateTime())) {
             helper.setText(R.id.comment_date, "");

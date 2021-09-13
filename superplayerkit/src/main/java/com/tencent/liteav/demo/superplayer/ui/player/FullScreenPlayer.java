@@ -152,7 +152,6 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private ImageView fullscreenShareQq;
     private DataDTO item;
     private boolean mIsTurnPage;
-    private DataDTO mPreviousDTO;
 
     private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow, translateAniBottomHide;
 
@@ -369,9 +368,8 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         superplayerSpeed.setOnClickListener(this);
     }
 
-    public void setDataDTO(DataDTO mItem, DataDTO previousDTO) {
+    public void setDataDTO(DataDTO mItem) {
         this.item = mItem;
-        this.mPreviousDTO = previousDTO;
     }
 
     public DataDTO getDataDTO() {
@@ -776,6 +774,11 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     public interface FullIsReplayClick {
         void getFullReplayClick();
     }
+
+    public void setFullIsReplayClick(FullIsReplayClick callBack) {
+        this.isReplayClick = callBack;
+    }
+
 
     /**
      * 设置点击事件监听

@@ -161,4 +161,13 @@ public class AppUtils {
         }
         return "";
     }
+
+    public static boolean isApkInDebug(Context context) {
+        try {
+            ApplicationInfo info = context.getApplicationInfo();
+            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

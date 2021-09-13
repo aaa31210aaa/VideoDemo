@@ -35,9 +35,12 @@ public class LiveRvAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
             liveState.setImageResource(R.drawable.live_end);
         }
         TextView textView = helper.getView(R.id.live_item_title);
-        Glide.with(mContext)
-                .load(item.getThumbnailUrl())
-                .into(imageView);
+        if (null != mContext) {
+            Glide.with(mContext)
+                    .load(item.getThumbnailUrl())
+                    .into(imageView);
+        }
+
         textView.setText(item.getTitle());
     }
 }

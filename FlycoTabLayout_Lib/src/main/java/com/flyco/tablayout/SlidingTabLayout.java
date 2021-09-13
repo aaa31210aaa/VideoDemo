@@ -112,6 +112,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     private int mLastScrollX;
     private int mHeight;
     private boolean mSnapOnTabClick;
+    private LinearLayout.LayoutParams lp_tab;
 
     public SlidingTabLayout(Context context) {
         this(context, null, 0);
@@ -180,7 +181,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
 
         mTabSpaceEqual = ta.getBoolean(R.styleable.SlidingTabLayout_tl_tab_space_equal, false);
         mTabWidth = ta.getDimension(R.styleable.SlidingTabLayout_tl_tab_width, dp2px(-1));
-        mTabPadding = ta.getDimension(R.styleable.SlidingTabLayout_tl_tab_padding, mTabSpaceEqual || mTabWidth > 0 ? dp2px(0) : dp2px(20));
+        mTabPadding = ta.getDimension(R.styleable.SlidingTabLayout_tl_tab_padding, mTabSpaceEqual || mTabWidth > 0 ? dp2px(0) : dp2px(0));
 
         ta.recycle();
     }
@@ -280,7 +281,9 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     private void addTab(final int position, String title, View tabView) {
         TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
         if (tv_tab_title != null) {
-            if (title != null) tv_tab_title.setText(title);
+            if (title != null) {
+                tv_tab_title.setText(title);
+            }
         }
 
         tabView.setOnClickListener(new OnClickListener() {
@@ -307,9 +310,21 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
             }
         });
         /** 每一个Tab的布局参数 */
-        LinearLayout.LayoutParams lp_tab = mTabSpaceEqual ?
-                new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
-                new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+
+        if (0 == position) {
+            lp_tab = mTabSpaceEqual ?
+                    new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
+                    new LinearLayout.LayoutParams(dp2px(130), LayoutParams.MATCH_PARENT);
+        } else if (1 == position) {
+            lp_tab = mTabSpaceEqual ?
+                    new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
+                    new LinearLayout.LayoutParams(dp2px(60), LayoutParams.MATCH_PARENT);
+        } else if (2 == position) {
+            lp_tab = mTabSpaceEqual ?
+                    new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
+                    new LinearLayout.LayoutParams(dp2px(60), LayoutParams.MATCH_PARENT);
+        }
+
 
         if (mTabWidth > 0) {
             lp_tab = new LinearLayout.LayoutParams((int) mTabWidth, LayoutParams.MATCH_PARENT);
@@ -339,7 +354,6 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
             }
         }
     }
-
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -585,6 +599,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         this.mTabWidth = dp2px(tabWidth);
         updateTabStyles();
     }
+
 
     public void setIndicatorColor(int indicatorColor) {
         this.mIndicatorColor = indicatorColor;

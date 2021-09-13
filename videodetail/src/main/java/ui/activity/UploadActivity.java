@@ -142,7 +142,9 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                     public void onSuccess(Response<TopicModel> response) {
                         if (null != response.body()) {
                             uploadTagFlow = response.body().getData().getRecords();
-                            setTagFlowData(uploadTagFlow);
+                            if (null != uploadTagFlow) {
+                                setTagFlowData(uploadTagFlow);
+                            }
                         }
                     }
 
@@ -355,9 +357,12 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void onSuccess(Response<UploadVideoBean> response) {
                         uploadVideoBean = response.body();
-                        Glide.with(UploadActivity.this)
-                                .load(uploadVideoBean.getCoverImageUrl())
-                                .into(uploadBtn);
+                        if (null != UploadActivity.this) {
+                            Glide.with(UploadActivity.this)
+                                    .load(uploadVideoBean.getCoverImageUrl())
+                                    .into(uploadBtn);
+                        }
+
                         uploadProgress.setVisibility(View.GONE);
                         uploadCompleteTip.setVisibility(View.VISIBLE);
                         uploadVideoCancel.setVisibility(View.VISIBLE);

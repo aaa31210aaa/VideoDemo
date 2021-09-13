@@ -32,8 +32,8 @@
             tool:text="有活动"
             android:gravity="center"
             android:textColor="#ffffff"
+            android:textSize="6sp"
             android:visibility="gone"
-            android:textSize="7sp"
             mv:mv_backgroundColor="#FD481F"
             mv:mv_isRadiusHalfHeight="true"
             mv:mv_strokeWidth="0dp" />

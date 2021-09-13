@@ -71,22 +71,24 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private VideoViewPagerAdapter adapter;
     private List<VideoChannelModel> videoChannelModels = new ArrayList<>();
     private List<String> colunmList = new ArrayList<>();
-    private String panelCode = "";
     private LinearLayout backLin;
     private RelativeLayout videoTitleView;
-    private VideoDetailFragment videoDetailFragment;
-    private XkshFragment xkshFragment;
+    public VideoDetailFragment videoDetailFragment;
+    public XkshFragment xkshFragment;
     private SuperPlayerView playerView;
 
     private ImageView searchIcon;
     private ImageView personalCenter;
-    private ActivityRuleBean activityRuleBean;
+    public ActivityRuleBean activityRuleBean;
     private boolean isAbbreviation; //当前是否是缩略图
     private TranslateAnimation translateAniLeftShow, translateAniLeftHide;
     public CustomPopWindow noLoginTipsPop;
     private View noLoginTipsView;
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
+    public String contentId;
+    private int toCurrentTab;
+    private String lsCotentnId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +100,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initView() {
-        panelCode = getIntent().getStringExtra("panelCode");
+        contentId = getIntent().getStringExtra("contentId");
+        toCurrentTab = getIntent().getIntExtra("setCurrentTab",1);
         backLin = findViewById(R.id.back_lin);
         backLin.setOnClickListener(this);
         videoTab = findViewById(R.id.video_tab);
@@ -192,159 +195,199 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 LinearLayout videoFragmentFullLin = (LinearLayout) videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.superplayer_iv_fullscreen);
                 LinearLayout xkshFullLin = (LinearLayout) xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.superplayer_iv_fullscreen);
                 if (playerMode.equals(SuperPlayerDef.PlayerMode.FULLSCREEN)) {
-                    videoDetailFragment.videoDetailmanager.setCanScoll(false);
-                    videoDetailFragment.refreshLayout.setEnableRefresh(false);
-                    xkshFragment.xkshManager.setCanScoll(false);
-                    xkshFragment.refreshLayout.setEnableRefresh(false);
-                    videoDetailFragment.adapter.setEnableLoadMore(false);
-                    xkshFragment.adapter.setEnableLoadMore(false);
+                    if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                        videoDetailFragment.videoDetailmanager.setCanScoll(false);
+                        videoDetailFragment.refreshLayout.setEnableRefresh(false);
+                        videoDetailFragment.adapter.setEnableLoadMore(false);
+                        if (null != videoDetailFragment.popupWindow) {
+                            videoDetailFragment.popupWindow.dissmiss();
+                        }
 
-                    if (null != videoDetailFragment.popupWindow) {
-                        videoDetailFragment.popupWindow.dissmiss();
-                    }
-                    if (null != xkshFragment.popupWindow) {
-                        xkshFragment.popupWindow.dissmiss();
-                    }
+                        if (null != videoDetailFragment.inputAndSendPop) {
+                            videoDetailFragment.inputAndSendPop.dissmiss();
+                        }
 
-                    if (null != videoDetailFragment.inputAndSendPop) {
-                        videoDetailFragment.inputAndSendPop.dissmiss();
-                    }
-                    if (null != xkshFragment.inputAndSendPop) {
-                        xkshFragment.inputAndSendPop.dissmiss();
-                    }
+                        if (null != videoDetailFragment.choosePop) {
+                            videoDetailFragment.choosePop.dissmiss();
+                        }
 
-                    if (null != videoDetailFragment.choosePop) {
-                        videoDetailFragment.choosePop.dissmiss();
-                    }
-                    if (null != xkshFragment.choosePop) {
-                        xkshFragment.choosePop.dissmiss();
-                    }
+                        if (null != videoDetailFragment.noLoginTipsPop) {
+                            videoDetailFragment.noLoginTipsPop.dissmiss();
+                        }
 
-                    if (null != videoDetailFragment.noLoginTipsPop) {
-                        videoDetailFragment.noLoginTipsPop.dissmiss();
-                    }
-                    if (null != xkshFragment.noLoginTipsPop) {
-                        xkshFragment.noLoginTipsPop.dissmiss();
-                    }
+                        if (null != videoDetailFragment.sharePop) {
+                            videoDetailFragment.sharePop.dissmiss();
+                        }
+                        if (null != videoDetailFragment.videoDetailCommentBtn) {
+                            videoDetailFragment.videoDetailCommentBtn.setVisibility(View.GONE);
+                        }
 
-                    if (null != videoDetailFragment.sharePop) {
-                        videoDetailFragment.sharePop.dissmiss();
-                    }
-                    if (null != xkshFragment.sharePop) {
-                        xkshFragment.sharePop.dissmiss();
+                        if (null != videoTitleView) {
+                            videoTitleView.setVisibility(View.GONE);
+                        }
+
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
+                        if (null != videoFragmentFullLin) {
+                            videoFragmentFullLin.setVisibility(View.GONE);
+                        }
+                    } else if (xkshFragment.mIsVisibleToUser) {
+                        xkshFragment.xkshManager.setCanScoll(false);
+                        xkshFragment.refreshLayout.setEnableRefresh(false);
+                        xkshFragment.adapter.setEnableLoadMore(false);
+
+                        if (null != xkshFragment.popupWindow) {
+                            xkshFragment.popupWindow.dissmiss();
+                        }
+
+
+                        if (null != xkshFragment.inputAndSendPop) {
+                            xkshFragment.inputAndSendPop.dissmiss();
+                        }
+
+                        if (null != xkshFragment.choosePop) {
+                            xkshFragment.choosePop.dissmiss();
+                        }
+
+                        if (null != xkshFragment.noLoginTipsPop) {
+                            xkshFragment.noLoginTipsPop.dissmiss();
+                        }
+
+                        if (null != xkshFragment.sharePop) {
+                            xkshFragment.sharePop.dissmiss();
+                        }
+
+                        if (null != xkshFragment.videoDetailCommentBtn) {
+                            xkshFragment.videoDetailCommentBtn.setVisibility(View.GONE);
+                        }
+
+                        if (null != videoTitleView) {
+                            videoTitleView.setVisibility(View.GONE);
+                        }
+
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
+                        if (null != xkshFullLin) {
+                            xkshFullLin.setVisibility(View.GONE);
+                        }
+                        xkshFragment.rankList.setVisibility(View.GONE);
+
+                        if (isAbbreviation) {
+                            xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
+                        } else {
+                            xkshFragment.activityRuleImg.setVisibility(View.GONE);
+                            xkshFragment.activityToAbbreviation.setVisibility(View.GONE);
+                        }
                     }
 
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
                     videoTab.setVisibility(View.GONE);
-                    if (null != videoDetailFragment.videoDetailCommentBtn) {
-                        videoDetailFragment.videoDetailCommentBtn.setVisibility(View.GONE);
-                    }
-                    if (null != xkshFragment.videoDetailCommentBtn) {
-                        xkshFragment.videoDetailCommentBtn.setVisibility(View.GONE);
-                    }
-                    if (null != videoDetailFragment.mVideoTitleView) {
-                        videoDetailFragment.mVideoTitleView.setVisibility(View.GONE);
-                    }
-                    if (null != xkshFragment.mVideoTitleView) {
-                        xkshFragment.mVideoTitleView.setVisibility(View.GONE);
-                    }
-                    videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
-                    xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
+
                     videoVp.setScroll(false);
 
-                    if (null != videoFragmentFullLin) {
-                        videoFragmentFullLin.setVisibility(View.GONE);
-                    }
-
-                    if (null != xkshFullLin) {
-                        xkshFullLin.setVisibility(View.GONE);
-                    }
-                    xkshFragment.rankList.setVisibility(View.GONE);
-                    if (isAbbreviation) {
-                        xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
-                    } else {
-                        xkshFragment.activityRuleImg.setVisibility(View.GONE);
-                        xkshFragment.activityToAbbreviation.setVisibility(View.GONE);
-                    }
 
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
-                    videoDetailFragment.videoDetailmanager.setCanScoll(true);
-                    videoDetailFragment.refreshLayout.setEnableRefresh(true);
-                    xkshFragment.xkshManager.setCanScoll(true);
-                    xkshFragment.refreshLayout.setEnableRefresh(true);
-                    videoDetailFragment.adapter.setEnableLoadMore(true);
-                    xkshFragment.adapter.setEnableLoadMore(true);
+                    if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                        videoDetailFragment.videoDetailmanager.setCanScoll(true);
+                        videoDetailFragment.refreshLayout.setEnableRefresh(true);
+                        videoDetailFragment.adapter.setEnableLoadMore(true);
+                        videoDetailFragment.setLikeCollection(playerView.contentStateModel);
+                        if (null != videoDetailFragment.videoDetailCommentBtn) {
+                            videoDetailFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
+                        }
+                        if (null != videoFragmentFullLin) {
+                            videoFragmentFullLin.setVisibility(View.VISIBLE);
+                        }
 
-                    videoDetailFragment.setLikeCollection(playerView.contentStateModel);
-                    xkshFragment.setLikeCollection(playerView.contentStateModel);
+                        if (null != videoTitleView) {
+                            videoTitleView.setVisibility(View.VISIBLE);
+                        }
 
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
+                    } else if (xkshFragment.mIsVisibleToUser) {
+                        xkshFragment.xkshManager.setCanScoll(true);
+                        xkshFragment.refreshLayout.setEnableRefresh(true);
+                        xkshFragment.adapter.setEnableLoadMore(true);
+                        xkshFragment.setLikeCollection(playerView.contentStateModel);
+                        if (null != xkshFragment.videoDetailCommentBtn) {
+                            xkshFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
+                        }
+
+                        if (null != xkshFullLin) {
+                            xkshFullLin.setVisibility(View.VISIBLE);
+                        }
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
+                        xkshFragment.rankList.setVisibility(View.VISIBLE);
+                        if (isAbbreviation) {
+                            xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                        } else {
+                            xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
+                            xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    if (null != videoTitleView) {
+                        videoTitleView.setVisibility(View.VISIBLE);
+                    }
                     videoTab.setVisibility(View.VISIBLE);
-                    if (null != videoDetailFragment.videoDetailCommentBtn) {
-                        videoDetailFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                    }
-                    if (null != xkshFragment.videoDetailCommentBtn) {
-                        xkshFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                    }
-                    if (null != videoDetailFragment.mVideoTitleView) {
-                        videoDetailFragment.mVideoTitleView.setVisibility(View.VISIBLE);
-                    }
-                    if (null != xkshFragment.mVideoTitleView) {
-                        xkshFragment.mVideoTitleView.setVisibility(View.VISIBLE);
-                    }
-                    if (null != videoFragmentFullLin) {
-                        videoFragmentFullLin.setVisibility(View.VISIBLE);
-                    }
-                    if (null != xkshFullLin) {
-                        xkshFullLin.setVisibility(View.VISIBLE);
-                    }
-
-                    videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
-                    xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                     videoVp.setScroll(true);
-                    xkshFragment.rankList.setVisibility(View.VISIBLE);
-                    if (isAbbreviation) {
-                        xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
-                    } else {
-                        xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
-                        xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
-                    }
                 }
             }
         };
 
-        playerView.mWindowPlayer.isReplayClick = new WindowPlayer.IsReplayClick() {
+        playerView.mWindowPlayer.setIsReplayClick(new WindowPlayer.IsReplayClick() {
             @Override
             public void getReplayClick() {
                 if (xkshFragment.mIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.myContentId,"","",Constants.CMS_VIDEO_PLAY),Constants.CMS_VIDEO_PLAY);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.myContentId,"","",Constants.CMS_VIDEO_PLAY),Constants.CMS_VIDEO_PLAY);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
                 }
-
             }
-        };
+        });
 
-        playerView.mFullScreenPlayer.isReplayClick = new FullScreenPlayer.FullIsReplayClick() {
+        playerView.mFullScreenPlayer.setFullIsReplayClick(new FullScreenPlayer.FullIsReplayClick() {
             @Override
             public void getFullReplayClick() {
                 if (xkshFragment.mIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.myContentId,"","",Constants.CMS_VIDEO_PLAY),Constants.CMS_VIDEO_PLAY);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.myContentId,"","",Constants.CMS_VIDEO_PLAY),Constants.CMS_VIDEO_PLAY);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
                 }
             }
-        };
+        });
 
-        SuperPlayerImpl.readPlayCallBack = new SuperPlayerImpl.ReadPlayCallBack() {
+        SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
                 if (xkshFragment.mIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.myContentId,"","",Constants.CMS_VIDEO_PLAY_AUTO),Constants.CMS_VIDEO_PLAY_AUTO);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.myContentId,"","",Constants.CMS_VIDEO_PLAY_AUTO),Constants.CMS_VIDEO_PLAY_AUTO);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
                 }
             }
-        };
+        });
+
+
+        SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
+            @Override
+            public void AutoPlayOverCallBack() {
+                 if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                    lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
+                } else if (xkshFragment.mIsVisibleToUser) {
+                    lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
+                }
+
+                final String event;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    //不为重播
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                } else {
+                    //重播
+                    event = Constants.CMS_VIDEO_OVER;
+                }
+
+                //拖动/自动播放结束上报埋点
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration*1000), "100", event), event);
+            }
+        });
 
         translateAnimation();
     }
@@ -426,15 +469,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        adapter.addItems(videoChannelModels, videoTab, videoTitleView, playerView);
+        adapter.addItems(videoChannelModels, videoTab, playerView, contentId);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }
         String[] titles = colunmList.toArray(new String[colunmList.size()]);
         //tab和ViewPager进行关联
         videoTab.setViewPager(videoVp, titles);
-        videoTab.setCurrentTab(1);
-
+        videoTab.setCurrentTab(toCurrentTab);
         videoDetailFragment = (VideoDetailFragment) adapter.getItem(1);
         xkshFragment = (XkshFragment) adapter.getItem(0);
 
@@ -462,17 +504,26 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             if (null == activityRuleBean) {
                                 return;
                             }
-                            videoTab.showMsg(0, "有活动");
-                            videoTab.setMsgMargin(0, 0, ButtonSpan.dip2px(10));
+                            if (null != activityRuleBean.getData().getConfig().getJumpUrl()
+                                    && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
+                                videoTab.showMsg(0, "有活动");
+                                videoTab.setMsgMargin(0, ButtonSpan.dip2px(3), ButtonSpan.dip2px(9));
+                                xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
+                                xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                            }
+
                             /**
                              * 设置活动规则图，缩略图
                              */
-                            Glide.with(VideoHomeActivity.this)
-                                    .load(activityRuleBean.getData().getConfig().getImageUrl())
-                                    .into(xkshFragment.activityRuleImg);
-                            Glide.with(VideoHomeActivity.this)
-                                    .load(activityRuleBean.getData().getConfig().getBackgroundImageUrl())
-                                    .into(xkshFragment.activityRuleAbbreviation);
+                            if (null != VideoHomeActivity.this) {
+                                Glide.with(VideoHomeActivity.this)
+                                        .load(activityRuleBean.getData().getConfig().getImageUrl())
+                                        .into(xkshFragment.activityRuleImg);
+                                Glide.with(VideoHomeActivity.this)
+                                        .load(activityRuleBean.getData().getConfig().getBackgroundImageUrl())
+                                        .into(xkshFragment.activityRuleAbbreviation);
+                            }
+
                             /**
                              * 活动规则图点击 跳转活动链接
                              */

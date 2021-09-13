@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
-                intent.putExtra("contentId", "720315");
+                intent.putExtra("contentId", "93459");
                 startActivity(intent);
             }
         });
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "b9ad3b76-8402-47df-8bf2-9e9e3380e56c";
+                        return "3077274f-d14d-48ec-b511-88a3c7c254b0";
                     }
 
                     @Override

@@ -47,12 +47,13 @@ import com.wdcs.videodetail.demo.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import widget.CircleImageView;
+import widget.OverLineTextView;
 import widget.SpannableTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.YELLOW_V;
-import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 
 @Keep
 public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
@@ -67,6 +68,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
     private SmartRefreshLayout mRefreshlayout;
     private RelativeLayout mVideoDetailCommentBtn;
     private ViewPagerLayoutManager mVideoDetailmanager;
+    private String spaceStr = "";
+    private String topicNameStr;
 
     public XkshVideoAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
                             SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
@@ -87,18 +90,26 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
         TextView continuePlay = helper.getView(R.id.continue_play);
         LinearLayout fullLin = helper.getView(R.id.superplayer_iv_fullscreen);
-        ImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
+        CircleImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
         TextView publisherName = helper.getView(R.id.publisher_name);
         TextView follow = helper.getView(R.id.follow);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
-        final SpannableTextView foldTextView = helper.getView(R.id.fold_text);
+        final TextView foldTextView = helper.getView(R.id.fold_text);
         final TextView expendText = helper.getView(R.id.expend_text);
+        TextView huati = helper.getView(R.id.huati);
 
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
         } else {
             noWifiLl.setVisibility(View.VISIBLE);
+        }
+
+        //全屏按钮是否显示
+        if (item.isFullBtnIsShow()) {
+            fullLin.setVisibility(View.VISIBLE);
+        } else {
+            fullLin.setVisibility(View.GONE);
         }
 
         //无wifi时继续播放按钮
@@ -110,7 +121,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-        //关注按钮
         follow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,10 +137,12 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 }
             }
         });
+        if (null != mContext) {
+            Glide.with(mContext)
+                    .load(item.getCreatorHead())
+                    .into(publisherHeadimg);
+        }
 
-        Glide.with(mContext)
-                .load(item.getCreatorHead())
-                .into(publisherHeadimg);
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,197 +163,252 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             officialCertificationImg.setVisibility(View.VISIBLE);
             if (TextUtils.equals(item.getCreatorCertMark(), BLUE_V)) {
                 officialCertificationImg.setImageResource(R.drawable.official_certification);
-            } else if (TextUtils.equals(item.getCreatorCertMark(), YELLOW_V)){
+            } else if (TextUtils.equals(item.getCreatorCertMark(), YELLOW_V)) {
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
 
         watched.setText(NumberFormatTool.formatNum(item.getViewCountShow(), false));
-        String topicNameStr;
+
         if (TextUtils.isEmpty(item.getBelongTopicName()) || null == item.getBelongTopicName()) {
             topicNameStr = "";
         } else {
-            topicNameStr = "#" + item.getBelongTopicName()+"  ";
+            topicNameStr = "#" + item.getBelongTopicName();
         }
-        brief = topicNameStr + item.getBrief();
-        if (TextUtils.isEmpty(brief)) {
-            foldTextView.setVisibility(View.GONE);
-        } else {
-            foldTextView.setVisibility(View.VISIBLE);
-        }
-
-        final SpannableStringBuilder foldTextBuilder = new SpannableStringBuilder(brief);
-        //单独设置字体大小
-        AbsoluteSizeSpan foldTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
-        foldTextBuilder.setSpan(foldTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //单独设置点击事件
-        ClickableSpan foldTextClickableSpan = new ClickableSpan() {
+        huati.setText(topicNameStr);
+        huati.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(@NonNull View widget) {
-                //跳转H5话题详情
+            public void onClick(View view) {
                 try {
                     param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+        });
 
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(mContext.getResources().getColor(R.color.white));
-                paint.setUnderlineText(false);
+        if (TextUtils.isEmpty(item.getBrief())) {
+            brief = item.getTitle();
+        } else {
+            brief = item.getBrief();
+        }
+
+        if (TextUtils.isEmpty(brief)) {
+            foldTextView.setVisibility(View.GONE);
+        } else {
+            foldTextView.setVisibility(View.VISIBLE);
+        }
+
+        if (huati.getText().length() != 0) {
+            int num;
+            if (huati.getText().length() > 13) {
+                num = 13 + 1;
+            } else {
+                num = huati.getText().length() + 1;
             }
-        };
-        foldTextBuilder.setSpan(foldTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        //同时设置字体颜色、点击事件
-        ClickableSpan foldTextBuilderClickableSpan = new ClickableSpan() {
+            for (int i = 0; i < num; i++) {
+                spaceStr = spaceStr + "\u3000";
+                item.setSpaceStr(spaceStr);
+            }
+            spaceStr = "";
+        }
 
+        foldTextView.setText(item.getSpaceStr() + brief);
+        foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(@NonNull View widget) {
+            public void onClick(View view) {
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
                 }
             }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(mContext.getResources().getColor(R.color.p80_opacity_white));
-                paint.setUnderlineText(false);
-
-            }
-        };
-        foldTextBuilder.setSpan(foldTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
-        //不设置不生效
-        foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        foldTextView.setText(foldTextBuilder);
-        //去掉点击后文字的背景色 (不去掉会有默认背景色)
-        foldTextView.setHighlightColor(Color.parseColor("#00000000"));
-
-        foldTextView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-
-                TextView tv = (TextView) v;
-                CharSequence text = tv.getText();
-                if (text instanceof SpannableString) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        x -= tv.getTotalPaddingLeft();
-                        y -= tv.getTotalPaddingTop();
-
-                        x += tv.getScrollX();
-                        y += tv.getScrollY();
-
-                        Layout layout = tv.getLayout();
-                        int line = layout.getLineForVertical(y);
-                        int off = layout.getOffsetForHorizontal(line, x);
-
-                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
-                        if (link.length != 0) {
-                            link[0].onClick(tv);
-                        } else {
-                            //do textview click event
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
         });
 
-
-        /**
-         * 展开的
-         */
-        final SpannableStringBuilder expendTextBuilder = new SpannableStringBuilder(brief);
-        //单独设置字体大小
-        AbsoluteSizeSpan expendTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
-        expendTextBuilder.setSpan(expendTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //单独设置点击事件
-        ClickableSpan expendTextClickableSpan = new ClickableSpan() {
+        expendText.setText(item.getSpaceStr() + brief);
+        expendText.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(@NonNull View widget) {
-                ToastUtils.showShort("点击了话题");
-            }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(mContext.getResources().getColor(R.color.white));
-                paint.setUnderlineText(false);
-            }
-        };
-        expendTextBuilder.setSpan(expendTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //同时设置字体颜色、点击事件
-        ClickableSpan expendTextBuilderClickableSpan = new ClickableSpan() {
-
-            @Override
-            public void onClick(@NonNull View widget) {
+            public void onClick(View view) {
                 if (expendText.getVisibility() == View.VISIBLE) {
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
                 }
             }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(mContext.getResources().getColor(R.color.p80_opacity_white));
-                paint.setUnderlineText(false);
-
-            }
-        };
-
-        expendTextBuilder.setSpan(expendTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
-        //不设置不生效
-        expendText.setMovementMethod(LinkMovementMethod.getInstance());
-        expendText.setText(expendTextBuilder);
-        //去掉点击后文字的背景色 (不去掉回有默认背景色)
-        expendText.setHighlightColor(Color.parseColor("#00000000"));
-
-
-        expendText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-
-                TextView tv = (TextView) v;
-                CharSequence text = tv.getText();
-                if (text instanceof SpannableString) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        x -= tv.getTotalPaddingLeft();
-                        y -= tv.getTotalPaddingTop();
-
-                        x += tv.getScrollX();
-                        y += tv.getScrollY();
-
-                        Layout layout = tv.getLayout();
-                        int line = layout.getLineForVertical(y);
-                        int off = layout.getOffsetForHorizontal(line, x);
-
-                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
-                        if (link.length != 0) {
-                            link[0].onClick(tv);
-                        } else {
-                            //do textview click event
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
         });
+
+
+//        final SpannableStringBuilder foldTextBuilder = new SpannableStringBuilder(brief);
+//        //单独设置字体大小
+//        AbsoluteSizeSpan foldTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
+//        foldTextBuilder.setSpan(foldTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//        //单独设置点击事件
+//        ClickableSpan foldTextClickableSpan = new ClickableSpan() {
+//            @Override
+//            public void onClick(@NonNull View widget) {
+//                //跳转H5话题详情
+//                try {
+//                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            @Override
+//            public void updateDrawState(@NonNull TextPaint paint) {
+//                paint.setColor(mContext.getResources().getColor(R.color.white));
+//                paint.setUnderlineText(false);
+//            }
+//        };
+//        foldTextBuilder.setSpan(foldTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//        //同时设置字体颜色、点击事件
+//        ClickableSpan foldTextBuilderClickableSpan = new ClickableSpan() {
+//
+//            @Override
+//            public void onClick(@NonNull View widget) {
+//                if (foldTextView.getVisibility() == View.VISIBLE) {
+//                    foldTextView.setVisibility(View.GONE);
+//                    expendText.setVisibility(View.VISIBLE);
+//                }
+//            }
+//
+//            @Override
+//            public void updateDrawState(@NonNull TextPaint paint) {
+//                paint.setColor(mContext.getResources().getColor(R.color.p80_opacity_white));
+//                paint.setUnderlineText(false);
+//
+//            }
+//        };
+//        foldTextBuilder.setSpan(foldTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
+//        //不设置不生效
+//        foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
+//        foldTextView.setText(foldTextBuilder);
+//        //去掉点击后文字的背景色 (不去掉会有默认背景色)
+//        foldTextView.setHighlightColor(Color.parseColor("#00000000"));
+//
+//        foldTextView.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                int action = event.getAction();
+//
+//                TextView tv = (TextView) v;
+//                CharSequence text = tv.getText();
+//                if (text instanceof SpannableString) {
+//                    if (action == MotionEvent.ACTION_UP) {
+//                        int x = (int) event.getX();
+//                        int y = (int) event.getY();
+//
+//                        x -= tv.getTotalPaddingLeft();
+//                        y -= tv.getTotalPaddingTop();
+//
+//                        x += tv.getScrollX();
+//                        y += tv.getScrollY();
+//
+//                        Layout layout = tv.getLayout();
+//                        int line = layout.getLineForVertical(y);
+//                        int off = layout.getOffsetForHorizontal(line, x);
+//
+//                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
+//                        if (link.length != 0) {
+//                            link[0].onClick(tv);
+//                        } else {
+//                            //do textview click event
+//                            return false;
+//                        }
+//                    }
+//                }
+//
+//                return true;
+//            }
+//        });
+//
+//
+//        /**
+//         * 展开的
+//         */
+//        final SpannableStringBuilder expendTextBuilder = new SpannableStringBuilder(brief);
+//        //单独设置字体大小
+//        AbsoluteSizeSpan expendTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
+//        expendTextBuilder.setSpan(expendTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//        //单独设置点击事件
+//        ClickableSpan expendTextClickableSpan = new ClickableSpan() {
+//            @Override
+//            public void onClick(@NonNull View widget) {
+//                ToastUtils.showShort("点击了话题");
+//            }
+//
+//            @Override
+//            public void updateDrawState(@NonNull TextPaint paint) {
+//                paint.setColor(mContext.getResources().getColor(R.color.white));
+//                paint.setUnderlineText(false);
+//            }
+//        };
+//        expendTextBuilder.setSpan(expendTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//        //同时设置字体颜色、点击事件
+//        ClickableSpan expendTextBuilderClickableSpan = new ClickableSpan() {
+//
+//            @Override
+//            public void onClick(@NonNull View widget) {
+//                if (expendText.getVisibility() == View.VISIBLE) {
+//                    expendText.setVisibility(View.GONE);
+//                    foldTextView.setVisibility(View.VISIBLE);
+//                }
+//            }
+//
+//            @Override
+//            public void updateDrawState(@NonNull TextPaint paint) {
+//                paint.setColor(mContext.getResources().getColor(R.color.p80_opacity_white));
+//                paint.setUnderlineText(false);
+//
+//            }
+//        };
+//
+//        expendTextBuilder.setSpan(expendTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
+//        //不设置不生效
+//        expendText.setMovementMethod(LinkMovementMethod.getInstance());
+//        expendText.setText(expendTextBuilder);
+//        //去掉点击后文字的背景色 (不去掉回有默认背景色)
+//        expendText.setHighlightColor(Color.parseColor("#00000000"));
+//
+//
+//        expendText.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                int action = event.getAction();
+//
+//                TextView tv = (TextView) v;
+//                CharSequence text = tv.getText();
+//                if (text instanceof SpannableString) {
+//                    if (action == MotionEvent.ACTION_UP) {
+//                        int x = (int) event.getX();
+//                        int y = (int) event.getY();
+//
+//                        x -= tv.getTotalPaddingLeft();
+//                        y -= tv.getTotalPaddingTop();
+//
+//                        x += tv.getScrollX();
+//                        y += tv.getScrollY();
+//
+//                        Layout layout = tv.getLayout();
+//                        int line = layout.getLineForVertical(y);
+//                        int off = layout.getOffsetForHorizontal(line, x);
+//
+//                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
+//                        if (link.length != 0) {
+//                            link[0].onClick(tv);
+//                        } else {
+//                            //do textview click event
+//                            return false;
+//                        }
+//                    }
+//                }
+//
+//                return true;
+//            }
+//        });
 
 
         /**
@@ -367,9 +434,12 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            Glide.with(mContext)
-                    .load(list.get(i).getThumbnailUrl())
-                    .into(viewFlipperIcon);
+            if (null != mContext) {
+                Glide.with(mContext)
+                        .load(list.get(i).getThumbnailUrl())
+                        .into(viewFlipperIcon);
+            }
+
             TextView textView = view.findViewById(R.id.view_flipper_content);
             textView.setTextColor(mContext.getResources().getColor(R.color.white));
             textView.setText(item);
@@ -418,7 +488,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
     public interface ToAddPlayerViewClick {
         void clickNoWifi(int position);
     }
-    public void setToAddPlayerViewClick(ToAddPlayerViewClick listener){
+
+    public void setToAddPlayerViewClick(ToAddPlayerViewClick listener) {
         this.click = listener;
     }
 
@@ -426,7 +497,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         void followClick(int position);
     }
 
-    public void setFollowViewClick(FollowViewClick mFollow){
+    public void setFollowViewClick(FollowViewClick mFollow) {
         this.followViewClick = mFollow;
     }
 

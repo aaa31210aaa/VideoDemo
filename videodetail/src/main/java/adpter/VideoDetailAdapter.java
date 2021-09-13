@@ -2,6 +2,7 @@ package adpter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.text.Layout;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -30,10 +31,13 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
+import com.tencent.liteav.demo.superplayer.model.VideoPlayerParam;
+import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
+import com.wdcs.utils.AppUtils;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.ScreenUtils;
@@ -43,6 +47,7 @@ import com.wdcs.videodetail.demo.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import widget.CircleImageView;
 import widget.SpannableTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
@@ -55,15 +60,16 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
     private List<RecommendModel.DataDTO.RecordsDTO> recommendList = new ArrayList<>();
     private boolean mIsAuto;
     private String brief;
+    private String spaceStr = "";
     private SuperPlayerView superPlayerView;
     private ToAddPlayerViewClick click;
     private SmartRefreshLayout mRefreshlayout;
     private RelativeLayout mVideoDetailCommentBtn;
     private ViewPagerLayoutManager mVideoDetailmanager;
-
+    private String topicNameStr;
 
     public VideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
-                            SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
+                              SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
         super(layoutResId, data);
         this.mContext = context;
         this.mDatas = data;
@@ -81,26 +87,42 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
         TextView continuePlay = helper.getView(R.id.continue_play);
         LinearLayout fullLin = helper.getView(R.id.superplayer_iv_fullscreen);
-        ImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
+        CircleImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
         TextView publisherName = helper.getView(R.id.publisher_name);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
-        final SpannableTextView foldTextView = helper.getView(R.id.fold_text);
+        final TextView foldTextView = helper.getView(R.id.fold_text);
         final TextView expendText = helper.getView(R.id.expend_text);
+        TextView huati = helper.getView(R.id.huati);
+
+        if (AppUtils.isApkInDebug(mContext)) {
+            publisherName.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    try {
+                        System.out.println("tgt码:" + VideoInteractiveParam.getInstance().getCode() + "------");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+            });
+        }
 
         //非wifi状态下布局是否显示
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
+            //全屏按钮是否显示
+            if (item.isFullBtnIsShow()) {
+                fullLin.setVisibility(View.VISIBLE);
+            } else {
+                fullLin.setVisibility(View.GONE);
+            }
         } else {
             noWifiLl.setVisibility(View.VISIBLE);
         }
 
-        //全屏按钮是否显示
-        if (item.isFullBtnIsShow()) {
-            fullLin.setVisibility(View.VISIBLE);
-        } else {
-            fullLin.setVisibility(View.GONE);
-        }
+
 
         //无wifi时继续播放按钮
         continuePlay.setOnClickListener(new View.OnClickListener() {
@@ -127,9 +149,11 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                         .into(publisherHeadimg);
                 publisherName.setText(item.getCreatorNickname());
             } else {
-                Glide.with(mContext)
-                        .load(item.getIssuerImageUrl())
-                        .into(publisherHeadimg);
+                if (null != mContext) {
+                    Glide.with(mContext)
+                            .load(item.getIssuerImageUrl())
+                            .into(publisherHeadimg);
+                }
                 publisherName.setText(item.getIssuerName());
             }
         }
@@ -137,12 +161,12 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //跳转H5头像TA人主页
-                try {
-                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                //跳转H5头像TA人主页  视频模块不需要跳转
+//                try {
+//                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
             }
         });
 
@@ -152,43 +176,23 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             officialCertificationImg.setVisibility(View.VISIBLE);
             if (TextUtils.equals(item.getCreatorCertMark(), BLUE_V)) {
                 officialCertificationImg.setImageResource(R.drawable.official_certification);
-            } else if (TextUtils.equals(item.getCreatorCertMark(), YELLOW_V)){
+            } else if (TextUtils.equals(item.getCreatorCertMark(), YELLOW_V)) {
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
 
-
-
+        //观看人数
         watched.setText(NumberFormatTool.formatNum(item.getViewCountShow(), false));
-        String topicNameStr;
+
         if (TextUtils.isEmpty(item.getBelongTopicName()) || null == item.getBelongTopicName()) {
             topicNameStr = "";
         } else {
-            topicNameStr = "#" + item.getBelongTopicName()+"  ";
+            topicNameStr = "#" + item.getBelongTopicName();
         }
-
-        if (TextUtils.isEmpty(item.getBrief())) {
-            brief = topicNameStr + item.getTitle();
-        } else {
-            brief = topicNameStr + item.getBrief();
-        }
-
-
-        if (TextUtils.isEmpty(brief)) {
-            foldTextView.setVisibility(View.GONE);
-        } else {
-            foldTextView.setVisibility(View.VISIBLE);
-        }
-
-        final SpannableStringBuilder foldTextBuilder = new SpannableStringBuilder(brief);
-        //单独设置字体大小
-        AbsoluteSizeSpan foldTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
-        foldTextBuilder.setSpan(foldTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //单独设置点击事件
-        ClickableSpan foldTextClickableSpan = new ClickableSpan() {
+        huati.setText(topicNameStr);
+        huati.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(@NonNull View widget) {
+            public void onClick(View view) {
                 //跳转H5话题详情
                 try {
                     param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId());
@@ -196,166 +200,54 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                     e.printStackTrace();
                 }
             }
+        });
 
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                if (null != mContext) {
-                    paint.setColor(mContext.getResources().getColor(R.color.white));
-                    paint.setUnderlineText(false);
-                }
+        if (TextUtils.isEmpty(item.getBrief())) {
+            brief = item.getTitle();
+        } else {
+            brief = item.getBrief();
+        }
+
+        if (TextUtils.isEmpty(brief)) {
+            foldTextView.setVisibility(View.GONE);
+        } else {
+            foldTextView.setVisibility(View.VISIBLE);
+        }
+
+        if (huati.getText().length() != 0) {
+            int num;
+            if (huati.getText().length() > 13) {
+                num = 13 + 2;
+            } else {
+                num = huati.getText().length();
             }
-        };
-        foldTextBuilder.setSpan(foldTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        //同时设置字体颜色、点击事件
-        ClickableSpan foldTextBuilderClickableSpan = new ClickableSpan() {
+            for (int i = 0; i < num; i++) {
+                spaceStr = spaceStr + "\u3000";
+                item.setSpaceStr(spaceStr);
+            }
+            spaceStr = "";
+        }
 
+        foldTextView.setText(item.getSpaceStr() + brief);
+        foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(@NonNull View widget) {
+            public void onClick(View view) {
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
                 }
             }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                if (null != mContext) {
-                    paint.setColor(mContext.getResources().getColor(R.color.p80_opacity_white));
-                    paint.setUnderlineText(false);
-                }
-            }
-        };
-        foldTextBuilder.setSpan(foldTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
-        //不设置不生效
-        foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        foldTextView.setText(foldTextBuilder);
-        //去掉点击后文字的背景色 (不去掉会有默认背景色)
-        foldTextView.setHighlightColor(Color.parseColor("#00000000"));
-
-        foldTextView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-
-                TextView tv = (TextView) v;
-                CharSequence text = tv.getText();
-                if (text instanceof SpannableString) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        x -= tv.getTotalPaddingLeft();
-                        y -= tv.getTotalPaddingTop();
-
-                        x += tv.getScrollX();
-                        y += tv.getScrollY();
-
-                        Layout layout = tv.getLayout();
-                        int line = layout.getLineForVertical(y);
-                        int off = layout.getOffsetForHorizontal(line, x);
-
-                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
-                        if (link.length != 0) {
-                            link[0].onClick(tv);
-                        } else {
-                            //do textview click event
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
         });
 
-
-        /**
-         * 展开的
-         */
-        final SpannableStringBuilder expendTextBuilder = new SpannableStringBuilder(brief);
-        //单独设置字体大小
-        AbsoluteSizeSpan expendTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
-        expendTextBuilder.setSpan(expendTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //单独设置点击事件
-        ClickableSpan expendTextClickableSpan = new ClickableSpan() {
+        expendText.setText(item.getSpaceStr() + brief);
+        expendText.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(@NonNull View widget) {
-                ToastUtils.showShort("点击了话题");
-            }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                if (null != mContext) {
-                    paint.setColor(mContext.getResources().getColor(R.color.white));
-                    paint.setUnderlineText(false);
-                }
-            }
-        };
-        expendTextBuilder.setSpan(expendTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //同时设置字体颜色、点击事件
-        ClickableSpan expendTextBuilderClickableSpan = new ClickableSpan() {
-
-            @Override
-            public void onClick(@NonNull View widget) {
+            public void onClick(View view) {
                 if (expendText.getVisibility() == View.VISIBLE) {
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
                 }
-            }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                if (null != mContext) {
-                    paint.setColor(mContext.getResources().getColor(R.color.p80_opacity_white));
-                    paint.setUnderlineText(false);
-                }
-            }
-        };
-
-        expendTextBuilder.setSpan(expendTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
-        //不设置不生效
-        expendText.setMovementMethod(LinkMovementMethod.getInstance());
-        expendText.setText(expendTextBuilder);
-        //去掉点击后文字的背景色 (不去掉回有默认背景色)
-        expendText.setHighlightColor(Color.parseColor("#00000000"));
-
-
-        expendText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-
-                TextView tv = (TextView) v;
-                CharSequence text = tv.getText();
-                if (text instanceof SpannableString) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        x -= tv.getTotalPaddingLeft();
-                        y -= tv.getTotalPaddingTop();
-
-                        x += tv.getScrollX();
-                        y += tv.getScrollY();
-
-                        Layout layout = tv.getLayout();
-                        int line = layout.getLineForVertical(y);
-                        int off = layout.getOffsetForHorizontal(line, x);
-
-                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
-                        if (link.length != 0) {
-                            link[0].onClick(tv);
-                        } else {
-                            //do textview click event
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
             }
         });
 
@@ -365,7 +257,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
      * 获取首页滚动消息
      */
     public void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list,
-                                    final ViewFlipper viewFlipper, final DataDTO mItem) {
+                                   final ViewFlipper viewFlipper, final DataDTO mItem) {
         if (null == mContext) {
             return;
         }
@@ -373,9 +265,12 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            Glide.with(mContext)
-                    .load(list.get(i).getThumbnailUrl())
-                    .into(viewFlipperIcon);
+            if (null != mContext) {
+                Glide.with(mContext)
+                        .load(list.get(i).getThumbnailUrl())
+                        .into(viewFlipperIcon);
+            }
+
             TextView textView = view.findViewById(R.id.view_flipper_content);
             textView.setTextColor(mContext.getResources().getColor(R.color.white));
             textView.setText(item);
@@ -410,7 +305,8 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
     public interface ToAddPlayerViewClick {
         void clickNoWifi(int position);
     }
-    public void setToAddPlayerViewClick(ToAddPlayerViewClick listener){
+
+    public void setToAddPlayerViewClick(ToAddPlayerViewClick listener) {
         this.click = listener;
     }
 }

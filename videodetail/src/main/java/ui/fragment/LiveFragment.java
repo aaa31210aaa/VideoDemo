@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.zhouwei.library.CustomPopWindow;
@@ -33,6 +34,7 @@ import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
+import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import org.json.JSONException;
@@ -48,7 +50,7 @@ import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 
-public class LiveFragment extends Fragment {
+public class LiveFragment extends Fragment implements View.OnClickListener {
     private RecyclerView liveRv;
     private LiveRvAdapter adapter;
     private List<DataDTO> mDatas;
@@ -60,6 +62,8 @@ public class LiveFragment extends Fragment {
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
     public CustomPopWindow noLoginTipsPop;
     private View noLoginTipsView;
+    private TextView noLoginTipsCancel;
+    private TextView noLoginTipsOk;
 
     public LiveFragment() {
 
@@ -97,6 +101,10 @@ public class LiveFragment extends Fragment {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         liveRv.setLayoutManager(linearLayoutManager);
         noLoginTipsView = View.inflate(getActivity(), R.layout.no_login_tips, null);
+        noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
+        noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
+        noLoginTipsCancel.setOnClickListener(this);
+        noLoginTipsOk.setOnClickListener(this);
         adapter = new LiveRvAdapter(R.layout.live_rv_item_layout, mDatas, getActivity());
         liveRv.setAdapter(adapter);
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
@@ -349,11 +357,30 @@ public class LiveFragment extends Fragment {
                     .setOutsideTouchable(true)
                     .setFocusable(true)
                     .setAnimationStyle(R.style.AnimCenter)
-                    .size(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels)
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels)
                     .create()
                     .showAtLocation(getActivity().getWindow().getDecorView(), Gravity.CENTER, 0, 0);
         } else {
             noLoginTipsPop.showAtLocation(getActivity().getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.no_login_tips_cancel) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+        } else if (id == R.id.no_login_tips_ok) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+            try {
+                param.toLogin();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

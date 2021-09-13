@@ -22,6 +22,7 @@ import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoParams;
 import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoProtocolV2;
 import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoProtocolV4;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoQualityUtils;
+import com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer;
 import com.tencent.rtmp.ITXLivePlayListener;
 import com.tencent.rtmp.ITXVodPlayListener;
 import com.tencent.rtmp.TXBitrateItem;
@@ -165,7 +166,18 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     public interface ReadPlayCallBack {
         void ReadPlayCallback();
     }
+    public static void setReadPlayCallBack(ReadPlayCallBack callBack) {
+        readPlayCallBack = callBack;
+    }
 
+    public static AutoPlayOverCallBack autoPlayOverCallBack;
+    public interface AutoPlayOverCallBack {
+        void AutoPlayOverCallBack();
+    }
+
+    public static void setAutoPlayOverCallBack(AutoPlayOverCallBack callBack) {
+        autoPlayOverCallBack = callBack;
+    }
 
     /**
      * 点播播放器事件回调
@@ -186,7 +198,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 float videoPercentage = mDuration > 0 ? ((float) progressress / (float) mDuration) : 1.0f;
                 final int progress = Math.round(percentage * superPlayerView.mWindowPlayer.mLoadBar.getMax());
                 final int videoProgress = Math.round(videoPercentage * superPlayerView.mWindowPlayer.mLoadBar.getMax());
-                superPlayerView.mWindowPlayer.mLoadBar.setProgress(progress);
+//                superPlayerView.mWindowPlayer.mLoadBar.setProgress(progress);
                 superPlayerView.mFullScreenPlayer.mFullLoadBar.setProgress(progress);
             }
 
@@ -231,8 +243,10 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             case TXLiveConstants.PLAY_EVT_RCV_FIRST_I_FRAME:
                 //视频自动播放埋点上报 在内流中滑动播放视频时上报
                 readPlayCallBack.ReadPlayCallback();
+                if (null != instance) {
+                    instance.isLoad = true;
+                }
 
-                instance.isLoad = true;
                 if (mChangeHWAcceleration) { //切换软硬解码器后，重新seek位置
                     TXCLog.i(TAG, "seek pos:" + mSeekPos);
                     seek(mSeekPos);
@@ -240,6 +254,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 }
                 break;
             case TXLiveConstants.PLAY_EVT_PLAY_END:
+                autoPlayOverCallBack.AutoPlayOverCallBack();
                 updatePlayerState(SuperPlayerDef.PlayerState.END);
                 break;
             case PLAY_EVT_PLAY_PROGRESS:
@@ -498,7 +513,9 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 query += "spfileid=" + mFileId + "&spdrmtype=" + drmType + "&spappid=" + mAppId;
                 Uri newUri = uri.buildUpon().query(query).build();
                 TXCLog.i(TAG, "playVodURL: newurl = " + Uri.decode(newUri.toString()) + " ;url= " + url);
-                instance.isLoad = false;
+                if (null != instance) {
+                    instance.isLoad = false;
+                }
                 ret = mVodPlayer.startPlay(Uri.decode(newUri.toString()));
             } else {
                 ret = mVodPlayer.startPlay(url); //开始播放视频

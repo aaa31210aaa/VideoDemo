@@ -55,10 +55,10 @@
             android:id="@+id/superplayer_iv_fullscreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="260dp"
-            android:visibility="gone"
+            android:layout_marginTop="290dp"
             android:background="@drawable/full_watch_btn_bg"
-            android:padding="7dp">
+            android:padding="7dp"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="10dp"
@@ -82,6 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginTop="@dimen/video_dp5"
         android:layout_marginRight="@dimen/video_dp10"
         android:layout_marginBottom="90dp"
         android:orientation="vertical">
@@ -90,6 +91,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/introduce_lin"
+            android:layout_marginTop="@dimen/video_dp10"
             android:layout_marginBottom="@dimen/video_dp10">
 
             <RelativeLayout
@@ -103,11 +105,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="28dp"
                     android:layout_centerVertical="true"
+                    android:layout_marginRight="@dimen/video_dp10"
+                    android:ellipsize="end"
                     android:gravity="center"
+                    android:maxEms="9"
                     android:paddingLeft="@dimen/video_dp25"
-                    android:text="软装设计"
+                    android:singleLine="true"
                     android:textColor="@color/video_white"
-                    android:textSize="@dimen/sp_16">
+                    android:textSize="@dimen/sp_16"
+                    tool:text="软装推荐软装推荐大苏打似的">
 
                 </TextView>
 
@@ -118,8 +124,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="@dimen/video_dp5"
-                    android:layout_toRightOf="@+id/publisher_name"
-                    >
+                    android:layout_toRightOf="@+id/publisher_name">
 
                 </ImageView>
 
@@ -168,26 +173,46 @@
             android:outAnimation="@anim/vf_anim_out"
             android:visibility="gone" />
 
-        <widget.SpannableTextView
-            android:id="@+id/fold_text"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="@color/p80_opacity_white"
-            android:textSize="15sp"
-            tool:text="">
+            android:layout_height="wrap_content">
 
-        </widget.SpannableTextView>
+            <TextView
+                android:id="@+id/fold_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:layout_centerVertical="true"
+                android:maxLines="2"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                tool:text="">
 
-        <TextView
-            android:id="@+id/expend_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/p80_opacity_white"
-            android:textSize="15sp"
-            android:visibility="gone"></TextView>
+            </TextView>
 
+            <TextView
+                android:id="@+id/expend_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                android:layout_centerVertical="true"
+                android:visibility="gone"></TextView>
+            <TextView
+                android:id="@+id/huati"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tool:text="#测试测试测试测试测试测试测试"
+                android:clickable="true"
+                android:focusable="true"
+                android:maxEms="11"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="16sp"
+                android:textColor="@color/white">
+
+            </TextView>
+        </RelativeLayout>
     </LinearLayout>
 
 </RelativeLayout>

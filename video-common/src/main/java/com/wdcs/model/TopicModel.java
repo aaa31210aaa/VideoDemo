@@ -1,8 +1,10 @@
 package com.wdcs.model;
 
 
-import java.util.List;
+import androidx.annotation.Keep;
 
+import java.util.List;
+@Keep
 public class TopicModel {
 
 
@@ -30,6 +32,9 @@ public class TopicModel {
     }
 
     public String getMessage() {
+        if (null == message) {
+            return "";
+        }
         return message;
     }
 
@@ -60,7 +65,7 @@ public class TopicModel {
     public void setTime(String time) {
         this.time = time;
     }
-
+    @Keep
     public static class DataDTO {
         private Integer total;
         private List<RecordsDTO> records;
@@ -98,7 +103,7 @@ public class TopicModel {
         public void setPageSize(Integer pageSize) {
             this.pageSize = pageSize;
         }
-
+        @Keep
         public static class RecordsDTO {
             private String shareTitle;
             private String shareUrl;
@@ -676,7 +681,7 @@ public class TopicModel {
             public void setPid(Object pid) {
                 this.pid = pid;
             }
-
+            @Keep
             public static class ExtendDTO {
             }
         }

@@ -130,7 +130,7 @@
 
             <LinearLayout
                 android:id="@+id/video_detail_collection"
-                android:layout_width="60dp"
+                android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -149,14 +149,14 @@
                     android:gravity="center"
                     android:layout_marginTop="@dimen/video_dp5"
                     android:textColor="@color/p60_opacity_white"
-                    android:textSize="@dimen/sp_12">
+                    android:textSize="11sp">
 
                 </TextView>
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/video_detail_likes"
-                android:layout_width="60dp"
+                android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
@@ -177,16 +177,17 @@
                     android:gravity="center"
                     android:layout_marginTop="@dimen/video_dp5"
                     android:textColor="@color/p60_opacity_white"
-                    android:textSize="@dimen/sp_12">
+                    android:textSize="11sp">
 
                 </TextView>
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/share"
-                android:layout_width="60dp"
+                android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
+                android:layout_marginRight="@dimen/video_dp10"
                 android:orientation="vertical">
 
                 <ImageView
@@ -202,7 +203,7 @@
                     android:text="转发"
                     android:layout_marginTop="@dimen/video_dp5"
                     android:textColor="@color/p60_opacity_white"
-                    android:textSize="@dimen/sp_12"></TextView>
+                    android:textSize="11sp"></TextView>
             </LinearLayout>
 
         </LinearLayout>

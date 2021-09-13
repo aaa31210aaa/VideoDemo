@@ -22,6 +22,10 @@ public class LoadingView extends RelativeLayout {
         //这里的原理就是简单的动态布局加入
         View view = View.inflate(context, R.layout.layout_view_loading, this);
         ImageView imgLoading = view.findViewById(R.id.imgLoading);
-        Glide.with(context).load(R.drawable.tiny_loading).into(imgLoading);
+        if (null != context) {
+            Glide.with(context)
+                    .load(R.drawable.tiny_loading)
+                    .into(imgLoading);
+        }
     }
 }

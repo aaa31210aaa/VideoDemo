@@ -76,6 +76,8 @@ public  class DataDTO {
     private String videoType;
     private String createBy;
     private boolean fullBtnIsShow;
+    private String spaceStr;
+    private String thirdPartyId;
 
     public String getShareTitle() {
         if (null == shareTitle) {
@@ -919,6 +921,28 @@ public  class DataDTO {
 
     public void setFullBtnIsShow(boolean fullBtnIsShow) {
         this.fullBtnIsShow = fullBtnIsShow;
+    }
+
+    public String getSpaceStr() {
+        if (null == spaceStr) {
+            return "";
+        }
+        return spaceStr;
+    }
+
+    public String getThirdPartyId() {
+        if (null == thirdPartyId) {
+            return "";
+        }
+        return thirdPartyId;
+    }
+
+    public void setThirdPartyId(String thirdPartyId) {
+        this.thirdPartyId = thirdPartyId;
+    }
+
+    public void setSpaceStr(String spaceStr) {
+        this.spaceStr = spaceStr;
     }
 
     @Keep

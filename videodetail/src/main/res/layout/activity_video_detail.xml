@@ -84,7 +84,7 @@
             android:id="@+id/superplayer_iv_fullscreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="260dp"
+            android:layout_marginTop="300dp"
             android:background="@drawable/full_watch_btn_bg"
             android:padding="7dp"
             android:visibility="gone">
@@ -108,8 +108,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/introduce_lin"
@@ -123,11 +123,12 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/video_dp10"
                 android:layout_marginBottom="@dimen/video_dp10">
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="35dp"
+                    android:layout_height="28dp"
                     android:layout_marginLeft="16dp"
                     android:background="@drawable/publisher_bg">
 
@@ -179,25 +180,43 @@
                 android:outAnimation="@anim/vf_anim_out"
                 android:visibility="gone" />
 
-            <widget.SpannableTextView
-                android:id="@+id/fold_text"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textColor="@color/p80_opacity_white"
-                android:textSize="15sp">
+                android:layout_height="wrap_content">
 
-            </widget.SpannableTextView>
+                <TextView
+                    android:id="@+id/fold_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="@color/p80_opacity_white"
+                    android:textSize="15sp">
 
-            <TextView
-                android:id="@+id/expend_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/p80_opacity_white"
-                android:textSize="15sp"
-                android:visibility="gone"></TextView>
+                </TextView>
 
+                <TextView
+                    android:id="@+id/expend_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/p80_opacity_white"
+                    android:textSize="15sp"
+                    android:visibility="gone"></TextView>
+
+                <TextView
+                    android:id="@+id/huati"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:ellipsize="end"
+                    android:focusable="true"
+                    android:maxEms="11"
+                    android:singleLine="true"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"></TextView>
+            </RelativeLayout>
         </LinearLayout>
 
         <RelativeLayout

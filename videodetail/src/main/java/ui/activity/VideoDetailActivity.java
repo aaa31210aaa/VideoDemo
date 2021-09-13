@@ -42,10 +42,12 @@ import com.lzy.okgo.model.Response;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
+import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer;
 import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
+import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
@@ -71,6 +73,7 @@ import com.wdcs.videodetail.demo.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +82,10 @@ import widget.CircleImageView;
 import widget.LoadingView;
 import widget.SpannableTextView;
 
+import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
+import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
+import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
@@ -87,6 +93,7 @@ import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.YELLOW_V;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static com.wdcs.utils.ShareUtils.toShare;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static utils.NetworkUtil.setDataWifiState;
 
@@ -98,7 +105,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private TextView publisherName;
     private ImageView officialCertificationImg;
     private CircleImageView publisherHeadimg;
-    private SpannableTextView foldText;
+    private TextView foldText;
+    private TextView huati;
     private TextView expendText;
     private LinearLayout introduceLin;
     private LoadingView videoLoadingProgress;
@@ -107,7 +115,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private LinearLayout superplayerIvFullscreen;
     private String TAG = "VideoDetailSimpleActivity";
     private RelativeLayout rootview;
-    public float pointPercent;                         // 每一次记录的节点播放百分比
+    public double pointPercent;                         // 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
     private String isPreview; //判断是否是预览版页面UI
     private RelativeLayout videoDetailCommentBtn;
@@ -157,6 +165,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private boolean isFirst = true;
     private RelativeLayout backLl;
     private SoftKeyBoardListener softKeyBoardListener;
+    private String spaceStr = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -247,7 +256,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         officialCertificationImg = findViewById(R.id.official_certification_img);
         publisherHeadimg = findViewById(R.id.publisher_headimg);
         foldText = findViewById(R.id.fold_text);
+        foldText.setOnClickListener(this);
         expendText = findViewById(R.id.expend_text);
+        expendText.setOnClickListener(this);
+        huati = findViewById(R.id.huati);
         introduceLin = findViewById(R.id.introduce_lin);
         videoLoadingProgress = findViewById(R.id.video_loading_progress);
         superplayerIvFullscreen = findViewById(R.id.superplayer_iv_fullscreen);
@@ -256,6 +268,59 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         mDatas = new ArrayList<>();
         recommondList = new ArrayList<>();
         initCommentPopRv();
+
+        playerView.mWindowPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
+                if (null == playerView) {
+                    return;
+                }
+                if (null == playerView.mWindowPlayer) {
+                    return;
+                }
+                if (playerView.mWindowPlayer.mGestureVideoProgressLayout != null && fromUser) {
+                    playerView.mWindowPlayer.mGestureVideoProgressLayout.show();
+                    float percentage = ((float) progress) / seekBar.getMax();
+                    float currentTime = (mDuration * percentage);
+                    playerView.mWindowPlayer.mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
+                    playerView.mWindowPlayer.mGestureVideoProgressLayout.setProgress(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(PointSeekBar seekBar) {
+                if (null == playerView) {
+                    return;
+                }
+                if (null == playerView.mWindowPlayer) {
+                    return;
+                }
+                playerView.mWindowPlayer.removeCallbacks(playerView.mWindowPlayer.mHideViewRunnable);
+            }
+
+            @Override
+            public void onStopTrackingTouch(PointSeekBar seekBar) {
+                int curProgress = seekBar.getProgress();
+                int maxProgress = seekBar.getMax();
+
+                switch (playerView.mWindowPlayer.mPlayType) {
+                    case VOD:
+                        if (curProgress >= 0 && curProgress <= maxProgress) {
+                            // 关闭重播按钮
+                            playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
+                            float percentage = ((float) curProgress) / maxProgress;
+                            int position = (int) (mDuration * percentage);
+                            if (playerView.mWindowPlayer.mControllerCallback != null) {
+                                playerView.mWindowPlayer.mControllerCallback.onSeekTo(position);
+                                playerView.mWindowPlayer.mControllerCallback.onResume();
+                            }
+                        }
+                        break;
+                }
+                playerView.mWindowPlayer.postDelayed(playerView.mWindowPlayer.mHideViewRunnable, Contants.delayMillis);
+            }
+        });
+
 
         /**
          * 监听播放器播放窗口变化回调
@@ -285,23 +350,40 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         playerView.mWindowPlayer.isReplayClick = new WindowPlayer.IsReplayClick() {
             @Override
             public void getReplayClick() {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, contentId, "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
             }
         };
 
         playerView.mFullScreenPlayer.isReplayClick = new FullScreenPlayer.FullIsReplayClick() {
             @Override
             public void getFullReplayClick() {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, contentId, "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
             }
         };
 
         SuperPlayerImpl.readPlayCallBack = new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, contentId, "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
             }
         };
+
+        SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
+            @Override
+            public void AutoPlayOverCallBack() {
+                final String event;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    //不为重播
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                } else {
+                    //重播
+                    event = Constants.CMS_VIDEO_OVER;
+                }
+
+                //拖动/自动播放结束上报埋点
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event), event);
+            }
+        });
     }
 
 
@@ -757,20 +839,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
         if (contentStateModel.getWhetherFavor().equals("true")) {
             videoDetailCollectionImage.setImageResource(R.drawable.collection);
-            collectionNum.setTextColor(getResources().getColor(R.color.superplayer_yellow));
         } else {
-            videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
-            collectionNum.setTextColor(getResources().getColor(R.color.video_c9));
+            videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
         }
 
         collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
 
         if (contentStateModel.getWhetherLike().equals("true")) {
             videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
-            likesNum.setTextColor(getResources().getColor(R.color.bz_red));
         } else {
             videoDetailLikesImage.setImageResource(R.drawable.favourite);
-            likesNum.setTextColor(getResources().getColor(R.color.video_c9));
         }
 
         if (contentStateModel.getLikeCountShow().equals("0")) {
@@ -818,7 +896,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    collectionNum.setTextColor(getResources().getColor(R.color.superplayer_yellow));
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                     playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
@@ -829,8 +906,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         num--;
                                     }
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    collectionNum.setTextColor(getResources().getColor(R.color.video_c9));
-                                    videoDetailCollectionImage.setImageResource(R.drawable.collection_unseletct);
+                                    videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
                                     playerView.contentStateModel.setWhetherFavor("false");
                                     playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
@@ -906,13 +982,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     num++;
                                     likesNum.setText(NumberFormatTool.formatNum(num, false));
-                                    likesNum.setTextColor(getResources().getColor(R.color.bz_red));
                                     playerView.contentStateModel.setWhetherLike("true");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
                                     int num;
                                     videoDetailLikesImage.setImageResource(R.drawable.favourite);
-                                    likesNum.setTextColor(getResources().getColor(R.color.c9));
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     if (num > 0) {
                                         num--;
@@ -1066,7 +1140,33 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     "", "", "", mDatas.get(0).getIssueTimeStamp(), Constants.CONTENT_TYPE, "");
             Log.e("埋点", "埋点：分享按钮---" + jsonString);
             sharePop();
-        } else if (id == R.id.tvSend) {
+        }  else if (id == R.id.share_wx_btn) {
+            if (mDatas.isEmpty()) {
+                return;
+            }
+            String jsonString = BuriedPointModelManager.getShareType(contentId, mDatas.get(0).getTitle(), "",
+                    "", "", "", mDatas.get(0).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.WX_STRING);
+            Log.e("埋点", "埋点：分享到微信朋友---" + jsonString);
+            toShare(mDatas.get(0), Constants.SHARE_WX);
+        } else if (id == R.id.share_circle_btn) {
+            if (mDatas.isEmpty()) {
+                return;
+            }
+            String jsonString = BuriedPointModelManager.getShareType(contentId, mDatas.get(0).getTitle(), "",
+                    "", "", "", mDatas.get(0).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.CIRCLE_STRING);
+            Log.e("埋点", "埋点：分享到微信朋友圈---" + jsonString);
+            toShare(mDatas.get(0), Constants.SHARE_CIRCLE);
+        } else if (id == R.id.share_qq_btn) {
+            if (mDatas.isEmpty()) {
+                return;
+            }
+            String jsonString = BuriedPointModelManager.getShareType(contentId, mDatas.get(0).getTitle(), "",
+                    "", "", "", mDatas.get(0).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.QQ_STRING);
+            Log.e("埋点", "埋点：分享到QQ---" + jsonString);
+            toShare(mDatas.get(0), Constants.SHARE_QQ);
+        }
+
+        else if (id == R.id.tvSend) {
             if (TextUtils.isEmpty(edtInput.getText())) {
                 ToastUtils.showShort("请输入评论");
             } else {
@@ -1184,18 +1284,24 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
+        if (null != this) {
+            Glide.with(this)
+                    .load(mDatas.get(0).getCreatorHead())
+                    .into(publisherHeadimg);
+        }
 
-        Glide.with(this)
-                .load(mDatas.get(0).getCreatorHead())
-                .into(publisherHeadimg);
         publisherName.setText(mDatas.get(0).getCreatorNickname());
         getFoldText(mDatas.get(0));
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
         LinearLayout.LayoutParams bottomLp = (LinearLayout.LayoutParams) introduceLin.getLayoutParams();
+        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
         lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+        if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
+            ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
+        }
         if (videoType.equals("1")) {
             if (phoneIsNormal()) {
                 superplayerIvFullscreen.setVisibility(View.GONE);
@@ -1206,19 +1312,26 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
+            if (introduceLin != null) {
+                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            }
         } else if (videoType.equals("0")) {
             superplayerIvFullscreen.setVisibility(View.GONE);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(false);
+            if (introduceLin != null) {
+                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            }
         } else {
             superplayerIvFullscreen.setVisibility(View.VISIBLE);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
+            mLayoutBottomParams.addRule(BELOW, playerView.getId());
+            mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(110), 0, 0);
+            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
+            rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
         }
-        if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
-            ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
-        }
-        introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+
         introduceLin.setLayoutParams(bottomLp);
         introduceLin.setVisibility(View.VISIBLE);
         RelativeLayout item = new RelativeLayout(this);
@@ -1231,189 +1344,55 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
     }
 
-    private void getFoldText(DataDTO item) {
+    private void getFoldText(final DataDTO item) {
         String topicNameStr;
         String brief;
         if (TextUtils.isEmpty(item.getBelongTopicName()) || null == item.getBelongTopicName()) {
             topicNameStr = "";
         } else {
-            topicNameStr = "#" + item.getBelongTopicName() + "  ";
+            topicNameStr = "#" + item.getBelongTopicName();
         }
+        huati.setText(topicNameStr);
+        huati.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         if (TextUtils.isEmpty(item.getBrief())) {
-            brief = topicNameStr + item.getTitle();
+            brief = item.getTitle();
         } else {
-            brief = topicNameStr + item.getBrief();
+            brief = item.getBrief();
         }
 
-        final SpannableStringBuilder foldTextBuilder = new SpannableStringBuilder(brief);
-        //单独设置字体大小
-        AbsoluteSizeSpan foldTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
-        foldTextBuilder.setSpan(foldTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (TextUtils.isEmpty(brief)) {
+            foldText.setVisibility(View.GONE);
+        } else {
+            foldText.setVisibility(View.VISIBLE);
+        }
 
-        //单独设置点击事件
-        ClickableSpan foldTextClickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                ToastUtils.showShort("点击了话题");
+        if (huati.getText().length() != 0) {
+            int num;
+            if (huati.getText().length() > 13) {
+                num = 13 + 2;
+            } else {
+                num = huati.getText().length();
             }
 
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(getResources().getColor(R.color.white));
-                paint.setUnderlineText(false);
+            for (int i = 0; i < num; i++) {
+                spaceStr = spaceStr + "\u3000";
+                item.setSpaceStr(spaceStr);
             }
-        };
-        foldTextBuilder.setSpan(foldTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spaceStr = "";
+        }
 
-        //同时设置字体颜色、点击事件
-        ClickableSpan foldTextBuilderClickableSpan = new ClickableSpan() {
-
-            @Override
-            public void onClick(@NonNull View widget) {
-                if (foldText.getVisibility() == View.VISIBLE) {
-                    foldText.setVisibility(View.GONE);
-                    expendText.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(getResources().getColor(R.color.p80_opacity_white));
-                paint.setUnderlineText(false);
-
-            }
-        };
-        foldTextBuilder.setSpan(foldTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
-        //不设置不生效
-        foldText.setMovementMethod(LinkMovementMethod.getInstance());
-        foldText.setText(foldTextBuilder);
-        //去掉点击后文字的背景色 (不去掉会有默认背景色)
-        foldText.setHighlightColor(Color.parseColor("#00000000"));
-
-        foldText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-
-                TextView tv = (TextView) v;
-                CharSequence text = tv.getText();
-                if (text instanceof SpannableString) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        x -= tv.getTotalPaddingLeft();
-                        y -= tv.getTotalPaddingTop();
-
-                        x += tv.getScrollX();
-                        y += tv.getScrollY();
-
-                        Layout layout = tv.getLayout();
-                        int line = layout.getLineForVertical(y);
-                        int off = layout.getOffsetForHorizontal(line, x);
-
-                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
-                        if (link.length != 0) {
-                            link[0].onClick(tv);
-                        } else {
-                            //do textview click event
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
-        });
-
-
-        /**
-         * 展开的
-         */
-        final SpannableStringBuilder expendTextBuilder = new SpannableStringBuilder(brief);
-        //单独设置字体大小
-        AbsoluteSizeSpan expendTextSizeSpan = new AbsoluteSizeSpan(ButtonSpan.dip2px(16));
-        expendTextBuilder.setSpan(expendTextSizeSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //单独设置点击事件
-        ClickableSpan expendTextClickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                ToastUtils.showShort("点击了话题");
-            }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(getResources().getColor(R.color.white));
-                paint.setUnderlineText(false);
-            }
-        };
-        expendTextBuilder.setSpan(expendTextClickableSpan, 0, topicNameStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //同时设置字体颜色、点击事件
-        ClickableSpan expendTextBuilderClickableSpan = new ClickableSpan() {
-
-            @Override
-            public void onClick(@NonNull View widget) {
-                if (expendText.getVisibility() == View.VISIBLE) {
-                    expendText.setVisibility(View.GONE);
-                    foldText.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void updateDrawState(@NonNull TextPaint paint) {
-                paint.setColor(getResources().getColor(R.color.p80_opacity_white));
-                paint.setUnderlineText(false);
-
-            }
-        };
-
-        expendTextBuilder.setSpan(expendTextBuilderClickableSpan, topicNameStr.length(), topicNameStr.length() + item.getBrief().length(), Spanned.SPAN_COMPOSING);
-        //不设置不生效
-        expendText.setMovementMethod(LinkMovementMethod.getInstance());
-        expendText.setText(expendTextBuilder);
-        //去掉点击后文字的背景色 (不去掉回有默认背景色)
-        expendText.setHighlightColor(Color.parseColor("#00000000"));
-
-
-        expendText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-
-                TextView tv = (TextView) v;
-                CharSequence text = tv.getText();
-                if (text instanceof SpannableString) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        x -= tv.getTotalPaddingLeft();
-                        y -= tv.getTotalPaddingTop();
-
-                        x += tv.getScrollX();
-                        y += tv.getScrollY();
-
-                        Layout layout = tv.getLayout();
-                        int line = layout.getLineForVertical(y);
-                        int off = layout.getOffsetForHorizontal(line, x);
-
-                        ClickableSpan[] link = ((SpannableString) text).getSpans(off, off, ClickableSpan.class);
-                        if (link.length != 0) {
-                            link[0].onClick(tv);
-                        } else {
-                            //do textview click event
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
-        });
-
+        foldText.setText(item.getSpaceStr() + brief);
+        expendText.setText(item.getSpaceStr() + brief);
     }
 
     /**
@@ -1439,7 +1418,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      */
     private String videoIsNormal(int videoWidth, int videoHeight) {
         if (videoWidth == 0 && videoHeight == 0) {
-            return "2";
+            return "0";
         }
 
         if (videoWidth > videoHeight) {
@@ -1497,6 +1476,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     }
                                     DataDTO dataDTO = JSON.parseObject(json, DataDTO.class);
                                     mDatas.add(dataDTO);
+                                    if (mDatas.isEmpty()) {
+                                        return;
+                                    }
                                     setDataWifiState(mDatas, VideoDetailActivity.this);
                                     addPlayView();
                                     if (mDatas.get(0).getDisableComment()) {
@@ -1512,7 +1494,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     }
                                     getContentState(contentId);
                                     getRecommend(contentId, 0);
-
+                                    playerView.mFullScreenPlayer.setDataDTO(mDatas.get(0));
                                 } else {
                                     ToastUtils.showShort(jsonObject.get("message").toString());
                                 }
@@ -1563,18 +1545,20 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 return;
             }
             everyOneDuration = playerView.mWindowPlayer.mProgress - playerView.mWindowPlayer.getRecordDuration();
-            pointPercent = everyOneDuration / mDuration;
-            playerView.mWindowPlayer.setRecordDuration(mDuration);
+            pointPercent = (double) everyOneDuration / mDuration;
+            BigDecimal two = new BigDecimal(pointPercent);
+            double pointPercentTwo = two.setScale(2,BigDecimal.ROUND_DOWN).doubleValue();
+            playerView.mWindowPlayer.setRecordDuration(everyOneDuration);
             String event;
             if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                 //不为重播
-                event = Constants.CMS_VIDEO_OVER;
+                event = Constants.CMS_VIDEO_OVER_AUTO;
             } else {
                 //重播
-                event = Constants.CMS_VIDEO_OVER_AUTO;
+                event = Constants.CMS_VIDEO_OVER;
             }
             //上报埋点
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, contentId, String.valueOf(everyOneDuration), String.valueOf(pointPercent), event), event);
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(pointPercentTwo*100), event), event);
         }
     }
 

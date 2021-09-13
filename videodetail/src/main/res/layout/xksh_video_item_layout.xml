@@ -55,7 +55,7 @@
             android:id="@+id/superplayer_iv_fullscreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="260dp"
+            android:layout_marginTop="300dp"
             android:visibility="gone"
             android:background="@drawable/full_watch_btn_bg"
             android:padding="7dp">
@@ -91,12 +91,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/introduce_lin"
-            android:layout_marginBottom="@dimen/video_dp10">
+            android:layout_marginBottom="@dimen/video_dp10"
+            android:layout_marginTop="@dimen/video_dp10">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="35dp"
+                android:layout_height="28dp"
                 android:layout_marginLeft="16dp"
+                android:gravity="center"
+                android:layout_centerVertical="true"
                 android:background="@drawable/publisher_bg">
 
                 <TextView
@@ -105,8 +108,11 @@
                     android:layout_height="28dp"
                     android:layout_centerVertical="true"
                     android:gravity="center"
+                    android:singleLine="true"
+                    android:maxEms="9"
+                    android:ellipsize="end"
                     android:paddingLeft="@dimen/video_dp25"
-                    android:text="软装设计"
+                    tool:text="软装设计软装设计软装设计软装设计"
                     android:textColor="@color/video_white"
                     android:textSize="@dimen/sp_16">
 
@@ -127,16 +133,16 @@
                 <TextView
                     android:id="@+id/follow"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="22dp"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="@dimen/video_dp5"
                     android:layout_marginRight="@dimen/video_dp5"
                     android:layout_toRightOf="@+id/official_certification_img"
                     android:paddingLeft="@dimen/video_dp10"
-                    android:paddingTop="@dimen/video_dp5"
                     android:paddingRight="@dimen/video_dp10"
-                    android:paddingBottom="@dimen/video_dp5"
                     android:text="关注"
+                    android:gravity="center"
+                    android:background="@drawable/follow_bg"
                     android:textColor="@color/video_white"
                     android:textSize="@dimen/sp_12">
 
@@ -186,26 +192,47 @@
             android:outAnimation="@anim/vf_anim_out"
             android:visibility="gone" />
 
-        <widget.SpannableTextView
-            android:id="@+id/fold_text"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="@color/p80_opacity_white"
-            android:textSize="15sp"
-            tool:text="">
+            android:layout_height="wrap_content">
 
-        </widget.SpannableTextView>
+            <TextView
+                android:id="@+id/expend_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                android:layout_centerVertical="true"
+                android:visibility="gone"></TextView>
 
-        <TextView
-            android:id="@+id/expend_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/p80_opacity_white"
-            android:textSize="15sp"
-            android:visibility="gone"></TextView>
+            <TextView
+                android:id="@+id/fold_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:layout_centerVertical="true"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                tool:text="">
 
+            </TextView>
+
+            <TextView
+                android:id="@+id/huati"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tool:text="#测试测试测试测试测试测试测试"
+                android:textSize="16sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:maxEms="11"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textColor="@color/white">
+
+            </TextView>
+        </RelativeLayout>
     </LinearLayout>
 
 </RelativeLayout>
