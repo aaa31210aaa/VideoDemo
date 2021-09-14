@@ -101,7 +101,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
     private void initView() {
         contentId = getIntent().getStringExtra("contentId");
-        toCurrentTab = getIntent().getIntExtra("setCurrentTab",1);
+        toCurrentTab = getIntent().getIntExtra("setCurrentTab", 1);
         backLin = findViewById(R.id.back_lin);
         backLin.setOnClickListener(this);
         videoTab = findViewById(R.id.video_tab);
@@ -120,6 +120,67 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         playerView = SuperPlayerView.getInstance(this, getWindow().getDecorView(), true);
         initViewPager();
         initViewPagerData();
+
+        //全屏进度条监听
+        playerView.mFullScreenPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
+                if (null == playerView) {
+                    return;
+                }
+                if (null == playerView.mFullScreenPlayer) {
+                    return;
+                }
+
+                if (playerView.mFullScreenPlayer.mGestureVideoProgressLayout != null && fromUser) {
+                    playerView.mFullScreenPlayer.mGestureVideoProgressLayout.show();
+                    float percentage = ((float) progress) / seekBar.getMax();
+                    float currentTime = (mDuration * percentage);
+                    playerView.mFullScreenPlayer.mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
+                    playerView.mFullScreenPlayer.mGestureVideoProgressLayout.setProgress(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(PointSeekBar seekBar) {
+                if (null == playerView) {
+                    return;
+                }
+                if (null == playerView.mFullScreenPlayer) {
+                    return;
+                }
+                playerView.mFullScreenPlayer.removeCallbacks(playerView.mFullScreenPlayer.mHideViewRunnable);
+            }
+
+            @Override
+            public void onStopTrackingTouch(PointSeekBar seekBar) {
+                int curProgress = seekBar.getProgress();
+                int maxProgress = seekBar.getMax();
+
+                switch (playerView.mFullScreenPlayer.mPlayType) {
+                    case VOD:
+                        if (curProgress >= 0 && curProgress <= maxProgress) {
+                            // 关闭重播按钮
+                            playerView.mFullScreenPlayer.toggleView(playerView.mFullScreenPlayer.mLayoutReplay, false);
+                            float percentage = ((float) curProgress) / maxProgress;
+                            int position = (int) (mDuration * percentage);
+                            //拖动进度条 如果拖动的进度大于之前
+                            if (position > playerView.mWindowPlayer.getRecordDuration()) {
+                                playerView.mWindowPlayer.setRecordDuration(position);
+                            }
+
+                            if (playerView.mFullScreenPlayer.mControllerCallback != null) {
+                                playerView.mFullScreenPlayer.mControllerCallback.onSeekTo(position);
+                                playerView.mFullScreenPlayer.mControllerCallback.onResume();
+                            }
+                        }
+                        break;
+                }
+                playerView.mFullScreenPlayer.postDelayed(playerView.mFullScreenPlayer.mHideViewRunnable, Contants.delayMillis);
+            }
+        });
+
+        //窗口进度条
         playerView.mWindowPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
@@ -150,7 +211,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 videoVp.setScroll(false);
                 videoDetailFragment.videoDetailmanager.setCanScoll(false);
                 xkshFragment.xkshManager.setCanScoll(false);
-                Log.e("Touch", "onStartTrackingTouch------");
             }
 
             @Override
@@ -175,6 +235,11 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
                             float percentage = ((float) curProgress) / maxProgress;
                             int position = (int) (mDuration * percentage);
+                            //拖动进度条 如果拖动的进度大于之前
+                            if (position > playerView.mWindowPlayer.getRecordDuration()) {
+                                playerView.mWindowPlayer.setRecordDuration(position);
+                            }
+
                             if (playerView.mWindowPlayer.mControllerCallback != null) {
                                 playerView.mWindowPlayer.mControllerCallback.onSeekTo(position);
                                 playerView.mWindowPlayer.mControllerCallback.onResume();
@@ -332,6 +397,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             }
         };
 
+        //窗口重播按钮
         playerView.mWindowPlayer.setIsReplayClick(new WindowPlayer.IsReplayClick() {
             @Override
             public void getReplayClick() {
@@ -343,6 +409,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             }
         });
 
+        //全屏重播按钮
         playerView.mFullScreenPlayer.setFullIsReplayClick(new FullScreenPlayer.FullIsReplayClick() {
             @Override
             public void getFullReplayClick() {
@@ -354,6 +421,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             }
         });
 
+        //开始播放回调
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
@@ -365,11 +433,11 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             }
         });
 
-
+        //自动播放/拖动进度条 播放结束回调
         SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
             @Override
             public void AutoPlayOverCallBack() {
-                 if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
                 } else if (xkshFragment.mIsVisibleToUser) {
                     lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
@@ -379,13 +447,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                     //不为重播
                     event = Constants.CMS_VIDEO_OVER_AUTO;
+                    playerView.mWindowPlayer.setRecordDuration(mDuration);
                 } else {
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
 
                 //拖动/自动播放结束上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration*1000), "100", event), event);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event), event);
             }
         });
 
@@ -438,6 +507,13 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             public void onPageSelected(int position) {
                 if (0 == position && null != videoTab) {
                     videoTab.hideMsg(position);
+                    playerView.setOrientation(true);
+                } else if (1 == position) {
+                    playerView.setOrientation(true);
+                } else if (2 == position) {
+                    playerView.mSuperPlayer.pause();
+                    //切换到直播的时候  不允许旋转
+                    playerView.setOrientation(false);
                 }
             }
 
@@ -531,7 +607,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 @Override
                                 public void onClick(View view) {
                                     try {
-                                        param.recommendUrl(activityRuleBean.getData().getConfig().getJumpUrl());
+                                        param.recommendUrl(activityRuleBean.getData().getConfig().getJumpUrl(),null);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -587,7 +663,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         } else if (id == R.id.search_icon) {
             //跳转H5搜索
             try {
-                param.recommendUrl(Constants.SEARCHPLUS);
+                param.recommendUrl(Constants.SEARCHPLUS,null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -597,7 +673,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             } else {
                 //跳转H5个人中心
                 try {
-                    param.recommendUrl(Constants.PERSONAL_CENTER);
+                    param.recommendUrl(Constants.PERSONAL_CENTER,null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

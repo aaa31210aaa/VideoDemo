@@ -39,6 +39,7 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
+import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.rtmp.TXLiveConstants;
@@ -189,6 +190,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private boolean isFollow; //是否关注
     public double pointPercent;                         // 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
+    private long lsDuration = 0; //每一次上报临时保存的播放时长
     private boolean isCheckState; //是否请求了检查点赞收藏状态的接口
     private TextView zxpl;
     private String negativeScreenContentId;
@@ -224,7 +226,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
         if (TextUtils.isEmpty(negativeScreenContentId)) {
-            getPullDownData(mVideoSize, panelCode, "false", Constants.SSID, Constants.REFRESH_TYPE);
+            getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
         } else {
             getOneVideo(negativeScreenContentId);
         }
@@ -331,6 +333,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //              ContentBuriedPointManager.setContentBuriedPoint();
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
+
+                if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
+                    //上报埋点
+                    everyOneDuration = playerView.mWindowPlayer.mProgress;
+                    pointPercent = (double) everyOneDuration / mDuration;
+                    BigDecimal two = new BigDecimal(pointPercent);
+                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                }
+
+                //滑动下一条或者上一条视频
+                playerView.mWindowPlayer.setRecordDuration(0);
+                lsDuration = 0;
+
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
@@ -439,13 +455,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 for (int i = 0; i < mDatas.size(); i++) {
                     mDatas.get(i).setWifi(true);
                 }
-                for (int i = 0; i <((VideoHomeActivity)getActivity()).xkshFragment.mDatas.size() ; i++) {
-                    ((VideoHomeActivity)getActivity()).xkshFragment.mDatas.get(i).setWifi(true);
+                for (int i = 0; i < ((VideoHomeActivity) getActivity()).xkshFragment.mDatas.size(); i++) {
+                    ((VideoHomeActivity) getActivity()).xkshFragment.mDatas.get(i).setWifi(true);
                 }
 
                 addPlayView(position);
                 adapter.notifyDataSetChanged();
-                ((VideoHomeActivity)getActivity()).xkshFragment.adapter.notifyDataSetChanged();
+                ((VideoHomeActivity) getActivity()).xkshFragment.adapter.notifyDataSetChanged();
             }
         });
 
@@ -478,7 +494,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     }
 
                                     negativeScreenDto = dataDTO;
-                                    getPullDownData(mVideoSize, panelCode, "false", Constants.SSID, Constants.REFRESH_TYPE);
+                                    getPullDownData(mVideoSize, panelCode, "false",Constants.REFRESH_TYPE);
                                 } else {
                                     ToastUtils.showShort(jsonObject.get("message").toString());
                                 }
@@ -536,10 +552,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             playerView.buriedPointModel.setIs_renew("false");
             addPlayView(currentIndex);
         } else {
-            playerView.mSuperPlayer.pause();
-            if (null != rlLp) {
-                rlLp.removeView(playerView);
+            if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
+                //上报埋点
+                everyOneDuration = playerView.mWindowPlayer.mProgress;
+                pointPercent = (double) everyOneDuration / mDuration;
+                BigDecimal two = new BigDecimal(pointPercent);
+                double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                playerView.mSuperPlayer.pause();
+                if (null != rlLp) {
+                    rlLp.removeView(playerView);
+                }
             }
+
+            lsDuration = 0;
         }
     }
 
@@ -700,7 +726,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
                 isLoadComplate = false;
                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
-                getPullDownData(mVideoSize, panelCode, "false", Constants.SSID, Constants.REFRESH_TYPE);
+                getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
             }
         });
 
@@ -715,7 +741,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 adapter.loadMoreFail();
                                 return;
                             }
-                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", mVideoSize, panelCode, "true", Constants.SSID, Constants.LOADMORE_TYPE);
+                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", mVideoSize, panelCode, "true", Constants.LOADMORE_TYPE);
                         }
                     });
                 }
@@ -873,7 +899,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      * @param panelCode
      * @param removeFirst
      */
-    private void getPullDownData(String pageSize, String panelCode, String removeFirst, String ssid, String refreshType) {
+    private void getPullDownData(String pageSize, String panelCode, String removeFirst, String refreshType) {
+        String deviceId = "";
         if (null != playerView && null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
@@ -882,12 +909,17 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (null != negativeScreenDto) {
             mDatas.add(negativeScreenDto);
         }
+        try {
+            deviceId = param.getDeviceId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
                 .params("pageSize", pageSize)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
-                .params("ssid", ssid)
+                .params("ssid", deviceId)
                 .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
@@ -953,15 +985,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     /**
      * 获取更多数据
      */
-    private void loadMoreData(String url, String contentId, String pageSize, String panelCode, String removeFirst, String ssid, String refreshType) {
-
+    private void loadMoreData(String url, String contentId, String pageSize, String panelCode, String removeFirst, String refreshType) {
+        String deviceId = "";
+        try {
+            deviceId = param.getDeviceId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         OkGo.<VideoDetailModel>get(url)
                 .tag(VIDEOTAG)
                 .params("contentId", contentId)
                 .params("pageSize", pageSize)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
-                .params("ssid", ssid)
+                .params("ssid", deviceId)
                 .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1542,47 +1579,50 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onPause() {
         super.onPause();
-        if (playerView != null) {
-            playerView.mSuperPlayer.pause();
+        if (playerView == null) {
+            return;
         }
 
         if (!videoFragmentIsVisibleToUser) {
             return;
         }
 
-        /**
-         * 上报内容埋点 视频播放时长
-         * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
-         */
-        if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
-            return;
-        }
-
-        //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
-        if (mDuration != 0) {
+        if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
             /**
              * 上报内容埋点 视频播放时长
-             * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+             * 如果 当前播放到的时长进度 小于 上一次存的时长进度 （用户往回拖动进度条，上报用户看到最长的视频时长进度）
              */
             if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
-                return;
-            }
-            everyOneDuration = playerView.mWindowPlayer.mProgress - playerView.mWindowPlayer.getRecordDuration();
-            pointPercent = (double) everyOneDuration / mDuration;
-            BigDecimal two = new BigDecimal(pointPercent);
-            double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-            playerView.mWindowPlayer.setRecordDuration(everyOneDuration);
-            String event;
-            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                //不为重播
-                event = Constants.CMS_VIDEO_OVER_AUTO;
+                everyOneDuration = playerView.mWindowPlayer.getRecordDuration();
             } else {
-                //重播
-                event = Constants.CMS_VIDEO_OVER;
+                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
             }
-            //上报埋点
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(pointPercentTwo * 100), event), event);
+
+            //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
+            if (mDuration != 0) {
+                /**
+                 * 上报内容埋点 视频播放时长
+                 * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+                 */
+                String event;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    //不为重播
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                } else {
+                    //重播
+                    event = Constants.CMS_VIDEO_OVER;
+                }
+
+                pointPercent = (double) everyOneDuration / mDuration;
+                BigDecimal two = new BigDecimal(pointPercent);
+                double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                lsDuration = everyOneDuration;
+
+                //上报埋点
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), event), event);
+            }
         }
+        playerView.mSuperPlayer.pause();
     }
 
     @Override

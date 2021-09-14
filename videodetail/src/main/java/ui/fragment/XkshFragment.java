@@ -189,6 +189,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public LinearLayout fullLin;
     public double pointPercent;                         // 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
+    private long lsDuration = 0; //每一次上报临时保存的播放时长
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -321,6 +322,19 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
+
+                if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
+                    //上报埋点
+                    everyOneDuration = playerView.mWindowPlayer.mProgress;
+                    pointPercent = (double) everyOneDuration / mDuration;
+                    BigDecimal two = new BigDecimal(pointPercent);
+                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(Math.floor(pointPercentTwo*100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                }
+
+                //滑动下一条或者上一条视频
+                playerView.mWindowPlayer.setRecordDuration(0);
+                lsDuration = 0;
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
@@ -487,10 +501,20 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             playerView.buriedPointModel.setIs_renew("false");
             addPlayView(currentIndex);
         } else {
+            if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
+                //上报埋点
+                everyOneDuration = playerView.mWindowPlayer.mProgress;
+                pointPercent = (double) everyOneDuration / mDuration;
+                BigDecimal two = new BigDecimal(pointPercent);
+                double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(pointPercentTwo*100), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+            }
+
             playerView.mSuperPlayer.pause();
             if (null != rlLp) {
                 rlLp.removeView(playerView);
             }
+            lsDuration = 0;
         }
     }
 
@@ -1479,39 +1503,50 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         super.onPause();
-        if (playerView != null) {
-            playerView.mSuperPlayer.pause();
+        if (playerView == null) {
+            return;
         }
 
         if (!mIsVisibleToUser) {
             return;
         }
 
-        //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
-        if (mDuration != 0) {
+        if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
             /**
              * 上报内容埋点 视频播放时长
-             * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+             * 如果 当前播放到的时长进度 小于 上一次存的时长进度 （用户往回拖动进度条，上报用户看到最长的视频时长进度）
              */
             if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
-                return;
-            }
-            everyOneDuration = playerView.mWindowPlayer.mProgress - playerView.mWindowPlayer.getRecordDuration();
-            pointPercent = (double) everyOneDuration / mDuration;
-            BigDecimal two = new BigDecimal(pointPercent);
-            double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-            playerView.mWindowPlayer.setRecordDuration(everyOneDuration);
-            String event;
-            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                //不为重播
-                event = Constants.CMS_VIDEO_OVER_AUTO;
+                everyOneDuration = playerView.mWindowPlayer.getRecordDuration();
             } else {
-                //重播
-                event = Constants.CMS_VIDEO_OVER;
+                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
             }
-            //上报埋点
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(pointPercentTwo * 100), event), event);
+
+            //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
+            if (mDuration != 0) {
+                /**
+                 * 上报内容埋点 视频播放时长
+                 * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
+                 */
+                String event;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    //不为重播
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                } else {
+                    //重播
+                    event = Constants.CMS_VIDEO_OVER;
+                }
+
+                pointPercent = (double) everyOneDuration / mDuration;
+                BigDecimal two = new BigDecimal(pointPercent);
+                double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                lsDuration = everyOneDuration;
+
+                //上报埋点
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), event), event);
+            }
         }
+        playerView.mSuperPlayer.pause();
     }
 
     @Override
@@ -1621,7 +1656,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         } else if (id == R.id.rank_list) {
             //跳转H5排行榜
             try {
-                param.recommendUrl(Constants.RANKING_LIST);
+                param.recommendUrl(Constants.RANKING_LIST, null);
             } catch (Exception e) {
                 e.printStackTrace();
             }

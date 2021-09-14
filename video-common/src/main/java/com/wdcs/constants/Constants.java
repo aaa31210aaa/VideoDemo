@@ -1,5 +1,7 @@
 package com.wdcs.constants;
 
+import static com.wdcs.callback.VideoInteractiveParam.param;
+
 public class Constants {
     public static final String success_code = "200";
     public static final String token_error = "401";
@@ -40,10 +42,10 @@ public class Constants {
     public static final String HEAD_OTHER = "https://uat-h5.zhcs.csbtv.com/act/xksh/#/others?id=";
     public static final String SEARCHPLUS = "https://uat-h5.zhcs.csbtv.com/fuse/news/#/searchPlus";
 
-    /**
-     * ssid 火山需要传入的设备id (暂时先固定填上测试  后续需从万达拿)
-     */
-    public static final String SSID = "88888888";
+//    /**
+//     * ssid 火山需要传入的设备id (暂时先固定填上测试  后续需从万达拿)
+//     */
+//    public static final String SSID = param.getYmSSid();
     /**
      * 刷新操作标识
      */

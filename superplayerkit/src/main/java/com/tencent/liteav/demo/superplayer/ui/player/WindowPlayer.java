@@ -81,6 +81,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public long mProgress;                              // 当前播放进度
     public double percent;                              // 当前播放进度百分比
     public long reportDuration = 0;                       //记录上报埋点时的进度
+    public long videoDetailReportDuration = 0;          //详情页上报埋点记录的进度
 
     private Bitmap mBackgroundBmp;                         // 背景图
     private Bitmap mWaterMarkBmp;                          // 水印图
@@ -300,6 +301,15 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
        return reportDuration;
     }
 
+    public void setVideoDetailReportDuration(long duration){
+        this.videoDetailReportDuration = duration;
+    }
+
+    public long getVideoDetailReportDuration() {
+        return videoDetailReportDuration;
+    }
+
+
     /**
      * 切换播放状态
      * <p>
@@ -423,6 +433,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                     if (mIsTurnPage) {
                         BuriedPointModelManager.reportPlayTime(mReportVodStartTime, mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "",
                                 "", "", "", mPreviousDTO.getIssueTimeStamp());
+
                     } else {
                         BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
                                 "", "", "", item.getIssueTimeStamp());

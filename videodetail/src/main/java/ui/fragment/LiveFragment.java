@@ -29,6 +29,7 @@ import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
@@ -110,11 +111,15 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                ShareInfo shareInfo = ShareInfo.getInstance(mDatas.get(position).getShareUrl(), mDatas.get(position).getShareImageUrl(),
+                mDatas.get(position).getShareBrief(), mDatas.get(position).getShareTitle(), "");
+
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
                     try {
-                        param.recommendUrl(mDatas.get(position).getDetailUrl() + "?token=" + PersonInfoManager.getInstance().getGdyToken());
+                        param.recommendUrl(mDatas.get(position).getDetailUrl() +
+                                "?token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

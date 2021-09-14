@@ -74,7 +74,7 @@ import static com.wdcs.utils.ShareUtils.toShare;
  * 8、硬件加速监听{@link #onHWAcceleration(boolean)}
  */
 public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
-        VodMoreView.Callback, VodQualityView.Callback, PointSeekBar.OnSeekBarChangeListener, PointSeekBar.OnSeekBarPointClickListener, RadioGroup.OnCheckedChangeListener {
+        VodMoreView.Callback, VodQualityView.Callback,PointSeekBar.OnSeekBarPointClickListener, RadioGroup.OnCheckedChangeListener {
 
     // UI控件
     private LinearLayout mLayoutTop;                             // 顶部标题栏布局
@@ -85,12 +85,12 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private ImageView mIvWatermark;                           // 水印
     private TextView mTvCurrent;                             // 当前进度文本
     private TextView mTvDuration;                            // 总时长文本
-    private PointSeekBar mSeekBarProgress;                       // 播放进度条
+    public PointSeekBar mSeekBarProgress;                       // 播放进度条
     public ProgressBar mFullLoadBar;
-    private LinearLayout mLayoutReplay;                          // 重播按钮所在布局
+    public LinearLayout mLayoutReplay;                          // 重播按钮所在布局
     private ProgressBar mPbLiveLoading;                         // 加载圈
     private VolumeBrightnessProgressLayout mGestureVolumeBrightnessProgressLayout; // 音量亮度调节布局
-    private VideoProgressLayout mGestureVideoProgressLayout;            // 手势快进提示布局
+    public VideoProgressLayout mGestureVideoProgressLayout;            // 手势快进提示布局
 
     private ImageView mIvBack;                                // 顶部标题栏中的返回按钮
     public ImageView mLike;                                  // 点赞按钮
@@ -111,7 +111,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
     private boolean isShowing;                              // 自身是否可见
     private boolean mIsChangingSeekBarProgress;             // 进度条是否正在拖动，避免SeekBar由于视频播放的update而跳动
-    private SuperPlayerDef.PlayerType mPlayType;                              // 当前播放视频类型
+    public SuperPlayerDef.PlayerType mPlayType;                              // 当前播放视频类型
     private SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
     private long mDuration;                              // 视频总时长
     private long mLivePushDuration;                      // 直播推流总时长
@@ -338,7 +338,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         mSeekBarProgress = (PointSeekBar) findViewById(R.id.superplayer_seekbar_progress);
         mSeekBarProgress.setProgress(0);
         mSeekBarProgress.setOnPointClickListener(this);
-        mSeekBarProgress.setOnSeekBarChangeListener(this);
+//        mSeekBarProgress.setOnSeekBarChangeListener(this);
         mFullLoadBar = findViewById(R.id.superplayer_loadbar_progress);
         mFullLoadBar.setProgress(0);
         mFullLoadBar.setMax(100);
@@ -981,67 +981,67 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         toggleView(mLayoutReplay, false);
     }
 
-    @Override
-    public void onProgressChanged(PointSeekBar seekBar, int progress, boolean isFromUser) {
-        if (mGestureVideoProgressLayout != null && isFromUser) {
-            mGestureVideoProgressLayout.show();
-            float percentage = ((float) progress) / seekBar.getMax();
-            float currentTime = (mDuration * percentage);
-            if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
-                if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
-                } else {
-                    currentTime = mLivePushDuration * percentage;
-                }
-                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime));
-            } else {
-                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
-            }
-            mGestureVideoProgressLayout.setProgress(progress);
-        }
-        // 加载点播缩略图
-        if (isFromUser && mPlayType == SuperPlayerDef.PlayerType.VOD) {
-            setThumbnail(progress);
-        }
-    }
-
-    @Override
-    public void onStartTrackingTouch(PointSeekBar seekBar) {
-        removeCallbacks(mHideViewRunnable);
-    }
-
-    @Override
-    public void onStopTrackingTouch(PointSeekBar seekBar) {
-        int curProgress = seekBar.getProgress();
-        int maxProgress = seekBar.getMax();
-
-        switch (mPlayType) {
-            case VOD:
-                if (curProgress >= 0 && curProgress <= maxProgress) {
-                    // 关闭重播按钮
-                    toggleView(mLayoutReplay, false);
-                    float percentage = ((float) curProgress) / maxProgress;
-                    int position = (int) (mDuration * percentage);
-                    if (mControllerCallback != null) {
-                        mControllerCallback.onSeekTo(position);
-                        mControllerCallback.onResume();
-                    }
-                }
-                break;
-            case LIVE:
-            case LIVE_SHIFT:
-                toggleView(mPbLiveLoading, true);
-                int seekTime = (int) (mLivePushDuration * curProgress * 1.0f / maxProgress);
-                if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (maxProgress - curProgress) * 1.0f / maxProgress);
-                }
-                if (mControllerCallback != null) {
-                    mControllerCallback.onSeekTo(seekTime);
-                }
-                break;
-        }
-        postDelayed(mHideViewRunnable, Contants.delayMillis);
-    }
+//    @Override
+//    public void onProgressChanged(PointSeekBar seekBar, int progress, boolean isFromUser) {
+//        if (mGestureVideoProgressLayout != null && isFromUser) {
+//            mGestureVideoProgressLayout.show();
+//            float percentage = ((float) progress) / seekBar.getMax();
+//            float currentTime = (mDuration * percentage);
+//            if (mPlayType == SuperPlayerDef.PlayerType.LIVE || mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
+//                if (mLivePushDuration > MAX_SHIFT_TIME) {
+//                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
+//                } else {
+//                    currentTime = mLivePushDuration * percentage;
+//                }
+//                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime));
+//            } else {
+//                mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
+//            }
+//            mGestureVideoProgressLayout.setProgress(progress);
+//        }
+//        // 加载点播缩略图
+//        if (isFromUser && mPlayType == SuperPlayerDef.PlayerType.VOD) {
+//            setThumbnail(progress);
+//        }
+//    }
+//
+//    @Override
+//    public void onStartTrackingTouch(PointSeekBar seekBar) {
+//        removeCallbacks(mHideViewRunnable);
+//    }
+//
+//    @Override
+//    public void onStopTrackingTouch(PointSeekBar seekBar) {
+//        int curProgress = seekBar.getProgress();
+//        int maxProgress = seekBar.getMax();
+//
+//        switch (mPlayType) {
+//            case VOD:
+//                if (curProgress >= 0 && curProgress <= maxProgress) {
+//                    // 关闭重播按钮
+//                    toggleView(mLayoutReplay, false);
+//                    float percentage = ((float) curProgress) / maxProgress;
+//                    int position = (int) (mDuration * percentage);
+//                    if (mControllerCallback != null) {
+//                        mControllerCallback.onSeekTo(position);
+//                        mControllerCallback.onResume();
+//                    }
+//                }
+//                break;
+//            case LIVE:
+//            case LIVE_SHIFT:
+//                toggleView(mPbLiveLoading, true);
+//                int seekTime = (int) (mLivePushDuration * curProgress * 1.0f / maxProgress);
+//                if (mLivePushDuration > MAX_SHIFT_TIME) {
+//                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (maxProgress - curProgress) * 1.0f / maxProgress);
+//                }
+//                if (mControllerCallback != null) {
+//                    mControllerCallback.onSeekTo(seekTime);
+//                }
+//                break;
+//        }
+//        postDelayed(mHideViewRunnable, Contants.delayMillis);
+//    }
 
     @Override
     public void onSeekBarPointClick(final View view, final int pos) {

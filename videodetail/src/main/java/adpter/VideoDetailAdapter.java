@@ -195,7 +195,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             public void onClick(View view) {
                 //跳转H5话题详情
                 try {
-                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId());
+                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -208,11 +208,11 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             brief = item.getBrief();
         }
 
-        if (TextUtils.isEmpty(brief)) {
-            foldTextView.setVisibility(View.GONE);
-        } else {
-            foldTextView.setVisibility(View.VISIBLE);
-        }
+//        if (TextUtils.isEmpty(brief)) {
+//            foldTextView.setVisibility(View.GONE);
+//        } else {
+//            foldTextView.setVisibility(View.VISIBLE);
+//        }
 
         if (huati.getText().length() != 0) {
             int num;
@@ -294,7 +294,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 int mPosition = viewFlipper.getDisplayedChild();
                 Log.e("yqh", "子View的id:" + mPosition);
                 try {
-                    param.recommendUrl(list.get(mPosition).getUrl());
+                    param.recommendUrl(list.get(mPosition).getUrl(),null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

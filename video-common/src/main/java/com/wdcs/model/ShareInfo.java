@@ -20,4 +20,11 @@ public class ShareInfo {
         this.shareTitle = shareTitle;
         this.platform = platform;
     }
+
+    public ShareInfo(String shareH5, String shareImageUrl, String shareBrief, String shareTitle) {
+        this.shareH5 = shareH5;
+        this.shareImageUrl = shareImageUrl;
+        this.shareBrief = shareBrief;
+        this.shareTitle = shareTitle;
+    }
 }

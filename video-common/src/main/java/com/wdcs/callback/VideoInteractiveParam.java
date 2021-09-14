@@ -73,11 +73,11 @@ public class VideoInteractiveParam {
     /**
      * 传递跳转url
      */
-    public void recommendUrl(String url) throws Exception {
+    public void recommendUrl(String url, ShareInfo shareInfo) throws Exception {
         if (callBack == null) {
             throw new Exception("获取失败,请重试");
         } else {
-            callBack.recommedUrl(url);
+            callBack.recommedUrl(url, shareInfo);
         }
     }
 

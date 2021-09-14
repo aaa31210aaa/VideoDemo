@@ -1,5 +1,7 @@
 package com.example.x5testdemo;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void recommedUrl(String url) {
+                    public void recommedUrl(@NonNull String url, @Nullable ShareInfo shareInfo) {
 
                     }
 

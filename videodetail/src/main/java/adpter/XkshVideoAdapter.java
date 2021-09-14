@@ -148,7 +148,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             public void onClick(View view) {
                 //跳转H5头像TA人主页
                 try {
-                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy());
+                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy(),null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -180,7 +180,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             @Override
             public void onClick(View view) {
                 try {
-                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId());
+                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(),null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -193,11 +193,11 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             brief = item.getBrief();
         }
 
-        if (TextUtils.isEmpty(brief)) {
-            foldTextView.setVisibility(View.GONE);
-        } else {
-            foldTextView.setVisibility(View.VISIBLE);
-        }
+//        if (TextUtils.isEmpty(brief)) {
+//            foldTextView.setVisibility(View.GONE);
+//        } else {
+//            foldTextView.setVisibility(View.VISIBLE);
+//        }
 
         if (huati.getText().length() != 0) {
             int num;
@@ -463,7 +463,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 int mPosition = viewFlipper.getDisplayedChild();
                 Log.e("yqh", "子View的id:" + mPosition);
                 try {
-                    param.recommendUrl(list.get(mPosition).getUrl());
+                    param.recommendUrl(list.get(mPosition).getUrl(), null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
