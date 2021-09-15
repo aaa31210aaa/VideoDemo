@@ -42,6 +42,7 @@ import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.ToastUtils;
+import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import java.util.ArrayList;
@@ -195,7 +196,12 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             public void onClick(View view) {
                 //跳转H5话题详情
                 try {
-                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
+                    if (Utils.mIsDebug) {
+                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
+                    } else {
+                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(), null);
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

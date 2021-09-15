@@ -68,6 +68,7 @@ import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.SoftKeyBoardListener;
 import com.wdcs.utils.ToastUtils;
+import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import org.json.JSONException;
@@ -1423,7 +1424,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onClick(View view) {
                 try {
-                    param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(),null);
+                    if (Utils.mIsDebug) {
+                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(),null);
+                    } else {
+                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(),null);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

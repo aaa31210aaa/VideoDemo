@@ -42,6 +42,12 @@ public class Constants {
     public static final String HEAD_OTHER = "https://uat-h5.zhcs.csbtv.com/act/xksh/#/others?id=";
     public static final String SEARCHPLUS = "https://uat-h5.zhcs.csbtv.com/fuse/news/#/searchPlus";
 
+    public static final String RANKING_LIST_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/ranking";
+    public static final String TOPIC_DETAILS_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/topicDetails?id=";
+    public static final String PERSONAL_CENTER_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/me";
+    public static final String HEAD_OTHER_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/others?id=";
+    public static final String SEARCHPLUS_ZS = "https://h5.zhcs.csbtv.com/fuse/news/#/searchPlus";
+
 //    /**
 //     * ssid 火山需要传入的设备id (暂时先固定填上测试  后续需从万达拿)
 //     */

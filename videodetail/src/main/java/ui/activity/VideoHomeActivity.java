@@ -41,6 +41,7 @@ import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
+import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import java.util.ArrayList;
@@ -663,7 +664,12 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         } else if (id == R.id.search_icon) {
             //跳转H5搜索
             try {
-                param.recommendUrl(Constants.SEARCHPLUS,null);
+                if (Utils.mIsDebug) {
+                    param.recommendUrl(Constants.SEARCHPLUS,null);
+                } else {
+                    param.recommendUrl(Constants.SEARCHPLUS_ZS,null);
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -673,7 +679,11 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             } else {
                 //跳转H5个人中心
                 try {
-                    param.recommendUrl(Constants.PERSONAL_CENTER,null);
+                    if (Utils.mIsDebug){
+                        param.recommendUrl(Constants.PERSONAL_CENTER,null);
+                    } else {
+                        param.recommendUrl(Constants.PERSONAL_CENTER_ZS,null);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

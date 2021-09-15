@@ -1656,7 +1656,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         } else if (id == R.id.rank_list) {
             //跳转H5排行榜
             try {
-                param.recommendUrl(Constants.RANKING_LIST, null);
+                if (Utils.mIsDebug) {
+                    param.recommendUrl(Constants.RANKING_LIST, null);
+                } else {
+                    param.recommendUrl(Constants.RANKING_LIST_ZS, null);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
