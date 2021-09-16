@@ -79,6 +79,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.CommentPopRvAdapter;
+import adpter.VideoDetailCommentPopRvAdapter;
 import widget.CircleImageView;
 import widget.LoadingView;
 import widget.SpannableTextView;
@@ -95,6 +96,8 @@ import static com.wdcs.constants.Constants.YELLOW_V;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static com.wdcs.utils.ShareUtils.toShare;
+import static ui.activity.VideoHomeActivity.lsDuration;
+import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static utils.NetworkUtil.setDataWifiState;
 
@@ -118,7 +121,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private RelativeLayout rootview;
     public double pointPercent;                         // 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
-    private long lsDuration = 0; //每一次上报临时保存的播放时长
     private String isPreview; //判断是否是预览版页面UI
     private RelativeLayout videoDetailCommentBtn;
 
@@ -150,11 +152,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     //评论列表数据
     private List<CommentModel.DataDTO.RecordsDTO> mCommentPopRvData;
     private List<CommentModel.DataDTO> mCommentPopDtoData;
-    private CommentPopRvAdapter commentPopRvAdapter;
+    private VideoDetailCommentPopRvAdapter commentPopRvAdapter;
     private VideoInteractiveParam param;
     private String transformationToken = "";
     public CustomPopWindow noLoginTipsPop;
     private View noLoginTipsView;
+    private TextView noLoginTipsCancel;
+    private TextView noLoginTipsOk;
     public CustomPopWindow popupWindow;
     public CustomPopWindow sharePop;
     private View sharePopView;
@@ -232,6 +236,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         });
         getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
         noLoginTipsView = View.inflate(this, R.layout.no_login_tips, null);
+        noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
+        noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
+        noLoginTipsCancel.setOnClickListener(this);
+        noLoginTipsOk.setOnClickListener(this);
         dismissPop = contentView.findViewById(R.id.dismiss_pop);
         dismissPop.setOnClickListener(this);
         commentPopRv = contentView.findViewById(R.id.comment_pop_rv);
@@ -312,11 +320,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             // 关闭重播按钮
                             playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
                             float percentage = ((float) curProgress) / maxProgress;
-                            int position = (int) (mDuration * percentage);
-                            //拖动进度条 如果拖动的进度大于之前
-                            if (position > playerView.mWindowPlayer.getVideoDetailReportDuration()) {
-                                playerView.mWindowPlayer.setVideoDetailReportDuration(position);
+                            long duration = (long) (percentage * mDuration);
+                            lsDuration = duration;
+                            if (percentage > maxPercent) {
+                                maxPercent = percentage;
                             }
+                            int position = (int) (mDuration * percentage);
                             if (playerView.mWindowPlayer.mControllerCallback != null) {
                                 playerView.mWindowPlayer.mControllerCallback.onSeekTo(position);
                                 playerView.mWindowPlayer.mControllerCallback.onResume();
@@ -370,11 +379,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             // 关闭重播按钮
                             playerView.mFullScreenPlayer.toggleView(playerView.mFullScreenPlayer.mLayoutReplay, false);
                             float percentage = ((float) curProgress) / maxProgress;
-                            int position = (int) (mDuration * percentage);
-                            //拖动进度条 如果拖动的进度大于之前
-                            if (position > playerView.mWindowPlayer.getVideoDetailReportDuration()) {
-                                playerView.mWindowPlayer.setVideoDetailReportDuration(position);
+                            long duration = (long) (percentage * mDuration);
+                            lsDuration = duration;
+                            if (percentage > maxPercent) {
+                                maxPercent = percentage;
                             }
+                            int position = (int) (mDuration * percentage);
 
                             if (playerView.mFullScreenPlayer.mControllerCallback != null) {
                                 playerView.mFullScreenPlayer.mControllerCallback.onSeekTo(position);
@@ -386,7 +396,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 playerView.mFullScreenPlayer.postDelayed(playerView.mFullScreenPlayer.mHideViewRunnable, Contants.delayMillis);
             }
         });
-
 
 
         /**
@@ -439,6 +448,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void AutoPlayOverCallBack() {
                 final String event;
+                playerView.mWindowPlayer.setVideoDetailReportDuration(mDuration);
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                     //不为重播
                     event = Constants.CMS_VIDEO_OVER_AUTO;
@@ -574,7 +584,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         commentPopRv.setLayoutManager(linearLayoutManager);
-        commentPopRvAdapter = new CommentPopRvAdapter(R.layout.comment_pop_rv_item, mCommentPopRvData, this);
+        commentPopRvAdapter = new VideoDetailCommentPopRvAdapter(R.layout.comment_pop_rv_item, mCommentPopRvData, this);
         commentPopRvAdapter.bindToRecyclerView(commentPopRv);
         commentPopRvAdapter.setEmptyView(R.layout.comment_list_empty);
         commentPopRv.setAdapter(commentPopRvAdapter);
@@ -676,7 +686,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             String item = list.get(i).getTitle();
             View view = View.inflate(this, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != this) {
+            if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing() && !VideoDetailActivity.this.isDestroyed()) {
                 Glide.with(this)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);
@@ -705,7 +715,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 int mPosition = viewFlipper.getDisplayedChild();
                 Log.e("yqh", "子View的id:" + mPosition);
                 try {
-                    param.recommendUrl(list.get(mPosition).getUrl(),null);
+                    param.recommendUrl(list.get(mPosition).getUrl(), null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1207,7 +1217,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     "", "", "", mDatas.get(0).getIssueTimeStamp(), Constants.CONTENT_TYPE, "");
             Log.e("埋点", "埋点：分享按钮---" + jsonString);
             sharePop();
-        }  else if (id == R.id.share_wx_btn) {
+        } else if (id == R.id.share_wx_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
@@ -1231,17 +1241,33 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     "", "", "", mDatas.get(0).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.QQ_STRING);
             Log.e("埋点", "埋点：分享到QQ---" + jsonString);
             toShare(mDatas.get(0), Constants.SHARE_QQ);
-        }
-
-        else if (id == R.id.tvSend) {
-            if (TextUtils.isEmpty(edtInput.getText())) {
-                ToastUtils.showShort("请输入评论");
-            } else {
-                toComment(edtInput.getText().toString(), contentId);
-            }
         } else if (id == R.id.dismiss_pop) {
             if (popupWindow != null) {
                 popupWindow.dissmiss();
+            }
+        } else if (id == R.id.no_login_tips_cancel) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+        } else if (id == R.id.no_login_tips_ok) {
+            if (null != noLoginTipsPop) {
+                noLoginTipsPop.dissmiss();
+            }
+            try {
+                param.toLogin();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (id == R.id.comment_pop_rl) {
+            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                try {
+                    noLoginTipsPop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
+                showInputEdittextAndSend();
             }
         }
     }
@@ -1351,7 +1377,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
-        if (null != this) {
+        if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing() && !VideoDetailActivity.this.isDestroyed()) {
             Glide.with(this)
                     .load(mDatas.get(0).getCreatorHead())
                     .into(publisherHeadimg);
@@ -1419,15 +1445,15 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         } else {
             topicNameStr = "#" + item.getBelongTopicName();
         }
-        huati.setText(topicNameStr);
+        huati.setText(ButtonSpan.subStrByLen(topicNameStr, 24));
         huati.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
                     if (Utils.mIsDebug) {
-                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(),null);
+                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
                     } else {
-                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(),null);
+                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(), null);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -1449,10 +1475,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 
         if (huati.getText().length() != 0) {
             int num;
-            if (huati.getText().length() > 13) {
-                num = 13 + 2;
+            if (huati.getText().length() > 12) {
+                num = 12 + 3;
             } else {
-                num = huati.getText().length();
+                num = huati.getText().length() + 1;
             }
 
             for (int i = 0; i < num; i++) {
@@ -1607,24 +1633,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
 
         if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
-
-            /**
-             * 上报内容埋点 视频播放时长
-             * 如果 当前播放到的时长进度 小于 上一次存的时长进度 （用户往回拖动进度条，上报用户看到最长的视频时长进度）
-             */
-            if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getVideoDetailReportDuration()) {
-                everyOneDuration = playerView.mWindowPlayer.getVideoDetailReportDuration();
-            } else {
-                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-            }
-
+            everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
 
             //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
             if (mDuration != 0) {
-                /**
-                 * 上报内容埋点 视频播放时长
-                 * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
-                 */
                 String event;
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                     //不为重播
@@ -1633,13 +1645,19 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-                pointPercent = (double) everyOneDuration / mDuration;
-                BigDecimal two = new BigDecimal(pointPercent);
+                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double uploadPercent = 0;
+                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    uploadPercent = currentPercent;
+                } else {
+                    uploadPercent = maxPercent;
+                }
+                BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                //把本次播放的时长临时保存
-                lsDuration = everyOneDuration;
+                lsDuration = playerView.mWindowPlayer.mProgress;
+
                 //上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(Math.floor(pointPercentTwo*100)), event), event);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), event), event);
             }
         }
         playerView.mSuperPlayer.pause();
@@ -1657,5 +1675,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView = null;
         }
         OkGo.getInstance().cancelAll();
+        lsDuration = 0;
+        maxPercent = 0;
     }
 }

@@ -1,6 +1,5 @@
 package adpter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
@@ -8,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
@@ -19,16 +17,16 @@ import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.GetTimeAgo;
 import com.wdcs.videodetail.demo.R;
 
-
 import java.util.List;
 
+import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
 import widget.CircleImageView;
-@Keep
-public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.RecordsDTO, BaseViewHolder> {
+
+public class VideoDetailCommentPopRvAdapter  extends BaseQuickAdapter<CommentModel.DataDTO.RecordsDTO, BaseViewHolder> {
     private Context mContext;
 
-    public CommentPopRvAdapter(int layoutResId, @Nullable List<CommentModel.DataDTO.RecordsDTO> data, Context context) {
+    public VideoDetailCommentPopRvAdapter(int layoutResId, @Nullable List<CommentModel.DataDTO.RecordsDTO> data, Context context) {
         super(layoutResId, data);
         this.mContext = context;
     }
@@ -49,8 +47,8 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
         } else {
             gmReback.setVisibility(View.GONE);
         }
-        if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                && !((VideoHomeActivity)mContext).isDestroyed()) {
+        if (null != mContext && !((VideoDetailActivity)mContext).isFinishing()
+                && !((VideoDetailActivity)mContext).isDestroyed()) {
             Glide.with(mContext)
                     .load(item.getHead())
                     .into(commentUserHead);
@@ -70,4 +68,5 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
 
 
     }
+
 }

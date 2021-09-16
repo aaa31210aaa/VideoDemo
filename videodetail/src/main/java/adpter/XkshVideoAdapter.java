@@ -48,6 +48,7 @@ import com.wdcs.videodetail.demo.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import ui.activity.VideoHomeActivity;
 import widget.CircleImageView;
 import widget.OverLineTextView;
 import widget.SpannableTextView;
@@ -83,7 +84,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         this.mVideoDetailmanager = videoDetailmanager;
     }
 
-
     @Override
     protected void convert(final BaseViewHolder helper, final DataDTO item) {
         RelativeLayout itemRootView = helper.getView(R.id.item_relativelayout);
@@ -113,6 +113,12 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             fullLin.setVisibility(View.GONE);
         }
 
+        if (TextUtils.equals("volcengine", item.getThirdPartyCode())) {
+            follow.setVisibility(View.GONE);
+        } else {
+            follow.setVisibility(View.VISIBLE);
+        }
+
         //无wifi时继续播放按钮
         continuePlay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,29 +144,43 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 }
             }
         });
-        if (null != mContext) {
-            Glide.with(mContext)
-                    .load(item.getCreatorHead())
-                    .into(publisherHeadimg);
+
+        if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (TextUtils.isEmpty(item.getIssuerName()) || TextUtils.isEmpty(item.getIssuerImageUrl())) {
+                Glide.with(mContext)
+                        .load(item.getCreatorHead())
+                        .into(publisherHeadimg);
+                publisherName.setText(item.getCreatorNickname());
+            } else {
+                if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                        && !((VideoHomeActivity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getIssuerImageUrl())
+                            .into(publisherHeadimg);
+                }
+                publisherName.setText(item.getIssuerName());
+            }
         }
 
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (TextUtils.equals("volcengine", item.getThirdPartyCode())) {
+                    return;
+                }
                 //跳转H5头像TA人主页
                 try {
-                    if (Utils.mIsDebug){
-                        param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy(),null);
+                    if (Utils.mIsDebug) {
+                        param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy(), null);
                     } else {
-                        param.recommendUrl(Constants.HEAD_OTHER_ZS + item.getCreateBy(),null);
+                        param.recommendUrl(Constants.HEAD_OTHER_ZS + item.getCreateBy(), null);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-
-        publisherName.setText(item.getCreatorNickname());
 
         if (TextUtils.isEmpty(item.getCreatorCertMark())) {
             officialCertificationImg.setVisibility(View.GONE);
@@ -180,15 +200,17 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         } else {
             topicNameStr = "#" + item.getBelongTopicName();
         }
-        huati.setText(topicNameStr);
+
+        huati.setText(ButtonSpan.subStrByLen(topicNameStr, 24));
+
         huati.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
                     if (Utils.mIsDebug) {
-                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(),null);
+                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
                     } else {
-                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(),null);
+                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(), null);
                     }
 
                 } catch (Exception e) {
@@ -211,8 +233,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
 
         if (huati.getText().length() != 0) {
             int num;
-            if (huati.getText().length() > 13) {
-                num = 13 + 1;
+            if (huati.getText().length() > 12) {
+                num = 12 + 3;
             } else {
                 num = huati.getText().length() + 1;
             }
@@ -444,7 +466,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != mContext) {
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);

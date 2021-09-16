@@ -226,9 +226,7 @@
                 android:textSize="16sp"
                 android:clickable="true"
                 android:focusable="true"
-                android:maxEms="11"
                 android:singleLine="true"
-                android:ellipsize="end"
                 android:textColor="@color/white">
 
             </TextView>

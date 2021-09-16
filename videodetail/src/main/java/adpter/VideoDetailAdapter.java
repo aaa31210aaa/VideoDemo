@@ -48,6 +48,7 @@ import com.wdcs.videodetail.demo.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import ui.activity.VideoHomeActivity;
 import widget.CircleImageView;
 import widget.SpannableTextView;
 
@@ -143,14 +144,16 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 }
             }
         });
-        if (null != mContext) {
+        if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
+                && !((VideoHomeActivity)mContext).isDestroyed()) {
             if (TextUtils.isEmpty(item.getIssuerName()) || TextUtils.isEmpty(item.getIssuerImageUrl())) {
                 Glide.with(mContext)
                         .load(item.getCreatorHead())
                         .into(publisherHeadimg);
                 publisherName.setText(item.getCreatorNickname());
             } else {
-                if (null != mContext) {
+                if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
+                        && !((VideoHomeActivity)mContext).isDestroyed()) {
                     Glide.with(mContext)
                             .load(item.getIssuerImageUrl())
                             .into(publisherHeadimg);
@@ -190,7 +193,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         } else {
             topicNameStr = "#" + item.getBelongTopicName();
         }
-        huati.setText(topicNameStr);
+        huati.setText(ButtonSpan.subStrByLen(topicNameStr, 24));
         huati.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -223,9 +226,9 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         if (huati.getText().length() != 0) {
             int num;
             if (huati.getText().length() > 13) {
-                num = 13 + 2;
+                num = 12 + 3;
             } else {
-                num = huati.getText().length();
+                num = huati.getText().length() + 1;
             }
 
             for (int i = 0; i < num; i++) {
@@ -271,7 +274,8 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != mContext) {
+            if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
+                    && !((VideoHomeActivity)mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);

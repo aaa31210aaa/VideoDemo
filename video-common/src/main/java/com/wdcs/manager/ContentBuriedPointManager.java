@@ -1,6 +1,7 @@
 package com.wdcs.manager;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.wdcs.constants.Constants;
@@ -22,7 +23,9 @@ import static com.wdcs.callback.VideoInteractiveParam.param;
 
 public class ContentBuriedPointManager {
     public static JSONObject setContentBuriedPoint(Context context, String contentId, String duration, String percent, String event) {
-
+        if (TextUtils.isEmpty(contentId)) {
+            return null;
+        }
         ContentBuriedPointModel model = ContentBuriedPointModel.getInstance();
 
         //user对象 ---start

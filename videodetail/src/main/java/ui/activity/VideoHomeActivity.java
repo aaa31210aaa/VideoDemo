@@ -69,7 +69,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     public SlidingTabLayout videoTab;
     public NoScrollViewPager videoVp;
     private String[] mTitlesArrays = {"我的小康", "视频", "直播"};
-    private VideoViewPagerAdapter adapter;
+    private VideoViewPagerAdapter videoViewPagerAdapter;
     private List<VideoChannelModel> videoChannelModels = new ArrayList<>();
     private List<String> colunmList = new ArrayList<>();
     private LinearLayout backLin;
@@ -90,6 +90,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     public String contentId;
     private int toCurrentTab;
     private String lsCotentnId;
+    public static double maxPercent = 0; //记录最大百分比
+    public static long lsDuration = 0; //每一次上报临时保存的播放时长
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,11 +166,13 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             // 关闭重播按钮
                             playerView.mFullScreenPlayer.toggleView(playerView.mFullScreenPlayer.mLayoutReplay, false);
                             float percentage = ((float) curProgress) / maxProgress;
-                            int position = (int) (mDuration * percentage);
-                            //拖动进度条 如果拖动的进度大于之前
-                            if (position > playerView.mWindowPlayer.getRecordDuration()) {
-                                playerView.mWindowPlayer.setRecordDuration(position);
+                            long duration = (long) (percentage * mDuration);
+                            lsDuration = duration;
+                            if (percentage > maxPercent) {
+                                maxPercent = percentage;
                             }
+
+                            int position = (int) (mDuration * percentage);
 
                             if (playerView.mFullScreenPlayer.mControllerCallback != null) {
                                 playerView.mFullScreenPlayer.mControllerCallback.onSeekTo(position);
@@ -235,11 +239,12 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             // 关闭重播按钮
                             playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
                             float percentage = ((float) curProgress) / maxProgress;
-                            int position = (int) (mDuration * percentage);
-                            //拖动进度条 如果拖动的进度大于之前
-                            if (position > playerView.mWindowPlayer.getRecordDuration()) {
-                                playerView.mWindowPlayer.setRecordDuration(position);
+                            long duration = (long) (percentage * mDuration);
+                            lsDuration = duration;
+                            if (percentage > maxPercent) {
+                                maxPercent = percentage;
                             }
+                            int position = (int) (mDuration * percentage);
 
                             if (playerView.mWindowPlayer.mControllerCallback != null) {
                                 playerView.mWindowPlayer.mControllerCallback.onSeekTo(position);
@@ -291,8 +296,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoTitleView) {
                             videoTitleView.setVisibility(View.GONE);
                         }
+                        if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin)) {
+                            videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
+                        }
 
-                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
                         if (null != videoFragmentFullLin) {
                             videoFragmentFullLin.setVisibility(View.GONE);
                         }
@@ -329,24 +336,33 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoTitleView) {
                             videoTitleView.setVisibility(View.GONE);
                         }
+                        if (null != xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin)) {
+                            xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
+                        }
 
-                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.GONE);
                         if (null != xkshFullLin) {
                             xkshFullLin.setVisibility(View.GONE);
                         }
-                        xkshFragment.rankList.setVisibility(View.GONE);
+                        if (null != xkshFragment.rankList) {
+                            xkshFragment.rankList.setVisibility(View.GONE);
+                        }
 
                         if (isAbbreviation) {
-                            xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
+                            if (null != xkshFragment.activityRuleAbbreviation) {
+                                xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
+                            }
                         } else {
-                            xkshFragment.activityRuleImg.setVisibility(View.GONE);
-                            xkshFragment.activityToAbbreviation.setVisibility(View.GONE);
+                            if (null != xkshFragment.activityRuleImg) {
+                                xkshFragment.activityRuleImg.setVisibility(View.GONE);
+                            }
+                            if (null != xkshFragment.activityToAbbreviation) {
+                                xkshFragment.activityToAbbreviation.setVisibility(View.GONE);
+                            }
                         }
                     }
 
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
                     videoTab.setVisibility(View.GONE);
-
                     videoVp.setScroll(false);
 
 
@@ -366,8 +382,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoTitleView) {
                             videoTitleView.setVisibility(View.VISIBLE);
                         }
+                        if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin)) {
+                            videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
+                        }
 
-                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(true);
                         xkshFragment.refreshLayout.setEnableRefresh(true);
@@ -380,13 +398,28 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != xkshFullLin) {
                             xkshFullLin.setVisibility(View.VISIBLE);
                         }
-                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
-                        xkshFragment.rankList.setVisibility(View.VISIBLE);
+
+                        if (null != xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin)) {
+                            xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
+                        }
+                        if (null != xkshFragment.rankList) {
+                            xkshFragment.rankList.setVisibility(View.VISIBLE);
+                        }
+
                         if (isAbbreviation) {
-                            xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                            if (null != xkshFragment.activityRuleAbbreviation) {
+                                xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                            }
                         } else {
-                            xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
-                            xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                            if (null != activityRuleBean.getData().getConfig().getJumpUrl()
+                                    && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
+                                if (null != xkshFragment.activityRuleImg) {
+                                    xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
+                                }
+                                if (null != xkshFragment.activityToAbbreviation) {
+                                    xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                                }
+                            }
                         }
                     }
                     if (null != videoTitleView) {
@@ -455,7 +488,12 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 }
 
                 //拖动/自动播放结束上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event), event);
+                try {
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event), event);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                maxPercent = 100;
             }
         });
 
@@ -493,10 +531,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
     private void initViewPager() {
         videoVp.setOffscreenPageLimit(3);
-        if (null == adapter) {
-            adapter = new VideoViewPagerAdapter(getSupportFragmentManager());
+        if (null == videoViewPagerAdapter) {
+            videoViewPagerAdapter = new VideoViewPagerAdapter(getSupportFragmentManager());
         }
-        videoVp.setAdapter(adapter);
+        videoVp.setAdapter(videoViewPagerAdapter);
 
         videoVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -546,7 +584,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        adapter.addItems(videoChannelModels, videoTab, playerView, contentId);
+        videoViewPagerAdapter.addItems(videoChannelModels, videoTab, playerView, contentId);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }
@@ -554,8 +592,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         //tab和ViewPager进行关联
         videoTab.setViewPager(videoVp, titles);
         videoTab.setCurrentTab(toCurrentTab);
-        videoDetailFragment = (VideoDetailFragment) adapter.getItem(1);
-        xkshFragment = (XkshFragment) adapter.getItem(0);
+        videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
+        xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
 
         getActivityRule();
     }
@@ -585,14 +623,19 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                     && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
                                 videoTab.showMsg(0, "有活动");
                                 videoTab.setMsgMargin(0, ButtonSpan.dip2px(3), ButtonSpan.dip2px(9));
-                                xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
-                                xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                                if (null != xkshFragment.activityRuleImg) {
+                                    xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
+                                }
+                                if (null != xkshFragment.activityToAbbreviation) {
+                                    xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                                }
                             }
 
                             /**
                              * 设置活动规则图，缩略图
                              */
-                            if (null != VideoHomeActivity.this) {
+                            if (null != VideoHomeActivity.this && !VideoHomeActivity.this.isFinishing()
+                                    && !VideoHomeActivity.this.isDestroyed()) {
                                 Glide.with(VideoHomeActivity.this)
                                         .load(activityRuleBean.getData().getConfig().getImageUrl())
                                         .into(xkshFragment.activityRuleImg);
@@ -621,8 +664,12 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             xkshFragment.activityToAbbreviation.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    xkshFragment.activityRuleImg.setVisibility(View.GONE);
-                                    xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                                    if (null != xkshFragment.activityRuleImg) {
+                                        xkshFragment.activityRuleImg.setVisibility(View.GONE);
+                                    }
+                                    if (null != xkshFragment.activityRuleAbbreviation) {
+                                        xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                                    }
                                     isAbbreviation = true;
                                 }
                             });
@@ -633,8 +680,13 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             xkshFragment.activityRuleAbbreviation.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
-                                    xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
+                                    if (null != xkshFragment.activityRuleImg) {
+                                        xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
+                                    }
+                                    if (null != xkshFragment.activityRuleAbbreviation) {
+                                        xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
+                                    }
+
                                     isAbbreviation = false;
                                 }
                             });
@@ -719,6 +771,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             instance.mSuperPlayer.destroy();
             instance = null;
         }
+        maxPercent = 0;
+        lsDuration = 0;
 //        OkGo.getInstance().cancelTag(VIDEOTAG);
     }
 
@@ -728,6 +782,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
      * @param jsonObject
      */
     public static void uploadBuriedPoint(JSONObject jsonObject, final String trackingType) {
+        if (null == jsonObject) {
+            return;
+        }
         OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().trackingUpload())
                 .tag(TRACKINGUPLOAD)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())

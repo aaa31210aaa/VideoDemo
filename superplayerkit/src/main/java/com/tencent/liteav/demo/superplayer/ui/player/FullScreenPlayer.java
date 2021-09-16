@@ -1191,7 +1191,9 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed2.getText());
         }
-        popupWindow.dismiss();
+        if (null != popupWindow) {
+            popupWindow.dismiss();
+        }
     }
 
     /**

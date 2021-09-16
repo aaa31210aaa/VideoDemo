@@ -15,6 +15,8 @@ import com.wdcs.videodetail.demo.R;
 
 import java.util.List;
 
+import ui.activity.VideoHomeActivity;
+
 public class LiveRvAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private Context mContext;
 
@@ -35,7 +37,8 @@ public class LiveRvAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
             liveState.setImageResource(R.drawable.live_end);
         }
         TextView textView = helper.getView(R.id.live_item_title);
-        if (null != mContext) {
+        if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
+                && !((VideoHomeActivity)mContext).isDestroyed()) {
             Glide.with(mContext)
                     .load(item.getThumbnailUrl())
                     .into(imageView);

@@ -90,6 +90,8 @@ import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static ui.activity.VideoHomeActivity.lsDuration;
+import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static utils.NetworkUtil.setDataWifiState;
 
@@ -187,9 +189,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public ImageView activityRuleAbbreviation;
     public ImageView activityToAbbreviation; //变为缩略图按钮
     public LinearLayout fullLin;
-    public double pointPercent;                         // 每一次记录的节点播放百分比
+    public double pointPercent;// 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
-    private long lsDuration = 0; //每一次上报临时保存的播放时长
+
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -218,7 +220,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_xksh, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        getPullDownData(String.valueOf(mVideoSize), panelCode, "false");
+        getPullDownData(String.valueOf(mVideoSize), panelCode, "false", Constants.REFRESH_TYPE);
         return view;
     }
 
@@ -244,9 +246,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         rankList.setOnClickListener(this);
         activityRuleImg = view.findViewById(R.id.activity_rule_img);
         activityRuleImg.setOnClickListener(this);
-
-        //如果活动没有跳转URL 隐藏
-            activityRuleImg.setVisibility(View.GONE);
 
         activityToAbbreviation = view.findViewById(R.id.activity_to_abbreviation);
         activityToAbbreviation.setOnClickListener(this);
@@ -320,21 +319,33 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 if (null != playerView.getTag() && position == (int) playerView.getTag()) {
                     return;
                 }
+                //避免越界
+                if (mDatas.isEmpty()) {
+                    return;
+                }
+
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
 
                 if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                     //上报埋点
-                    everyOneDuration = playerView.mWindowPlayer.mProgress;
-                    pointPercent = (double) everyOneDuration / mDuration;
-                    BigDecimal two = new BigDecimal(pointPercent);
+                    everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
+                    double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                    double uploadPercent = 0;
+                    if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                        uploadPercent = currentPercent;
+                    } else {
+                        uploadPercent = maxPercent;
+                    }
+                    BigDecimal two = new BigDecimal(uploadPercent);
                     double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(Math.floor(pointPercentTwo*100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
                 }
 
                 //滑动下一条或者上一条视频
                 playerView.mWindowPlayer.setRecordDuration(0);
                 lsDuration = 0;
+                maxPercent = 0;
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
@@ -503,11 +514,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         } else {
             if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                 //上报埋点
-                everyOneDuration = playerView.mWindowPlayer.mProgress;
-                pointPercent = (double) everyOneDuration / mDuration;
-                BigDecimal two = new BigDecimal(pointPercent);
+                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
+                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double uploadPercent = 0;
+                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    uploadPercent = currentPercent;
+                } else {
+                    uploadPercent = maxPercent;
+                }
+                BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration*1000), String.valueOf(pointPercentTwo*100), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
             }
 
             playerView.mSuperPlayer.pause();
@@ -515,6 +532,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 rlLp.removeView(playerView);
             }
             lsDuration = 0;
+            maxPercent = 0;
         }
     }
 
@@ -593,7 +611,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 isLoadComplate = false;
                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
-                getPullDownData(String.valueOf(mVideoSize), panelCode, "false");
+                getPullDownData(String.valueOf(mVideoSize), panelCode, "false", Constants.REFRESH_TYPE);
             }
         });
         requestLoadMoreListener = new BaseQuickAdapter.RequestLoadMoreListener() {
@@ -607,7 +625,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 adapter.loadMoreFail();
                                 return;
                             }
-                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true");
+                            loadMoreData(ApiConstants.getInstance().getVideoDetailListUrl(), mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true", Constants.LOADMORE_TYPE);
                         }
                     });
                 }
@@ -810,9 +828,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      *
      * @param removeFirst
      */
-    private void getPullDownData(String pageSize, String panelCode, String removeFirst) {
+    private void getPullDownData(String pageSize, String panelCode, String removeFirst, String refreshType) {
+        String deviceId = "";
         if (null != playerView && null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
+        }
+        try {
+            deviceId = param.getDeviceId();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         mDatas.clear();
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
@@ -820,6 +844,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 .params("pageSize", pageSize)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
+                .params("ssid", deviceId)
+                .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
@@ -886,14 +912,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     /**
      * 获取更多数据
      */
-    private void loadMoreData(String url, String contentId, String panelCode, String removeFirst) {
-
+    private void loadMoreData(String url, String contentId, String panelCode, String removeFirst, String refreshType) {
+        String deviceId = "";
+        try {
+            deviceId = param.getDeviceId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         OkGo.<VideoDetailModel>get(url)
                 .tag(VIDEOTAG)
                 .params("contentId", contentId)
                 .params("pageSize", 10)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
+                .params("ssid", deviceId)
+                .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
@@ -1181,6 +1214,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         TextView followText = (TextView) adapter.getViewByPosition(currentIndex, R.id.follow);
         String localUserId = PersonInfoManager.getInstance().getUserId();
         String userId = mDataDTO.getCreateBy();
+
+        if (null == followText) {
+            return;
+        }
         if (TextUtils.isEmpty(localUserId) && TextUtils.isEmpty(userId)) {
             followText.setVisibility(View.VISIBLE);
         } else {
@@ -1512,15 +1549,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
 
         if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
-            /**
-             * 上报内容埋点 视频播放时长
-             * 如果 当前播放到的时长进度 小于 上一次存的时长进度 （用户往回拖动进度条，上报用户看到最长的视频时长进度）
-             */
-            if (playerView.mWindowPlayer.mProgress < playerView.mWindowPlayer.getRecordDuration()) {
-                everyOneDuration = playerView.mWindowPlayer.getRecordDuration();
-            } else {
-                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-            }
+            everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
 
             //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
             if (mDuration != 0) {
@@ -1536,11 +1565,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-
-                pointPercent = (double) everyOneDuration / mDuration;
-                BigDecimal two = new BigDecimal(pointPercent);
+                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double uploadPercent = 0;
+                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    uploadPercent = currentPercent;
+                } else {
+                    uploadPercent = maxPercent;
+                }
+                BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                lsDuration = everyOneDuration;
+                lsDuration = playerView.mWindowPlayer.mProgress;
 
                 //上报埋点
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), event), event);

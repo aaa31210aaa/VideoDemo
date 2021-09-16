@@ -357,7 +357,8 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void onSuccess(Response<UploadVideoBean> response) {
                         uploadVideoBean = response.body();
-                        if (null != UploadActivity.this) {
+                        if (null != UploadActivity.this && !UploadActivity.this.isFinishing()
+                                && !UploadActivity.this.isDestroyed()) {
                             Glide.with(UploadActivity.this)
                                     .load(uploadVideoBean.getCoverImageUrl())
                                     .into(uploadBtn);

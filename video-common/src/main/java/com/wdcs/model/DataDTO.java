@@ -78,6 +78,7 @@ public  class DataDTO {
     private boolean fullBtnIsShow;
     private String spaceStr;
     private String thirdPartyId;
+    private String  thirdPartyCode;
 
     public String getShareTitle() {
         if (null == shareTitle) {
@@ -943,6 +944,17 @@ public  class DataDTO {
 
     public void setSpaceStr(String spaceStr) {
         this.spaceStr = spaceStr;
+    }
+
+    public String getThirdPartyCode() {
+        if (null == thirdPartyCode) {
+            return "";
+        }
+        return thirdPartyCode;
+    }
+
+    public void setThirdPartyCode(String thirdPartyCode) {
+        this.thirdPartyCode = thirdPartyCode;
     }
 
     @Keep
