@@ -263,17 +263,6 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         new RxPermissions(this).request(permissionsGroup).subscribe(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) throws Exception {
-//                //自定义添加所有的视频文件格式
-//                mimeTypes.add(MimeType.MP4);
-//                mimeTypes.add(MimeType.AVI);
-//                mimeTypes.add(MimeType.MKV);
-//                mimeTypes.add(MimeType.MPEG);
-//                mimeTypes.add(MimeType.QUICKTIME);
-//                mimeTypes.add(MimeType.THREEGPP);
-//                mimeTypes.add(MimeType.THREEGPP2);
-//                mimeTypes.add(MimeType.MKV);
-//                mimeTypes.add(MimeType.WEBM);
-//                mimeTypes.add(MimeType.TS);
                 if (aBoolean) {
                     Matisse.from(UploadActivity.this)
                             .choose(MimeType.ofVideo())
@@ -360,7 +349,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                         if (null != UploadActivity.this && !UploadActivity.this.isFinishing()
                                 && !UploadActivity.this.isDestroyed()) {
                             Glide.with(UploadActivity.this)
-                                    .load(uploadVideoBean.getCoverImageUrl())
+                                    .load("https://cdn-oss.zhcs.csbtv.com/zhcs-prd/images/61435c67856fb900013adc10")
                                     .into(uploadBtn);
                         }
 

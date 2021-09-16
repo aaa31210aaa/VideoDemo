@@ -106,14 +106,14 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             noWifiLl.setVisibility(View.VISIBLE);
         }
 
-        //全屏按钮是否显示
-        if (item.isFullBtnIsShow()) {
-            fullLin.setVisibility(View.VISIBLE);
-        } else {
-            fullLin.setVisibility(View.GONE);
-        }
+//        //全屏按钮是否显示
+//        if (item.isFullBtnIsShow()) {
+//            fullLin.setVisibility(View.VISIBLE);
+//        } else {
+//            fullLin.setVisibility(View.GONE);
+//        }
 
-        if (TextUtils.equals("volcengine", item.getThirdPartyCode())) {
+        if (TextUtils.isEmpty(item.getIssuerId())) {
             follow.setVisibility(View.GONE);
         } else {
             follow.setVisibility(View.VISIBLE);
@@ -147,26 +147,19 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
 
         if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                 && !((VideoHomeActivity) mContext).isDestroyed()) {
-            if (TextUtils.isEmpty(item.getIssuerName()) || TextUtils.isEmpty(item.getIssuerImageUrl())) {
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
-                        .load(item.getCreatorHead())
+                        .load(item.getIssuerImageUrl())
                         .into(publisherHeadimg);
-                publisherName.setText(item.getCreatorNickname());
-            } else {
-                if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                        && !((VideoHomeActivity) mContext).isDestroyed()) {
-                    Glide.with(mContext)
-                            .load(item.getIssuerImageUrl())
-                            .into(publisherHeadimg);
-                }
-                publisherName.setText(item.getIssuerName());
             }
+            publisherName.setText(item.getIssuerName());
         }
 
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (TextUtils.equals("volcengine", item.getThirdPartyCode())) {
+                if (TextUtils.isEmpty(item.getIssuerId())) {
                     return;
                 }
                 //跳转H5头像TA人主页

@@ -266,6 +266,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         publisherName = findViewById(R.id.publisher_name);
         officialCertificationImg = findViewById(R.id.official_certification_img);
         publisherHeadimg = findViewById(R.id.publisher_headimg);
+        publisherHeadimg.setOnClickListener(this);
         foldText = findViewById(R.id.fold_text);
         foldText.setOnClickListener(this);
         expendText = findViewById(R.id.expend_text);
@@ -1269,6 +1270,20 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
                 showInputEdittextAndSend();
             }
+        } else if (id == R.id.publisher_headimg) {
+            if (TextUtils.isEmpty(mDatas.get(0).getIssuerId())) {
+                return;
+            }
+            //跳转H5头像TA人主页
+            try {
+                if (Utils.mIsDebug) {
+                    param.recommendUrl(Constants.HEAD_OTHER + mDatas.get(0).getCreateBy(), null);
+                } else {
+                    param.recommendUrl(Constants.HEAD_OTHER_ZS + mDatas.get(0).getCreateBy(), null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1377,13 +1392,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
+
         if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing() && !VideoDetailActivity.this.isDestroyed()) {
             Glide.with(this)
-                    .load(mDatas.get(0).getCreatorHead())
+                    .load(mDatas.get(0).getIssuerImageUrl())
                     .into(publisherHeadimg);
+            publisherName.setText(mDatas.get(0).getIssuerName());
         }
 
-        publisherName.setText(mDatas.get(0).getCreatorNickname());
         getFoldText(mDatas.get(0));
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
@@ -1420,7 +1436,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
             mLayoutBottomParams.addRule(BELOW, playerView.getId());
-            mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(110), 0, 0);
+            mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(120), 0, 0);
             playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
             rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
         }
@@ -1645,9 +1661,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
-                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                     uploadPercent = currentPercent;
                 } else {
                     uploadPercent = maxPercent;

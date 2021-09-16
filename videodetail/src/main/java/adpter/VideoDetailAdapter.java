@@ -114,16 +114,15 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         //非wifi状态下布局是否显示
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
-            //全屏按钮是否显示
-            if (item.isFullBtnIsShow()) {
-                fullLin.setVisibility(View.VISIBLE);
-            } else {
-                fullLin.setVisibility(View.GONE);
-            }
+//            //全屏按钮是否显示
+//            if (item.isFullBtnIsShow()) {
+//                fullLin.setVisibility(View.VISIBLE);
+//            } else {
+//                fullLin.setVisibility(View.GONE);
+//            }
         } else {
             noWifiLl.setVisibility(View.VISIBLE);
         }
-
 
 
         //无wifi时继续播放按钮
@@ -144,22 +143,15 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 }
             }
         });
-        if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                && !((VideoHomeActivity)mContext).isDestroyed()) {
-            if (TextUtils.isEmpty(item.getIssuerName()) || TextUtils.isEmpty(item.getIssuerImageUrl())) {
+        if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
-                        .load(item.getCreatorHead())
+                        .load(item.getIssuerImageUrl())
                         .into(publisherHeadimg);
-                publisherName.setText(item.getCreatorNickname());
-            } else {
-                if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                        && !((VideoHomeActivity)mContext).isDestroyed()) {
-                    Glide.with(mContext)
-                            .load(item.getIssuerImageUrl())
-                            .into(publisherHeadimg);
-                }
-                publisherName.setText(item.getIssuerName());
             }
+            publisherName.setText(item.getIssuerName());
         }
 
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
@@ -274,8 +266,8 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                    && !((VideoHomeActivity)mContext).isDestroyed()) {
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);
@@ -304,7 +296,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 int mPosition = viewFlipper.getDisplayedChild();
                 Log.e("yqh", "子View的id:" + mPosition);
                 try {
-                    param.recommendUrl(list.get(mPosition).getUrl(),null);
+                    param.recommendUrl(list.get(mPosition).getUrl(), null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

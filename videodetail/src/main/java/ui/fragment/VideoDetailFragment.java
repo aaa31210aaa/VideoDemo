@@ -279,6 +279,16 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     return;
                 }
                 mDataDTO = mDatas.get(0);
+                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
+                if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoType)) {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
                 playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
                 playerView.mWindowPlayer.setIsTurnPages(false);
@@ -339,13 +349,25 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //              ContentBuriedPointManager.setContentBuriedPoint();
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
+                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoType)) {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
 
+                Log.e("翻页----", mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
+                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
                 if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                     //上报埋点
                     everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                    double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                    double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                     double uploadPercent = 0;
-                    if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                         uploadPercent = currentPercent;
                     } else {
                         uploadPercent = maxPercent;
@@ -506,7 +528,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     }
 
                                     negativeScreenDto = dataDTO;
-                                    getPullDownData(mVideoSize, panelCode, "false",Constants.REFRESH_TYPE);
+                                    getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
                                 } else {
                                     ToastUtils.showShort(jsonObject.get("message").toString());
                                 }
@@ -567,9 +589,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                 //上报埋点
                 everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
-                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                     uploadPercent = currentPercent;
                 } else {
                     uploadPercent = maxPercent;
@@ -593,50 +615,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      * @param position
      */
     public void addPlayView(final int position) {
-//        lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.MATCH_PARENT);
-//        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-//        fullLin = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.superplayer_iv_fullscreen);
-//        if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
-//            ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
-//        }
-//        RelativeLayout.LayoutParams bottomLp = (RelativeLayout.LayoutParams) linearLayout.getLayoutParams();
-//        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
-//                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
-//        if (videoType.equals("1")) {
-//            if (phoneIsNormal()) {
-//                fullLin.setVisibility(View.GONE);
-//                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
-//                lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-//                ((ViewGroup) refreshLayout).setLayoutParams(lp);
-//                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-//                playerView.setOrientation(false);
-//            } else {
-//                fullLin.setVisibility(View.GONE);
-//                bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-//                lp.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
-//                ((ViewGroup) refreshLayout).setLayoutParams(lp);
-//                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
-//                playerView.setOrientation(false);
-//            }
-//        } else if (videoType.equals("0")) {
-//            fullLin.setVisibility(View.GONE);
-//            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(10));
-//            lp.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
-//            ((ViewGroup) refreshLayout).setLayoutParams(lp);
-//            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-//            playerView.setOrientation(false);
-//        } else {
-//            fullLin.setVisibility(View.VISIBLE);
-//            bottomLp.setMargins(ButtonSpan.dip2px(10), 0, ButtonSpan.dip2px(10), ButtonSpan.dip2px(90));
-//            lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-//            ((ViewGroup) refreshLayout).setLayoutParams(lp);
-//            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-//            playerView.setOrientation(true);
-//        }
-//        linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
-//        linearLayout.setLayoutParams(bottomLp);
-
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
@@ -956,15 +934,15 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             }
                             mDatas.addAll(response.body().getData());
 
-                            for (int i = 0; i < mDatas.size(); i++) {
-                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
-                                    mDatas.get(i).setFullBtnIsShow(false);
-                                } else {
-                                    mDatas.get(i).setFullBtnIsShow(true);
-                                }
-                            }
+//                            for (int i = 0; i < mDatas.size(); i++) {
+//                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+//                                 if (TextUtils.equals("2", videoType)) {
+//                                    mDatas.get(i).setFullBtnIsShow(true);
+//                                } else {
+//                                    mDatas.get(i).setFullBtnIsShow(false);
+//                                }
+//                            }
 
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
@@ -1618,9 +1596,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
-                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                     uploadPercent = currentPercent;
                 } else {
                     uploadPercent = maxPercent;

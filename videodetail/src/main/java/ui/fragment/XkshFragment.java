@@ -85,6 +85,7 @@ import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 
 import static android.widget.RelativeLayout.BELOW;
+import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
@@ -269,6 +270,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
                 mDataDTO = mDatas.get(0);
+                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
+                if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoType)) {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
 //                playerView = SuperPlayerView.getInstance(getActivity(), decorView);
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
                 playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
@@ -326,6 +337,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
+
+                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoType)) {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
 
                 if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                     //上报埋点
@@ -863,15 +884,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             }
 
                             mDatas.addAll(response.body().getData());
-                            for (int i = 0; i < mDatas.size(); i++) {
-                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
-                                    mDatas.get(i).setFullBtnIsShow(false);
-                                } else {
-                                    mDatas.get(i).setFullBtnIsShow(true);
-                                }
-                            }
+//                            for (int i = 0; i < mDatas.size(); i++) {
+//                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+//                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
+//                                    mDatas.get(i).setFullBtnIsShow(false);
+//                                } else {
+//                                    mDatas.get(i).setFullBtnIsShow(true);
+//                                }
+//                            }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
                             if (mDatas.size() > 0) {
@@ -1461,8 +1482,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
-        if (playerView != null) {
-            playerView.mSuperPlayer.resume();
+        if (instance != null) {
+            if (instance.isLoad) {
+                instance.mSuperPlayer.resume();
+            } else {
+                instance.mSuperPlayer.reStart();
+            }
         }
 
         if (!TextUtils.isEmpty(myContentId)) {
