@@ -69,7 +69,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private VolumeBrightnessProgressLayout mGestureVolumeBrightnessProgressLayout; // 音量亮度调节布局
     public VideoProgressLayout mGestureVideoProgressLayout;            // 手势快进提示布局
 
-    private GestureDetector mGestureDetector;                       // 手势检测监听器
+    public GestureDetector mGestureDetector;                       // 手势检测监听器
     private VideoGestureDetector mVideoGestureDetector;                      // 手势控制工具
 
     private boolean isShowing;                              // 自身是否可见
@@ -113,6 +113,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         super(context, attrs, defStyleAttr);
         initialize(context);
     }
+
 
     /**
      * 初始化控件、手势检测监听器、亮度/音量/播放进度的回调
@@ -315,7 +316,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
      * <p>
      * 双击和点击播放/暂停按钮会触发此方法
      */
-    private void togglePlayState() {
+    public void togglePlayState() {
         switch (mCurrentPlayState) {
             case PAUSE:
             case END:
@@ -337,7 +338,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     /**
      * 切换自身的可见性
      */
-    private void toggle() {
+    public void toggle() {
         if (isShowing) {
             hide();
         } else {

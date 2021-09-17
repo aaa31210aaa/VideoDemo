@@ -1,19 +1,8 @@
 package adpter;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Build;
-import android.text.Layout;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.ClickableSpan;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,7 +10,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
@@ -29,9 +17,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
-import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
-import com.tencent.liteav.demo.superplayer.model.VideoPlayerParam;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.ViewPagerLayoutManager;
@@ -40,8 +26,6 @@ import com.wdcs.model.RecommendModel;
 import com.wdcs.utils.AppUtils;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
-import com.wdcs.utils.ScreenUtils;
-import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
@@ -49,8 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ui.activity.VideoHomeActivity;
-import widget.CircleImageView;
-import widget.SpannableTextView;
+import utils.GlideUtil;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
@@ -89,7 +72,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
         TextView continuePlay = helper.getView(R.id.continue_play);
         LinearLayout fullLin = helper.getView(R.id.superplayer_iv_fullscreen);
-        CircleImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
+        ImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
         TextView publisherName = helper.getView(R.id.publisher_name);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
@@ -114,16 +97,15 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         //非wifi状态下布局是否显示
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
-            //全屏按钮是否显示
-            if (item.isFullBtnIsShow()) {
-                fullLin.setVisibility(View.VISIBLE);
-            } else {
-                fullLin.setVisibility(View.GONE);
-            }
+//            //全屏按钮是否显示
+//            if (item.isFullBtnIsShow()) {
+//                fullLin.setVisibility(View.VISIBLE);
+//            } else {
+//                fullLin.setVisibility(View.GONE);
+//            }
         } else {
             noWifiLl.setVisibility(View.VISIBLE);
         }
-
 
 
         //无wifi时继续播放按钮
@@ -144,22 +126,16 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 }
             }
         });
-        if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                && !((VideoHomeActivity)mContext).isDestroyed()) {
-            if (TextUtils.isEmpty(item.getIssuerName()) || TextUtils.isEmpty(item.getIssuerImageUrl())) {
-                Glide.with(mContext)
-                        .load(item.getCreatorHead())
-                        .into(publisherHeadimg);
-                publisherName.setText(item.getCreatorNickname());
-            } else {
-                if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                        && !((VideoHomeActivity)mContext).isDestroyed()) {
-                    Glide.with(mContext)
-                            .load(item.getIssuerImageUrl())
-                            .into(publisherHeadimg);
-                }
-                publisherName.setText(item.getIssuerName());
+        if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+                GlideUtil.displayCircle(publisherHeadimg,item.getIssuerImageUrl(),true,mContext);
+//                Glide.with(mContext)
+//                        .load(item.getIssuerImageUrl())
+//                        .into(publisherHeadimg);
             }
+            publisherName.setText(item.getIssuerName());
         }
 
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
@@ -274,8 +250,8 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                    && !((VideoHomeActivity)mContext).isDestroyed()) {
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);
@@ -304,7 +280,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 int mPosition = viewFlipper.getDisplayedChild();
                 Log.e("yqh", "子View的id:" + mPosition);
                 try {
-                    param.recommendUrl(list.get(mPosition).getUrl(),null);
+                    param.recommendUrl(list.get(mPosition).getUrl(), null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

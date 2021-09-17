@@ -1,24 +1,13 @@
 package ui.activity;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Layout;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -28,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
@@ -78,18 +66,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailCommentPopRvAdapter;
-import widget.CircleImageView;
+import utils.GlideUtil;
 import widget.LoadingView;
-import widget.SpannableTextView;
 
 import static android.widget.RelativeLayout.BELOW;
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
-import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.YELLOW_V;
@@ -108,7 +91,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private TextView continuePlay;
     private TextView publisherName;
     private ImageView officialCertificationImg;
-    private CircleImageView publisherHeadimg;
+    private ImageView publisherHeadimg;
     private TextView foldText;
     private TextView huati;
     private TextView expendText;
@@ -184,8 +167,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             agreeNowifiPlay.setVisibility(View.VISIBLE);
         } else {
             agreeNowifiPlay.setVisibility(View.GONE);
-            getOneVideo(contentId);
         }
+        getOneVideo(contentId);
     }
 
     private void initView() {
@@ -266,6 +249,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         publisherName = findViewById(R.id.publisher_name);
         officialCertificationImg = findViewById(R.id.official_certification_img);
         publisherHeadimg = findViewById(R.id.publisher_headimg);
+        publisherHeadimg.setOnClickListener(this);
         foldText = findViewById(R.id.fold_text);
         foldText.setOnClickListener(this);
         expendText = findViewById(R.id.expend_text);
@@ -448,7 +432,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void AutoPlayOverCallBack() {
                 final String event;
-                playerView.mWindowPlayer.setVideoDetailReportDuration(mDuration);
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                     //不为重播
                     event = Constants.CMS_VIDEO_OVER_AUTO;
@@ -456,7 +439,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-
                 //拖动/自动播放结束上报埋点
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event), event);
             }
@@ -1269,6 +1251,20 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
                 showInputEdittextAndSend();
             }
+        } else if (id == R.id.publisher_headimg) {
+            if (TextUtils.isEmpty(mDatas.get(0).getIssuerId())) {
+                return;
+            }
+            //跳转H5头像TA人主页
+            try {
+                if (Utils.mIsDebug) {
+                    param.recommendUrl(Constants.HEAD_OTHER + mDatas.get(0).getCreateBy(), null);
+                } else {
+                    param.recommendUrl(Constants.HEAD_OTHER_ZS + mDatas.get(0).getCreateBy(), null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1363,7 +1359,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 
 
     private void addPlayView() {
-        if (null != playerView && null != playerView.getParent()) {
+        if (null == playerView) {
+            return;
+        }
+        if (null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
 
@@ -1377,13 +1376,15 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
+
         if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing() && !VideoDetailActivity.this.isDestroyed()) {
-            Glide.with(this)
-                    .load(mDatas.get(0).getCreatorHead())
-                    .into(publisherHeadimg);
+            GlideUtil.displayCircle(publisherHeadimg, mDatas.get(0).getIssuerImageUrl(), true, this);
+            //            Glide.with(this)
+//                    .load(mDatas.get(0).getIssuerImageUrl())
+//                    .into(publisherHeadimg);
+            publisherName.setText(mDatas.get(0).getIssuerName());
         }
 
-        publisherName.setText(mDatas.get(0).getCreatorNickname());
         getFoldText(mDatas.get(0));
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
@@ -1420,7 +1421,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
             mLayoutBottomParams.addRule(BELOW, playerView.getId());
-            mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(110), 0, 0);
+            mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(120), 0, 0);
             playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
             rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
         }
@@ -1577,7 +1578,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         return;
                                     }
                                     setDataWifiState(mDatas, VideoDetailActivity.this);
-                                    addPlayView();
+                                    if (!SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
+                                        addPlayView();
+                                    }
+
                                     if (mDatas.get(0).getDisableComment()) {
                                         videoDetailWhiteCommentRl.setEnabled(false);
                                         commentPopRl.setEnabled(false);
@@ -1645,9 +1649,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
-                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                     uploadPercent = currentPercent;
                 } else {
                     uploadPercent = maxPercent;
@@ -1666,16 +1670,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //简版视频页退出的时候重置重播标识
-        playerView.buriedPointModel.setIs_renew("false");
+        SuperPlayerImpl.mCurrentPlayVideoURL = null;
         if (playerView != null) {
-            playerView.stopPlay();
             playerView.release();
+            playerView.stopPlay();
             playerView.mSuperPlayer.destroy();
             playerView = null;
         }
-        OkGo.getInstance().cancelAll();
-        lsDuration = 0;
         maxPercent = 0;
+        lsDuration = 0;
     }
 }

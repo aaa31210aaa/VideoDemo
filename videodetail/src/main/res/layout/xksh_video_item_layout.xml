@@ -149,13 +149,14 @@
                 </TextView>
             </RelativeLayout>
 
-            <widget.CircleImageView
+            <ImageView
                 android:id="@+id/publisher_headimg"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_centerVertical="true">
+                android:layout_centerVertical="true"
+                >
 
-            </widget.CircleImageView>
+            </ImageView>
 
             <TextView
                 android:id="@+id/watched"

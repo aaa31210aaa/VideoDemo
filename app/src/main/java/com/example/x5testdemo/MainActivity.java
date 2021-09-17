@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
-                intent.putExtra("contentId", "65787");
+                intent.putExtra("contentId", contentId.getText().toString());
                 startActivity(intent);
             }
         });

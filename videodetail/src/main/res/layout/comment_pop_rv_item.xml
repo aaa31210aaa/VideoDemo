@@ -10,13 +10,13 @@
         android:layout_height="wrap_content"
         android:padding="10dp">
 
-        <widget.CircleImageView
+        <ImageView
             android:id="@+id/comment_user_head"
             android:layout_width="45dp"
             android:layout_height="45dp">
 
 
-        </widget.CircleImageView>
+        </ImageView>
 
         <LinearLayout
             android:id="@+id/comment_head_ll"

@@ -85,6 +85,7 @@ import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 
 import static android.widget.RelativeLayout.BELOW;
+import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
@@ -269,6 +270,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
                 mDataDTO = mDatas.get(0);
+                if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
 //                playerView = SuperPlayerView.getInstance(getActivity(), decorView);
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
                 playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
@@ -327,12 +337,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
 
+                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
                 if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                     //上报埋点
                     everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                    double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                    double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                     double uploadPercent = 0;
-                    if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                         uploadPercent = currentPercent;
                     } else {
                         uploadPercent = maxPercent;
@@ -505,19 +524,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
 
         if (isVisibleToUser) {
-            if (null != playerView && null != playerView.getParent()) {
-                ((ViewGroup) playerView.getParent()).removeView(playerView);
+            if (!SPUtils.isVisibleNoWifiView(getActivity())) {
+                if (null != playerView && null != playerView.getParent()) {
+                    ((ViewGroup) playerView.getParent()).removeView(playerView);
+                }
+                //重置重播标识
+                playerView.buriedPointModel.setIs_renew("false");
+                addPlayView(currentIndex);
             }
-            //重置重播标识
-            playerView.buriedPointModel.setIs_renew("false");
-            addPlayView(currentIndex);
         } else {
             if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                 //上报埋点
                 everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
-                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                     uploadPercent = currentPercent;
                 } else {
                     uploadPercent = maxPercent;
@@ -863,15 +884,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             }
 
                             mDatas.addAll(response.body().getData());
-                            for (int i = 0; i < mDatas.size(); i++) {
-                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
-                                    mDatas.get(i).setFullBtnIsShow(false);
-                                } else {
-                                    mDatas.get(i).setFullBtnIsShow(true);
-                                }
-                            }
+//                            for (int i = 0; i < mDatas.size(); i++) {
+//                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+//                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
+//                                    mDatas.get(i).setFullBtnIsShow(false);
+//                                } else {
+//                                    mDatas.get(i).setFullBtnIsShow(true);
+//                                }
+//                            }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
                             if (mDatas.size() > 0) {
@@ -1462,7 +1483,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             return;
         }
         if (playerView != null) {
-            playerView.mSuperPlayer.resume();
+            if (playerView.isLoad) {
+                playerView.mSuperPlayer.resume();
+            } else {
+                playerView.mSuperPlayer.reStart();
+            }
         }
 
         if (!TextUtils.isEmpty(myContentId)) {
@@ -1565,9 +1590,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
                 }
-                double currentPercent = ((double)playerView.mWindowPlayer.mProgress / mDuration);
+                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
-                if (((double)playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
                     uploadPercent = currentPercent;
                 } else {
                     uploadPercent = maxPercent;

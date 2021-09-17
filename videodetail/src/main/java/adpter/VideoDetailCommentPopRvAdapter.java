@@ -20,8 +20,7 @@ import com.wdcs.videodetail.demo.R;
 import java.util.List;
 
 import ui.activity.VideoDetailActivity;
-import ui.activity.VideoHomeActivity;
-import widget.CircleImageView;
+import utils.GlideUtil;
 
 public class VideoDetailCommentPopRvAdapter  extends BaseQuickAdapter<CommentModel.DataDTO.RecordsDTO, BaseViewHolder> {
     private Context mContext;
@@ -33,7 +32,7 @@ public class VideoDetailCommentPopRvAdapter  extends BaseQuickAdapter<CommentMod
 
     @Override
     protected void convert(BaseViewHolder helper, CommentModel.DataDTO.RecordsDTO item) {
-        CircleImageView commentUserHead = helper.getView(R.id.comment_user_head);
+        ImageView commentUserHead = helper.getView(R.id.comment_user_head);
         LinearLayout gmReback = helper.getView(R.id.gm_reback);
         if (null != item.getChildren() && item.getChildren().size() > 0) {
             gmReback.setVisibility(View.VISIBLE);
@@ -49,9 +48,10 @@ public class VideoDetailCommentPopRvAdapter  extends BaseQuickAdapter<CommentMod
         }
         if (null != mContext && !((VideoDetailActivity)mContext).isFinishing()
                 && !((VideoDetailActivity)mContext).isDestroyed()) {
-            Glide.with(mContext)
-                    .load(item.getHead())
-                    .into(commentUserHead);
+            GlideUtil.displayCircle(commentUserHead,item.getHead(),true , mContext);
+//            Glide.with(mContext)
+//                    .load(item.getHead())
+//                    .into(commentUserHead);
         }
 
         helper.setText(R.id.comment_pop_username, item.getNickname());

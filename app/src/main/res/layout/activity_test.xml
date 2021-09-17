@@ -68,14 +68,14 @@
             </TextView>
         </RelativeLayout>
 
-        <widget.CircleImageView
+        <ImageView
             android:id="@+id/publisher_headimg"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerVertical="true"
             android:src="@drawable/share_circle">
 
-        </widget.CircleImageView>
+        </ImageView>
 
         <TextView
             android:layout_width="wrap_content"

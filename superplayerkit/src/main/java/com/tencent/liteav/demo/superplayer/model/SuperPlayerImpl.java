@@ -1,12 +1,10 @@
 package com.tencent.liteav.demo.superplayer.model;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
 import com.tencent.liteav.basic.log.TXCLog;
 import com.tencent.liteav.demo.superplayer.SuperPlayerCode;
@@ -22,7 +20,6 @@ import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoParams;
 import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoProtocolV2;
 import com.tencent.liteav.demo.superplayer.model.protocol.PlayInfoProtocolV4;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoQualityUtils;
-import com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer;
 import com.tencent.rtmp.ITXLivePlayListener;
 import com.tencent.rtmp.ITXVodPlayListener;
 import com.tencent.rtmp.TXBitrateItem;
@@ -33,7 +30,6 @@ import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.TXVodPlayConfig;
 import com.tencent.rtmp.TXVodPlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
-import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.ResolutionName;
@@ -46,7 +42,6 @@ import java.util.List;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.PlayerState.PLAYING;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
-import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.rtmp.TXLiveConstants.PLAY_EVT_PLAY_PROGRESS;
 
 public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLivePlayListener {
@@ -193,14 +188,14 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             demouration = param.getInt(TXLiveConstants.EVT_PLAY_DURATION);
             // 播放进度, 单位是秒
             final int progressress = param.getInt(TXLiveConstants.EVT_PLAY_PROGRESS);
-            if (mDuration != 0) {
-                float percentage = mDuration > 0 ? ((float) demouration / (float) mDuration) : 1.0f;
-                float videoPercentage = mDuration > 0 ? ((float) progressress / (float) mDuration) : 1.0f;
-                final int progress = Math.round(percentage * superPlayerView.mWindowPlayer.mLoadBar.getMax());
-                final int videoProgress = Math.round(videoPercentage * superPlayerView.mWindowPlayer.mLoadBar.getMax());
-//                superPlayerView.mWindowPlayer.mLoadBar.setProgress(progress);
-                superPlayerView.mFullScreenPlayer.mFullLoadBar.setProgress(progress);
-            }
+//            if (mDuration != 0) {
+//                float percentage = mDuration > 0 ? ((float) demouration / (float) mDuration) : 1.0f;
+//                float videoPercentage = mDuration > 0 ? ((float) progressress / (float) mDuration) : 1.0f;
+//                final int progress = Math.round(percentage * superPlayerView.mWindowPlayer.mLoadBar.getMax());
+//                final int videoProgress = Math.round(videoPercentage * superPlayerView.mWindowPlayer.mLoadBar.getMax());
+////                superPlayerView.mWindowPlayer.mLoadBar.setProgress(progress);
+//                superPlayerView.mFullScreenPlayer.mFullLoadBar.setProgress(progress);
+//            }
 
             // 视频总长, 单位是秒
 //            int duration = param.getInt(TXLiveConstants.EVT_PLAY_DURATION);
@@ -243,8 +238,9 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             case TXLiveConstants.PLAY_EVT_RCV_FIRST_I_FRAME:
                 //视频自动播放埋点上报 在内流中滑动播放视频时上报
                 readPlayCallBack.ReadPlayCallback();
-                if (null != instance) {
-                    instance.isLoad = true;
+                if (null != superPlayerView) {
+                    superPlayerView.isLoad = true;
+                    superPlayerView.homeVideoIsLoad = true;
                 }
 
                 if (mChangeHWAcceleration) { //切换软硬解码器后，重新seek位置
@@ -514,7 +510,8 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 Uri newUri = uri.buildUpon().query(query).build();
                 TXCLog.i(TAG, "playVodURL: newurl = " + Uri.decode(newUri.toString()) + " ;url= " + url);
                 if (null != instance) {
-                    instance.isLoad = false;
+                    superPlayerView.isLoad = false;
+                    superPlayerView.homeVideoIsLoad = false;
                 }
                 ret = mVodPlayer.startPlay(Uri.decode(newUri.toString()));
             } else {
@@ -779,16 +776,13 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
 
     @Override
     public void pause() {
-        if (instance == null) {
-            return;
-        }
         if (mCurrentPlayType == SuperPlayerDef.PlayerType.VOD) {
-            if (instance.isLoad) {
+            if (superPlayerView.isLoad) {
                 mVodPlayer.pause();
             } else {
-                instance.release();
-                instance.mSuperPlayer.stop();
-                instance.mSuperPlayer.destroy();
+                superPlayerView.release();
+                superPlayerView.mSuperPlayer.stop();
+                superPlayerView.mSuperPlayer.destroy();
                 return;
             }
         } else {

@@ -1,6 +1,5 @@
 package adpter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
@@ -23,7 +22,8 @@ import com.wdcs.videodetail.demo.R;
 import java.util.List;
 
 import ui.activity.VideoHomeActivity;
-import widget.CircleImageView;
+import utils.GlideUtil;
+
 @Keep
 public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.RecordsDTO, BaseViewHolder> {
     private Context mContext;
@@ -35,7 +35,7 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
 
     @Override
     protected void convert(BaseViewHolder helper, CommentModel.DataDTO.RecordsDTO item) {
-        CircleImageView commentUserHead = helper.getView(R.id.comment_user_head);
+        ImageView commentUserHead = helper.getView(R.id.comment_user_head);
         LinearLayout gmReback = helper.getView(R.id.gm_reback);
         if (null != item.getChildren() && item.getChildren().size() > 0) {
             gmReback.setVisibility(View.VISIBLE);
@@ -51,9 +51,10 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
         }
         if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
                 && !((VideoHomeActivity)mContext).isDestroyed()) {
-            Glide.with(mContext)
-                    .load(item.getHead())
-                    .into(commentUserHead);
+            GlideUtil.displayCircle(commentUserHead,item.getHead(),true,mContext);
+//            Glide.with(mContext)
+//                    .load(item.getHead())
+//                    .into(commentUserHead);
         }
 
         helper.setText(R.id.comment_pop_username, item.getNickname());
