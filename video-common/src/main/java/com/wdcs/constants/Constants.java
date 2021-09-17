@@ -10,6 +10,7 @@ public class Constants {
     public static final String TYPE_TOKEN = "token";
     public static final String GDY_TOKEN = "gdy_token";
     public static final String TRANSFORMATION_TOKEN = "transformation_token";
+    public static final String TGT_CODE = "tgt_code";
 
     public static final String KEY_USER = "keyuser";
     public static final String KEY_REFRESH_TOKEN = "refresh_token";

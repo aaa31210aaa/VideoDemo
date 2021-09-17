@@ -1519,6 +1519,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
                                 PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                 PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
+                                PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

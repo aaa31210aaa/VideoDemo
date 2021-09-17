@@ -87,7 +87,13 @@ public class PersonInfoManager {
         SPUtils.getInstance().put(Constants.GDY_TOKEN, userId);
     }
 
+    public void setTgtCode(String tgt) {
+        SPUtils.getInstance().put(Constants.TGT_CODE, tgt);
+    }
 
+    public String getTgtCode(){
+        return SPUtils.getInstance().getString(Constants.TGT_CODE, "");
+    }
 
     /**
      * 保存转换后的用户token
@@ -112,6 +118,9 @@ public class PersonInfoManager {
     public void clearToken() {
         PersonInfoManager.getInstance().setToken("");
         PersonInfoManager.getInstance().setTransformationToken("");
+        PersonInfoManager.getInstance().setTgtCode("");
+        PersonInfoManager.getInstance().setUserId("");
+        PersonInfoManager.getInstance().setGdyToken("");
     }
 
     /**
@@ -122,8 +131,8 @@ public class PersonInfoManager {
     public boolean isRequestToken() {
         try {
             if (!TextUtils.isEmpty(VideoInteractiveParam.getInstance().getCode())) {//获取的token不为空
-                if (!TextUtils.isEmpty(PersonInfoManager.getInstance().getToken())) { //本地token不为空
-                    if (TextUtils.equals(PersonInfoManager.getInstance().getToken(),
+                if (!TextUtils.isEmpty(PersonInfoManager.getInstance().getTgtCode())) { //本地token不为空
+                    if (TextUtils.equals(PersonInfoManager.getInstance().getTgtCode(),
                             VideoInteractiveParam.getInstance().getCode())) {
                         Log.e("YQH_Token", "我的长沙已登录_数智已登");
                         return false;
