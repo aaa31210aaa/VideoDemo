@@ -1136,7 +1136,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         if (mFloatPlayer != null) {
             mFloatPlayer.release();
         }
-        mOrientationHelper.disable();
+//        mOrientationHelper.disable();
     }
 
     @Override

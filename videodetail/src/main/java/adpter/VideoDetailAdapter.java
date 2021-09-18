@@ -67,6 +67,9 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
 
     @Override
     protected void convert(final BaseViewHolder helper, final DataDTO item) {
+        if (null == item) {
+            return;
+        }
         RelativeLayout itemRootView = helper.getView(R.id.item_relativelayout);
         LinearLayout introduceLin = helper.getView(R.id.introduce_lin);
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);

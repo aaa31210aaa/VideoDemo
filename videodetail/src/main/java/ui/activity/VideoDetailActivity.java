@@ -264,122 +264,126 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         recommondList = new ArrayList<>();
         initCommentPopRv();
 
-        playerView.mWindowPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
-                if (null == playerView) {
-                    return;
+        if (null != playerView && null != playerView.mWindowPlayer) {
+            playerView.mWindowPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
+                    if (null == playerView) {
+                        return;
+                    }
+                    if (null == playerView.mWindowPlayer) {
+                        return;
+                    }
+                    if (playerView.mWindowPlayer.mGestureVideoProgressLayout != null && fromUser) {
+                        playerView.mWindowPlayer.mGestureVideoProgressLayout.show();
+                        float percentage = ((float) progress) / seekBar.getMax();
+                        float currentTime = (mDuration * percentage);
+                        playerView.mWindowPlayer.mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
+                        playerView.mWindowPlayer.mGestureVideoProgressLayout.setProgress(progress);
+                    }
                 }
-                if (null == playerView.mWindowPlayer) {
-                    return;
-                }
-                if (playerView.mWindowPlayer.mGestureVideoProgressLayout != null && fromUser) {
-                    playerView.mWindowPlayer.mGestureVideoProgressLayout.show();
-                    float percentage = ((float) progress) / seekBar.getMax();
-                    float currentTime = (mDuration * percentage);
-                    playerView.mWindowPlayer.mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
-                    playerView.mWindowPlayer.mGestureVideoProgressLayout.setProgress(progress);
-                }
-            }
 
-            @Override
-            public void onStartTrackingTouch(PointSeekBar seekBar) {
-                if (null == playerView) {
-                    return;
+                @Override
+                public void onStartTrackingTouch(PointSeekBar seekBar) {
+                    if (null == playerView) {
+                        return;
+                    }
+                    if (null == playerView.mWindowPlayer) {
+                        return;
+                    }
+                    playerView.mWindowPlayer.removeCallbacks(playerView.mWindowPlayer.mHideViewRunnable);
                 }
-                if (null == playerView.mWindowPlayer) {
-                    return;
-                }
-                playerView.mWindowPlayer.removeCallbacks(playerView.mWindowPlayer.mHideViewRunnable);
-            }
 
-            @Override
-            public void onStopTrackingTouch(PointSeekBar seekBar) {
-                int curProgress = seekBar.getProgress();
-                int maxProgress = seekBar.getMax();
+                @Override
+                public void onStopTrackingTouch(PointSeekBar seekBar) {
+                    int curProgress = seekBar.getProgress();
+                    int maxProgress = seekBar.getMax();
 
-                switch (playerView.mWindowPlayer.mPlayType) {
-                    case VOD:
-                        if (curProgress >= 0 && curProgress <= maxProgress) {
-                            // 关闭重播按钮
-                            playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
-                            float percentage = ((float) curProgress) / maxProgress;
-                            long duration = (long) (percentage * mDuration);
-                            lsDuration = duration;
-                            if (percentage > maxPercent) {
-                                maxPercent = percentage;
+                    switch (playerView.mWindowPlayer.mPlayType) {
+                        case VOD:
+                            if (curProgress >= 0 && curProgress <= maxProgress) {
+                                // 关闭重播按钮
+                                playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
+                                float percentage = ((float) curProgress) / maxProgress;
+                                long duration = (long) (percentage * mDuration);
+                                lsDuration = duration;
+                                if (percentage > maxPercent) {
+                                    maxPercent = percentage;
+                                }
+                                int position = (int) (mDuration * percentage);
+                                if (playerView.mWindowPlayer.mControllerCallback != null) {
+                                    playerView.mWindowPlayer.mControllerCallback.onSeekTo(position);
+                                    playerView.mWindowPlayer.mControllerCallback.onResume();
+                                }
                             }
-                            int position = (int) (mDuration * percentage);
-                            if (playerView.mWindowPlayer.mControllerCallback != null) {
-                                playerView.mWindowPlayer.mControllerCallback.onSeekTo(position);
-                                playerView.mWindowPlayer.mControllerCallback.onResume();
+                            break;
+                    }
+                    playerView.mWindowPlayer.postDelayed(playerView.mWindowPlayer.mHideViewRunnable, Contants.delayMillis);
+                }
+            });
+        }
+
+        if (null != playerView && null != playerView.mFullScreenPlayer) {
+            //全屏进度条监听
+            playerView.mFullScreenPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
+                    if (null == playerView) {
+                        return;
+                    }
+                    if (null == playerView.mFullScreenPlayer) {
+                        return;
+                    }
+
+                    if (playerView.mFullScreenPlayer.mGestureVideoProgressLayout != null && fromUser) {
+                        playerView.mFullScreenPlayer.mGestureVideoProgressLayout.show();
+                        float percentage = ((float) progress) / seekBar.getMax();
+                        float currentTime = (mDuration * percentage);
+                        playerView.mFullScreenPlayer.mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
+                        playerView.mFullScreenPlayer.mGestureVideoProgressLayout.setProgress(progress);
+                    }
+                }
+
+                @Override
+                public void onStartTrackingTouch(PointSeekBar seekBar) {
+                    if (null == playerView) {
+                        return;
+                    }
+                    if (null == playerView.mFullScreenPlayer) {
+                        return;
+                    }
+                    playerView.mFullScreenPlayer.removeCallbacks(playerView.mFullScreenPlayer.mHideViewRunnable);
+                }
+
+                @Override
+                public void onStopTrackingTouch(PointSeekBar seekBar) {
+                    int curProgress = seekBar.getProgress();
+                    int maxProgress = seekBar.getMax();
+
+                    switch (playerView.mFullScreenPlayer.mPlayType) {
+                        case VOD:
+                            if (curProgress >= 0 && curProgress <= maxProgress) {
+                                // 关闭重播按钮
+                                playerView.mFullScreenPlayer.toggleView(playerView.mFullScreenPlayer.mLayoutReplay, false);
+                                float percentage = ((float) curProgress) / maxProgress;
+                                long duration = (long) (percentage * mDuration);
+                                lsDuration = duration;
+                                if (percentage > maxPercent) {
+                                    maxPercent = percentage;
+                                }
+                                int position = (int) (mDuration * percentage);
+
+                                if (playerView.mFullScreenPlayer.mControllerCallback != null) {
+                                    playerView.mFullScreenPlayer.mControllerCallback.onSeekTo(position);
+                                    playerView.mFullScreenPlayer.mControllerCallback.onResume();
+                                }
                             }
-                        }
-                        break;
+                            break;
+                    }
+                    playerView.mFullScreenPlayer.postDelayed(playerView.mFullScreenPlayer.mHideViewRunnable, Contants.delayMillis);
                 }
-                playerView.mWindowPlayer.postDelayed(playerView.mWindowPlayer.mHideViewRunnable, Contants.delayMillis);
-            }
-        });
-
-        //全屏进度条监听
-        playerView.mFullScreenPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
-                if (null == playerView) {
-                    return;
-                }
-                if (null == playerView.mFullScreenPlayer) {
-                    return;
-                }
-
-                if (playerView.mFullScreenPlayer.mGestureVideoProgressLayout != null && fromUser) {
-                    playerView.mFullScreenPlayer.mGestureVideoProgressLayout.show();
-                    float percentage = ((float) progress) / seekBar.getMax();
-                    float currentTime = (mDuration * percentage);
-                    playerView.mFullScreenPlayer.mGestureVideoProgressLayout.setTimeText(formattedTime((long) currentTime) + " / " + formattedTime((long) mDuration));
-                    playerView.mFullScreenPlayer.mGestureVideoProgressLayout.setProgress(progress);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(PointSeekBar seekBar) {
-                if (null == playerView) {
-                    return;
-                }
-                if (null == playerView.mFullScreenPlayer) {
-                    return;
-                }
-                playerView.mFullScreenPlayer.removeCallbacks(playerView.mFullScreenPlayer.mHideViewRunnable);
-            }
-
-            @Override
-            public void onStopTrackingTouch(PointSeekBar seekBar) {
-                int curProgress = seekBar.getProgress();
-                int maxProgress = seekBar.getMax();
-
-                switch (playerView.mFullScreenPlayer.mPlayType) {
-                    case VOD:
-                        if (curProgress >= 0 && curProgress <= maxProgress) {
-                            // 关闭重播按钮
-                            playerView.mFullScreenPlayer.toggleView(playerView.mFullScreenPlayer.mLayoutReplay, false);
-                            float percentage = ((float) curProgress) / maxProgress;
-                            long duration = (long) (percentage * mDuration);
-                            lsDuration = duration;
-                            if (percentage > maxPercent) {
-                                maxPercent = percentage;
-                            }
-                            int position = (int) (mDuration * percentage);
-
-                            if (playerView.mFullScreenPlayer.mControllerCallback != null) {
-                                playerView.mFullScreenPlayer.mControllerCallback.onSeekTo(position);
-                                playerView.mFullScreenPlayer.mControllerCallback.onResume();
-                            }
-                        }
-                        break;
-                }
-                playerView.mFullScreenPlayer.postDelayed(playerView.mFullScreenPlayer.mHideViewRunnable, Contants.delayMillis);
-            }
-        });
+            });
+        }
 
 
         /**
@@ -406,20 +410,23 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
         };
 
+        if (null != playerView && null != playerView.mWindowPlayer) {
+            playerView.mWindowPlayer.isReplayClick = new WindowPlayer.IsReplayClick() {
+                @Override
+                public void getReplayClick() {
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+                }
+            };
+        }
 
-        playerView.mWindowPlayer.isReplayClick = new WindowPlayer.IsReplayClick() {
-            @Override
-            public void getReplayClick() {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-            }
-        };
-
-        playerView.mFullScreenPlayer.isReplayClick = new FullScreenPlayer.FullIsReplayClick() {
-            @Override
-            public void getFullReplayClick() {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-            }
-        };
+        if (null != playerView && null != playerView.mFullScreenPlayer) {
+            playerView.mFullScreenPlayer.isReplayClick = new FullScreenPlayer.FullIsReplayClick() {
+                @Override
+                public void getFullReplayClick() {
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+                }
+            };
+        }
 
         SuperPlayerImpl.readPlayCallBack = new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
@@ -531,6 +538,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                 PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
                                 PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
+                                if (!TextUtils.isEmpty(contentId)) {
+                                    getContentState(contentId);
+                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -1154,12 +1164,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
             SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
             for (int i = 0; i < mDatas.size(); i++) {
-                mDatas.get(i).setWifi(true);
+                if (null != mDatas.get(i)) {
+                    mDatas.get(i).setWifi(true);
+                }
             }
             agreeNowifiPlay.setVisibility(View.GONE);
             getOneVideo(contentId);
         } else if (id == R.id.superplayer_iv_fullscreen) {
-            playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
+            if (null != playerView.mWindowPlayer) {
+                playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
+            }
         } else if (id == R.id.video_detail_comment_btn) {
             showCommentPopWindow();
         } else if (id == R.id.video_detail_white_comment_rl) {
@@ -1596,7 +1610,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     }
                                     getContentState(contentId);
                                     getRecommend(contentId, 0);
-                                    playerView.mFullScreenPlayer.setDataDTO(mDatas.get(0));
+                                    if (null != playerView.mFullScreenPlayer) {
+                                        playerView.mFullScreenPlayer.setDataDTO(mDatas.get(0));
+                                    }
                                 } else {
                                     ToastUtils.showShort(jsonObject.get("message").toString());
                                 }

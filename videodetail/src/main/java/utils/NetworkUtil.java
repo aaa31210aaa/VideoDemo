@@ -182,11 +182,16 @@ public class NetworkUtil {
     public static void setDataWifiState(List<DataDTO> data, Context context) {
         if (SPUtils.isVisibleNoWifiView(context)) {
             for (int i = 0; i < data.size(); i++) {
-                data.get(i).setWifi(false);
+                if (null != data.get(i)) {
+                    data.get(i).setWifi(false);
+                }
+
             }
         } else {
             for (int i = 0; i < data.size(); i++) {
-                data.get(i).setWifi(true);
+                if (null != data.get(i)) {
+                    data.get(i).setWifi(true);
+                }
             }
         }
     }

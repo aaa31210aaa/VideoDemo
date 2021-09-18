@@ -270,6 +270,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
                 mDataDTO = mDatas.get(0);
+                if (null == mDatas.get(0)) {
+                    return;
+                }
                 if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
                     if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
                             Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
@@ -331,6 +334,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 //避免越界
                 if (mDatas.isEmpty()) {
+                    return;
+                }
+                if (null == mDatas.get(position)) {
                     return;
                 }
 
@@ -472,11 +478,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             public void clickNoWifi(int position) {
                 SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
                 for (int i = 0; i < mDatas.size(); i++) {
-                    mDatas.get(i).setWifi(true);
+                    if (null != mDatas.get(i)) {
+                        mDatas.get(i).setWifi(true);
+                    }
                 }
 
                 for (int i = 0; i < ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.size(); i++) {
-                    ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i).setWifi(true);
+                    if (null != ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i)) {
+                        ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i).setWifi(true);
+                    }
                 }
                 addPlayView(position);
                 adapter.notifyDataSetChanged();
@@ -1536,11 +1546,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             Log.d("mycs_token", "转换成功");
                             try {
                                 PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
+                                PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
+                                PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
+                                PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             transformationToken = response.body().getData().getToken();
                             PersonInfoManager.getInstance().setTransformationToken(transformationToken);
+                            if (!TextUtils.isEmpty(myContentId)) {
+                                getContentState(myContentId);
+                            }
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
                         }

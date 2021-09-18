@@ -144,7 +144,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private String transformationToken = "";
     private String panelCode = "";
     private RelativeLayout commentListEmptyRl;
-    private String recordContentId;//记录的内容id
     private boolean initialize = true;
     private String mVideoSize = "20"; //每页视频多少条
     private int mPageIndex = 1; //评论列表页数
@@ -278,6 +277,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 if (mDatas.isEmpty()) {
                     return;
                 }
+                if (null == mDatas.get(0)) {
+                    return;
+                }
                 mDataDTO = mDatas.get(0);
                 if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
                     if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
@@ -342,6 +344,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
                 //避免越界
                 if (mDatas.isEmpty()) {
+                    return;
+                }
+
+                if (null == mDatas.get(position)) {
                     return;
                 }
                 //露出 即上报
@@ -485,10 +491,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             public void clickNoWifi(int position) {
                 SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
                 for (int i = 0; i < mDatas.size(); i++) {
-                    mDatas.get(i).setWifi(true);
+                    if (null != mDatas.get(i)) {
+                        mDatas.get(i).setWifi(true);
+                    }
                 }
                 for (int i = 0; i < ((VideoHomeActivity) getActivity()).xkshFragment.mDatas.size(); i++) {
-                    ((VideoHomeActivity) getActivity()).xkshFragment.mDatas.get(i).setWifi(true);
+                    if (null != ((VideoHomeActivity) getActivity()).xkshFragment.mDatas.get(i)) {
+                        ((VideoHomeActivity) getActivity()).xkshFragment.mDatas.get(i).setWifi(true);
+                    }
                 }
 
                 addPlayView(position);
@@ -952,7 +962,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             adapter.setNewData(mDatas);
                             if (mDatas.size() > 0) {
                                 initialize = false;
-                                recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
                             }
                             videoDetailCommentBtn.setVisibility(View.VISIBLE);
                             commentListEmptyRl.setVisibility(View.GONE);
@@ -1030,7 +1039,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
-                            recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
                             Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                             adapter.loadMoreComplete();
                         } else {
@@ -1525,6 +1533,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             }
                             transformationToken = response.body().getData().getToken();
                             PersonInfoManager.getInstance().setTransformationToken(transformationToken);
+                            if (!TextUtils.isEmpty(myContentId)) {
+                                getContentState(myContentId);
+                            }
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
                         }
