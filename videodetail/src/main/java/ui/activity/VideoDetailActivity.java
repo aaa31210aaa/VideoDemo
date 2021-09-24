@@ -431,7 +431,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         SuperPlayerImpl.readPlayCallBack = new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
             }
         };
 
@@ -439,13 +439,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void AutoPlayOverCallBack() {
                 final String event;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                    //不为重播
-                    event = Constants.CMS_VIDEO_OVER_AUTO;
-                } else {
+//                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                    //不为重播
+//                    event = Constants.CMS_VIDEO_OVER_AUTO;
+//                } else {
                     //重播
                     event = Constants.CMS_VIDEO_OVER;
-                }
+//                }
                 //拖动/自动播放结束上报埋点
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event), event);
             }
@@ -1659,13 +1659,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
             if (mDuration != 0) {
                 String event;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                    //不为重播
-                    event = Constants.CMS_VIDEO_OVER_AUTO;
-                } else {
-                    //重播
+//                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                    //不为重播
+//                    event = Constants.CMS_VIDEO_OVER_AUTO;
+//                } else {
+//                    //重播
                     event = Constants.CMS_VIDEO_OVER;
-                }
+//                }
                 double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;
                 if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
