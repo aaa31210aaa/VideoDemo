@@ -79,6 +79,7 @@ public  class DataDTO {
     private String spaceStr;
     private String thirdPartyId;
     private String  thirdPartyCode;
+    private String logoType;
 
     public String getShareTitle() {
         if (null == shareTitle) {
@@ -955,6 +956,17 @@ public  class DataDTO {
 
     public void setThirdPartyCode(String thirdPartyCode) {
         this.thirdPartyCode = thirdPartyCode;
+    }
+
+    public String getLogoType() {
+        if (null == logoType) {
+            return "";
+        }
+        return logoType;
+    }
+
+    public void setLogoType(String logoType) {
+        this.logoType = logoType;
     }
 
     @Keep

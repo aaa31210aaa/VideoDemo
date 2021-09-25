@@ -155,6 +155,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private RelativeLayout backLl;
     private SoftKeyBoardListener softKeyBoardListener;
     private String spaceStr = "";
+    private ImageView verticalVideoWdcsLogo;
+    private ImageView horizontalVideoWdcsLogo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,6 +206,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         edtParent = sendPopContentView.findViewById(R.id.edt_parent);
         edtInput = sendPopContentView.findViewById(R.id.edtInput);
         tvSend = sendPopContentView.findViewById(R.id.tvSend);
+        verticalVideoWdcsLogo = findViewById(R.id.vertical_video_wdcs_logo);
+        horizontalVideoWdcsLogo = findViewById(R.id.horizontal_video_wdcs_logo);
+
         /**
          * 发送评论
          */
@@ -398,6 +403,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     superplayerIvFullscreen.setVisibility(View.GONE);
                     backLl.setVisibility(View.GONE);
                     videoDetailCommentBtn.setVisibility(View.GONE);
+                    horizontalVideoWdcsLogo.setVisibility(View.GONE);
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     introduceLin.setVisibility(View.VISIBLE);
                     superplayerIvFullscreen.setVisibility(View.VISIBLE);
@@ -406,6 +412,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         videoDetailCommentBtn.setVisibility(View.VISIBLE);
                     }
                     setLikeCollection(playerView.contentStateModel);
+                    horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -443,8 +450,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                    //不为重播
 //                    event = Constants.CMS_VIDEO_OVER_AUTO;
 //                } else {
-                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
+                //重播
+                event = Constants.CMS_VIDEO_OVER;
 //                }
                 //拖动/自动播放结束上报埋点
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event), event);
@@ -1664,7 +1671,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                    event = Constants.CMS_VIDEO_OVER_AUTO;
 //                } else {
 //                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
+                event = Constants.CMS_VIDEO_OVER;
 //                }
                 double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;

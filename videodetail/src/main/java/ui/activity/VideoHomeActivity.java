@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.VideoViewPagerAdapter;
-import model.bean.ActivityRuleBean;
 import ui.fragment.VideoDetailFragment;
 import ui.fragment.XkshFragment;
 
@@ -80,8 +79,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
     private ImageView searchIcon;
     private ImageView personalCenter;
-    public ActivityRuleBean activityRuleBean;
-    private boolean isAbbreviation; //当前是否是缩略图
+
     private TranslateAnimation translateAniLeftShow, translateAniLeftHide;
     public CustomPopWindow noLoginTipsPop;
     private View noLoginTipsView;
@@ -301,6 +299,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoFragmentFullLin) {
                             videoFragmentFullLin.setVisibility(View.GONE);
                         }
+
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(false);
                         xkshFragment.refreshLayout.setEnableRefresh(false);
@@ -345,7 +345,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             xkshFragment.rankList.setVisibility(View.GONE);
                         }
 
-                        if (isAbbreviation) {
+                        if (xkshFragment.isAbbreviation) {
                             if (null != xkshFragment.activityRuleAbbreviation) {
                                 xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
                             }
@@ -357,6 +357,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 xkshFragment.activityToAbbreviation.setVisibility(View.GONE);
                             }
                         }
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
                     }
 
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
@@ -383,6 +384,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin)) {
                             videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                         }
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.VISIBLE);
 
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(true);
@@ -404,13 +406,13 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             xkshFragment.rankList.setVisibility(View.VISIBLE);
                         }
 
-                        if (isAbbreviation) {
+                        if (xkshFragment.isAbbreviation) {
                             if (null != xkshFragment.activityRuleAbbreviation) {
                                 xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
                             }
                         } else {
-                            if (null != activityRuleBean.getData().getConfig().getJumpUrl()
-                                    && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
+                            if (null != xkshFragment.activityRuleBean.getData().getConfig().getJumpUrl()
+                                    && !TextUtils.isEmpty(xkshFragment.activityRuleBean.getData().getConfig().getJumpUrl())) {
                                 if (null != xkshFragment.activityRuleImg) {
                                     xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
                                 }
@@ -419,6 +421,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 }
                             }
                         }
+
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.VISIBLE);
                     }
                     if (null != videoTitleView) {
                         videoTitleView.setVisibility(View.VISIBLE);
@@ -593,117 +597,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
         xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
 
-        getActivityRule();
-    }
-
-    /**
-     * 获取活动规则
-     */
-    private void getActivityRule() {
-        OkGo.<ActivityRuleBean>get(ApiConstants.getInstance().getActivityRule())
-                .tag(VIDEOTAG)
-                .params("panelCode", "activity.xksh.link")
-                .cacheMode(CacheMode.NO_CACHE)
-                .execute(new JsonCallback<ActivityRuleBean>() {
-                    @Override
-                    public void onSuccess(Response<ActivityRuleBean> response) {
-                        if (null == response.body()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
-
-                        if (response.body().getCode().equals(success_code)) {
-                            activityRuleBean = response.body();
-                            if (null == activityRuleBean) {
-                                return;
-                            }
-                            if (null != activityRuleBean.getData().getConfig().getJumpUrl()
-                                    && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
-                                videoTab.showMsg(0, "有活动");
-                                videoTab.setMsgMargin(0, ButtonSpan.dip2px(3), ButtonSpan.dip2px(9));
-                                if (null != xkshFragment.activityRuleImg) {
-                                    xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
-                                }
-                                if (null != xkshFragment.activityToAbbreviation) {
-                                    xkshFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
-                                }
-                            }
-
-                            /**
-                             * 设置活动规则图，缩略图
-                             */
-                            if (null != VideoHomeActivity.this && !VideoHomeActivity.this.isFinishing()
-                                    && !VideoHomeActivity.this.isDestroyed()) {
-                                Glide.with(VideoHomeActivity.this)
-                                        .load(activityRuleBean.getData().getConfig().getImageUrl())
-                                        .into(xkshFragment.activityRuleImg);
-                                Glide.with(VideoHomeActivity.this)
-                                        .load(activityRuleBean.getData().getConfig().getBackgroundImageUrl())
-                                        .into(xkshFragment.activityRuleAbbreviation);
-                            }
-
-                            /**
-                             * 活动规则图点击 跳转活动链接
-                             */
-                            xkshFragment.activityRuleImg.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    try {
-                                        param.recommendUrl(activityRuleBean.getData().getConfig().getJumpUrl(),null);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-
-                            /**
-                             * 变成缩略图
-                             */
-                            xkshFragment.activityToAbbreviation.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (null != xkshFragment.activityRuleImg) {
-                                        xkshFragment.activityRuleImg.setVisibility(View.GONE);
-                                    }
-                                    if (null != xkshFragment.activityRuleAbbreviation) {
-                                        xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
-                                    }
-                                    isAbbreviation = true;
-                                }
-                            });
-
-                            /**
-                             * 点击展示完整活动图
-                             */
-                            xkshFragment.activityRuleAbbreviation.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (null != xkshFragment.activityRuleImg) {
-                                        xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
-                                    }
-                                    if (null != xkshFragment.activityRuleAbbreviation) {
-                                        xkshFragment.activityRuleAbbreviation.setVisibility(View.GONE);
-                                    }
-
-                                    isAbbreviation = false;
-                                }
-                            });
-
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onError(Response<ActivityRuleBean> response) {
-                        super.onError(response);
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                    }
-                });
     }
 
     @Override
@@ -715,9 +608,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             //跳转H5搜索
             try {
                 if (Utils.mIsDebug) {
-                    param.recommendUrl(Constants.SEARCHPLUS,null);
+                    param.recommendUrl(Constants.SEARCHPLUS, null);
                 } else {
-                    param.recommendUrl(Constants.SEARCHPLUS_ZS,null);
+                    param.recommendUrl(Constants.SEARCHPLUS_ZS, null);
                 }
 
             } catch (Exception e) {
@@ -729,10 +622,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             } else {
                 //跳转H5个人中心
                 try {
-                    if (Utils.mIsDebug){
-                        param.recommendUrl(Constants.PERSONAL_CENTER,null);
+                    if (Utils.mIsDebug) {
+                        param.recommendUrl(Constants.PERSONAL_CENTER, null);
                     } else {
-                        param.recommendUrl(Constants.PERSONAL_CENTER_ZS,null);
+                        param.recommendUrl(Constants.PERSONAL_CENTER_ZS, null);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
