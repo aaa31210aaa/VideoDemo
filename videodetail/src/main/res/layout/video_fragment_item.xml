@@ -7,6 +7,10 @@
     android:layout_height="match_parent"
     android:background="@color/video_black">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        ></ImageView>
 
     <RelativeLayout
         android:id="@+id/agree_nowifi_play"
