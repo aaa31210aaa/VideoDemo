@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
@@ -77,8 +78,10 @@ import java.util.List;
 
 import adpter.CommentPopRvAdapter;
 import adpter.XkshVideoAdapter;
+import model.bean.ActivityRuleBean;
 import ui.activity.UploadActivity;
 import ui.activity.VideoHomeActivity;
+import widget.CustomLoadMoreView;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
@@ -87,10 +90,12 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
+import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
@@ -192,7 +197,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public LinearLayout fullLin;
     public double pointPercent;// 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
-
+    public ActivityRuleBean activityRuleBean;
+    public boolean isAbbreviation; //当前是否是缩略图
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -252,9 +258,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         activityToAbbreviation.setOnClickListener(this);
         activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
         activityRuleAbbreviation.setOnClickListener(this);
+
         xkshManager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(xkshManager);
-
         setSoftKeyBoardListener();
         xkshManager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -273,6 +279,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 if (null == mDatas.get(0)) {
                     return;
                 }
+
                 if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
                     if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
                             Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
@@ -293,6 +300,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                if (isVisibleNoWifiView(getActivity())) {
+                    playerView.setOrientation(false);
+                } else {
+                    playerView.setOrientation(true);
+                }
 
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
@@ -342,6 +354,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
+
+                if (isVisibleNoWifiView(getActivity())) {
+                    playerView.setOrientation(false);
+                } else {
+                    playerView.setOrientation(true);
+                }
 
                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
                     if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
@@ -467,7 +485,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         videoDetailWhiteCommentRl.setOnClickListener(this);
         adapter = new XkshVideoAdapter(R.layout.xksh_video_item_layout, mDatas, getActivity(),
                 playerView, refreshLayout, videoDetailCommentBtn, xkshManager);
-        adapter.setPreLoadNumber(2);
+        adapter.setLoadMoreView(new CustomLoadMoreView());
+        adapter.setPreLoadNumber(3);
         adapter.openLoadAnimation();
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
         /**
@@ -534,7 +553,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
 
         if (isVisibleToUser) {
-            if (!SPUtils.isVisibleNoWifiView(getActivity())) {
+            if (!isVisibleNoWifiView(getActivity())) {
                 if (null != playerView && null != playerView.getParent()) {
                     ((ViewGroup) playerView.getParent()).removeView(playerView);
                 }
@@ -568,12 +587,124 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
+     * 获取活动规则
+     */
+    private void getActivityRule() {
+        OkGo.<ActivityRuleBean>get(ApiConstants.getInstance().getActivityRule())
+                .tag(VIDEOTAG)
+                .params("panelCode", "activity.xksh.link")
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new JsonCallback<ActivityRuleBean>() {
+                    @Override
+                    public void onSuccess(Response<ActivityRuleBean> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        if (response.body().getCode().equals(success_code)) {
+                            activityRuleBean = response.body();
+                            if (null == activityRuleBean) {
+                                return;
+                            }
+
+                            if (null != activityRuleBean.getData().getConfig().getJumpUrl()
+                                    && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
+                                mVideoTab.showMsg(0, "有活动");
+                                mVideoTab.setMsgMargin(0, ButtonSpan.dip2px(3), ButtonSpan.dip2px(9));
+                                if (null != activityRuleImg) {
+                                    activityRuleImg.setVisibility(View.VISIBLE);
+                                }
+                                if (null != activityToAbbreviation) {
+                                    activityToAbbreviation.setVisibility(View.VISIBLE);
+                                }
+                            }
+
+                            /**
+                             * 设置活动规则图，缩略图
+                             */
+                            if (null != getActivity() && !getActivity().isFinishing()
+                                    && !getActivity().isDestroyed()) {
+                                Glide.with(getActivity())
+                                        .load(activityRuleBean.getData().getConfig().getImageUrl())
+                                        .into(activityRuleImg);
+                                Glide.with(getActivity())
+                                        .load(activityRuleBean.getData().getConfig().getBackgroundImageUrl())
+                                        .into(activityRuleAbbreviation);
+                            }
+
+                            /**
+                             * 活动规则图点击 跳转活动链接
+                             */
+                            activityRuleImg.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    try {
+                                        param.recommendUrl(activityRuleBean.getData().getConfig().getJumpUrl(), null);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+
+                            /**
+                             * 变成缩略图
+                             */
+                            activityToAbbreviation.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (null != activityRuleImg) {
+                                        activityRuleImg.setVisibility(View.GONE);
+                                    }
+                                    if (null != activityRuleAbbreviation) {
+                                        activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                                    }
+                                    isAbbreviation = true;
+                                }
+                            });
+
+                            /**
+                             * 点击展示完整活动图
+                             */
+                            activityRuleAbbreviation.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (null != activityRuleImg) {
+                                        activityRuleImg.setVisibility(View.VISIBLE);
+                                    }
+                                    if (null != activityRuleAbbreviation) {
+                                        activityRuleAbbreviation.setVisibility(View.GONE);
+                                    }
+
+                                    isAbbreviation = false;
+                                }
+                            });
+
+                        } else {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<ActivityRuleBean> response) {
+                        super.onError(response);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
+
+
+    /**
      * 在视频playview位置上添加各种view
      *
      * @param position
      */
     public void addPlayView(final int position) {
-        if (SPUtils.isVisibleNoWifiView(getActivity())) {
+        if (isVisibleNoWifiView(getActivity())) {
             return;
         }
 
@@ -894,15 +1025,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             }
 
                             mDatas.addAll(response.body().getData());
-//                            for (int i = 0; i < mDatas.size(); i++) {
-//                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-//                                if (TextUtils.equals("0", videoType) || TextUtils.equals("1", videoType)) {
-//                                    mDatas.get(i).setFullBtnIsShow(false);
-//                                } else {
-//                                    mDatas.get(i).setFullBtnIsShow(true);
-//                                }
-//                            }
+                             for (int i = 0; i < mDatas.size() ; i++) {
+                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+                                mDatas.get(i).setLogoType(videoType);
+                            }
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
                             if (mDatas.size() > 0) {
@@ -935,6 +1062,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                        getActivityRule();
                     }
                 });
     }
@@ -987,7 +1115,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             }
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas, getActivity());
-                            adapter.setNewData(mDatas);
+//                            adapter.setNewData(mDatas);
                             recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
                             Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                             adapter.loadMoreComplete();
@@ -1868,7 +1996,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onFinish() {
                         super.onFinish();
-                        if (SPUtils.isVisibleNoWifiView(getActivity())) {
+                        if (isVisibleNoWifiView(getActivity())) {
                             SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                         }
                         loadingProgress.setVisibility(View.GONE);

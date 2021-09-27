@@ -155,6 +155,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private RelativeLayout backLl;
     private SoftKeyBoardListener softKeyBoardListener;
     private String spaceStr = "";
+    private ImageView verticalVideoWdcsLogo;
+    private ImageView horizontalVideoWdcsLogo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,10 +167,16 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         initView();
         if (SPUtils.isVisibleNoWifiView(this)) {
             agreeNowifiPlay.setVisibility(View.VISIBLE);
+            if (null != playerView) {
+                playerView.setOrientation(true);
+            }
         } else {
             agreeNowifiPlay.setVisibility(View.GONE);
+            if (null != playerView) {
+                playerView.setOrientation(false);
+            }
+            getOneVideo(contentId);
         }
-        getOneVideo(contentId);
     }
 
     private void initView() {
@@ -204,6 +212,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         edtParent = sendPopContentView.findViewById(R.id.edt_parent);
         edtInput = sendPopContentView.findViewById(R.id.edtInput);
         tvSend = sendPopContentView.findViewById(R.id.tvSend);
+        verticalVideoWdcsLogo = findViewById(R.id.vertical_video_wdcs_logo);
+        horizontalVideoWdcsLogo = findViewById(R.id.horizontal_video_wdcs_logo);
+
         /**
          * 发送评论
          */
@@ -398,6 +409,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     superplayerIvFullscreen.setVisibility(View.GONE);
                     backLl.setVisibility(View.GONE);
                     videoDetailCommentBtn.setVisibility(View.GONE);
+                    horizontalVideoWdcsLogo.setVisibility(View.GONE);
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     introduceLin.setVisibility(View.VISIBLE);
                     superplayerIvFullscreen.setVisibility(View.VISIBLE);
@@ -406,6 +418,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         videoDetailCommentBtn.setVisibility(View.VISIBLE);
                     }
                     setLikeCollection(playerView.contentStateModel);
+                    horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -443,8 +456,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                    //不为重播
 //                    event = Constants.CMS_VIDEO_OVER_AUTO;
 //                } else {
-                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
+                //重播
+                event = Constants.CMS_VIDEO_OVER;
 //                }
                 //拖动/自动播放结束上报埋点
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event), event);
@@ -1159,17 +1172,15 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 foldText.setVisibility(View.VISIBLE);
             }
         } else if (id == R.id.continue_play) {
-            if (mDatas.isEmpty()) {
-                return;
-            }
-            SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
-            for (int i = 0; i < mDatas.size(); i++) {
-                if (null != mDatas.get(i)) {
-                    mDatas.get(i).setWifi(true);
-                }
-            }
             agreeNowifiPlay.setVisibility(View.GONE);
+            if (null != playerView) {
+                playerView.setOrientation(true);
+            }
             getOneVideo(contentId);
+            if (null != playerView) {
+                playerView.setOrientation(true);
+            }
+
         } else if (id == R.id.superplayer_iv_fullscreen) {
             if (null != playerView.mWindowPlayer) {
                 playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
@@ -1407,6 +1418,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
+
         lp.addRule(RelativeLayout.CENTER_IN_PARENT);
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
@@ -1424,6 +1436,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             if (introduceLin != null) {
                 introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
+            //竖版视频  包括非标准
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
         } else if (videoType.equals("0")) {
             superplayerIvFullscreen.setVisibility(View.GONE);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
@@ -1431,6 +1446,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             if (introduceLin != null) {
                 introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
+            //竖版视频  包括非标准
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
         } else {
             superplayerIvFullscreen.setVisibility(View.VISIBLE);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
@@ -1439,6 +1457,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(120), 0, 0);
             playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
             rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
+            //横板标准视频
+            verticalVideoWdcsLogo.setVisibility(View.GONE);
+            horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
         }
 
         introduceLin.setLayoutParams(bottomLp);
@@ -1592,6 +1613,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     if (mDatas.isEmpty()) {
                                         return;
                                     }
+                                    SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
+                                    for (int i = 0; i < mDatas.size(); i++) {
+                                        if (null != mDatas.get(i)) {
+                                            mDatas.get(i).setWifi(true);
+                                        }
+                                    }
+
                                     setDataWifiState(mDatas, VideoDetailActivity.this);
                                     if (!SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
                                         addPlayView();
@@ -1664,7 +1692,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                    event = Constants.CMS_VIDEO_OVER_AUTO;
 //                } else {
 //                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
+                event = Constants.CMS_VIDEO_OVER;
 //                }
                 double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
                 double uploadPercent = 0;

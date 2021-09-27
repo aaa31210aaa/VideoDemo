@@ -81,6 +81,7 @@ import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailAdapter;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
+import widget.CustomLoadMoreView;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
@@ -195,7 +196,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private TextView zxpl;
     private String negativeScreenContentId;
     private DataDTO negativeScreenDto;
-
 
     public VideoDetailFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String contentId) {
         this.mVideoTab = videoTab;
@@ -480,7 +480,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         initCommentPopRv();
         adapter = new VideoDetailAdapter(R.layout.video_fragment_item, mDatas, getActivity(),
                 playerView, refreshLayout, videoDetailCommentBtn, videoDetailmanager);
-        adapter.setPreLoadNumber(2);
+        adapter.setLoadMoreView(new CustomLoadMoreView());
+        adapter.setPreLoadNumber(3);
         adapter.openLoadAnimation();
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
         /**
@@ -688,7 +689,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      * 1 ：  竖版视频16：9
      * 2 ：  横板视频
      */
-    private String videoIsNormal(int videoWidth, int videoHeight) {
+    public static String videoIsNormal(int videoWidth, int videoHeight) {
         if (videoWidth == 0 && videoHeight == 0) {
             return "0";
         }
@@ -947,16 +948,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 return;
                             }
                             mDatas.addAll(response.body().getData());
-
-//                            for (int i = 0; i < mDatas.size(); i++) {
-//                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-//                                 if (TextUtils.equals("2", videoType)) {
-//                                    mDatas.get(i).setFullBtnIsShow(true);
-//                                } else {
-//                                    mDatas.get(i).setFullBtnIsShow(false);
-//                                }
-//                            }
+                            for (int i = 0; i < mDatas.size() ; i++) {
+                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+                                mDatas.get(i).setLogoType(videoType);
+                            }
 
                             setDataWifiState(mDatas, getActivity());
                             adapter.setNewData(mDatas);
@@ -1038,7 +1034,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             }
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas, getActivity());
-                            adapter.setNewData(mDatas);
+//                            adapter.setNewData(mDatas);
                             Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                             adapter.loadMoreComplete();
                         } else {

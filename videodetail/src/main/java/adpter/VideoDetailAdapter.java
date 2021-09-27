@@ -26,6 +26,7 @@ import com.wdcs.model.RecommendModel;
 import com.wdcs.utils.AppUtils;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
+import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
@@ -38,6 +39,7 @@ import utils.GlideUtil;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.YELLOW_V;
+import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 
 public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private Context mContext;
@@ -82,6 +84,18 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         final TextView foldTextView = helper.getView(R.id.fold_text);
         final TextView expendText = helper.getView(R.id.expend_text);
         TextView huati = helper.getView(R.id.huati);
+        ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
+        ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
+
+        if (item.getLogoType().equals("0") || item.getLogoType().equals("1")) {
+            //竖版视频  包括非标准
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+        } else {
+            //横板标准视频
+            verticalVideoWdcsLogo.setVisibility(View.GONE);
+            horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+        }
 
         if (AppUtils.isApkInDebug(mContext)) {
             publisherName.setOnLongClickListener(new View.OnLongClickListener() {
@@ -117,6 +131,9 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             public void onClick(View view) {
                 noWifiLl.setVisibility(View.GONE);
                 click.clickNoWifi(helper.getAdapterPosition());
+                if (null != superPlayerView) {
+                    superPlayerView.setOrientation(true);
+                }
             }
         });
 
@@ -124,6 +141,9 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         fullLin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (isVisibleNoWifiView(mContext)) {
+                    return;
+                }
                 if (superPlayerView.mWindowPlayer.mControllerCallback != null) {
                     superPlayerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
                 }
@@ -133,7 +153,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 && !((VideoHomeActivity) mContext).isDestroyed()) {
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
-                GlideUtil.displayCircle(publisherHeadimg,item.getIssuerImageUrl(),true,mContext);
+                GlideUtil.displayCircle(publisherHeadimg, item.getIssuerImageUrl(), true, mContext);
 //                Glide.with(mContext)
 //                        .load(item.getIssuerImageUrl())
 //                        .into(publisherHeadimg);

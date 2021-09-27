@@ -349,7 +349,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                         if (null != UploadActivity.this && !UploadActivity.this.isFinishing()
                                 && !UploadActivity.this.isDestroyed()) {
                             Glide.with(UploadActivity.this)
-                                    .load("https://cdn-oss.zhcs.csbtv.com/zhcs-prd/images/61435c67856fb900013adc10")
+                                    .load(uploadVideoBean.getCoverImageUrl())
                                     .into(uploadBtn);
                         }
 

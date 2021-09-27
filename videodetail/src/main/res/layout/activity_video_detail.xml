@@ -37,6 +37,36 @@
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/vertical_video_wdcs_logo"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="@dimen/video_dp20"
+        android:src="@drawable/video_wdcs_logo"
+        android:layout_marginTop="70dp"
+        android:visibility="gone"
+        >
+
+    </ImageView>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/horizontal_video_wdcs_logo"
+            android:layout_width="35dp"
+            android:layout_height="30dp"
+            android:src="@drawable/video_wdcs_logo"
+            android:layout_marginBottom="275dp"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            >
+
+        </ImageView>
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/agree_nowifi_play"

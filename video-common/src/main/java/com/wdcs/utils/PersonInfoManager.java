@@ -138,6 +138,7 @@ public class PersonInfoManager {
                         return false;
                     } else {
                         Log.e("YQH_Token", "获取到的tgt和本地tgt不一致,我的长沙切换了用户_重登数智融媒");
+                        clearToken();
                         return true;
                     }
                 } else {
