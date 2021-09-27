@@ -81,6 +81,7 @@ import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
 import ui.activity.UploadActivity;
 import ui.activity.VideoHomeActivity;
+import widget.CustomLoadMoreView;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
@@ -484,6 +485,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         videoDetailWhiteCommentRl.setOnClickListener(this);
         adapter = new XkshVideoAdapter(R.layout.xksh_video_item_layout, mDatas, getActivity(),
                 playerView, refreshLayout, videoDetailCommentBtn, xkshManager);
+        adapter.setLoadMoreView(new CustomLoadMoreView());
         adapter.setPreLoadNumber(3);
         adapter.openLoadAnimation();
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
@@ -1113,7 +1115,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             }
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas, getActivity());
-                            adapter.setNewData(mDatas);
+//                            adapter.setNewData(mDatas);
                             recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
                             Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                             adapter.loadMoreComplete();

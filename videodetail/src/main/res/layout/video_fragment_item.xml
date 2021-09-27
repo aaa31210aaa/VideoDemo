@@ -136,7 +136,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="28dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="@dimen/video_dp10"
+                    android:layout_marginRight="@dimen/video_dp5"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxEms="9"
@@ -154,8 +154,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="@dimen/video_dp5"
-                    android:layout_toRightOf="@+id/publisher_name">
+                    android:layout_marginRight="@dimen/video_dp5"
+                    android:layout_toRightOf="@+id/publisher_name"
+                    android:src="@drawable/official_certification">
 
                 </ImageView>
 

@@ -81,6 +81,7 @@ import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailAdapter;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
+import widget.CustomLoadMoreView;
 import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
@@ -479,6 +480,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         initCommentPopRv();
         adapter = new VideoDetailAdapter(R.layout.video_fragment_item, mDatas, getActivity(),
                 playerView, refreshLayout, videoDetailCommentBtn, videoDetailmanager);
+        adapter.setLoadMoreView(new CustomLoadMoreView());
         adapter.setPreLoadNumber(3);
         adapter.openLoadAnimation();
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
@@ -1032,7 +1034,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             }
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas, getActivity());
-                            adapter.setNewData(mDatas);
+//                            adapter.setNewData(mDatas);
                             Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                             adapter.loadMoreComplete();
                         } else {
