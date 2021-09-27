@@ -58,7 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/video_title_view"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="165dp"
         android:orientation="vertical">
 
         <RelativeLayout

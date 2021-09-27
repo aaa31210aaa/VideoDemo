@@ -39,6 +39,7 @@ import utils.GlideUtil;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.YELLOW_V;
+import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 
 public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private Context mContext;
@@ -130,6 +131,9 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             public void onClick(View view) {
                 noWifiLl.setVisibility(View.GONE);
                 click.clickNoWifi(helper.getAdapterPosition());
+                if (null != superPlayerView) {
+                    superPlayerView.setOrientation(true);
+                }
             }
         });
 
@@ -137,7 +141,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         fullLin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (SPUtils.getInstance().getString(Constants.AGREE_NETWORK).equals("0")) {
+                if (isVisibleNoWifiView(mContext)) {
                     return;
                 }
                 if (superPlayerView.mWindowPlayer.mControllerCallback != null) {

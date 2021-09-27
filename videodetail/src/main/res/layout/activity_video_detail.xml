@@ -43,7 +43,7 @@
         android:layout_height="30dp"
         android:layout_marginLeft="@dimen/video_dp20"
         android:src="@drawable/video_wdcs_logo"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="70dp"
         android:visibility="gone"
         >
 
@@ -59,7 +59,7 @@
             android:layout_width="35dp"
             android:layout_height="30dp"
             android:src="@drawable/video_wdcs_logo"
-            android:layout_marginBottom="270dp"
+            android:layout_marginBottom="275dp"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
             >

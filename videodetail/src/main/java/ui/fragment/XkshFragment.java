@@ -94,6 +94,7 @@ import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
@@ -195,7 +196,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public LinearLayout fullLin;
     public double pointPercent;// 每一次记录的节点播放百分比
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
-    public LinearLayout activityLinear;
     public ActivityRuleBean activityRuleBean;
     public boolean isAbbreviation; //当前是否是缩略图
 
@@ -257,7 +257,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         activityToAbbreviation.setOnClickListener(this);
         activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
         activityRuleAbbreviation.setOnClickListener(this);
-        activityLinear = view.findViewById(R.id.activity_linear);
 
         xkshManager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(xkshManager);
@@ -280,16 +279,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
 
-                if (null != activityLinear && !mDatas.isEmpty()) {
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    if (mDataDTO.getLogoType().equals("0") || mDataDTO.getLogoType().equals("1")) {
-                        layoutParams.setMargins(0,ButtonSpan.dip2px(160),0,0);
-                    } else {
-                        layoutParams.setMargins(0,ButtonSpan.dip2px(120),0,0);
-                    }
-                    activityLinear.setLayoutParams(layoutParams);
-                }
-
                 if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
                     if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
                             Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
@@ -310,6 +299,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                if (isVisibleNoWifiView(getActivity())) {
+                    playerView.setOrientation(false);
+                } else {
+                    playerView.setOrientation(true);
+                }
 
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
@@ -360,14 +354,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mWindowPlayer.hide();
                 mDataDTO = mDatas.get(position);
 
-                if (null != activityLinear && !mDatas.isEmpty()) {
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    if (mDataDTO.getLogoType().equals("0") || mDataDTO.getLogoType().equals("1")) {
-                        layoutParams.setMargins(0,ButtonSpan.dip2px(160),0,0);
-                    } else {
-                        layoutParams.setMargins(0,ButtonSpan.dip2px(120),0,0);
-                    }
-                    activityLinear.setLayoutParams(layoutParams);
+                if (isVisibleNoWifiView(getActivity())) {
+                    playerView.setOrientation(false);
+                } else {
+                    playerView.setOrientation(true);
                 }
 
                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
@@ -561,7 +551,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
 
         if (isVisibleToUser) {
-            if (!SPUtils.isVisibleNoWifiView(getActivity())) {
+            if (!isVisibleNoWifiView(getActivity())) {
                 if (null != playerView && null != playerView.getParent()) {
                     ((ViewGroup) playerView.getParent()).removeView(playerView);
                 }
@@ -712,7 +702,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param position
      */
     public void addPlayView(final int position) {
-        if (SPUtils.isVisibleNoWifiView(getActivity())) {
+        if (isVisibleNoWifiView(getActivity())) {
             return;
         }
 
@@ -2004,7 +1994,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onFinish() {
                         super.onFinish();
-                        if (SPUtils.isVisibleNoWifiView(getActivity())) {
+                        if (isVisibleNoWifiView(getActivity())) {
                             SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                         }
                         loadingProgress.setVisibility(View.GONE);
