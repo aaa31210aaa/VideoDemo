@@ -299,6 +299,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
+
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
 
                 mPageIndex = 1;
@@ -412,6 +413,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
+
                 rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(position);
                 OkGo.getInstance().cancelTag(recommendTag);
                 getRecommend(myContentId, position);

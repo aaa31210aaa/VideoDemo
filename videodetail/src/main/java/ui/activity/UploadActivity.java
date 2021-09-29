@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -220,6 +221,11 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         } else if (id == R.id.release_img) {
             if (!isSelected) {
                 ToastUtils.showShort("请选择视频相关话题");
+                return;
+            }
+
+            if (TextUtils.isEmpty(briefIntroduction.getText().toString())) {
+                ToastUtils.showShort("请填写视频简介");
                 return;
             }
 

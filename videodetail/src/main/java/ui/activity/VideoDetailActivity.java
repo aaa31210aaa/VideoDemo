@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -157,6 +158,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private String spaceStr = "";
     private ImageView verticalVideoWdcsLogo;
     private ImageView horizontalVideoWdcsLogo;
+    private TextView commentTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -239,6 +241,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         commentPopRv = contentView.findViewById(R.id.comment_pop_rv);
         commentEdtInput = contentView.findViewById(R.id.comment_edtInput);
         commentPopRl = contentView.findViewById(R.id.comment_pop_rl);
+        commentTitle = contentView.findViewById(R.id.comment_title);
+        commentTitle.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                startActivity(new Intent(VideoDetailActivity.this,TgtCodeActivity.class));
+                return true;
+            }
+        });
         commentPopRl.setOnClickListener(this);
         sharePopView = View.inflate(this, R.layout.share_pop_view, null);
         shareWxBtn = sharePopView.findViewById(R.id.share_wx_btn);

@@ -299,6 +299,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
+                String localUserId = PersonInfoManager.getInstance().getUserId();
+                String userId = mDataDTO.getCreateBy();
+                if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
+                    adapter.getViewByPosition(0, R.id.follow).setVisibility(View.GONE);
+                } else {
+                    adapter.getViewByPosition(0, R.id.follow).setVisibility(View.VISIBLE);
+                }
+
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                 if (isVisibleNoWifiView(getActivity())) {
                     playerView.setOrientation(false);
@@ -416,6 +424,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
+                String localUserId = PersonInfoManager.getInstance().getUserId();
+                String userId = mDataDTO.getCreateBy();
+                if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
+                    adapter.getViewByPosition(position, R.id.follow).setVisibility(View.GONE);
+                } else {
+                    adapter.getViewByPosition(position, R.id.follow).setVisibility(View.VISIBLE);
+                }
+
                 rlLp = (ViewGroup) xkshManager.findViewByPosition(position);
                 OkGo.getInstance().cancelTag(recommendTag);
                 getRecommend(myContentId, position);
@@ -1025,7 +1041,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             }
 
                             mDatas.addAll(response.body().getData());
-                             for (int i = 0; i < mDatas.size() ; i++) {
+                            for (int i = 0; i < mDatas.size(); i++) {
                                 String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
                                         Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
                                 mDatas.get(i).setLogoType(videoType);

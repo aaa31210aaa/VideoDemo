@@ -40,6 +40,7 @@ import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.YELLOW_V;
 import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
+import static ui.fragment.VideoDetailFragment.videoIsNormal;
 
 public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private Context mContext;
@@ -87,16 +88,17 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
 
-        if (item.getLogoType().equals("0") || item.getLogoType().equals("1")) {
-            //竖版视频  包括非标准
-            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
-            horizontalVideoWdcsLogo.setVisibility(View.GONE);
-        } else {
+        if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
+                Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //横板标准视频
             verticalVideoWdcsLogo.setVisibility(View.GONE);
             horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
-        }
+        } else {
+            //竖版视频  包括非标准
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
 
+        }
         if (AppUtils.isApkInDebug(mContext)) {
             publisherName.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
