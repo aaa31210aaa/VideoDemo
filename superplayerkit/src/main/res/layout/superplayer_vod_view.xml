@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    >
 
     <com.tencent.rtmp.ui.TXCloudVideoView
         android:id="@+id/superplayer_cloud_video_view"
@@ -12,7 +13,8 @@
     <com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer
         android:id="@+id/superplayer_controller_small"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        />
 
     <com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer
         android:id="@+id/superplayer_controller_large"

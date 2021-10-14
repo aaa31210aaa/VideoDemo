@@ -77,6 +77,8 @@ public class Constants {
     public static final String CMS_VIDEO_OVER_AUTO = "cms_video_over_auto"; //滑动播放结束/自动播放结束
     public static final String CMS_VIDEO_PLAY = "cms_video_play"; //播放完成后点击「重播」
     public static final String CMS_VIDEO_OVER = "cms_video_over";  //重播的视频播放结束
+    public static final double Horizontal_Proportion = 1.7777;
+    public static final double Portrait_Proportion = 0.5625;
 
 
 }

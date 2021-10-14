@@ -179,7 +179,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private ImageView shareQqBtn;
     public DataDTO mDataDTO;
     private List<RecommendModel.DataDTO.RecordsDTO> recommondList;
-    private ViewGroup rlLp;
+    public ViewGroup rlLp;
     private VideoChannelModel videoChannelModel;
 
     private VideoChannelModel channelModel;
@@ -199,6 +199,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
     public ActivityRuleBean activityRuleBean;
     public boolean isAbbreviation; //当前是否是缩略图
+    private RelativeLayout.LayoutParams playViewParams;
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -727,20 +728,27 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
+
+        if (null != playerView && null != playerView.getParent()) {
+            ((ViewGroup) playerView.getParent()).removeView(playerView);
+        }
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
         RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        RelativeLayout.LayoutParams playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
-            playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(false);
             if (linearLayout != null) {
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else if (TextUtils.equals("1", videoType)) {
+            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Portrait_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
@@ -754,6 +762,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else {
+            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Horizontal_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
@@ -766,10 +776,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
         playerView.setLayoutParams(playViewParams);
         playerView.setTag(position);
-        playerView.setBackgroundColor(Utils.getContext().getResources().getColor(R.color.video_black));
 
         if (rlLp != null && mIsVisibleToUser) {
-            rlLp.addView(playerView, 0);
+            rlLp.addView(playerView, 1);
             //露出即上报
             uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());

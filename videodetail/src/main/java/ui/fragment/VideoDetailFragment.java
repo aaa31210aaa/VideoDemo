@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,6 +43,7 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
+import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
@@ -89,6 +91,7 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.utils.NoScrollViewPager;
 
 import static android.widget.RelativeLayout.BELOW;
+import static android.widget.RelativeLayout.CENTER_IN_PARENT;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.constants.Constants.PANELCODE;
@@ -97,6 +100,7 @@ import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
+import static ui.fragment.VideoDetailFragment.videoIsNormal;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailFragment extends Fragment implements View.OnClickListener {
@@ -196,6 +200,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private TextView zxpl;
     private String negativeScreenContentId;
     private DataDTO negativeScreenDto;
+    private RelativeLayout.LayoutParams playViewParams;
+
 
     public VideoDetailFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String contentId) {
         this.mVideoTab = videoTab;
@@ -325,7 +331,48 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
 
 //                initChoosePop();
+                playerView.mWindowPlayer.setUpdatePlayStateCallback(new WindowPlayer.UpdatePlayStateCallback() {
+                    @Override
+                    public void UpdatePlayStateCallback(SuperPlayerDef.PlayerState playState) {
+                        switch (playState) {
+                            case PLAYING:
+//                                if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))))) {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_horizontal).setVisibility(View.GONE);
+//                                } else {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_full).setVisibility(View.GONE);
+//                                }
 
+                                break;
+                            case LOADING:
+//                                if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))))) {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_horizontal).setVisibility(View.VISIBLE);
+//                                } else {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_full).setVisibility(View.VISIBLE);
+//                                }
+                                break;
+                            case PAUSE:
+//                                if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))))) {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_horizontal).setVisibility(View.GONE);
+//                                } else {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_full).setVisibility(View.GONE);
+//                                }
+
+                                break;
+                            case END:
+//                                if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+//                                        Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))))) {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_horizontal).setVisibility(View.GONE);
+//                                } else {
+//                                    adapter.getViewByPosition(currentIndex,R.id.cover_picture_full).setVisibility(View.GONE);
+//                                }
+
+                                break;
+                        }
+                    }
+                });
             }
 
             @Override
@@ -637,18 +684,22 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
         RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        RelativeLayout.LayoutParams playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
-            playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(false);
             if (linearLayout != null) {
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else if (TextUtils.equals("1", videoType)) {
+            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Portrait_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
@@ -662,6 +713,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else {
+            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Horizontal_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
@@ -674,10 +727,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
         playerView.setLayoutParams(playViewParams);
         playerView.setTag(position);
-        playerView.setBackgroundColor(Utils.getContext().getResources().getColor(R.color.video_black));
-
         if (rlLp != null && videoFragmentIsVisibleToUser) {
-            rlLp.addView(playerView, 0);
+            rlLp.addView(playerView, 1);
             //露出即上报
             uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());

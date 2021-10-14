@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -83,6 +84,7 @@ import static com.wdcs.utils.ShareUtils.toShare;
 import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
+import static ui.fragment.VideoDetailFragment.videoIsNormal;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailActivity extends AppCompatActivity implements View.OnClickListener {
@@ -159,6 +161,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView verticalVideoWdcsLogo;
     private ImageView horizontalVideoWdcsLogo;
     private TextView commentTitle;
+    private ImageView coverPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,6 +219,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         tvSend = sendPopContentView.findViewById(R.id.tvSend);
         verticalVideoWdcsLogo = findViewById(R.id.vertical_video_wdcs_logo);
         horizontalVideoWdcsLogo = findViewById(R.id.horizontal_video_wdcs_logo);
+        coverPicture = findViewById(R.id.cover_picture);
 
         /**
          * 发送评论
@@ -420,6 +424,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     backLl.setVisibility(View.GONE);
                     videoDetailCommentBtn.setVisibility(View.GONE);
                     horizontalVideoWdcsLogo.setVisibility(View.GONE);
+                    coverPicture.setVisibility(View.GONE);
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     introduceLin.setVisibility(View.VISIBLE);
                     superplayerIvFullscreen.setVisibility(View.VISIBLE);
@@ -429,6 +434,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     }
                     setLikeCollection(playerView.contentStateModel);
                     horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                    coverPicture.setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -1480,7 +1486,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         item.addView(playerView, itemLp);
         playerView.setTag(0);
         playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
-        rootview.addView(item, 0, lp);
+        rootview.addView(item, 1, lp);
         play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
     }
 
@@ -1627,6 +1633,70 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     for (int i = 0; i < mDatas.size(); i++) {
                                         if (null != mDatas.get(i)) {
                                             mDatas.get(i).setWifi(true);
+                                        }
+                                    }
+
+                                    RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
+                                    DisplayMetrics outMetrics = new DisplayMetrics();
+                                    getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+                                    double widthPixel = outMetrics.widthPixels;
+                                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
+                                        //横板标准视频
+                                        verticalVideoWdcsLogo.setVisibility(View.GONE);
+                                        horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                                        layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                        layoutParams.width = (int) widthPixel - 1;
+                                        layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
+                                        if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing()
+                                                && !VideoDetailActivity.this.isDestroyed()) {
+                                            Glide.with(VideoDetailActivity.this)
+                                                    .load(mDatas.get(0).getImagesUrl())
+                                                    .into(coverPicture);
+                                        }
+                                    } else if (TextUtils.equals("1", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
+                                        //竖版视频
+                                        verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                                        horizontalVideoWdcsLogo.setVisibility(View.GONE);
+
+                                        if (phoneIsNormal()) {
+                                            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                            layoutParams.setMargins(0,0,0,0);
+                                        } else {
+                                            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                            layoutParams.setMargins(0,0,0,ButtonSpan.dip2px(80));
+                                        }
+                                        layoutParams.width = (int) widthPixel - 1;
+                                        layoutParams.height = (int) (widthPixel/Constants.Portrait_Proportion);
+                                        if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing()
+                                                && !VideoDetailActivity.this.isDestroyed()) {
+                                            Glide.with(VideoDetailActivity.this)
+                                                    .load(mDatas.get(0).getImagesUrl())
+                                                    .into(coverPicture);
+                                        }
+                                    } else {
+                                        //非标准视频
+                                        verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                                        horizontalVideoWdcsLogo.setVisibility(View.GONE);
+                                        layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                        layoutParams.width = (int) widthPixel - 1;
+                                        if (Integer.parseInt(mDatas.get(0).getWidth()) > Integer.parseInt(mDatas.get(0).getHeight())) {
+                                            double percent = Double.parseDouble(mDatas.get(0).getHeight()) / Double.parseDouble(mDatas.get(0).getWidth());
+                                            layoutParams.height = (int) (widthPixel * percent);
+                                        } else {
+                                            double percent = Double.parseDouble(mDatas.get(0).getWidth()) / Double.parseDouble(mDatas.get(0).getHeight());
+                                            layoutParams.height = (int) (widthPixel * percent);
+                                        }
+
+                                        if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing()
+                                                && !VideoDetailActivity.this.isDestroyed()) {
+                                            Glide.with(VideoDetailActivity.this)
+                                                    .load(mDatas.get(0).getImagesUrl())
+                                                    .into(coverPicture);
                                         }
                                     }
 

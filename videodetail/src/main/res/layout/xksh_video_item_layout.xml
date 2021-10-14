@@ -8,6 +8,13 @@
     android:background="@color/video_black">
 
     <ImageView
+        android:id="@+id/cover_picture"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:scaleType="centerCrop"></ImageView>
+
+    <ImageView
         android:id="@+id/vertical_video_wdcs_logo"
         android:layout_width="35dp"
         android:layout_height="30dp"

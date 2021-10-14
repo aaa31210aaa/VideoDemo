@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -301,6 +302,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         }
 
                         videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex,R.id.cover_picture).setVisibility(View.GONE);
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(false);
                         xkshFragment.refreshLayout.setEnableRefresh(false);
@@ -358,6 +360,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             }
                         }
                         xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex,R.id.cover_picture).setVisibility(View.GONE);
                     }
 
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
@@ -385,7 +388,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                         }
                         videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.VISIBLE);
-
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex,R.id.cover_picture).setVisibility(View.VISIBLE);
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(true);
                         xkshFragment.refreshLayout.setEnableRefresh(true);
@@ -423,6 +426,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         }
 
                         xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.VISIBLE);
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex,R.id.cover_picture).setVisibility(View.VISIBLE);
                     }
                     if (null != videoTitleView) {
                         videoTitleView.setVisibility(View.VISIBLE);
@@ -473,11 +477,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
             @Override
             public void AutoPlayOverCallBack() {
-                if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
-                } else if (xkshFragment.mIsVisibleToUser) {
-                    lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
-                }
 
                 final String event;
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
@@ -496,6 +495,19 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     e.printStackTrace();
                 }
                 maxPercent = 100;
+
+
+                if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                    lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
+//                    videoDetailFragment.currentIndex = videoDetailFragment.currentIndex + 1;
+//                    videoDetailFragment.videoDetailmanager.scrollToPosition(videoDetailFragment.currentIndex);
+//                    videoDetailFragment.addPlayView(videoDetailFragment.currentIndex);
+                } else if (xkshFragment.mIsVisibleToUser) {
+                    lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
+//                    xkshFragment.currentIndex = xkshFragment.currentIndex + 1;
+//                    xkshFragment.xkshManager.scrollToPosition(xkshFragment.currentIndex);
+//                    xkshFragment.addPlayView(xkshFragment.currentIndex);
+                }
             }
         });
 

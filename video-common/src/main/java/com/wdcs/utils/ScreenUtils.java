@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -274,16 +275,23 @@ public class ScreenUtils {
     /**
      * 获得屏幕宽度
      *
-     * @param context
      * @return
      */
-    public static int getScreenWidth(Context context)
+    public static int getScreenWidth(Activity activity)
     {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE );
         DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics( outMetrics);
-        return outMetrics .widthPixels ;
+        activity.getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        return outMetrics.widthPixels;
     }
+
+    public static int getScreenHeight(Activity activity) {
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        return outMetrics.widthPixels;
+    }
+
+
+
 
 
     //设置6.0的字体

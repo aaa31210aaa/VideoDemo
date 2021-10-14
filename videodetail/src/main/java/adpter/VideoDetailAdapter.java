@@ -2,6 +2,7 @@ package adpter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,6 +28,7 @@ import com.wdcs.utils.AppUtils;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.SPUtils;
+import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
@@ -87,31 +89,74 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         TextView huati = helper.getView(R.id.huati);
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
+        ImageView coverPicture = helper.getView(R.id.cover_picture);
 
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        ((VideoHomeActivity)mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        double widthPixel = outMetrics.widthPixels;
+        double heightPixel = outMetrics.heightPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //横板标准视频
             verticalVideoWdcsLogo.setVisibility(View.GONE);
             horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
-        } else {
-            //竖版视频  包括非标准
+            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            layoutParams.width = (int) widthPixel - 1;
+            layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+                Glide.with(mContext)
+                        .load(item.getImagesUrl())
+                        .into(coverPicture);
+            }
+        } else if (TextUtils.equals("1", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
+                Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
+            //竖版视频
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
 
+            if (phoneIsNormal()) {
+                layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                layoutParams.setMargins(0,0,0,0);
+            } else {
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                layoutParams.setMargins(0,0,0,ButtonSpan.dip2px(80));
+            }
+            layoutParams.width = (int) widthPixel - 1;
+            layoutParams.height = (int) (widthPixel/Constants.Portrait_Proportion);
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+                Glide.with(mContext)
+                        .load(item.getImagesUrl())
+                        .into(coverPicture);
+            }
+        } else {
+            //非标准视频
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            layoutParams.width = (int) widthPixel - 1;
+            if (Integer.parseInt(item.getWidth()) > Integer.parseInt(item.getHeight())) {
+                double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
+                layoutParams.height = (int) (widthPixel * percent);
+            } else {
+                double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
+                layoutParams.height = (int) (widthPixel * percent);
+            }
+
+            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
+                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+                Glide.with(mContext)
+                        .load(item.getImagesUrl())
+                        .into(coverPicture);
+            }
         }
-        if (AppUtils.isApkInDebug(mContext)) {
-            publisherName.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    try {
-                        System.out.println("tgt码:" + VideoInteractiveParam.getInstance().getCode() + "------");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return true;
-                }
-            });
-        }
+
+
 
         //非wifi状态下布局是否显示
         if (item.isWifi()) {
@@ -319,5 +364,20 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
 
     public void setToAddPlayerViewClick(ToAddPlayerViewClick listener) {
         this.click = listener;
+    }
+
+    /**
+     * 手机是否为16：9
+     *
+     * @return
+     */
+    private boolean phoneIsNormal() {
+        int phoneWidth = ScreenUtils.getPhoneWidth(mContext);
+        int phoneHeight = ScreenUtils.getPhoneHeight(mContext);
+        if (phoneHeight * 9 == phoneWidth * 16) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

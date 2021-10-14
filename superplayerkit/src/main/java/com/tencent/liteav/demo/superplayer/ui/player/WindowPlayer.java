@@ -419,8 +419,22 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         }
     }
 
+    public UpdatePlayStateCallback updatePlayStateCallback;
+
+    public interface UpdatePlayStateCallback {
+        void UpdatePlayStateCallback(SuperPlayerDef.PlayerState playState);
+    }
+
+    public void setUpdatePlayStateCallback(UpdatePlayStateCallback callback){
+        this.updatePlayStateCallback = callback;
+    }
+
     @Override
     public void updatePlayState(SuperPlayerDef.PlayerState playState) {
+        if (null != updatePlayStateCallback) {
+            updatePlayStateCallback.UpdatePlayStateCallback(playState);
+        }
+
         switch (playState) {
             case PLAYING:
                 mReportVodStartTime = System.currentTimeMillis();
@@ -445,7 +459,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 mReportVodStartTime = -1;
                 mIvPause.setImageResource(R.drawable.superplayer_ic_vod_pause_normal);
                 zdyIvPause.setVisibility(GONE);
-                toggleView(mPbLiveLoading, true);
+//                toggleView(mPbLiveLoading, true);
                 toggleView(mLayoutReplay, false);
                 break;
             case PAUSE:
@@ -515,7 +529,6 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
             percent = mProgress / mDuration;  //需要记录每一次上报时的播放进度和播放进度百分比
         }
 
-        Log.e("yqh",mProgress+"-------"+mDuration+"---当前播放到百分比:"+ percent);
         mTvCurrent.setText(formattedTime(mProgress));
         float percentage = mDuration > 0 ? ((float) mProgress / (float) mDuration) : 1.0f;
         if (mProgress == 0) {

@@ -339,7 +339,6 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
      */
     public void playWithModel(final SuperPlayerModel model) {
         mCurrentModel = model;
-//        stop();
         PlayInfoParams params = new PlayInfoParams();
         params.appId = model.appId;
         if (model.videoId != null) {
