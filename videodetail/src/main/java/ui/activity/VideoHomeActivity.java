@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
+import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.model.Response;
@@ -499,15 +500,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
                 if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
-//                    videoDetailFragment.currentIndex = videoDetailFragment.currentIndex + 1;
-//                    videoDetailFragment.videoDetailmanager.scrollToPosition(videoDetailFragment.currentIndex);
-//                    videoDetailFragment.addPlayView(videoDetailFragment.currentIndex);
                 } else if (xkshFragment.mIsVisibleToUser) {
                     lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
-//                    xkshFragment.currentIndex = xkshFragment.currentIndex + 1;
-//                    xkshFragment.xkshManager.scrollToPosition(xkshFragment.currentIndex);
-//                    xkshFragment.addPlayView(xkshFragment.currentIndex);
                 }
+                playerView.mSuperPlayer.reStart();
             }
         });
 
@@ -561,12 +557,18 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 if (0 == position && null != videoTab) {
                     videoTab.hideMsg(position);
                     playerView.setOrientation(true);
+                    //滑动切换到小康生活  事件名：short_video_home_click
+                    //属性名：button_name
                 } else if (1 == position) {
                     playerView.setOrientation(true);
+                    //滑动切换到小康生活  事件名：short_video_home_click
+                    //属性名：button_name
                 } else if (2 == position) {
                     playerView.mSuperPlayer.pause();
                     //切换到直播的时候  不允许旋转
                     playerView.setOrientation(false);
+                    //滑动切换到小康生活  事件名：short_video_home_click
+                    //属性名：button_name
                 }
             }
 
@@ -606,6 +608,27 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         //tab和ViewPager进行关联
         videoTab.setViewPager(videoVp, titles);
         videoTab.setCurrentTab(toCurrentTab);
+        videoTab.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelect(int position) {
+                if (0 == position) {
+                    //点击切换到小康生活  事件名：short_video_home_click
+                    //属性名：button_name
+                } else if (1 == position) {
+                    //点击切换到视频 事件名：short_video_home_click
+                    //属性名：button_name
+                } else {
+                    //点击切换到视频首页  事件名：short_video_home_click
+                    //属性名：button_name
+                }
+            }
+
+            @Override
+            public void onTabReselect(int position) {
+
+            }
+        });
+
         videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
         xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
 
@@ -672,7 +695,8 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         if (instance != null) {
             instance.release();
             instance.mSuperPlayer.destroy();
-            instance = null;
+//            instance = null;
+            OkGo.getInstance().cancelAll();
         }
         maxPercent = 0;
         lsDuration = 0;

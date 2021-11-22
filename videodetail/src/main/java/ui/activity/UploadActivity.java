@@ -33,6 +33,7 @@ import com.wdcs.callback.JsonCallback;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.TopicModel;
 import com.wdcs.model.TopicModel.DataDTO.RecordsDTO;
+import com.wdcs.utils.DataCleanUtils;
 import com.wdcs.utils.FileUtils;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
@@ -96,6 +97,8 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     private boolean isSelected;
     private EditText briefIntroduction;
     private List<RecordsDTO> uploadTagFlow;
+    private float worksDuration; //视频的时长
+    private long worksSize; //视频大小
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -183,6 +186,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
             public boolean onTagClick(View view, int position, FlowLayout parent) {
                 Log.e("onTagClick", list.get(position).getTitle());
                 topicSelectId = list.get(position).getId()+"";
+                selectTopicStr = list.get(position).getTitle();
                 return true;
             }
         });
@@ -239,6 +243,8 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
             } else {
                 orientation = "1";
             }
+
+
             releaseContent(topicSelectId, uploadVideoBean.getWidth(), uploadVideoBean.getHeight(),
                     uploadVideoBean.getCoverImageUrl(), orientation, uploadVideoBean.getDuration()
                     , uploadVideoBean.getUrl(), briefIntroduction.getText().toString());
@@ -329,6 +335,11 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
 
             for (int i = 0; i < imageUrlList.size(); i++) {
                 File file = new File(imageUrlList.get(i));
+                try {
+                    worksSize = DataCleanUtils.getFolderSize(file);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 fileList.add(file);
             }
 
@@ -337,6 +348,12 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
 //            viewModel.uploadVideo(fileList, "1","1");
             uploadVideo();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        OkGo.getInstance().cancelAll();
     }
 
     /**
@@ -358,10 +375,13 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                                     .load(uploadVideoBean.getCoverImageUrl())
                                     .into(uploadBtn);
                         }
-
                         uploadProgress.setVisibility(View.GONE);
                         uploadCompleteTip.setVisibility(View.VISIBLE);
                         uploadVideoCancel.setVisibility(View.VISIBLE);
+                        worksDuration = Float.parseFloat(uploadVideoBean.getDuration());
+                        //行为埋点 点击上传作品按钮时触发
+                        Log.d("upLoadActivity","话题："+selectTopicStr+"---"+"内容id"+""+"---"+ "作品简介"+briefIntroduction.getText().toString()
+                                +"---"+"作品时长"+worksDuration+"---"+"作品大小"+worksSize);
                     }
 
                     @Override
@@ -412,6 +432,9 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void onSuccess(Response<ResponseBean> response) {
                         if (null != response.body()) {
+                            //行为埋点 编辑视频发布
+                            //selectTopicStr workDuration  worksSize
+
                             ResponseBean bean = response.body();
                             ToastUtils.showShort(bean.getMessage());
                             finish();

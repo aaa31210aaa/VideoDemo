@@ -158,14 +158,17 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
 
 
     public static ReadPlayCallBack readPlayCallBack;
+
     public interface ReadPlayCallBack {
         void ReadPlayCallback();
     }
+
     public static void setReadPlayCallBack(ReadPlayCallBack callBack) {
         readPlayCallBack = callBack;
     }
 
     public static AutoPlayOverCallBack autoPlayOverCallBack;
+
     public interface AutoPlayOverCallBack {
         void AutoPlayOverCallBack();
     }
@@ -239,7 +242,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 //视频自动播放埋点上报 在内流中滑动播放视频时上报
                 readPlayCallBack.ReadPlayCallback();
                 if (null != superPlayerView) {
-                    superPlayerView.isLoad = true;
+                    superPlayerView.detailIsLoad = true;
                     superPlayerView.homeVideoIsLoad = true;
                 }
 
@@ -508,15 +511,12 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 query += "spfileid=" + mFileId + "&spdrmtype=" + drmType + "&spappid=" + mAppId;
                 Uri newUri = uri.buildUpon().query(query).build();
                 TXCLog.i(TAG, "playVodURL: newurl = " + Uri.decode(newUri.toString()) + " ;url= " + url);
-                if (null != instance) {
-                    superPlayerView.isLoad = false;
-                    superPlayerView.homeVideoIsLoad = false;
-                }
                 ret = mVodPlayer.startPlay(Uri.decode(newUri.toString()));
             } else {
                 ret = mVodPlayer.startPlay(url); //开始播放视频
             }
-
+            superPlayerView.detailIsLoad = false;
+            superPlayerView.homeVideoIsLoad = false;
             if (ret == 0) {
                 updatePlayerState(SuperPlayerDef.PlayerState.LOADING);
             }
@@ -776,7 +776,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     @Override
     public void pause() {
         if (mCurrentPlayType == SuperPlayerDef.PlayerType.VOD) {
-            if (superPlayerView.isLoad) {
+            if (superPlayerView.detailIsLoad) {
                 mVodPlayer.pause();
             } else {
                 superPlayerView.release();

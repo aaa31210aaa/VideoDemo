@@ -43,6 +43,7 @@ import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.YELLOW_V;
 import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.fragment.VideoDetailFragment.videoIsNormal;
+import static ui.fragment.XkshFragment.isFollow;
 
 @Keep
 public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
@@ -93,7 +94,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
-        ((VideoHomeActivity)mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        ((VideoHomeActivity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         double widthPixel = outMetrics.widthPixels;
         double heightPixel = outMetrics.heightPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
@@ -114,19 +115,18 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         } else if (TextUtils.equals("1", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //竖版视频
-            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
-            horizontalVideoWdcsLogo.setVisibility(View.GONE);
-
             if (phoneIsNormal()) {
                 layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-                layoutParams.setMargins(0,0,0,0);
             } else {
                 layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                layoutParams.setMargins(0,0,0,ButtonSpan.dip2px(80));
             }
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+
+            layoutParams.setMargins(0, 0, 0, 0);
             layoutParams.width = (int) widthPixel - 1;
-            layoutParams.height = (int) (widthPixel/Constants.Portrait_Proportion);
+            layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
@@ -137,16 +137,13 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             //非标准视频
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
+            layoutParams.width = (int) widthPixel - 1;
             layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            layoutParams.width = (int) widthPixel - 1;
-            if (Integer.parseInt(item.getWidth()) > Integer.parseInt(item.getHeight())) {
-                double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
-                layoutParams.height = (int) (widthPixel * percent);
-            } else {
-                double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
-                layoutParams.height = (int) (widthPixel * percent);
-            }
+            layoutParams.setMargins(0, 0, 0, 0);
+
+            double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
+            layoutParams.height = (int) (widthPixel * percent);
 
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
@@ -177,7 +174,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         } else {
             follow.setVisibility(View.VISIBLE);
         }
-
 
 
         //无wifi时继续播放按钮
@@ -231,6 +227,9 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 if (TextUtils.isEmpty(item.getIssuerId())) {
                     return;
                 }
+                //行为埋点 点击他人头像
+                Log.d("xkshadapter", "用户id(user_id)" + item.getCreateBy() + "---" +
+                        "是否关注(is_notice)" + isFollow + "---" + "入口来源(module_source)" + "" + "---" + "用户昵称(user_nickname)" + item.getIssuerName());
                 //跳转H5头像TA人主页
                 try {
                     if (Utils.mIsDebug) {
@@ -268,6 +267,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         huati.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //行为埋点 话题点击
                 try {
                     if (Utils.mIsDebug) {
                         param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
@@ -312,6 +312,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //行为埋点 button_name 展开简介
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
@@ -554,6 +555,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         viewFlipper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //行为埋点 button_name 记录关联框服务名称
                 //获取子View的id
                 int mPosition = viewFlipper.getDisplayedChild();
                 Log.e("yqh", "子View的id:" + mPosition);

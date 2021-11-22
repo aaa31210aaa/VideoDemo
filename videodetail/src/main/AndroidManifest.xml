@@ -43,8 +43,6 @@
         android:largeHeap="true">
 
 
-
-
         <activity android:name="ui.activity.TgtCodeActivity"></activity>
         <activity
             android:name="ui.activity.VideoDetailActivity"

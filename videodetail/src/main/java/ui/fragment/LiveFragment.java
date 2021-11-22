@@ -65,6 +65,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     private View noLoginTipsView;
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
+    private View footview;
 
     public LiveFragment() {
 
@@ -108,6 +109,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         noLoginTipsOk.setOnClickListener(this);
         adapter = new LiveRvAdapter(R.layout.live_rv_item_layout, mDatas, getActivity());
         liveRv.setAdapter(adapter);
+        footview = View.inflate(getActivity(),R.layout.footer_view,null);
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
@@ -253,9 +255,10 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
 
                             if (response.body().getData().size() == 0) {
                                 Log.e("loadMoreData", "没有更多视频了");
-                                adapter.loadMoreEnd();
+                                adapter.loadMoreComplete();
 //                                adapter.setOnLoadMoreListener(null, liveRv);
                                 isLoadComplate = true;
+                                adapter.addFooterView(footview);
                                 return;
                             } else {
 //                                adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);

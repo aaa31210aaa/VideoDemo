@@ -79,6 +79,7 @@ import java.util.List;
 import adpter.CommentPopRvAdapter;
 import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
+import ui.activity.TgtCodeActivity;
 import ui.activity.UploadActivity;
 import ui.activity.VideoHomeActivity;
 import widget.CustomLoadMoreView;
@@ -89,6 +90,7 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
+import static com.tencent.liteav.demo.superplayer.contants.Contants.delayMillis;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.PANELCODE;
@@ -189,7 +191,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private LinearLayout shotAlike;
     private LoadingView loadingProgress;
     private RelativeLayout.LayoutParams lp;
-    private boolean isFollow; //是否关注
+    public static boolean isFollow; //是否关注
     public ImageView rankList; //排行榜
     public ImageView activityRuleImg; //活动规则图
     public ImageView activityRuleAbbreviation;
@@ -200,6 +202,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public ActivityRuleBean activityRuleBean;
     public boolean isAbbreviation; //当前是否是缩略图
     private RelativeLayout.LayoutParams playViewParams;
+    private View footView;
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -262,6 +265,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
         xkshManager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(xkshManager);
+        footView = View.inflate(getActivity(), R.layout.footer_view, null);
         setSoftKeyBoardListener();
         xkshManager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -503,7 +507,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         adapter = new XkshVideoAdapter(R.layout.xksh_video_item_layout, mDatas, getActivity(),
                 playerView, refreshLayout, videoDetailCommentBtn, xkshManager);
         adapter.setLoadMoreView(new CustomLoadMoreView());
-        adapter.setPreLoadNumber(3);
+        adapter.setPreLoadNumber(0);
         adapter.openLoadAnimation();
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
         /**
@@ -738,16 +742,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
-//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            playViewParams.setMargins(0, 0, 0, 0);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+
+//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
+
+
             playerView.setOrientation(false);
             if (linearLayout != null) {
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else if (TextUtils.equals("1", videoType)) {
-            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Portrait_Proportion);
+            int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -762,7 +771,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else {
-            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Horizontal_Proportion);
+            int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Horizontal_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
@@ -1131,9 +1140,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                             if (response.body().getData().size() == 0) {
                                 Log.e("loadMoreData", "没有更多视频了");
-                                adapter.loadMoreEnd();
+                                adapter.loadMoreComplete();
                                 adapter.setOnLoadMoreListener(null, videoDetailRv);
+                                adapter.addFooterView(footView);
                                 isLoadComplate = true;
+                                return;
                             } else {
                                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
                                 isLoadComplate = false;
@@ -1402,26 +1413,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (null == followText) {
             return;
         }
-        if (TextUtils.isEmpty(localUserId) && TextUtils.isEmpty(userId)) {
-            followText.setVisibility(View.VISIBLE);
+        if (TextUtils.equals(whetherFollow, "true")) {
+            //已关注
+            isFollow = true;
+            followText.setText("已关注");
+            followText.setBackgroundResource(R.drawable.followed_bg);
         } else {
-            if (TextUtils.equals(localUserId, userId)) {
-                //如果发布者是本人  不显示关注按钮
-                followText.setVisibility(View.GONE);
-            } else {
-                followText.setVisibility(View.VISIBLE);
-                if (TextUtils.equals(whetherFollow, "true")) {
-                    //已关注
-                    isFollow = true;
-                    followText.setText("已关注");
-                    followText.setBackgroundResource(R.drawable.followed_bg);
-                } else {
-                    //未关注
-                    isFollow = false;
-                    followText.setText("关注");
-                    followText.setBackgroundResource(R.drawable.follow_bg);
-                }
-            }
+            //未关注
+            isFollow = false;
+            followText.setText("关注");
+            followText.setBackgroundResource(R.drawable.follow_bg);
         }
     }
 
@@ -1646,7 +1647,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             return;
         }
         if (playerView != null) {
-            if (playerView.isLoad) {
+            if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
                 playerView.mSuperPlayer.reStart();
@@ -1872,6 +1873,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             Log.e("埋点", "埋点：分享到QQ---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_QQ);
         } else if (id == R.id.shot_alike) {
+            //行为埋点 点击视频发布
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 try {
                     noLoginTipsPop();
@@ -1882,6 +1884,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 startActivity(new Intent(getActivity(), UploadActivity.class));
             }
         } else if (id == R.id.rank_list) {
+            //行为埋点 排行榜按钮点击
+            startActivity(new Intent(getActivity(), TgtCodeActivity.class));
             //跳转H5排行榜
             try {
                 if (Utils.mIsDebug) {
@@ -2055,6 +2059,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     public void onSuccess(Response<TrackingUploadModel> response) {
                         if (200 == response.body().getCode()) {
                             setFollowView("true");
+                            //行为埋点 关注用户 关注的用户id mDataDTO.getCreateBy()
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
                         }

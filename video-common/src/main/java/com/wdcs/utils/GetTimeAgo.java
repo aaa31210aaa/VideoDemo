@@ -1,11 +1,13 @@
 package com.wdcs.utils;
 
 public class GetTimeAgo {
-    private static final int SECOND_MILLIS = 1000;
-    private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
+    private static final Long SECOND_MILLIS = Long.valueOf(1000);
+    private static final Long MINUTE_MILLIS = 60 * SECOND_MILLIS;
 
-    private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
-    private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
+    private static final Long HOUR_MILLIS = 60 * MINUTE_MILLIS;
+    private static final Long DAY_MILLIS = 24 * HOUR_MILLIS;
+    private static final Long MONTH_MILLIS = 30 * DAY_MILLIS;
+    private static final Long YEAR_MILLIS = 12 * MONTH_MILLIS;
 
     /**
      * 按照毫秒来存储
@@ -18,14 +20,12 @@ public class GetTimeAgo {
             // if timestamp given in seconds, convert to millis
             time *= 1000;
         }
-
         long now = System.currentTimeMillis();
         if (time > now || time <= 0) {
             return "未知时间";
         }
 
         final long diff = now - time;
-
         if (diff < MINUTE_MILLIS) {
             return "刚刚";
         } else if (diff < 2 * MINUTE_MILLIS) {
@@ -38,8 +38,16 @@ public class GetTimeAgo {
             return diff / HOUR_MILLIS + "小时前";
         } else if (diff < 48 * HOUR_MILLIS) {
             return "昨天";
-        } else {
+        } else if (diff / DAY_MILLIS < 30) {
             return diff / DAY_MILLIS + "天前";
+        } else if (diff < 2 * MONTH_MILLIS) {
+            return "1个月前";
+        } else if (diff < 12 * MONTH_MILLIS) {
+            return   diff/MONTH_MILLIS + "个月前";
+        } else if (diff < 2 * YEAR_MILLIS) {
+            return "1年前";
+        } else {
+            return diff / YEAR_MILLIS + "年前";
         }
     }
 }

@@ -11,7 +11,7 @@
     android:paddingLeft="@dimen/video_dp10"
     android:paddingRight="@dimen/video_dp10"
     android:background="@drawable/tag_selector_bg"
-    android:text="#标签标签标签标签标签标签标签签标签标签标签标签签"
+    android:text=""
     android:textColor="@drawable/tagflow_text_color"
     android:textSize="15sp">
 

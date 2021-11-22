@@ -145,7 +145,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     private TextView noLoginTipsOk;
     public boolean isOrientation;
     private boolean isMainbool;
-    public boolean isLoad;//播放器是否已经准备完毕
+    public boolean detailIsLoad;//播放器是否已经准备完毕
     public boolean homeVideoIsLoad;
     public BuriedPointModel buriedPointModel;
     public static SuperPlayerView instance;

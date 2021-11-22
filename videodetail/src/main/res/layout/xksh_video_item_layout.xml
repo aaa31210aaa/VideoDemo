@@ -144,15 +144,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="28dp"
                     android:layout_centerVertical="true"
-                    android:gravity="center"
-                    android:singleLine="true"
-                    android:maxEms="9"
-                    android:ellipsize="end"
-                    android:paddingLeft="@dimen/video_dp25"
                     android:layout_marginRight="@dimen/video_dp5"
-                    tool:text="软装设计软装设计软装设计软装设计"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxEms="9"
+                    android:paddingLeft="@dimen/video_dp25"
+                    android:singleLine="true"
                     android:textColor="@color/video_white"
-                    android:textSize="@dimen/sp_16">
+                    android:textSize="@dimen/sp_16"
+                    tool:text="软装设计软装设计软装设计软装设计">
 
                 </TextView>
 
@@ -261,12 +261,12 @@
                 android:id="@+id/huati"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tool:text="#测试测试测试测试测试测试测试"
-                android:textSize="16sp"
                 android:clickable="true"
                 android:focusable="true"
                 android:singleLine="true"
-                android:textColor="@color/white">
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                tool:text="#测试测试测试测试测试测试测试">
 
             </TextView>
         </RelativeLayout>

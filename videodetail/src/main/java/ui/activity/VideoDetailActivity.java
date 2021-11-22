@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -162,10 +163,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private ImageView horizontalVideoWdcsLogo;
     private TextView commentTitle;
     private ImageView coverPicture;
+    private RelativeLayout.LayoutParams playViewParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         SystemUtils.setNavbarColor(this, R.color.video_black);
         setContentView(R.layout.activity_video_detail);
@@ -249,7 +252,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         commentTitle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                startActivity(new Intent(VideoDetailActivity.this,TgtCodeActivity.class));
+                startActivity(new Intent(VideoDetailActivity.this, TgtCodeActivity.class));
                 return true;
             }
         });
@@ -477,6 +480,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                }
                 //拖动/自动播放结束上报埋点
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event), event);
+                playerView.mSuperPlayer.reStart();
             }
         });
     }
@@ -511,8 +515,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     protected void onResume() {
         super.onResume();
         if (!isFirst) {
-            if (playerView != null) {
+            if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
+            } else {
+                playerView.mSuperPlayer.reStart();
             }
 
             if (!TextUtils.isEmpty(contentId)) {
@@ -1297,6 +1303,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             if (TextUtils.isEmpty(mDatas.get(0).getIssuerId())) {
                 return;
             }
+            //行为埋点 点击他人头像
+            Log.d("VideoDetailActivity", "用户id(user_id)" + mDatas.get(0).getCreateBy() +
+                    "入口来源(module_source)" + "" + "用户昵称(user_nickname)" + mDatas.get(0).getIssuerName());
             //跳转H5头像TA人主页
             try {
                 if (Utils.mIsDebug) {
@@ -1400,7 +1409,165 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     }
 
 
-    private void addPlayView() {
+//    private void addPlayView() {
+//        if (null == playerView) {
+//            return;
+//        }
+//        if (null != playerView.getParent()) {
+//            ((ViewGroup) playerView.getParent()).removeView(playerView);
+//        }
+//
+//        if (TextUtils.isEmpty(mDatas.get(0).getCreatorCertMark())) {
+//            officialCertificationImg.setVisibility(View.GONE);
+//        } else {
+//            officialCertificationImg.setVisibility(View.VISIBLE);
+//            if (TextUtils.equals(mDatas.get(0).getCreatorCertMark(), BLUE_V)) {
+//                officialCertificationImg.setImageResource(R.drawable.official_certification);
+//            } else if (TextUtils.equals(mDatas.get(0).getCreatorCertMark(), YELLOW_V)) {
+//                officialCertificationImg.setImageResource(R.drawable.yellow_v);
+//            }
+//        }
+//
+//        if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing() && !VideoDetailActivity.this.isDestroyed()) {
+//            GlideUtil.displayCircle(publisherHeadimg, mDatas.get(0).getIssuerImageUrl(), true, this);
+//            //            Glide.with(this)
+////                    .load(mDatas.get(0).getIssuerImageUrl())
+////                    .into(publisherHeadimg);
+//            publisherName.setText(mDatas.get(0).getIssuerName());
+//        }
+//
+//        getFoldText(mDatas.get(0));
+//
+//
+//
+//
+//        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT);
+//        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+//                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
+//
+//        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+//        if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
+//            ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
+//        }
+//        playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        if (videoType.equals("1")) {
+//            int height = (int) (ScreenUtils.getScreenWidth(this) / Constants.Portrait_Proportion);
+//            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+//            if (phoneIsNormal()) {
+//                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+//                playerView.setOrientation(false);
+//            } else {
+//                playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+//                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
+////                playViewParams.setMargins(0, 0, 0, ButtonSpan.dip2px(80));
+//                playerView.setOrientation(false);
+//            }
+//            if (introduceLin != null) {
+//                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+//            }
+//            //竖版视频  包括非标准
+//            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+//            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+//        } else if (videoType.equals("0")) {
+//            superplayerIvFullscreen.setVisibility(View.GONE);
+//            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//            playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+//            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+//            playerView.setOrientation(false);
+//            if (rootview != null) {
+//                rootview.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+//            }
+//            //竖版视频  包括非标准
+//            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+//            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+//        } else {
+//            superplayerIvFullscreen.setVisibility(View.VISIBLE);
+//            int height = (int) (ScreenUtils.getScreenWidth(this) / Constants.Horizontal_Proportion);
+//            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+//            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+//            playerView.setOrientation(true);
+//            mLayoutBottomParams.addRule(BELOW, playerView.getId());
+//            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
+//            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
+//            if (null != rootview) {
+//                rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
+//            }
+//            verticalVideoWdcsLogo.setVisibility(View.GONE);
+//            horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+//        }
+////        RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
+////                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+////        if (TextUtils.equals("0", videoType)) {
+////            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+////            playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+////            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+////            playViewParams.setMargins(0, 0, 0, 0);
+////            itemLp.setMargins(0,0,0,0);
+////            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+////
+//////            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
+////
+////
+////            playerView.setOrientation(false);
+////            if (introduceLin != null) {
+////                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+////            }
+////        } else if (TextUtils.equals("1", videoType)) {
+////            int height = (int) (ScreenUtils.getScreenWidth(this) / Constants.Portrait_Proportion);
+////            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+////            if (phoneIsNormal()) {
+////                itemLp.setMargins(0,0,0,0);
+////                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+////                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+////                playerView.setOrientation(false);
+////            } else {
+////                playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+////                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
+////                playerView.setOrientation(false);
+////            }
+////            if (introduceLin != null) {
+////                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+////            }
+////        } else {
+////            itemLp.setMargins(0,0,0,0);
+////            int height = (int) (ScreenUtils.getScreenWidth(this) / Constants.Horizontal_Proportion);
+////            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+////            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+////            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+////            playerView.setOrientation(true);
+////            mLayoutBottomParams.addRule(BELOW, playerView.getId());
+////            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
+////            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
+////            if (null != rootview) {
+////                rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
+////            }
+////        }
+//
+//        playerView.setLayoutParams(playViewParams);
+//        RelativeLayout item = new RelativeLayout(this);
+//
+//        item.addView(playerView);
+//        playerView.setTag(0);
+////        playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
+//        rootview.addView(item, 1, lp);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
+//            }
+//        },1000);
+//
+//    }
+
+    /**
+     * 在视频playview位置上添加各种view
+     */
+    public void addPlayView() {
         if (null == playerView) {
             return;
         }
@@ -1428,24 +1595,43 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
 
         getFoldText(mDatas.get(0));
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        LinearLayout.LayoutParams bottomLp = (LinearLayout.LayoutParams) introduceLin.getLayoutParams();
-        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
-                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
 
-        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
-        if (videoType.equals("1")) {
+
+        if (null != playerView && null != playerView.getParent()) {
+            ((ViewGroup) playerView.getParent()).removeView(playerView);
+        }
+        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight())));
+        if (TextUtils.equals("0", videoType)) {
+            superplayerIvFullscreen.setVisibility(View.GONE);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            playViewParams.setMargins(0, 0, 0, 0);
+            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+            playerView.setOrientation(false);
+            if (introduceLin != null) {
+                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            }
+
+            //竖版视频  包括非标准
+            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+        } else if (TextUtils.equals("1", videoType)) {
+            superplayerIvFullscreen.setVisibility(View.GONE);
+            int height = (int) (ScreenUtils.getPhoneWidth(this) / Constants.Portrait_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
-                superplayerIvFullscreen.setVisibility(View.GONE);
+                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
                 playerView.setOrientation(false);
             } else {
-                superplayerIvFullscreen.setVisibility(View.GONE);
+                playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
@@ -1455,40 +1641,34 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             //竖版视频  包括非标准
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
-        } else if (videoType.equals("0")) {
-            superplayerIvFullscreen.setVisibility(View.GONE);
-            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-            playerView.setOrientation(false);
-            if (introduceLin != null) {
-                introduceLin.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
-            }
-            //竖版视频  包括非标准
-            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
-            horizontalVideoWdcsLogo.setVisibility(View.GONE);
         } else {
             superplayerIvFullscreen.setVisibility(View.VISIBLE);
+            int height = (int) (ScreenUtils.getPhoneWidth(this) / Constants.Horizontal_Proportion);
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
             mLayoutBottomParams.addRule(BELOW, playerView.getId());
-            mLayoutBottomParams.setMargins(0, (getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(120), 0, 0);
+            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
             playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
-            rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
-            //横板标准视频
+            if (null != rootview) {
+                rootview.addView(playerView.mWindowPlayer.mLayoutBottom);
+            }
             verticalVideoWdcsLogo.setVisibility(View.GONE);
             horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
         }
+        playerView.setLayoutParams(playViewParams);
 
-        introduceLin.setLayoutParams(bottomLp);
-        introduceLin.setVisibility(View.VISIBLE);
-        RelativeLayout item = new RelativeLayout(this);
-        RelativeLayout.LayoutParams itemLp = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        item.addView(playerView, itemLp);
-        playerView.setTag(0);
-        playerView.setBackgroundColor(getResources().getColor(R.color.video_black));
-        rootview.addView(item, 1, lp);
-        play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
+        if (rootview != null) {
+            rootview.addView(playerView, 3);
+            //露出即上报
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
+            play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
+        }
+
+
     }
+
 
     private void getFoldText(final DataDTO item) {
         String topicNameStr;
@@ -1502,6 +1682,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         huati.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //行为埋点 话题点击
                 try {
                     if (Utils.mIsDebug) {
                         param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
@@ -1664,13 +1845,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         if (phoneIsNormal()) {
                                             layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                                             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-                                            layoutParams.setMargins(0,0,0,0);
                                         } else {
                                             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                                            layoutParams.setMargins(0,0,0,ButtonSpan.dip2px(80));
                                         }
                                         layoutParams.width = (int) widthPixel - 1;
-                                        layoutParams.height = (int) (widthPixel/Constants.Portrait_Proportion);
+                                        layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
                                         if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing()
                                                 && !VideoDetailActivity.this.isDestroyed()) {
                                             Glide.with(VideoDetailActivity.this)
@@ -1681,16 +1860,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         //非标准视频
                                         verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
                                         horizontalVideoWdcsLogo.setVisibility(View.GONE);
+                                        layoutParams.width = (int) widthPixel - 1;
                                         layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                                         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-                                        layoutParams.width = (int) widthPixel - 1;
-                                        if (Integer.parseInt(mDatas.get(0).getWidth()) > Integer.parseInt(mDatas.get(0).getHeight())) {
-                                            double percent = Double.parseDouble(mDatas.get(0).getHeight()) / Double.parseDouble(mDatas.get(0).getWidth());
-                                            layoutParams.height = (int) (widthPixel * percent);
-                                        } else {
-                                            double percent = Double.parseDouble(mDatas.get(0).getWidth()) / Double.parseDouble(mDatas.get(0).getHeight());
-                                            layoutParams.height = (int) (widthPixel * percent);
-                                        }
+                                        layoutParams.setMargins(0, 0, 0, 0);
+
+                                        double percent = Double.parseDouble(mDatas.get(0).getHeight()) / Double.parseDouble(mDatas.get(0).getWidth());
+                                        layoutParams.height = (int) (widthPixel * percent);
 
                                         if (null != VideoDetailActivity.this && !VideoDetailActivity.this.isFinishing()
                                                 && !VideoDetailActivity.this.isDestroyed()) {
@@ -1800,8 +1976,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView.release();
             playerView.stopPlay();
             playerView.mSuperPlayer.destroy();
-            playerView = null;
         }
+        OkGo.getInstance().cancelAll();
         maxPercent = 0;
         lsDuration = 0;
     }

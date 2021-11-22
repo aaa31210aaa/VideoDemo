@@ -279,12 +279,18 @@ public class ScreenUtils {
      */
     public static int getScreenWidth(Activity activity)
     {
+        if (null == activity) {
+            return 0;
+        }
         DisplayMetrics outMetrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         return outMetrics.widthPixels;
     }
 
     public static int getScreenHeight(Activity activity) {
+        if (null == activity) {
+            return 0;
+        }
         DisplayMetrics outMetrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         return outMetrics.widthPixels;
@@ -346,10 +352,16 @@ public class ScreenUtils {
     }
 
     public static int getPhoneWidth(Context context){
+        if (null == context) {
+            return 0;
+        }
         return context.getResources().getDisplayMetrics().widthPixels;
     }
 
     public static int getPhoneHeight(Context context){
+        if (null == context) {
+            return 0;
+        }
         return context.getResources().getDisplayMetrics().heightPixels;
     }
 }

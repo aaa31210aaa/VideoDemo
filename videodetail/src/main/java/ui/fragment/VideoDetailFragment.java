@@ -201,7 +201,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private String negativeScreenContentId;
     private DataDTO negativeScreenDto;
     private RelativeLayout.LayoutParams playViewParams;
-
+    private View footview;
 
     public VideoDetailFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String contentId) {
         this.mVideoTab = videoTab;
@@ -268,7 +268,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
         videoDetailmanager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(videoDetailmanager);
-
+        footview = View.inflate(getActivity(), R.layout.footer_view, null);
         setSoftKeyBoardListener();
         videoDetailmanager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -689,16 +689,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
-//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            playViewParams.setMargins(0, 0, 0, 0);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+
+//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
+
             playerView.setOrientation(false);
             if (linearLayout != null) {
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else if (TextUtils.equals("1", videoType)) {
-            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Portrait_Proportion);
+            int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -713,7 +717,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
             }
         } else {
-            int height = (int) (ScreenUtils.getScreenWidth(getActivity()) / Constants.Horizontal_Proportion);
+            int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Horizontal_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
@@ -1001,7 +1005,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 return;
                             }
                             mDatas.addAll(response.body().getData());
-                            for (int i = 0; i < mDatas.size() ; i++) {
+                            for (int i = 0; i < mDatas.size(); i++) {
                                 String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
                                         Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
                                 mDatas.get(i).setLogoType(videoType);
@@ -1078,8 +1082,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
                             if (response.body().getData().size() == 0) {
                                 Log.e("loadMoreData", "没有更多视频了");
-                                adapter.loadMoreEnd();
+                                adapter.loadMoreComplete();
                                 adapter.setOnLoadMoreListener(null, videoDetailRv);
+                                adapter.addFooterView(footview);
                                 isLoadComplate = true;
                             } else {
                                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);

@@ -116,6 +116,8 @@ public class CommentModel {
             private Integer rcommentId;
             private String title;
             private Integer userId;
+            private String isTop;
+            private String onShelve;
 
             public List<ChildrenDTO> getChildren() {
                 return children;
@@ -219,6 +221,22 @@ public class CommentModel {
 
             public void setUserId(Integer userId) {
                 this.userId = userId;
+            }
+
+            public String getIsTop() {
+                return isTop;
+            }
+
+            public void setIsTop(String isTop) {
+                this.isTop = isTop;
+            }
+
+            public String getOnShelve() {
+                return onShelve;
+            }
+
+            public void setOnShelve(String onShelve) {
+                this.onShelve = onShelve;
             }
 
             @Keep

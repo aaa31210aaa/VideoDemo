@@ -36,7 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="漫国神卡密撒嘛"
+                    tool:text="测试测试测试测试"
                     android:textColor="@color/comment_pop_user_nam"
                     android:textSize="12sp">
 
@@ -63,7 +63,7 @@
                         android:textColor="#3E85ED"
                         android:textSize="12sp"
                         android:visibility="gone"
-                        tool:text="(审核中)">
+                        android:text="(审核中)">
 
                     </TextView>
 

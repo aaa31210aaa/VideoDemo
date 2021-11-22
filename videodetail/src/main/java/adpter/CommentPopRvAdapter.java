@@ -69,6 +69,17 @@ public class CommentPopRvAdapter extends BaseQuickAdapter<CommentModel.DataDTO.R
         ImageView commentTopLabel = helper.getView(R.id.comment_top_label);
         TextView underReview = helper.getView(R.id.under_review);
 
+        if (TextUtils.equals(item.getIsTop(),"false")) {
+            commentTopLabel.setVisibility(View.GONE);
+        } else {
+            commentTopLabel.setVisibility(View.VISIBLE);
+        }
+
+        if (TextUtils.equals(item.getOnShelve(),"true")) {
+            underReview.setVisibility(View.GONE);
+        } else {
+            underReview.setVisibility(View.VISIBLE);
+        }
 
     }
 }

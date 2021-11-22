@@ -93,7 +93,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
-        ((VideoHomeActivity)mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        ((VideoHomeActivity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         double widthPixel = outMetrics.widthPixels;
         double heightPixel = outMetrics.heightPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
@@ -120,13 +120,12 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             if (phoneIsNormal()) {
                 layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-                layoutParams.setMargins(0,0,0,0);
+                layoutParams.setMargins(0, 0, 0, 0);
             } else {
                 layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                layoutParams.setMargins(0,0,0,ButtonSpan.dip2px(80));
             }
             layoutParams.width = (int) widthPixel - 1;
-            layoutParams.height = (int) (widthPixel/Constants.Portrait_Proportion);
+            layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
@@ -140,14 +139,18 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.width = (int) widthPixel - 1;
-            if (Integer.parseInt(item.getWidth()) > Integer.parseInt(item.getHeight())) {
-                double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
-                layoutParams.height = (int) (widthPixel * percent);
-            } else {
-                double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
-                layoutParams.height = (int) (widthPixel * percent);
-            }
-
+//            if (Integer.parseInt(item.getWidth()) > Integer.parseInt(item.getHeight())) {
+//                double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
+//                layoutParams.height = (int) (widthPixel * percent);
+//            } else {
+//                double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
+//                layoutParams.height = (int) (widthPixel * percent);
+//            }
+            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            layoutParams.setMargins(0, 0, 0, 0);
+            double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
+            layoutParams.height = (int) (widthPixel * percent);
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
@@ -155,7 +158,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                         .into(coverPicture);
             }
         }
-
 
 
         //非wifi状态下布局是否显示
@@ -243,6 +245,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         huati.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //行为埋点 话题点击
                 //跳转H5话题详情
                 try {
                     if (Utils.mIsDebug) {
@@ -288,6 +291,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //行为埋点 button_name 展开简介
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);

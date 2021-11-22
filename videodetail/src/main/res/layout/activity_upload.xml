@@ -158,9 +158,9 @@
                             android:id="@+id/upload_btn"
                             android:layout_width="95dp"
                             android:layout_height="95dp"
-                            android:src="@drawable/upload_btn"
+                            android:paddingTop="@dimen/video_dp10"
                             android:scaleType="fitXY"
-                            android:paddingTop="@dimen/video_dp10">
+                            android:src="@drawable/upload_btn">
 
                         </ImageView>
 
