@@ -438,29 +438,29 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             }
         };
 
-        //窗口重播按钮
-        playerView.mWindowPlayer.setIsReplayClick(new WindowPlayer.IsReplayClick() {
-            @Override
-            public void getReplayClick() {
-                if (xkshFragment.mIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-                }
-            }
-        });
+//        //窗口重播按钮
+//        playerView.mWindowPlayer.setIsReplayClick(new WindowPlayer.IsReplayClick() {
+//            @Override
+//            public void getReplayClick() {
+//                if (xkshFragment.mIsVisibleToUser) {
+//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+//                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+//                }
+//            }
+//        });
 
-        //全屏重播按钮
-        playerView.mFullScreenPlayer.setFullIsReplayClick(new FullScreenPlayer.FullIsReplayClick() {
-            @Override
-            public void getFullReplayClick() {
-                if (xkshFragment.mIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-                }
-            }
-        });
+//        //全屏重播按钮
+//        playerView.mFullScreenPlayer.setFullIsReplayClick(new FullScreenPlayer.FullIsReplayClick() {
+//            @Override
+//            public void getFullReplayClick() {
+//                if (xkshFragment.mIsVisibleToUser) {
+//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+//                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
+//                }
+//            }
+//        });
 
         //开始播放回调
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {

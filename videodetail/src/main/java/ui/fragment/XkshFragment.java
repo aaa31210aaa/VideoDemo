@@ -1884,8 +1884,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 startActivity(new Intent(getActivity(), UploadActivity.class));
             }
         } else if (id == R.id.rank_list) {
-            //行为埋点 排行榜按钮点击
-            startActivity(new Intent(getActivity(), TgtCodeActivity.class));
             //跳转H5排行榜
             try {
                 if (Utils.mIsDebug) {
