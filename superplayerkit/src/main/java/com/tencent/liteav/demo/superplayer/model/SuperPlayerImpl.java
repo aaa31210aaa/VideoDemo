@@ -769,6 +769,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             }
         } else {
             //埋点  视频-开始播放  重播
+            superPlayerView.buriedPointModel.setIs_renew("true");
             playVodURL(mCurrentPlayVideoURL);
         }
     }

@@ -1,6 +1,5 @@
 package ui.fragment;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -16,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,6 +25,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
@@ -40,7 +39,6 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
-import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
@@ -60,8 +58,8 @@ import com.wdcs.model.TokenModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.KeyboardUtils;
-import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
@@ -75,13 +73,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailAdapter;
-import ui.activity.VideoDetailActivity;
+import model.bean.ActivityRuleBean;
 import ui.activity.VideoHomeActivity;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
@@ -194,14 +191,23 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private LoadingView loadingProgress;
     private boolean isFollow; //是否关注
     public double pointPercent;// 每一次记录的节点播放百分比
-    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
+    //    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
     private long lsDuration = 0; //每一次上报临时保存的播放时长
     private boolean isCheckState; //是否请求了检查点赞收藏状态的接口
     private TextView zxpl;
     private String negativeScreenContentId;
     private DataDTO negativeScreenDto;
     private RelativeLayout.LayoutParams playViewParams;
-    private View footview;
+    private View footerView;
+    public ActivityRuleBean activityRuleBean;
+    public ImageView activityRuleImg; //活动规则图
+    public ImageView activityRuleAbbreviation;
+    public ImageView activityToAbbreviation; //变为缩略图按钮
+    public boolean isAbbreviation; //当前是否是缩略图
+    public long videoOldSystemTime;
+    public long videoReportTime;
+    private boolean isFirst = true;
+
 
     public VideoDetailFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String contentId) {
         this.mVideoTab = videoTab;
@@ -268,7 +274,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
         videoDetailmanager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(videoDetailmanager);
-        footview = View.inflate(getActivity(), R.layout.footer_view, null);
+        footerView = View.inflate(getActivity(), R.layout.footer_view, null);
         setSoftKeyBoardListener();
         videoDetailmanager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -281,9 +287,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 initialize = true;
 
                 if (mDatas.isEmpty()) {
-                    return;
-                }
-                if (null == mDatas.get(0)) {
                     return;
                 }
                 mDataDTO = mDatas.get(0);
@@ -416,17 +419,19 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
                 if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                     //上报埋点
-                    everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                    double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
+                    double time = (DateUtils.getTimeCurrent() - videoOldSystemTime) / 1000;
+                    double currentPercent = (time / mDuration);
                     double uploadPercent = 0;
-                    if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
                         uploadPercent = currentPercent;
                     } else {
-                        uploadPercent = maxPercent;
+                        uploadPercent = 1;
                     }
+                    videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
                     BigDecimal two = new BigDecimal(uploadPercent);
                     double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_OVER_AUTO);
                 }
 
                 //滑动下一条或者上一条视频
@@ -499,6 +504,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         shareCircleBtn.setOnClickListener(this);
         shareQqBtn = sharePopView.findViewById(R.id.share_qq_btn);
         shareQqBtn.setOnClickListener(this);
+
+        activityRuleImg = view.findViewById(R.id.activity_rule_img);
+        activityRuleImg.setOnClickListener(this);
+        activityToAbbreviation = view.findViewById(R.id.activity_to_abbreviation);
+        activityToAbbreviation.setOnClickListener(this);
+        activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
+        activityRuleAbbreviation.setOnClickListener(this);
 
         /**
          * 发送评论
@@ -641,24 +653,24 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 if (null != playerView && null != playerView.getParent()) {
                     ((ViewGroup) playerView.getParent()).removeView(playerView);
                 }
-                //重置重播标识
-                playerView.buriedPointModel.setIs_renew("false");
                 addPlayView(currentIndex);
             }
         } else {
             if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                 //上报埋点
-                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
+                double time = (DateUtils.getTimeCurrent() - videoOldSystemTime) / 1000;
+                double currentPercent = (time / mDuration);
                 double uploadPercent = 0;
-                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
                     uploadPercent = currentPercent;
                 } else {
-                    uploadPercent = maxPercent;
+                    uploadPercent = 1;
                 }
+                videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
                 BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_OVER_AUTO);
             }
             playerView.mSuperPlayer.pause();
             if (null != rlLp) {
@@ -667,7 +679,121 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             lsDuration = 0;
             maxPercent = 0;
         }
+        //重置重播标识
+        playerView.buriedPointModel.setIs_renew("false");
     }
+
+    /**
+     * 获取活动规则
+     */
+    private void getActivityRule() {
+        OkGo.<ActivityRuleBean>get(ApiConstants.getInstance().getActivityRule())
+                .tag(VIDEOTAG)
+                .params("panelCode", "activity.video.link")
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new JsonCallback<ActivityRuleBean>() {
+                    @Override
+                    public void onSuccess(Response<ActivityRuleBean> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        if (response.body().getCode().equals(success_code)) {
+                            activityRuleBean = response.body();
+                            if (null == activityRuleBean) {
+                                return;
+                            }
+
+                            if (null != activityRuleBean.getData().getConfig().getJumpUrl()
+                                    && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
+                                mVideoTab.showMsg(1, "活动");
+                                mVideoTab.setMsgMargin(1, ButtonSpan.dip2px(6), ButtonSpan.dip2px(10));
+                                if (null != activityRuleImg) {
+                                    activityRuleImg.setVisibility(View.VISIBLE);
+                                }
+                                if (null != activityToAbbreviation) {
+                                    activityToAbbreviation.setVisibility(View.VISIBLE);
+                                }
+                            }
+
+                            /**
+                             * 设置活动规则图，缩略图
+                             */
+                            if (null != getActivity() && !getActivity().isFinishing()
+                                    && !getActivity().isDestroyed()) {
+                                Glide.with(getActivity())
+                                        .load(activityRuleBean.getData().getConfig().getImageUrl())
+                                        .into(activityRuleImg);
+                                Glide.with(getActivity())
+                                        .load(activityRuleBean.getData().getConfig().getBackgroundImageUrl())
+                                        .into(activityRuleAbbreviation);
+                            }
+
+                            /**
+                             * 活动规则图点击 跳转活动链接
+                             */
+                            activityRuleImg.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    try {
+                                        param.recommendUrl(activityRuleBean.getData().getConfig().getJumpUrl(), null);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+
+                            /**
+                             * 变成缩略图
+                             */
+                            activityToAbbreviation.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (null != activityRuleImg) {
+                                        activityRuleImg.setVisibility(View.GONE);
+                                    }
+                                    if (null != activityRuleAbbreviation) {
+                                        activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                                    }
+                                    isAbbreviation = true;
+                                }
+                            });
+
+                            /**
+                             * 点击展示完整活动图
+                             */
+                            activityRuleAbbreviation.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (null != activityRuleImg) {
+                                        activityRuleImg.setVisibility(View.VISIBLE);
+                                    }
+                                    if (null != activityRuleAbbreviation) {
+                                        activityRuleAbbreviation.setVisibility(View.GONE);
+                                    }
+
+                                    isAbbreviation = false;
+                                }
+                            });
+
+                        } else {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<ActivityRuleBean> response) {
+                        super.onError(response);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
+
 
     /**
      * 在视频playview位置上添加各种view
@@ -678,22 +804,29 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (null == playerView) {
             return;
         }
+        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
+        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
         }
-        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        if (null != playerView && null != playerView.getParent()) {
+            ((ViewGroup) playerView.getParent()).removeView(playerView);
+        }
 
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
-            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
+            double mHeight;
+            mHeight = getResources().getDisplayMetrics().widthPixels / percent;
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) mHeight);
             playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playViewParams.setMargins(0, 0, 0, 0);
-            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
 
 //            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
 
@@ -734,7 +867,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (rlLp != null && videoFragmentIsVisibleToUser) {
             rlLp.addView(playerView, 1);
             //露出即上报
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, Constants.CATEGORY_NAME), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
     }
@@ -747,8 +880,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      * 2 ：  横板视频
      */
     public static String videoIsNormal(int videoWidth, int videoHeight) {
-        if (videoWidth == 0 && videoHeight == 0) {
-            return "0";
+        if (videoWidth == 0 || videoHeight == 0) {
+            return "2";
         }
 
         if (videoWidth > videoHeight) {
@@ -1040,6 +1173,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                        getActivityRule();
                     }
                 });
     }
@@ -1084,7 +1218,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 Log.e("loadMoreData", "没有更多视频了");
                                 adapter.loadMoreComplete();
                                 adapter.setOnLoadMoreListener(null, videoDetailRv);
-                                adapter.addFooterView(footview);
+                                if (null != footerView && null != footerView.getParent()) {
+                                    ((ViewGroup) footerView.getParent()).removeView(footerView);
+                                }
+                                adapter.addFooterView(footerView);
                                 isLoadComplate = true;
                             } else {
                                 adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
@@ -1618,14 +1755,15 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             return;
         }
 
-        if (playerView != null) {
+        if (playerView != null && !isFirst) {
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
                 playerView.mSuperPlayer.reStart();
             }
         }
-
+        isFirst = false;
+        videoOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
         }
@@ -1652,36 +1790,32 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (!videoFragmentIsVisibleToUser) {
             return;
         }
-
+        playerView.mSuperPlayer.pause();
         if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
-            everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
 
-            //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
             if (mDuration != 0) {
-                String event;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                    //不为重播
-                    event = Constants.CMS_VIDEO_OVER_AUTO;
-                } else {
-                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
-                }
-                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
+                /**
+                 * 上报内容埋点 视频播放时长
+                 */
+                String event = Constants.CMS_VIDEO_OVER_AUTO;
+                double time = (DateUtils.getTimeCurrent() - videoOldSystemTime) / 1000;
+                double currentPercent = (time / mDuration);
                 double uploadPercent = 0;
-                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
                     uploadPercent = currentPercent;
                 } else {
-                    uploadPercent = maxPercent;
+                    uploadPercent = 1;
                 }
+                videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
                 BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
                 lsDuration = playerView.mWindowPlayer.mProgress;
 
                 //上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), event), event);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event,Constants.CATEGORY_NAME), event);
             }
         }
-        playerView.mSuperPlayer.pause();
     }
 
     @Override

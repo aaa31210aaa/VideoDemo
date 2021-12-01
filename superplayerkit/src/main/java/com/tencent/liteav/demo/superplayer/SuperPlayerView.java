@@ -487,11 +487,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         } else if (model.multiURLs != null && !model.multiURLs.isEmpty()) {
             mSuperPlayer.play(model.appId, model.multiURLs, model.playDefaultIndex);
         } else {
-            if (null != mWindowPlayer.getDataDTO()) {
-                String jsonString = BuriedPointModelManager.getVideoStartPlay("", "false", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
-                        "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
-                Log.e("埋点", "埋点：视频开始播放---" + jsonString);
-            }
+//            if (null != mWindowPlayer.getDataDTO()) {
+//                String jsonString = BuriedPointModelManager.getVideoStartPlay("", "false", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
+//                        "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
+//                Log.e("埋点", "埋点：视频开始播放---" + jsonString);
+//            }
             mSuperPlayer.play(model);
         }
     }
@@ -840,11 +840,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) { //重播
                 mSuperPlayer.reStart();
                 buriedPointModel.setIs_renew("true");
-                if (null != mWindowPlayer.getDataDTO()) {
-                    String jsonString = BuriedPointModelManager.getVideoStartPlay("", "true", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
-                            "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
-                    Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
-                }
+//                if (null != mWindowPlayer.getDataDTO()) {
+//                    String jsonString = BuriedPointModelManager.getVideoStartPlay("", "true", mWindowPlayer.getDataDTO().getId() + "", mWindowPlayer.getDataDTO().getTitle(),
+//                            "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
+//                    Log.e("埋点", "埋点：视频开始重新播放---" + jsonString);
+//                }
             } else if (mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PAUSE) { //继续播放
                 mSuperPlayer.resume();
             }

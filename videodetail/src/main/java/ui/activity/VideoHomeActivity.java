@@ -3,6 +3,8 @@ package ui.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,8 +42,11 @@ import com.wdcs.model.ColumnModel;
 import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.KeyboardUtils;
+import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.PersonInfoManager;
+import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
@@ -52,6 +57,7 @@ import java.util.List;
 import adpter.VideoViewPagerAdapter;
 import ui.fragment.VideoDetailFragment;
 import ui.fragment.XkshFragment;
+import widget.NetBroadcastReceiver;
 
 import com.wdcs.utils.NoScrollViewPager;
 
@@ -92,6 +98,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private String lsCotentnId;
     public static double maxPercent = 0; //记录最大百分比
     public static long lsDuration = 0; //每一次上报临时保存的播放时长
+    private NetBroadcastReceiver netWorkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,10 +126,15 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
         noLoginTipsCancel.setOnClickListener(this);
         noLoginTipsOk.setOnClickListener(this);
-
         playerView = SuperPlayerView.getInstance(this, getWindow().getDecorView(), true);
         initViewPager();
         initViewPagerData();
+        if (netWorkStateReceiver == null) {
+            netWorkStateReceiver = new NetBroadcastReceiver();
+        }
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(netWorkStateReceiver, filter);
 
         //全屏进度条监听
         if (null != playerView && null != playerView.mFullScreenPlayer) {
@@ -302,8 +314,21 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             videoFragmentFullLin.setVisibility(View.GONE);
                         }
 
+                        if (videoDetailFragment.isAbbreviation) {
+                            if (null != videoDetailFragment.activityRuleAbbreviation) {
+                                videoDetailFragment.activityRuleAbbreviation.setVisibility(View.GONE);
+                            }
+                        } else {
+                            if (null != videoDetailFragment.activityRuleImg) {
+                                videoDetailFragment.activityRuleImg.setVisibility(View.GONE);
+                            }
+                            if (null != videoDetailFragment.activityToAbbreviation) {
+                                videoDetailFragment.activityToAbbreviation.setVisibility(View.GONE);
+                            }
+                        }
+
                         videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
-                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex,R.id.cover_picture).setVisibility(View.GONE);
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.cover_picture).setVisibility(View.GONE);
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(false);
                         xkshFragment.refreshLayout.setEnableRefresh(false);
@@ -360,8 +385,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 xkshFragment.activityToAbbreviation.setVisibility(View.GONE);
                             }
                         }
+
                         xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
-                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex,R.id.cover_picture).setVisibility(View.GONE);
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.cover_picture).setVisibility(View.GONE);
                     }
 
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
@@ -388,8 +414,25 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin)) {
                             videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.introduce_lin).setVisibility(View.VISIBLE);
                         }
+
+                        if (videoDetailFragment.isAbbreviation) {
+                            if (null != videoDetailFragment.activityRuleAbbreviation) {
+                                videoDetailFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            if (null != videoDetailFragment.activityRuleBean.getData() && null != videoDetailFragment.activityRuleBean.getData().getConfig().getJumpUrl()
+                                    && !TextUtils.isEmpty(videoDetailFragment.activityRuleBean.getData().getConfig().getJumpUrl())) {
+                                if (null != videoDetailFragment.activityRuleImg) {
+                                    videoDetailFragment.activityRuleImg.setVisibility(View.VISIBLE);
+                                }
+                                if (null != videoDetailFragment.activityToAbbreviation) {
+                                    videoDetailFragment.activityToAbbreviation.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        }
+
                         videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.VISIBLE);
-                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex,R.id.cover_picture).setVisibility(View.VISIBLE);
+                        videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.cover_picture).setVisibility(View.VISIBLE);
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(true);
                         xkshFragment.refreshLayout.setEnableRefresh(true);
@@ -415,7 +458,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 xkshFragment.activityRuleAbbreviation.setVisibility(View.VISIBLE);
                             }
                         } else {
-                            if (null != xkshFragment.activityRuleBean.getData().getConfig().getJumpUrl()
+                            if (null != xkshFragment.activityRuleBean.getData() && null != xkshFragment.activityRuleBean.getData().getConfig().getJumpUrl()
                                     && !TextUtils.isEmpty(xkshFragment.activityRuleBean.getData().getConfig().getJumpUrl())) {
                                 if (null != xkshFragment.activityRuleImg) {
                                     xkshFragment.activityRuleImg.setVisibility(View.VISIBLE);
@@ -427,7 +470,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         }
 
                         xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.VISIBLE);
-                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex,R.id.cover_picture).setVisibility(View.VISIBLE);
+                        xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.cover_picture).setVisibility(View.VISIBLE);
                     }
                     if (null != videoTitleView) {
                         videoTitleView.setVisibility(View.VISIBLE);
@@ -467,9 +510,17 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void ReadPlayCallback() {
                 if (xkshFragment.mIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
+                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                    //不为重播
+                        xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
+                    }
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_PLAY_AUTO);
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO), Constants.CMS_VIDEO_PLAY_AUTO);
+                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                    //不为重播
+                        videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
+                    }
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_PLAY_AUTO);
                 }
             }
         });
@@ -480,29 +531,20 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             public void AutoPlayOverCallBack() {
 
                 final String event;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                maxPercent = 100;
+                if (xkshFragment.mIsVisibleToUser) {
+                    lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
+                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                    lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
+                }
+                String renew = playerView.buriedPointModel.getIs_renew();
+                if (null == renew || TextUtils.equals("false", renew)) {
                     //不为重播
                     event = Constants.CMS_VIDEO_OVER_AUTO;
-                    playerView.mWindowPlayer.setRecordDuration(mDuration);
-                } else {
-                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
+                    //拖动/自动播放结束上报埋点
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event, Constants.CATEGORY_NAME), event);
                 }
 
-                //拖动/自动播放结束上报埋点
-                try {
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event), event);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                maxPercent = 100;
-
-
-                if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
-                } else if (xkshFragment.mIsVisibleToUser) {
-                    lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
-                }
                 playerView.mSuperPlayer.reStart();
             }
         });
@@ -561,6 +603,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     //属性名：button_name
                 } else if (1 == position) {
                     playerView.setOrientation(true);
+                    videoTab.hideMsg(position);
                     //滑动切换到小康生活  事件名：short_video_home_click
                     //属性名：button_name
                 } else if (2 == position) {
@@ -695,11 +738,12 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         if (instance != null) {
             instance.release();
             instance.mSuperPlayer.destroy();
-//            instance = null;
-            OkGo.getInstance().cancelAll();
+            instance = null;
         }
+        OkGo.getInstance().cancelAll();
         maxPercent = 0;
         lsDuration = 0;
+        unregisterReceiver(netWorkStateReceiver);
 //        OkGo.getInstance().cancelTag(VIDEOTAG);
     }
 

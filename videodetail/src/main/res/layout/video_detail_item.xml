@@ -18,7 +18,7 @@
         android:maxLines="3"
         android:textColor="@color/video_white"
         android:textSize="18sp"
-        tool:text="长沙实景交响诗MV丨红色经典激荡起“一身挂满音符的河红色经典激荡起“一身挂满音符的河”一身挂满音符的河红色经典激荡起“一身挂满音符的河" />
+        tool:text="" />
 
     <LinearLayout
         android:id="@+id/video_detail_info"
@@ -132,12 +132,12 @@
         android:id="@+id/video_flipper"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_above="@+id/fold_text"
         android:layout_marginLeft="@dimen/video_dp10"
         android:layout_marginRight="@dimen/video_dp10"
-        android:layout_above="@+id/fold_text"
-        android:flipInterval="2000"
-        android:autoStart="false"
         android:layout_marginBottom="@dimen/video_dp5"
+        android:autoStart="false"
+        android:flipInterval="2000"
         android:inAnimation="@anim/vf_anim_in"
         android:outAnimation="@anim/vf_anim_out" />
 

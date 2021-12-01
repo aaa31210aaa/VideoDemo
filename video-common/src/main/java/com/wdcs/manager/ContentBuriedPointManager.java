@@ -22,7 +22,8 @@ import static com.wdcs.callback.VideoInteractiveParam.param;
 
 
 public class ContentBuriedPointManager {
-    public static JSONObject setContentBuriedPoint(Context context, String contentId, String duration, String percent, String event) {
+    public static JSONObject setContentBuriedPoint(Context context, String contentId, String duration, String percent, String event,
+                                                   String category_name) {
         if (TextUtils.isEmpty(contentId)) {
             return null;
         }
@@ -70,7 +71,7 @@ public class ContentBuriedPointManager {
         //params对象 ---start
         ParamsModel paramsModel = new ParamsModel();
         paramsModel.setEnter_from(Constants.ENTER_FROM);
-        paramsModel.setCategory_name(Constants.CATEGORY_NAME);
+        paramsModel.setCategory_name(category_name);
         paramsModel.setDuration(duration);
         paramsModel.setPercent(percent);
         paramsModel.setParams_for_special(Constants.PARAMS_FOR_SPECIAL);

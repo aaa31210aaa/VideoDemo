@@ -57,6 +57,7 @@ import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NoScrollViewPager;
@@ -198,11 +199,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public ImageView activityToAbbreviation; //变为缩略图按钮
     public LinearLayout fullLin;
     public double pointPercent;// 每一次记录的节点播放百分比
-    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
+    //    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
     public ActivityRuleBean activityRuleBean;
     public boolean isAbbreviation; //当前是否是缩略图
     private RelativeLayout.LayoutParams playViewParams;
     private View footView;
+    public long xkshOldSystemTime;
+    public long xkshReportTime;
+    private boolean isFirst = true;
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView) {
         this.mVideoTab = videoTab;
@@ -281,9 +285,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
                 mDataDTO = mDatas.get(0);
-                if (null == mDatas.get(0)) {
-                    return;
-                }
 
                 if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
                     if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
@@ -382,22 +383,24 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
                     }
                 }
-
                 if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                     //上报埋点
-                    everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                    double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
+                    double time = (DateUtils.getTimeCurrent() - xkshOldSystemTime) / 1000;
+                    double currentPercent = (time / mDuration);
                     double uploadPercent = 0;
-                    if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
                         uploadPercent = currentPercent;
                     } else {
-                        uploadPercent = maxPercent;
+                        uploadPercent = 1;
                     }
+                    xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                     BigDecimal two = new BigDecimal(uploadPercent);
                     double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_OVER_AUTO);
                 }
-
+                //重置重播标识
+                playerView.buriedPointModel.setIs_renew("false");
                 //滑动下一条或者上一条视频
                 playerView.mWindowPlayer.setRecordDuration(0);
                 lsDuration = 0;
@@ -411,8 +414,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 currentIndex = position;
                 reset();
                 myContentId = String.valueOf(mDatas.get(position).getId());
-                //重置重播标识
-                playerView.buriedPointModel.setIs_renew("false");
+
                 addPageViews(myContentId);
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
@@ -572,30 +574,29 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (null == adapter) {
             return;
         }
-
         if (isVisibleToUser) {
             if (!isVisibleNoWifiView(getActivity())) {
                 if (null != playerView && null != playerView.getParent()) {
                     ((ViewGroup) playerView.getParent()).removeView(playerView);
                 }
-                //重置重播标识
-                playerView.buriedPointModel.setIs_renew("false");
                 addPlayView(currentIndex);
             }
         } else {
             if (mDuration != 0 && playerView.mWindowPlayer.mProgress != 0) {
                 //上报埋点
-                everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
+                double time = (DateUtils.getTimeCurrent() - xkshOldSystemTime) / 1000;
+                double currentPercent = (time / mDuration);
                 double uploadPercent = 0;
-                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
                     uploadPercent = currentPercent;
                 } else {
-                    uploadPercent = maxPercent;
+                    uploadPercent = 1;
                 }
+                xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                 BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO), Constants.CMS_VIDEO_OVER_AUTO);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_OVER_AUTO);
             }
 
             playerView.mSuperPlayer.pause();
@@ -605,6 +606,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             lsDuration = 0;
             maxPercent = 0;
         }
+        //重置重播标识
+        playerView.buriedPointModel.setIs_renew("false");
     }
 
     /**
@@ -631,8 +634,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                             if (null != activityRuleBean.getData().getConfig().getJumpUrl()
                                     && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
-                                mVideoTab.showMsg(0, "有活动");
-                                mVideoTab.setMsgMargin(0, ButtonSpan.dip2px(3), ButtonSpan.dip2px(9));
+                                mVideoTab.showMsg(0, "活动");
+                                mVideoTab.setMsgMargin(0, ButtonSpan.dip2px(6), ButtonSpan.dip2px(10));
                                 if (null != activityRuleImg) {
                                     activityRuleImg.setVisibility(View.VISIBLE);
                                 }
@@ -739,14 +742,18 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
         RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
+
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
         if (TextUtils.equals("0", videoType)) {
-            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
+            double mHeight;
+            mHeight = getResources().getDisplayMetrics().widthPixels / percent;
+            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) mHeight);
             playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playViewParams.setMargins(0, 0, 0, 0);
-            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
 
 //            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
 
@@ -789,7 +796,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (rlLp != null && mIsVisibleToUser) {
             rlLp.addView(playerView, 1);
             //露出即上报
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW), Constants.CMS_CLIENT_SHOW);
+            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, Constants.CATEGORY_NAME), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
 
@@ -837,7 +844,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      */
     private String videoIsNormal(int videoWidth, int videoHeight) {
         if (videoWidth == 0 && videoHeight == 0) {
-            return "0";
+            return "2";
         }
         if (videoWidth > videoHeight) {
             //横板
@@ -1142,6 +1149,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 Log.e("loadMoreData", "没有更多视频了");
                                 adapter.loadMoreComplete();
                                 adapter.setOnLoadMoreListener(null, videoDetailRv);
+                                if (null != footView && null != footView.getParent()) {
+                                    ((ViewGroup) footView.getParent()).removeView(footView);
+                                }
                                 adapter.addFooterView(footView);
                                 isLoadComplate = true;
                                 return;
@@ -1646,14 +1656,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
-        if (playerView != null) {
+        if (playerView != null && !isFirst) {
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
                 playerView.mSuperPlayer.reStart();
             }
         }
-
+        isFirst = false;
+        xkshOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
         }
@@ -1743,39 +1754,31 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             return;
         }
 
+        playerView.mSuperPlayer.pause();
         if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
-            everyOneDuration = playerView.mWindowPlayer.mProgress - lsDuration;
-
-            //当前节点播放的时长/总视频时长 = 这一次观看的视频进度百分比
             if (mDuration != 0) {
                 /**
                  * 上报内容埋点 视频播放时长
-                 * 如果 当前播放到的时长进度 小于 上一次存的时长进度  那么不上报（用户往回拖动进度条，只上报用户看到最长的视频时长进度）
                  */
-                String event;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                    //不为重播
-                    event = Constants.CMS_VIDEO_OVER_AUTO;
-                } else {
-                    //重播
-                    event = Constants.CMS_VIDEO_OVER;
-                }
-                double currentPercent = ((double) playerView.mWindowPlayer.mProgress / mDuration);
+                String event = Constants.CMS_VIDEO_OVER_AUTO;
+                double time = (DateUtils.getTimeCurrent() - xkshOldSystemTime) / 1000;
+                double currentPercent = (time / mDuration);
                 double uploadPercent = 0;
-                if (((double) playerView.mWindowPlayer.mProgress / mDuration) > maxPercent) {
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
                     uploadPercent = currentPercent;
                 } else {
-                    uploadPercent = maxPercent;
+                    uploadPercent = 1;
                 }
+
+                xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                 BigDecimal two = new BigDecimal(uploadPercent);
                 double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                lsDuration = playerView.mWindowPlayer.mProgress;
-
+//                lsDuration = playerView.mWindowPlayer.mProgress + lsDuration;
                 //上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(everyOneDuration * 1000), String.valueOf(Math.floor(pointPercentTwo * 100)), event), event);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, Constants.CATEGORY_NAME), event);
             }
         }
-        playerView.mSuperPlayer.pause();
     }
 
     @Override

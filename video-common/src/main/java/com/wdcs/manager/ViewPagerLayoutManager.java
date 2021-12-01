@@ -65,8 +65,10 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
                     return;
                 }
                 int positionIdle = getPosition(viewIdle);
-                if (mOnViewPagerListener != null && getChildCount() == 1) {
-                    mOnViewPagerListener.onPageSelected(positionIdle,positionIdle == getItemCount() - 1);
+                if (getItemCount() > 0) {
+                    if (mOnViewPagerListener != null && getChildCount() == 1) {
+                        mOnViewPagerListener.onPageSelected(positionIdle,positionIdle == getItemCount() - 1);
+                    }
                 }
                 break;
             case RecyclerView.SCROLL_STATE_DRAGGING:

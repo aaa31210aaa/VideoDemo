@@ -96,7 +96,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((VideoHomeActivity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         double widthPixel = outMetrics.widthPixels;
-        double heightPixel = outMetrics.heightPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //横板标准视频
@@ -142,8 +141,10 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.setMargins(0, 0, 0, 0);
 
-            double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
-            layoutParams.height = (int) (widthPixel * percent);
+            double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
+            double mHeight;
+            mHeight = layoutParams.width / percent;
+            layoutParams.height = (int) mHeight;
 
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
@@ -152,6 +153,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                         .into(coverPicture);
             }
         }
+        coverPicture.setLayoutParams(layoutParams);
 
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);

@@ -49,9 +49,8 @@
         android:layout_height="30dp"
         android:layout_marginLeft="@dimen/video_dp20"
         android:src="@drawable/video_wdcs_logo"
-        android:layout_marginTop="70dp"
-        android:visibility="gone"
-        >
+        android:layout_marginTop="120dp"
+        android:visibility="gone">
 
     </ImageView>
 

@@ -169,6 +169,7 @@ public class ActivityRuleBean {
             private String jumpUrl;
             private String typeCode;
             private String backgroundImageUrl;
+            private String volcengineCategoryId;
 
             public String getCode() {
                 return code;
@@ -220,6 +221,14 @@ public class ActivityRuleBean {
 
             public String getBackgroundImageUrl() {
                 return backgroundImageUrl;
+            }
+
+            public String getVolcengineCategoryId() {
+                return volcengineCategoryId;
+            }
+
+            public void setVolcengineCategoryId(String volcengineCategoryId) {
+                this.volcengineCategoryId = volcengineCategoryId;
             }
 
             public void setBackgroundImageUrl(String backgroundImageUrl) {

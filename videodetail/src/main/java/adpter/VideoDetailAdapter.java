@@ -134,23 +134,19 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             }
         } else {
             //非标准视频
+            //非标准视频
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
-            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.width = (int) widthPixel - 1;
-//            if (Integer.parseInt(item.getWidth()) > Integer.parseInt(item.getHeight())) {
-//                double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
-//                layoutParams.height = (int) (widthPixel * percent);
-//            } else {
-//                double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
-//                layoutParams.height = (int) (widthPixel * percent);
-//            }
             layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.setMargins(0, 0, 0, 0);
-            double percent = Double.parseDouble(item.getHeight()) / Double.parseDouble(item.getWidth());
-            layoutParams.height = (int) (widthPixel * percent);
+
+            double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
+            double mHeight;
+            mHeight = layoutParams.width / percent;
+            layoutParams.height = (int) mHeight;
+
             if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
                     && !((VideoHomeActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)

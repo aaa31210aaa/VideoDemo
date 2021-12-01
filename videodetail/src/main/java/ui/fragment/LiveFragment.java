@@ -258,6 +258,9 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                                 adapter.loadMoreComplete();
 //                                adapter.setOnLoadMoreListener(null, liveRv);
                                 isLoadComplate = true;
+                                if (null != footview && null != footview.getParent()) {
+                                    ((ViewGroup) footview.getParent()).removeView(footview);
+                                }
                                 adapter.addFooterView(footview);
                                 return;
                             } else {

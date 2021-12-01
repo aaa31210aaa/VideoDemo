@@ -145,4 +145,12 @@ public enum DateUtils {
         String localTime = localFormater.format(gpsUTCDate.getTime());
         return localTime;
     }
+
+    /**
+     * 获取当前时间戳
+     */
+    public static long getTimeCurrent(){
+        long timecurrentTimeMillis = System.currentTimeMillis();
+        return timecurrentTimeMillis;
+    }
 }

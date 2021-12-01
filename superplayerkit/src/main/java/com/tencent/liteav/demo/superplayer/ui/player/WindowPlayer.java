@@ -127,7 +127,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                     return false;
                 }
                 togglePlayState();
-                show();
+//                show();
                 if (mHideViewRunnable != null) {
                     removeCallbacks(mHideViewRunnable);
                     postDelayed(mHideViewRunnable, Contants.delayMillis);
@@ -140,8 +140,16 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 if (mCurrentPlayState == SuperPlayerDef.PlayerState.LOADING) {
                     return false;
                 }
+                toggle();
+//                togglePlayState();
+//                show();
+//                if (mHideViewRunnable != null) {
+//                    removeCallbacks(mHideViewRunnable);
+//                    postDelayed(mHideViewRunnable, Contants.delayMillis);
+//                }
+
 //                if (isShowSelfProgress) {
-                    toggle();
+//                    toggle();
 //                }
 
                 return true;
@@ -735,6 +743,10 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
             }
         } else if (id == R.id.superplayer_iv_pause || id == R.id.zdy_iv_pause) { //暂停\播放按钮
             togglePlayState();
+            if (mHideViewRunnable != null) {
+                removeCallbacks(mHideViewRunnable);
+                postDelayed(mHideViewRunnable, Contants.delayMillis);
+            }
         } else if (id == R.id.superplayer_iv_fullscreen) { //全屏按钮
             if (mControllerCallback != null) {
                 mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
