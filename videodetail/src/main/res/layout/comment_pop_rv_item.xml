@@ -56,16 +56,16 @@
                         android:src="@drawable/comment_top"></ImageView>
 
 
-                    <TextView
-                        android:id="@+id/under_review"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#3E85ED"
-                        android:textSize="12sp"
-                        android:visibility="gone"
-                        android:text="(审核中)">
+<!--                    <TextView-->
+<!--                        android:id="@+id/under_review"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:textColor="#3E85ED"-->
+<!--                        android:textSize="12sp"-->
+<!--                        android:visibility="gone"-->
+<!--                        android:text="(审核中)">-->
 
-                    </TextView>
+<!--                    </TextView>-->
 
                 </RelativeLayout>
             </LinearLayout>

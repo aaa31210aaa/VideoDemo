@@ -80,6 +80,11 @@ public  class DataDTO {
     private String thirdPartyId;
     private String  thirdPartyCode;
     private String logoType;
+    private String volcCategory;
+    /**
+     *  0 是自动上报事件  1 是手动上报事件
+     */
+    private String isAutoReportEvent;
 
     public String getShareTitle() {
         if (null == shareTitle) {
@@ -967,6 +972,28 @@ public  class DataDTO {
 
     public void setLogoType(String logoType) {
         this.logoType = logoType;
+    }
+
+    public String getVolcCategory() {
+        if (null == volcCategory) {
+            return "";
+        }
+        return volcCategory;
+    }
+
+    public void setVolcCategory(String volcCategory) {
+        this.volcCategory = volcCategory;
+    }
+
+    public String getIsAutoReportEvent() {
+        if (null == isAutoReportEvent) {
+            return "";
+        }
+        return isAutoReportEvent;
+    }
+
+    public void setIsAutoReportEvent(String isAutoReportEvent) {
+        this.isAutoReportEvent = isAutoReportEvent;
     }
 
     @Keep

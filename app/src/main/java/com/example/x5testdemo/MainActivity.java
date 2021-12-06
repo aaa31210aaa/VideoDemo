@@ -6,14 +6,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.wdcs.callback.GetGdyTokenCallBack;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
+import com.wdcs.constants.Constants;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
+import com.wdcs.utils.ToastUtils;
 
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "42dd8962-9577-4651-aa87-9a3aa430e513";
+                        return "0aff2b97-850c-41b2-9ee0-219868a0987b";
                     }
 
                     @Override
@@ -79,7 +83,16 @@ public class MainActivity extends AppCompatActivity {
                     public String setDeviceId() {
                         return "998877665544332212";
                     }
+
                 });
+
+                VideoInteractiveParam.getInstance().setGdyTokenCallBack(new GetGdyTokenCallBack() {
+                    @Override
+                    public void checkLoginStatus(String gdyToken) {
+                        Log.e("Main",gdyToken);
+                    }
+                });
+
             }
         });
 
@@ -89,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, VideoHomeActivity.class);
                 intent.putExtra("panelId", panelCode.getText().toString());
                 intent.putExtra("contentId", contentId.getText().toString());
+                intent.putExtra("category_name", Constants.CATEGORY_NAME);
                 startActivity(intent);
             }
         });

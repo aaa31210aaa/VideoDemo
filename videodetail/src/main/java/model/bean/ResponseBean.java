@@ -1,5 +1,7 @@
 package model.bean;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
 @Keep
@@ -13,6 +15,9 @@ public class ResponseBean {
     private String time;
 
     public String getCode() {
+        if (TextUtils.isEmpty(code)) {
+            return "";
+        }
         return code;
     }
 
@@ -21,6 +26,9 @@ public class ResponseBean {
     }
 
     public String getSuccess() {
+        if (TextUtils.isEmpty(success)) {
+            return "";
+        }
         return success;
     }
 
@@ -29,6 +37,9 @@ public class ResponseBean {
     }
 
     public String getMessage() {
+        if (TextUtils.isEmpty(message)) {
+            return "";
+        }
         return message;
     }
 
@@ -37,6 +48,9 @@ public class ResponseBean {
     }
 
     public String getDetail() {
+        if (TextUtils.isEmpty(detail)) {
+            return "";
+        }
         return detail;
     }
 
@@ -45,6 +59,9 @@ public class ResponseBean {
     }
 
     public String getData() {
+        if (TextUtils.isEmpty(data)) {
+            return "";
+        }
         return data;
     }
 
@@ -53,6 +70,9 @@ public class ResponseBean {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(time)) {
+            return "";
+        }
         return time;
     }
 

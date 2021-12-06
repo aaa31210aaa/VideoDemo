@@ -1,8 +1,11 @@
 package com.wdcs.model;
 
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
+import java.util.ArrayList;
 import java.util.List;
 @Keep
 public class TopicModel {
@@ -24,6 +27,9 @@ public class TopicModel {
     }
 
     public Boolean getSuccess() {
+        if (null == success) {
+            return false;
+        }
         return success;
     }
 
@@ -32,7 +38,7 @@ public class TopicModel {
     }
 
     public String getMessage() {
-        if (null == message) {
+        if (TextUtils.isEmpty(message)) {
             return "";
         }
         return message;
@@ -51,6 +57,9 @@ public class TopicModel {
     }
 
     public DataDTO getData() {
+        if (null == data) {
+            return new DataDTO();
+        }
         return data;
     }
 
@@ -59,6 +68,9 @@ public class TopicModel {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(message)) {
+            return "";
+        }
         return time;
     }
 
@@ -73,6 +85,9 @@ public class TopicModel {
         private Integer pageSize;
 
         public Integer getTotal() {
+            if (null == total) {
+                return 0;
+            }
             return total;
         }
 
@@ -81,6 +96,10 @@ public class TopicModel {
         }
 
         public List<RecordsDTO> getRecords() {
+            if (null == records) {
+                List<RecordsDTO> list = new ArrayList<>();
+                return list;
+            }
             return records;
         }
 
@@ -89,6 +108,9 @@ public class TopicModel {
         }
 
         public Integer getPageIndex() {
+            if (null == pageIndex) {
+                return 0;
+            }
             return pageIndex;
         }
 
@@ -97,6 +119,9 @@ public class TopicModel {
         }
 
         public Integer getPageSize() {
+            if (null == pageSize) {
+                return 0;
+            }
             return pageSize;
         }
 
@@ -171,6 +196,9 @@ public class TopicModel {
             private Object pid;
 
             public String getShareTitle() {
+                if (TextUtils.isEmpty(shareTitle)) {
+                    return "";
+                }
                 return shareTitle;
             }
 
@@ -179,6 +207,9 @@ public class TopicModel {
             }
 
             public String getShareUrl() {
+                if (TextUtils.isEmpty(shareUrl)) {
+                    return "";
+                }
                 return shareUrl;
             }
 
@@ -187,6 +218,9 @@ public class TopicModel {
             }
 
             public String getShareImageUrl() {
+                if (TextUtils.isEmpty(shareImageUrl)) {
+                    return "";
+                }
                 return shareImageUrl;
             }
 
@@ -195,6 +229,9 @@ public class TopicModel {
             }
 
             public String getShareBrief() {
+                if (TextUtils.isEmpty(shareBrief)) {
+                    return "";
+                }
                 return shareBrief;
             }
 
@@ -203,6 +240,9 @@ public class TopicModel {
             }
 
             public String getTimeDif() {
+                if (TextUtils.isEmpty(timeDif)) {
+                    return "";
+                }
                 return timeDif;
             }
 
@@ -211,6 +251,9 @@ public class TopicModel {
             }
 
             public String getIssueTimeStamp() {
+                if (TextUtils.isEmpty(issueTimeStamp)) {
+                    return "";
+                }
                 return issueTimeStamp;
             }
 
@@ -219,6 +262,9 @@ public class TopicModel {
             }
 
             public String getStartTime() {
+                if (TextUtils.isEmpty(startTime)) {
+                    return "";
+                }
                 return startTime;
             }
 
@@ -235,6 +281,9 @@ public class TopicModel {
             }
 
             public Integer getCreateBy() {
+                if (null == createBy) {
+                    return 0;
+                }
                 return createBy;
             }
 
@@ -251,6 +300,9 @@ public class TopicModel {
             }
 
             public Integer getCommentCountShow() {
+                if (null == commentCountShow) {
+                    return 0;
+                }
                 return commentCountShow;
             }
 
@@ -259,6 +311,9 @@ public class TopicModel {
             }
 
             public Integer getLikeCountShow() {
+                if (null == likeCountShow) {
+                    return 0;
+                }
                 return likeCountShow;
             }
 
@@ -267,6 +322,9 @@ public class TopicModel {
             }
 
             public Integer getFavorCountShow() {
+                if (null == favorCountShow) {
+                    return 0;
+                }
                 return favorCountShow;
             }
 
@@ -275,6 +333,9 @@ public class TopicModel {
             }
 
             public Integer getViewCountShow() {
+                if (null == viewCountShow) {
+                    return 0;
+                }
                 return viewCountShow;
             }
 
@@ -283,6 +344,9 @@ public class TopicModel {
             }
 
             public String getType() {
+                if (TextUtils.isEmpty(type)) {
+                    return "";
+                }
                 return type;
             }
 
@@ -299,6 +363,9 @@ public class TopicModel {
             }
 
             public String getTitle() {
+                if (TextUtils.isEmpty(title)) {
+                    return "";
+                }
                 return title;
             }
 
@@ -307,6 +374,9 @@ public class TopicModel {
             }
 
             public String getThumbnailUrl() {
+                if (TextUtils.isEmpty(thumbnailUrl)) {
+                    return "";
+                }
                 return thumbnailUrl;
             }
 
@@ -315,6 +385,9 @@ public class TopicModel {
             }
 
             public String getBrief() {
+                if (TextUtils.isEmpty(brief)) {
+                    return "";
+                }
                 return brief;
             }
 
@@ -323,6 +396,9 @@ public class TopicModel {
             }
 
             public String getDetailUrl() {
+                if (TextUtils.isEmpty(detailUrl)) {
+                    return "";
+                }
                 return detailUrl;
             }
 
@@ -339,6 +415,9 @@ public class TopicModel {
             }
 
             public Boolean getIsExternal() {
+                if (null == isExternal) {
+                    return false;
+                }
                 return isExternal;
             }
 
@@ -347,6 +426,9 @@ public class TopicModel {
             }
 
             public String getPlayUrl() {
+                if (TextUtils.isEmpty(playUrl)) {
+                    return "";
+                }
                 return playUrl;
             }
 
@@ -395,6 +477,9 @@ public class TopicModel {
             }
 
             public Integer getPlayDuration() {
+                if (null == playDuration) {
+                    return 0;
+                }
                 return playDuration;
             }
 
@@ -403,6 +488,9 @@ public class TopicModel {
             }
 
             public Integer getStatus() {
+                if (null == status) {
+                    return 0;
+                }
                 return status;
             }
 

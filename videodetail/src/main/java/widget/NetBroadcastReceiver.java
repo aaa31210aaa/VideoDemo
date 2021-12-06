@@ -8,6 +8,9 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.widget.Toast;
 
+import com.wdcs.utils.NetworkUtil;
+import com.wdcs.utils.SPUtils;
+
 public class NetBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -50,10 +53,19 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
             if (networks.length == 1 && !sb.toString().contains("WIFI")) {
                 return;
             }
+            String netState;
+            String oleNetState = SPUtils.getInstance().getString("net_state");
+            if (NetworkUtil.isWifi(context)) {
+                netState = "0";
+            } else {
+                netState = "1";
+            }
+            SPUtils.getInstance().put("net_state",netState);
 
-            if (!sb.toString().contains("WIFI")) {
+            if (oleNetState.equals("1") && netState.equals(oleNetState)) {
                 Toast.makeText(context, "当前为非WIFI状态，请注意流量消耗", Toast.LENGTH_SHORT).show();
             }
+
         }
     }
 }

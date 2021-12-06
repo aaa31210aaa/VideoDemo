@@ -24,9 +24,12 @@ import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.model.Response;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
+import com.scwang.smart.refresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
+import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
+import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.ShareInfo;
@@ -45,11 +48,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.LiveRvAdapter;
+import widget.CustomLoadMoreView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
+import static utils.NetworkUtil.setDataWifiState;
 
 public class LiveFragment extends Fragment implements View.OnClickListener {
     private RecyclerView liveRv;
@@ -120,8 +125,13 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                     noLoginTipsPop();
                 } else {
                     try {
-                        param.recommendUrl(mDatas.get(position).getDetailUrl() +
-                                "?token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
+                        String url = mDatas.get(position).getDetailUrl();
+                        if (url.contains("?")) {
+                            param.recommendUrl(url + "&token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
+                        } else {
+                            param.recommendUrl(url + "?token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
+                        }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -129,45 +139,54 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
             }
         });
         initSmartRefresh(view);
+//        adapter.setLoadMoreView(new CustomLoadMoreView());
+        adapter.setPreLoadNumber(2);
+        adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getPullDownData(mPageSize, panelCode, "false");
+        getPullDownData(mPageSize, panelCode, "false", Constants.REFRESH_TYPE);
     }
 
     private void initSmartRefresh(View view) {
+
         refreshLayout = view.findViewById(R.id.refreshLayout);
         refreshLayout.setEnableScrollContentWhenLoaded(true);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
                 isLoadComplate = false;
-                adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
-                getPullDownData(mPageSize, panelCode, "false");
+//                adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
+                getPullDownData(mPageSize, panelCode, "false", Constants.REFRESH_TYPE);
             }
         });
-        adapter.setPreLoadNumber(2);
-        requestLoadMoreListener = new BaseQuickAdapter.RequestLoadMoreListener() {
-            @Override
-            public void onLoadMoreRequested() {
-                if (!isLoadComplate) {
-                    liveRv.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mDatas.isEmpty()) {
-                                adapter.loadMoreFail();
-                                return;
-                            }
 
-                            loadMoreData(mDatas.get(mDatas.size() - 1).getId() + "", mPageSize, panelCode, "true");
-                        }
-                    });
-                }
+        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                loadMoreData(mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true", Constants.LOADMORE_TYPE);
             }
-        };
-        adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
+        });
+
+//        requestLoadMoreListener = new BaseQuickAdapter.RequestLoadMoreListener() {
+//            @Override
+//            public void onLoadMoreRequested() {
+//                if (!isLoadComplate) {
+//                    liveRv.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            if (mDatas.isEmpty()) {
+//                                adapter.loadMoreFail();
+//                                return;
+//                            }
+//                            loadMoreData(mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true", Constants.LOADMORE_TYPE);
+//                        }
+//                    });
+//                }
+//            }
+//        };
     }
 
     /**
@@ -176,13 +195,14 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
      * @param panelCode
      * @param removeFirst
      */
-    private void getPullDownData(String pageSize, String panelCode, String removeFirst) {
+    private void getPullDownData(String pageSize, String panelCode, String removeFirst,String refreshType) {
         mDatas.clear();
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
                 .params("pageSize", pageSize)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
+                .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
@@ -228,13 +248,14 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     /**
      * 获取更多数据
      */
-    private void loadMoreData(String contentId, String mPageSize, String panelCode, String removeFirst) {
+    private void loadMoreData(String contentId, String panelCode, String removeFirst,String refreshType) {
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
                 .params("contentId", contentId)
-                .params("pageSize", mPageSize)
+                .params("pageSize", 10)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
+                .params("refreshType", refreshType)
                 .params("type", "")
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<VideoDetailModel>(VideoDetailModel.class) {
@@ -255,13 +276,10 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
 
                             if (response.body().getData().size() == 0) {
                                 Log.e("loadMoreData", "没有更多视频了");
-                                adapter.loadMoreComplete();
-//                                adapter.setOnLoadMoreListener(null, liveRv);
+//                                adapter.loadMoreEnd();
+//                                adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
+                                refreshLayout.finishLoadMoreWithNoMoreData();
                                 isLoadComplate = true;
-                                if (null != footview && null != footview.getParent()) {
-                                    ((ViewGroup) footview.getParent()).removeView(footview);
-                                }
-                                adapter.addFooterView(footview);
                                 return;
                             } else {
 //                                adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
@@ -269,7 +287,8 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                             }
                             mDatas.addAll(response.body().getData());
                             adapter.setNewData(mDatas);
-                            adapter.loadMoreComplete();
+                            Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
+//                            adapter.loadMoreComplete();
                         } else {
                             adapter.loadMoreFail();
                         }
@@ -288,6 +307,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                     public void onFinish() {
                         super.onFinish();
                         refreshLayout.setEnableRefresh(true);
+                        refreshLayout.finishLoadMore();
                     }
                 });
     }

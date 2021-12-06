@@ -752,7 +752,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
             }
         } else if (id == R.id.superplayer_ll_replay) { //重播按钮
-            isReplayClick.getReplayClick();
+//            isReplayClick.getReplayClick();
             if (mControllerCallback != null) {
                 mControllerCallback.onResume();
             }

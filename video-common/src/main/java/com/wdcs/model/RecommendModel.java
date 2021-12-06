@@ -1,7 +1,10 @@
 package com.wdcs.model;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Keep
@@ -15,6 +18,9 @@ public class RecommendModel {
     private String time;
 
     public String getCode() {
+        if (TextUtils.isEmpty(code)){
+            return "";
+        }
         return code;
     }
 
@@ -23,6 +29,9 @@ public class RecommendModel {
     }
 
     public String getSuccess() {
+        if (TextUtils.isEmpty(success)){
+            return "";
+        }
         return success;
     }
 
@@ -31,6 +40,9 @@ public class RecommendModel {
     }
 
     public String getMessage() {
+        if (TextUtils.isEmpty(message)){
+            return "";
+        }
         return message;
     }
 
@@ -39,6 +51,9 @@ public class RecommendModel {
     }
 
     public Object getDetail() {
+        if (null == detail) {
+            return new Object();
+        }
         return detail;
     }
 
@@ -47,6 +62,9 @@ public class RecommendModel {
     }
 
     public DataDTO getData() {
+        if (null == detail) {
+            return new DataDTO();
+        }
         return data;
     }
 
@@ -55,6 +73,9 @@ public class RecommendModel {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(time)){
+            return "";
+        }
         return time;
     }
 
@@ -70,6 +91,9 @@ public class RecommendModel {
         private String pageSize;
 
         public String getTotal() {
+            if (TextUtils.isEmpty(total)){
+                return "";
+            }
             return total;
         }
 
@@ -78,6 +102,10 @@ public class RecommendModel {
         }
 
         public List<RecordsDTO> getRecords() {
+            if (null == records) {
+                List<RecordsDTO> list = new ArrayList<>();
+                return list;
+            }
             return records;
         }
 
@@ -86,6 +114,9 @@ public class RecommendModel {
         }
 
         public String getPageIndex() {
+            if (TextUtils.isEmpty(pageIndex)){
+                return "";
+            }
             return pageIndex;
         }
 
@@ -94,6 +125,9 @@ public class RecommendModel {
         }
 
         public String getPageSize() {
+            if (TextUtils.isEmpty(pageSize)){
+                return "";
+            }
             return pageSize;
         }
 
@@ -113,6 +147,9 @@ public class RecommendModel {
             private String liveStatus;
 
             public String getTitle() {
+                if (TextUtils.isEmpty(title)){
+                    return "";
+                }
                 return title;
             }
 
@@ -121,6 +158,9 @@ public class RecommendModel {
             }
 
             public String getUrl() {
+                if (TextUtils.isEmpty(url)){
+                    return "";
+                }
                 return url;
             }
 
@@ -129,6 +169,9 @@ public class RecommendModel {
             }
 
             public String getThumbnailUrl() {
+                if (TextUtils.isEmpty(thumbnailUrl)){
+                    return "";
+                }
                 return thumbnailUrl;
             }
 
@@ -145,6 +188,9 @@ public class RecommendModel {
             }
 
             public String getType() {
+                if (TextUtils.isEmpty(type)){
+                    return "";
+                }
                 return type;
             }
 
@@ -153,6 +199,9 @@ public class RecommendModel {
             }
 
             public String getIsExternal() {
+                if (TextUtils.isEmpty(isExternal)){
+                    return "";
+                }
                 return isExternal;
             }
 
@@ -161,6 +210,9 @@ public class RecommendModel {
             }
 
             public String getExternalUrl() {
+                if (TextUtils.isEmpty(externalUrl)){
+                    return "";
+                }
                 return externalUrl;
             }
 
@@ -169,6 +221,9 @@ public class RecommendModel {
             }
 
             public String getLiveStatus() {
+                if (TextUtils.isEmpty(liveStatus)){
+                    return "";
+                }
                 return liveStatus;
             }
 

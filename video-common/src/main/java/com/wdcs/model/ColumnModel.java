@@ -1,5 +1,7 @@
 package com.wdcs.model;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
 import java.io.Serializable;
@@ -21,6 +23,9 @@ public class ColumnModel implements Serializable {
     private String panelCode;
 
     public String getSkipUrl() {
+        if (TextUtils.isEmpty(skipUrl)) {
+            return "";
+        }
         return skipUrl;
     }
 
@@ -29,6 +34,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getpColumnId() {
+        if (TextUtils.isEmpty(pColumnId)) {
+            return "";
+        }
         return pColumnId;
     }
 
@@ -49,6 +57,9 @@ public class ColumnModel implements Serializable {
     private String updUserCode;
 
     public String getColumnCode() {
+        if (TextUtils.isEmpty(columnCode)) {
+            return "";
+        }
         return columnCode;
     }
 
@@ -57,6 +68,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getColumnDesc() {
+        if (TextUtils.isEmpty(columnDesc)) {
+            return "";
+        }
         return columnDesc;
     }
 
@@ -65,6 +79,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getColumnId() {
+        if (TextUtils.isEmpty(columnId)) {
+            return "";
+        }
         return columnId;
     }
 
@@ -73,6 +90,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getColumnName() {
+        if (TextUtils.isEmpty(columnName)) {
+            return "";
+        }
         return columnName;
     }
 
@@ -81,6 +101,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getColumnPicName() {
+        if (TextUtils.isEmpty(columnPicName)) {
+            return "";
+        }
         return columnPicName;
     }
 
@@ -89,6 +112,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getColumnPicUrl() {
+        if (TextUtils.isEmpty(columnPicUrl)) {
+            return "";
+        }
         return columnPicUrl;
     }
 
@@ -97,6 +123,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getColumnType() {
+        if (TextUtils.isEmpty(columnType)) {
+            return "";
+        }
         return columnType;
     }
 
@@ -105,6 +134,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getCrtDate() {
+        if (TextUtils.isEmpty(crtDate)) {
+            return "";
+        }
         return crtDate;
     }
 
@@ -113,6 +145,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getCrtOrgCode() {
+        if (TextUtils.isEmpty(crtOrgCode)) {
+            return "";
+        }
         return crtOrgCode;
     }
 
@@ -121,6 +156,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getCrtUserCode() {
+        if (TextUtils.isEmpty(crtUserCode)) {
+            return "";
+        }
         return crtUserCode;
     }
 
@@ -129,6 +167,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getId() {
+        if (TextUtils.isEmpty(id)) {
+            return "";
+        }
         return id;
     }
 
@@ -137,6 +178,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getIsDefault() {
+        if (TextUtils.isEmpty(isDefault)) {
+            return "";
+        }
         return isDefault;
     }
 
@@ -145,6 +189,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getIsFocusPict() {
+        if (TextUtils.isEmpty(isFocusPict)) {
+            return "";
+        }
         return isFocusPict;
     }
 
@@ -153,6 +200,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getIsSort() {
+        if (TextUtils.isEmpty(isSort)) {
+            return "";
+        }
         return isSort;
     }
 
@@ -161,6 +211,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getPColumnId() {
+        if (TextUtils.isEmpty(pColumnId)) {
+            return "";
+        }
         return pColumnId;
     }
 
@@ -169,6 +222,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getPath() {
+        if (TextUtils.isEmpty(path)) {
+            return "";
+        }
         return path;
     }
 
@@ -185,6 +241,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getSeq() {
+        if (TextUtils.isEmpty(seq)) {
+            return "";
+        }
         return seq;
     }
 
@@ -193,6 +252,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getStatus() {
+        if (TextUtils.isEmpty(status)) {
+            return "";
+        }
         return status;
     }
 
@@ -201,6 +263,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getUpdDate() {
+        if (TextUtils.isEmpty(updDate)) {
+            return "";
+        }
         return updDate;
     }
 
@@ -209,6 +274,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getUpdOrgCode() {
+        if (TextUtils.isEmpty(updOrgCode)) {
+            return "";
+        }
         return updOrgCode;
     }
 
@@ -217,6 +285,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getUpdUserCode() {
+        if (TextUtils.isEmpty(updUserCode)) {
+            return "";
+        }
         return updUserCode;
     }
 
@@ -225,6 +296,9 @@ public class ColumnModel implements Serializable {
     }
 
     public String getPanelCode() {
+        if (TextUtils.isEmpty(panelCode)) {
+            return "";
+        }
         return panelCode;
     }
 

@@ -1,5 +1,7 @@
 package com.wdcs.model;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
 @Keep
@@ -22,6 +24,9 @@ public class TokenModel {
     }
 
     public Boolean getSuccess() {
+        if (null == success) {
+            return false;
+        }
         return success;
     }
 
@@ -30,6 +35,9 @@ public class TokenModel {
     }
 
     public String getMessage() {
+        if (TextUtils.isEmpty(message)) {
+            return "";
+        }
         return message;
     }
 
@@ -38,6 +46,9 @@ public class TokenModel {
     }
 
     public String getDetail() {
+        if (TextUtils.isEmpty(detail)) {
+            return "";
+        }
         return detail;
     }
 
@@ -46,6 +57,9 @@ public class TokenModel {
     }
 
     public DataDTO getData() {
+        if (null == data) {
+            return new DataDTO();
+        }
         return data;
     }
 
@@ -54,6 +68,9 @@ public class TokenModel {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(time)) {
+            return "";
+        }
         return time;
     }
 
@@ -68,6 +85,9 @@ public class TokenModel {
         private String gdyToken;
 
         public String getToken() {
+            if (TextUtils.isEmpty(token)) {
+                return "";
+            }
             return token;
         }
 
@@ -76,6 +96,9 @@ public class TokenModel {
         }
 
         public LoginSysUserVoDTO getLoginSysUserVo() {
+            if (null == loginSysUserVo) {
+                return new LoginSysUserVoDTO();
+            }
             return loginSysUserVo;
         }
 
@@ -84,6 +107,9 @@ public class TokenModel {
         }
 
         public String getGdyToken() {
+            if (TextUtils.isEmpty(gdyToken)) {
+                return "";
+            }
             return gdyToken;
         }
 
@@ -102,6 +128,9 @@ public class TokenModel {
             private String permissionCodes;
 
             public String getId() {
+                if (TextUtils.isEmpty(id)) {
+                    return "";
+                }
                 return id;
             }
 
@@ -110,6 +139,9 @@ public class TokenModel {
             }
 
             public String getUsername() {
+                if (TextUtils.isEmpty(username)) {
+                    return "";
+                }
                 return username;
             }
 
@@ -118,6 +150,9 @@ public class TokenModel {
             }
 
             public String getNickname() {
+                if (TextUtils.isEmpty(nickname)) {
+                    return "";
+                }
                 return nickname;
             }
 
@@ -126,6 +161,9 @@ public class TokenModel {
             }
 
             public String getHead() {
+                if (TextUtils.isEmpty(head)) {
+                    return "";
+                }
                 return head;
             }
 
@@ -134,6 +172,9 @@ public class TokenModel {
             }
 
             public String getGender() {
+                if (TextUtils.isEmpty(gender)) {
+                    return "";
+                }
                 return gender;
             }
 
@@ -142,6 +183,9 @@ public class TokenModel {
             }
 
             public String getState() {
+                if (TextUtils.isEmpty(state)) {
+                    return "";
+                }
                 return state;
             }
 
@@ -150,6 +194,9 @@ public class TokenModel {
             }
 
             public String getPermissionCodes() {
+                if (TextUtils.isEmpty(permissionCodes)) {
+                    return "";
+                }
                 return permissionCodes;
             }
 

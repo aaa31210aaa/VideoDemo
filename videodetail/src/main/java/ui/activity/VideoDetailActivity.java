@@ -75,6 +75,7 @@ import utils.GlideUtil;
 import widget.LoadingView;
 
 import static android.widget.RelativeLayout.BELOW;
+import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.constants.Constants.BLUE_V;
@@ -168,6 +169,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public long videoDetailOldTime;
     public long videoDetailReportTime;
     public String category_name; //火山埋点场景标识
+    private TextView watched;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,7 +226,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         videoDetailLikesImage = findViewById(R.id.video_detail_likes_image);
         likesNum = findViewById(R.id.likes_num);
         collectionNum = findViewById(R.id.collection_num);
-
+        watched = findViewById(R.id.watched);
         contentView = View.inflate(this, R.layout.fragment_video_comment_pop, null);
         sendPopContentView = View.inflate(this, R.layout.layout_input_window, null);
         commentPopCommentTotal = contentView.findViewById(R.id.comment_pop_comment_total);
@@ -481,16 +483,18 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
         };
 
-        SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
+        SuperPlayerImpl.setDetailAutoPlayOverCallBack(new SuperPlayerImpl.DetailAutoPlayOverCallBack() {
             @Override
-            public void AutoPlayOverCallBack() {
-//                final String event;
+            public void DetailAutoPlayOverCallBack() {
+                if (null == playerView || null == playerView.buriedPointModel) {
+                    return;
+                }
+                //                final String event;
                 String event = Constants.CMS_VIDEO_OVER;
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
                     //拖动/自动播放结束上报埋点
                     uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event, category_name), event);
                 }
-
                 playerView.mSuperPlayer.reStart();
             }
         });
@@ -929,6 +933,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 return;
                             }
 
+                            if (null == playerView) {
+                                return;
+                            }
+
                             playerView.contentStateModel = response.body().getData();
                             if (null != playerView.contentStateModel) {
                                 setLikeCollection(playerView.contentStateModel);
@@ -997,6 +1005,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             ToastUtils.showShort(R.string.data_err);
                             return;
                         }
+
+                        if (null == playerView) {
+                            return;
+                        }
+
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (json.get("code").toString().equals(success_code)) {
@@ -1079,6 +1092,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     public void onSuccess(Response<String> response) {
                         if (null == response.body()) {
                             ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        if (null == playerView) {
                             return;
                         }
 
@@ -1690,7 +1707,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         playerView.setLayoutParams(playViewParams);
 
         if (rootview != null) {
-            rootview.addView(playerView, 3);
+            rootview.addView(playerView, 1);
             //露出即上报
             uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, category_name), Constants.CMS_CLIENT_SHOW);
             play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
@@ -1840,6 +1857,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     if (mDatas.isEmpty()) {
                                         return;
                                     }
+                                    if (null != dataDTO.getViewCountShow()) {
+                                        watched.setText(NumberFormatTool.formatNum(dataDTO.getViewCountShow(), false));
+                                    }
+
                                     SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
                                     for (int i = 0; i < mDatas.size(); i++) {
                                         if (null != mDatas.get(i)) {
@@ -1997,7 +2018,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onDestroy() {
         super.onDestroy();
-        SuperPlayerImpl.mCurrentPlayVideoURL = null;
         //重置重播标识
         playerView.buriedPointModel.setIs_renew("false");
         if (playerView != null) {

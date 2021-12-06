@@ -1,7 +1,10 @@
 package com.wdcs.model;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Keep
@@ -23,6 +26,9 @@ public class CommentModel {
     }
 
     public DataDTO getData() {
+        if (null == data) {
+            return new DataDTO();
+        }
         return data;
     }
 
@@ -31,6 +37,9 @@ public class CommentModel {
     }
 
     public String getDetail() {
+        if (TextUtils.isEmpty(detail)) {
+            return "";
+        }
         return detail;
     }
 
@@ -39,6 +48,9 @@ public class CommentModel {
     }
 
     public String getMessage() {
+        if (TextUtils.isEmpty(message)) {
+            return "";
+        }
         return message;
     }
 
@@ -47,6 +59,9 @@ public class CommentModel {
     }
 
     public Boolean getSuccess() {
+        if (null == success) {
+            return false;
+        }
         return success;
     }
 
@@ -55,6 +70,9 @@ public class CommentModel {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(time)) {
+            return "";
+        }
         return time;
     }
 
@@ -70,6 +88,9 @@ public class CommentModel {
         private Integer total;
 
         public Integer getPageIndex() {
+            if (null == pageIndex) {
+                return 0;
+            }
             return pageIndex;
         }
 
@@ -78,6 +99,9 @@ public class CommentModel {
         }
 
         public Integer getPageSize() {
+            if (null == pageSize) {
+                return 0;
+            }
             return pageSize;
         }
 
@@ -86,6 +110,10 @@ public class CommentModel {
         }
 
         public List<RecordsDTO> getRecords() {
+            if (null == records) {
+                List<RecordsDTO> list = new ArrayList<>();
+                return list;
+            }
             return records;
         }
 
@@ -94,6 +122,9 @@ public class CommentModel {
         }
 
         public Integer getTotal() {
+            if (null == total) {
+                return 0;
+            }
             return total;
         }
 
@@ -120,6 +151,10 @@ public class CommentModel {
             private String onShelve;
 
             public List<ChildrenDTO> getChildren() {
+                if (null == children) {
+                    List<ChildrenDTO> list = new ArrayList<>();
+                    return list;
+                }
                 return children;
             }
 
@@ -128,6 +163,9 @@ public class CommentModel {
             }
 
             public String getContent() {
+                if (TextUtils.isEmpty(content)) {
+                    return "";
+                }
                 return content;
             }
 
@@ -136,6 +174,9 @@ public class CommentModel {
             }
 
             public Integer getContentId() {
+                if (null == contentId) {
+                    return 0;
+                }
                 return contentId;
             }
 
@@ -144,6 +185,9 @@ public class CommentModel {
             }
 
             public Integer getCreateBy() {
+                if (null == createBy) {
+                    return 0;
+                }
                 return createBy;
             }
 
@@ -152,6 +196,9 @@ public class CommentModel {
             }
 
             public String getCreateTime() {
+                if (TextUtils.isEmpty(createTime)) {
+                    return "";
+                }
                 return createTime;
             }
 
@@ -160,6 +207,9 @@ public class CommentModel {
             }
 
             public String getEditor() {
+                if (TextUtils.isEmpty(editor)) {
+                    return "";
+                }
                 return editor;
             }
 
@@ -168,6 +218,9 @@ public class CommentModel {
             }
 
             public String getHead() {
+                if (TextUtils.isEmpty(head)) {
+                    return "";
+                }
                 return head;
             }
 
@@ -184,6 +237,9 @@ public class CommentModel {
             }
 
             public String getNickname() {
+                if (TextUtils.isEmpty(nickname)) {
+                    return "";
+                }
                 return nickname;
             }
 
@@ -192,6 +248,9 @@ public class CommentModel {
             }
 
             public Integer getPcommentId() {
+                if (null == pcommentId) {
+                    return 0;
+                }
                 return pcommentId;
             }
 
@@ -200,6 +259,9 @@ public class CommentModel {
             }
 
             public Integer getRcommentId() {
+                if (null == rcommentId) {
+                    return 0;
+                }
                 return rcommentId;
             }
 
@@ -208,6 +270,9 @@ public class CommentModel {
             }
 
             public String getTitle() {
+                if (TextUtils.isEmpty(title)) {
+                    return "";
+                }
                 return title;
             }
 
@@ -216,6 +281,9 @@ public class CommentModel {
             }
 
             public Integer getUserId() {
+                if (null == userId) {
+                    return 0;
+                }
                 return userId;
             }
 
@@ -224,6 +292,9 @@ public class CommentModel {
             }
 
             public String getIsTop() {
+                if (TextUtils.isEmpty(isTop)) {
+                    return "";
+                }
                 return isTop;
             }
 
@@ -232,6 +303,9 @@ public class CommentModel {
             }
 
             public String getOnShelve() {
+                if (TextUtils.isEmpty(onShelve)) {
+                    return "";
+                }
                 return onShelve;
             }
 
@@ -255,6 +329,9 @@ public class CommentModel {
                 private Integer userId;
 
                 public String getContent() {
+                    if (TextUtils.isEmpty(content)) {
+                        return "";
+                    }
                     return content;
                 }
 
@@ -263,6 +340,9 @@ public class CommentModel {
                 }
 
                 public Integer getContentId() {
+                    if (null == contentId) {
+                        return 0;
+                    }
                     return contentId;
                 }
 
@@ -271,6 +351,9 @@ public class CommentModel {
                 }
 
                 public Integer getCreateBy() {
+                    if (null == createBy) {
+                        return 0;
+                    }
                     return createBy;
                 }
 
@@ -279,6 +362,9 @@ public class CommentModel {
                 }
 
                 public String getCreateTime() {
+                    if (TextUtils.isEmpty(createTime)) {
+                        return "";
+                    }
                     return createTime;
                 }
 
@@ -287,6 +373,9 @@ public class CommentModel {
                 }
 
                 public String getEditor() {
+                    if (TextUtils.isEmpty(editor)) {
+                        return "";
+                    }
                     return editor;
                 }
 
@@ -295,6 +384,9 @@ public class CommentModel {
                 }
 
                 public String getHead() {
+                    if (TextUtils.isEmpty(head)) {
+                        return "";
+                    }
                     return head;
                 }
 
@@ -311,6 +403,9 @@ public class CommentModel {
                 }
 
                 public String getNickname() {
+                    if (TextUtils.isEmpty(nickname)) {
+                        return "";
+                    }
                     return nickname;
                 }
 
@@ -319,6 +414,9 @@ public class CommentModel {
                 }
 
                 public Integer getPcommentId() {
+                    if (null == pcommentId) {
+                        return 0;
+                    }
                     return pcommentId;
                 }
 
@@ -327,6 +425,9 @@ public class CommentModel {
                 }
 
                 public Integer getRcommentId() {
+                    if (null == rcommentId) {
+                        return 0;
+                    }
                     return rcommentId;
                 }
 
@@ -335,6 +436,9 @@ public class CommentModel {
                 }
 
                 public String getTitle() {
+                    if (TextUtils.isEmpty(title)) {
+                        return "";
+                    }
                     return title;
                 }
 
@@ -343,6 +447,9 @@ public class CommentModel {
                 }
 
                 public Integer getUserId() {
+                    if (null == userId) {
+                        return 0;
+                    }
                     return userId;
                 }
 

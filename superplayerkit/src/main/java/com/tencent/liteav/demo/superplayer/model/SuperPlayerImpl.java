@@ -84,6 +84,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     private int mAppId;
     public int demouration;
     public SuperPlayerView superPlayerView;
+    private boolean isFirst = false;
 
     public SuperPlayerImpl(Context context, TXCloudVideoView videoView, SuperPlayerView superPlayerView) {
         initialize(context, videoView);
@@ -177,6 +178,16 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         autoPlayOverCallBack = callBack;
     }
 
+    public static DetailAutoPlayOverCallBack detailAutoPlayOverCallBack;
+
+    public interface DetailAutoPlayOverCallBack {
+        void DetailAutoPlayOverCallBack();
+    }
+
+    public static void setDetailAutoPlayOverCallBack(DetailAutoPlayOverCallBack callBack) {
+        detailAutoPlayOverCallBack = callBack;
+    }
+
     /**
      * 点播播放器事件回调
      *
@@ -253,7 +264,13 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 }
                 break;
             case TXLiveConstants.PLAY_EVT_PLAY_END:
-                autoPlayOverCallBack.AutoPlayOverCallBack();
+                if (null != autoPlayOverCallBack) {
+                    autoPlayOverCallBack.AutoPlayOverCallBack();
+                }
+
+                if (null != detailAutoPlayOverCallBack) {
+                    detailAutoPlayOverCallBack.DetailAutoPlayOverCallBack();
+                }
                 updatePlayerState(SuperPlayerDef.PlayerState.END);
                 break;
             case PLAY_EVT_PLAY_PROGRESS:
@@ -769,7 +786,10 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             }
         } else {
             //埋点  视频-开始播放  重播
-            superPlayerView.buriedPointModel.setIs_renew("true");
+            if (isFirst) {
+                superPlayerView.buriedPointModel.setIs_renew("true");
+            }
+            isFirst = true;
             playVodURL(mCurrentPlayVideoURL);
         }
     }

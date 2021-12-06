@@ -176,11 +176,11 @@
                     android:layout_centerVertical="true"
                     android:layout_marginRight="@dimen/video_dp5"
                     android:layout_toRightOf="@+id/official_certification_img"
+                    android:background="@drawable/follow_bg"
+                    android:gravity="center"
                     android:paddingLeft="@dimen/video_dp10"
                     android:paddingRight="@dimen/video_dp10"
                     android:text="关注"
-                    android:gravity="center"
-                    android:background="@drawable/follow_bg"
                     android:textColor="@color/video_white"
                     android:textSize="@dimen/sp_12">
 

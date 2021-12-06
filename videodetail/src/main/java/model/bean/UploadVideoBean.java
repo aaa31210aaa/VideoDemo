@@ -1,5 +1,7 @@
 package model.bean;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
 @Keep
@@ -22,6 +24,9 @@ public class UploadVideoBean {
     private String status;
 
     public String getUrl() {
+        if (TextUtils.isEmpty(url)) {
+            return "";
+        }
         return url;
     }
 
@@ -30,6 +35,9 @@ public class UploadVideoBean {
     }
 
     public String getKey() {
+        if (TextUtils.isEmpty(key)) {
+            return "";
+        }
         return key;
     }
 
@@ -38,6 +46,9 @@ public class UploadVideoBean {
     }
 
     public String getHash() {
+        if (TextUtils.isEmpty(hash)) {
+            return "";
+        }
         return hash;
     }
 
@@ -46,6 +57,9 @@ public class UploadVideoBean {
     }
 
     public String getSize() {
+        if (TextUtils.isEmpty(size)) {
+            return "";
+        }
         return size;
     }
 
@@ -54,6 +68,9 @@ public class UploadVideoBean {
     }
 
     public String getCoverImageUrl() {
+        if (TextUtils.isEmpty(coverImageUrl)) {
+            return "";
+        }
         return coverImageUrl;
     }
 
@@ -62,6 +79,9 @@ public class UploadVideoBean {
     }
 
     public String getCoverImageKey() {
+        if (TextUtils.isEmpty(coverImageKey)) {
+            return "";
+        }
         return coverImageKey;
     }
 
@@ -70,6 +90,9 @@ public class UploadVideoBean {
     }
 
     public String getWidth() {
+        if (TextUtils.isEmpty(width)) {
+            return "";
+        }
         return width;
     }
 
@@ -78,6 +101,9 @@ public class UploadVideoBean {
     }
 
     public String getHeight() {
+        if (TextUtils.isEmpty(height)) {
+            return "";
+        }
         return height;
     }
 
@@ -86,6 +112,9 @@ public class UploadVideoBean {
     }
 
     public String getOrientation() {
+        if (TextUtils.isEmpty(orientation)) {
+            return "";
+        }
         return orientation;
     }
 
@@ -94,6 +123,9 @@ public class UploadVideoBean {
     }
 
     public String getDuration() {
+        if (TextUtils.isEmpty(duration)) {
+            return "";
+        }
         return duration;
     }
 
@@ -102,6 +134,9 @@ public class UploadVideoBean {
     }
 
     public String getExpires() {
+        if (TextUtils.isEmpty(expires)) {
+            return "";
+        }
         return expires;
     }
 
@@ -110,6 +145,9 @@ public class UploadVideoBean {
     }
 
     public String getContentType() {
+        if (TextUtils.isEmpty(contentType)) {
+            return "";
+        }
         return contentType;
     }
 
@@ -118,6 +156,9 @@ public class UploadVideoBean {
     }
 
     public String getIsImage() {
+        if (TextUtils.isEmpty(isImage)) {
+            return "";
+        }
         return isImage;
     }
 
@@ -126,6 +167,9 @@ public class UploadVideoBean {
     }
 
     public String getIsVideo() {
+        if (TextUtils.isEmpty(isVideo)) {
+            return "";
+        }
         return isVideo;
     }
 
@@ -134,6 +178,9 @@ public class UploadVideoBean {
     }
 
     public String getStatus() {
+        if (TextUtils.isEmpty(status)) {
+            return "";
+        }
         return status;
     }
 

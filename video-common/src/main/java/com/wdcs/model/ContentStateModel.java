@@ -1,5 +1,7 @@
 package com.wdcs.model;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
 @Keep
@@ -13,6 +15,9 @@ public class ContentStateModel {
     private String time;
 
     public String getCode() {
+        if (TextUtils.isEmpty(code)){
+            return "";
+        }
         return code;
     }
 
@@ -21,6 +26,9 @@ public class ContentStateModel {
     }
 
     public String getSuccess() {
+        if (TextUtils.isEmpty(success)){
+            return "";
+        }
         return success;
     }
 
@@ -29,6 +37,9 @@ public class ContentStateModel {
     }
 
     public String getMessage() {
+        if (TextUtils.isEmpty(message)){
+            return "";
+        }
         return message;
     }
 
@@ -45,6 +56,9 @@ public class ContentStateModel {
     }
 
     public DataDTO getData() {
+        if (null == data){
+            return new DataDTO();
+        }
         return data;
     }
 
@@ -53,6 +67,9 @@ public class ContentStateModel {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(time)){
+            return "";
+        }
         return time;
     }
 
@@ -82,6 +99,9 @@ public class ContentStateModel {
         }
 
         public String getCommentCountShow() {
+            if (TextUtils.isEmpty(commentCountShow)){
+                return "";
+            }
             return commentCountShow;
         }
 
@@ -90,6 +110,9 @@ public class ContentStateModel {
         }
 
         public String getLikeCountShow() {
+            if (TextUtils.isEmpty(likeCountShow)){
+                return "";
+            }
             return likeCountShow;
         }
 
@@ -98,6 +121,9 @@ public class ContentStateModel {
         }
 
         public String getFavorCountShow() {
+            if (TextUtils.isEmpty(favorCountShow)){
+                return "";
+            }
             return favorCountShow;
         }
 
@@ -106,6 +132,9 @@ public class ContentStateModel {
         }
 
         public String getViewCountShow() {
+            if (TextUtils.isEmpty(viewCountShow)){
+                return "";
+            }
             return viewCountShow;
         }
 
@@ -114,6 +143,9 @@ public class ContentStateModel {
         }
 
         public String getPlayCountShow() {
+            if (TextUtils.isEmpty(playCountShow)){
+                return "";
+            }
             return playCountShow;
         }
 
@@ -122,6 +154,9 @@ public class ContentStateModel {
         }
 
         public String getContentId() {
+            if (TextUtils.isEmpty(contentId)){
+                return "";
+            }
             return contentId;
         }
 
@@ -130,6 +165,9 @@ public class ContentStateModel {
         }
 
         public String getWhetherLike() {
+            if (TextUtils.isEmpty(whetherLike)){
+                return "";
+            }
             return whetherLike;
         }
 
@@ -138,6 +176,9 @@ public class ContentStateModel {
         }
 
         public String getWhetherFavor() {
+            if (TextUtils.isEmpty(whetherFavor)){
+                return "";
+            }
             return whetherFavor;
         }
 
@@ -146,6 +187,9 @@ public class ContentStateModel {
         }
 
         public String getWhetherFollow() {
+            if (TextUtils.isEmpty(whetherFollow)){
+                return "";
+            }
             return whetherFollow;
         }
 

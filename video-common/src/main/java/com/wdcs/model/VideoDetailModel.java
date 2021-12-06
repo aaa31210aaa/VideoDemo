@@ -1,8 +1,11 @@
 package com.wdcs.model;
 
 
+import android.text.TextUtils;
+
 import androidx.annotation.Keep;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +22,9 @@ public class VideoDetailModel {
     private String time;
 
     public String getCode() {
+        if (TextUtils.isEmpty(code)) {
+            return "";
+        }
         return code;
     }
 
@@ -27,6 +33,9 @@ public class VideoDetailModel {
     }
 
     public Boolean getSuccess() {
+        if (null == success) {
+            return false;
+        }
         return success;
     }
 
@@ -35,6 +44,9 @@ public class VideoDetailModel {
     }
 
     public String getMessage() {
+        if (TextUtils.isEmpty(message)) {
+            return "";
+        }
         return message;
     }
 
@@ -43,6 +55,9 @@ public class VideoDetailModel {
     }
 
     public String getDetail() {
+        if (TextUtils.isEmpty(detail)) {
+            return "";
+        }
         return detail;
     }
 
@@ -51,6 +66,10 @@ public class VideoDetailModel {
     }
 
     public List<DataDTO> getData() {
+        if (null == data) {
+            List<DataDTO> list = new ArrayList<>();
+            return list;
+        }
         return data;
     }
 
@@ -59,6 +78,9 @@ public class VideoDetailModel {
     }
 
     public String getTime() {
+        if (TextUtils.isEmpty(time)) {
+            return "";
+        }
         return time;
     }
 
