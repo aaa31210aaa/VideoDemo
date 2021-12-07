@@ -338,7 +338,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             }
                         }
 
-                        if(null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo)) {
+                        if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo)) {
                             videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.horizontal_video_wdcs_logo).setVisibility(View.GONE);
                         }
 
@@ -548,13 +548,28 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 //                    //不为重播
                         xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
                     }
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_PLAY_AUTO);
+                    String event;
+                    if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                        event = Constants.CMS_VIDEO_PLAY;
+                    } else {
+                        event = Constants.CMS_VIDEO_PLAY_AUTO;
+                    }
+
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), event);
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
 //                    //不为重播
                         videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
                     }
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), Constants.CMS_VIDEO_PLAY_AUTO);
+
+                    String event;
+                    if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                        event = Constants.CMS_VIDEO_PLAY;
+                    } else {
+                        event = Constants.CMS_VIDEO_PLAY_AUTO;
+                    }
+
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), event);
                 }
             }
         });
@@ -566,17 +581,22 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 if (isPause) {
                     return;
                 }
-                final String event;
+                String event = "";
                 maxPercent = 100;
                 if (xkshFragment.mIsVisibleToUser) {
                     lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
+                    if (TextUtils.equals(videoDetailFragment.mDataDTO.getVolcCategory(), "0")) {
+                        event = Constants.CMS_VIDEO_OVER_AUTO;
+                    } else {
+                        event = Constants.CMS_VIDEO_OVER;
+                    }
                 }
                 String renew = playerView.buriedPointModel.getIs_renew();
                 if (null == renew || TextUtils.equals("false", renew)) {
                     //不为重播
-                    event = Constants.CMS_VIDEO_OVER_AUTO;
                     //拖动/自动播放结束上报埋点
                     uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event, Constants.CATEGORY_NAME), event);
                 }

@@ -78,7 +78,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;                 // 当前播放状态
     public long mLivePushDuration;                      // 直播推流总时长
     public static long mDuration;                              // 视频总时长
-    public long mProgress;                              // 当前播放进度
+    public static long mProgress;                              // 当前播放进度
     public double percent;                              // 当前播放进度百分比
     public long reportDuration = 0;                       //记录上报埋点时的进度
     public long videoDetailReportDuration = 0;          //详情页上报埋点记录的进度

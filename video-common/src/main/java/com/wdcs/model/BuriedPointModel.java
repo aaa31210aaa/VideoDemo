@@ -49,9 +49,13 @@ public class BuriedPointModel {
      */
     private String module_source;
     /**
-     * 是否为重播
+     * 视频fragment是否为重播
      */
     private String is_renew;
+    /**
+     * 小康生活fragment是否为重播
+     */
+    private String xksh_renew;
     /**
      * 播放完成 播放时长
      */
@@ -157,6 +161,14 @@ public class BuriedPointModel {
         this.is_renew = is_renew;
     }
 
+    public String getXksh_renew() {
+        return xksh_renew;
+    }
+
+    public void setXksh_renew(String xksh_renew) {
+        this.xksh_renew = xksh_renew;
+    }
+
     public String getPlay_duration() {
         return play_duration;
     }
@@ -172,4 +184,5 @@ public class BuriedPointModel {
     public void setSpeed_n(String speed_n) {
         this.speed_n = speed_n;
     }
+
 }

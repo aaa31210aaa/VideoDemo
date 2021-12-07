@@ -78,6 +78,7 @@ import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
+import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.YELLOW_V;
@@ -157,7 +158,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private String recommendTag = "recommend";
     private List<RecommendModel.DataDTO.RecordsDTO> recommondList;
     private ViewFlipper videoFlipper;
-    private boolean isFirst = true;
     private RelativeLayout backLl;
     private SoftKeyBoardListener softKeyBoardListener;
     private String spaceStr = "";
@@ -170,6 +170,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public long videoDetailReportTime;
     public String category_name; //火山埋点场景标识
     private TextView watched;
+    public double detailMaxPercent = 0; //记录最大百分比
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -348,8 +349,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 float percentage = ((float) curProgress) / maxProgress;
                                 long duration = (long) (percentage * mDuration);
                                 lsDuration = duration;
-                                if (percentage > maxPercent) {
-                                    maxPercent = percentage;
+                                if (percentage > detailMaxPercent) {
+                                    detailMaxPercent = percentage;
                                 }
                                 int position = (int) (mDuration * percentage);
                                 if (playerView.mWindowPlayer.mControllerCallback != null) {
@@ -409,8 +410,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 float percentage = ((float) curProgress) / maxProgress;
                                 long duration = (long) (percentage * mDuration);
                                 lsDuration = duration;
-                                if (percentage > maxPercent) {
-                                    maxPercent = percentage;
+                                if (percentage > detailMaxPercent) {
+                                    detailMaxPercent = percentage;
                                 }
                                 int position = (int) (mDuration * percentage);
 
@@ -454,25 +455,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         };
-
-//        //重播按钮
-//        if (null != playerView && null != playerView.mWindowPlayer) {
-//            playerView.mWindowPlayer.isReplayClick = new WindowPlayer.IsReplayClick() {
-//                @Override
-//                public void getReplayClick() {
-//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-//                }
-//            };
-//        }
-//
-//        if (null != playerView && null != playerView.mFullScreenPlayer) {
-//            playerView.mFullScreenPlayer.isReplayClick = new FullScreenPlayer.FullIsReplayClick() {
-//                @Override
-//                public void getFullReplayClick() {
-//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY), Constants.CMS_VIDEO_PLAY);
-//                }
-//            };
-//        }
 
         //开始播放回调
         SuperPlayerImpl.readPlayCallBack = new SuperPlayerImpl.ReadPlayCallBack() {
@@ -529,7 +511,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isFirst) {
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
@@ -539,9 +520,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             if (!TextUtils.isEmpty(contentId)) {
                 getContentState(contentId);
             }
-        }
-        isFirst = false;
-
 
         if (PersonInfoManager.getInstance().isRequestToken()) {
             try {
@@ -1988,31 +1966,37 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             return;
         }
         playerView.mSuperPlayer.pause();
-        if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
-            if (mDuration != 0) {
-                /**
-                 * 上报内容埋点 视频播放时长
-                 */
-                String event = Constants.CMS_VIDEO_OVER;
-                double time = (DateUtils.getTimeCurrent() - videoDetailOldTime) / 1000;
-                double currentPercent = (time / mDuration);
-                double uploadPercent = 0;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                      //不为重播
-                    uploadPercent = currentPercent;
-                } else {
-                    uploadPercent = 1;
-                }
+//        if (!TextUtils.isEmpty(mDatas.get(0).getVolcCategory())) {
+            if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
+                if (mDuration != 0) {
+                    /**
+                     * 上报内容埋点 视频播放时长
+                     */
+                    String event = Constants.CMS_VIDEO_OVER;
+                    double currentPercent = (mProgress * 1.0 / mDuration);
+                    double uploadPercent = 0;
+                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                        //不为重播
+                        if (currentPercent > detailMaxPercent) {
+                            uploadPercent = currentPercent;
+                            detailMaxPercent = currentPercent;
+                        } else {
+                            uploadPercent = detailMaxPercent;
+                        }
+                    } else {
+                        uploadPercent = 1;
+                    }
 
-                videoDetailReportTime = DateUtils.getTimeCurrent() - videoDetailOldTime;
-                BigDecimal two = new BigDecimal(uploadPercent);
-                double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-//                lsDuration = playerView.mWindowPlayer.mProgress + lsDuration;
-                //上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), String.valueOf(videoDetailReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, category_name), event);
+                    videoDetailReportTime = DateUtils.getTimeCurrent() - videoDetailOldTime;
+                    BigDecimal two = new BigDecimal(uploadPercent);
+                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                    lsDuration = mProgress;
+                    //上报埋点
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), String.valueOf(videoDetailReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, category_name), event);
+                    Log.e("video_detail_md", "埋点事件：" + event + "播放时长:" + videoDetailReportTime + "---" + "播放百分比:" + pointPercentTwo);
+//                }
             }
         }
-
     }
 
     @Override
@@ -2027,7 +2011,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView = null;
         }
         OkGo.getInstance().cancelAll();
-        maxPercent = 0;
+        detailMaxPercent = 0;
         lsDuration = 0;
     }
 }
