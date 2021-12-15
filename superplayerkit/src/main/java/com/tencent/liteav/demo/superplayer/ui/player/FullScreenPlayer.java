@@ -879,7 +879,6 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         if (null != item) {
             String jsonString = BuriedPointModelManager.getVideoPlaySpeed(speed, item.getId() + "", item.getTitle(), "", "",
                     "", "", item.getIssueTimeStamp());
-            Log.e("埋点", "埋点：" + speed + "倍速---" + jsonString);
         }
     }
 

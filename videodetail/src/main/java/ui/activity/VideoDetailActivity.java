@@ -493,7 +493,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void keyBoardShow(int height) {
                 //软键盘已经显示，做逻辑
-                Log.e("yqh", "软键盘已经显示,做逻辑");
             }
 
             @Override
@@ -503,7 +502,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 if (null != inputAndSendPop) {
                     inputAndSendPop.getPopupWindow().dismiss();
                 }
-                Log.e("yqh", "软键盘已经隐藏,做逻辑");
             }
         });
     }
@@ -560,7 +558,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 ToastUtils.showShort(R.string.data_err);
                                 return;
                             }
-                            Log.d("mycs_token", "转换成功");
                             try {
                                 PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
                                 PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
@@ -939,6 +936,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     }
 
     public void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
+        if (null == contentStateModel) {
+            return;
+        }
         if (contentStateModel.getWhetherFavor().equals("true")) {
             videoDetailCollectionImage.setImageResource(R.drawable.collection);
         } else {
@@ -1004,8 +1004,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection);
-                                    playerView.contentStateModel.setWhetherFavor("true");
-                                    playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    if (null != playerView.contentStateModel) {
+                                        playerView.contentStateModel.setWhetherFavor("true");
+                                        playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    }
                                 } else {
                                     int num;
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
@@ -1014,8 +1016,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     }
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
                                     videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
-                                    playerView.contentStateModel.setWhetherFavor("false");
-                                    playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    if (null != playerView.contentStateModel) {
+                                        playerView.contentStateModel.setWhetherFavor("false");
+                                        playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    }
                                 }
                                 if (null != playerView.contentStateModel) {
                                     if (!mDatas.isEmpty()) {
@@ -1093,8 +1097,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
                                     num++;
                                     likesNum.setText(NumberFormatTool.formatNum(num, false));
-                                    playerView.contentStateModel.setWhetherLike("true");
-                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    if (null != playerView.contentStateModel) {
+                                        playerView.contentStateModel.setWhetherLike("true");
+                                        playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    }
                                 } else {
                                     int num;
                                     videoDetailLikesImage.setImageResource(R.drawable.favourite);
@@ -1107,8 +1113,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     } else {
                                         likesNum.setText(NumberFormatTool.formatNum(num, false));
                                     }
-                                    playerView.contentStateModel.setWhetherLike("false");
-                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    if (null != playerView.contentStateModel) {
+                                        playerView.contentStateModel.setWhetherLike("false");
+                                        playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                    }
                                 }
                                 if (null != playerView.contentStateModel) {
                                     if (!mDatas.isEmpty()) {
@@ -1966,7 +1974,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             return;
         }
         playerView.mSuperPlayer.pause();
-//        if (!TextUtils.isEmpty(mDatas.get(0).getVolcCategory())) {
+        if (mDatas.isEmpty()) {
+            return;
+        }
+        if (!TextUtils.isEmpty(mDatas.get(0).getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
                 if (mDuration != 0) {
                     /**
@@ -1994,7 +2005,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     //上报埋点
                     uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), String.valueOf(videoDetailReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, category_name), event);
                     Log.e("video_detail_md", "埋点事件：" + event + "播放时长:" + videoDetailReportTime + "---" + "播放百分比:" + pointPercentTwo);
-//                }
+                }
             }
         }
     }

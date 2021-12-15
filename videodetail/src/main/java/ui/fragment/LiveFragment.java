@@ -275,7 +275,6 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                             }
 
                             if (response.body().getData().size() == 0) {
-                                Log.e("loadMoreData", "没有更多视频了");
 //                                adapter.loadMoreEnd();
 //                                adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
                                 refreshLayout.finishLoadMoreWithNoMoreData();
@@ -287,7 +286,6 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                             }
                             mDatas.addAll(response.body().getData());
                             adapter.setNewData(mDatas);
-                            Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
 //                            adapter.loadMoreComplete();
                         } else {
                             adapter.loadMoreFail();
@@ -347,7 +345,6 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                         }
 
                         if (response.body().getCode() == 200) {
-                            Log.d("mycs_token", "转换成功");
                             try {
                                 PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
                                 PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());

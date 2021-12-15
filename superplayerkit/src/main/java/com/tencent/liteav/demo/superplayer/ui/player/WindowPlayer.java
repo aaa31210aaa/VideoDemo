@@ -491,13 +491,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                         if (null != mPreviousDTO) {
                             String jsonString = BuriedPointModelManager.getVideoPlayComplate(mPreviousDTO.getId() + "", mPreviousDTO.getTitle(), "", "", "", ""
                                     , mPreviousDTO.getIssueTimeStamp(), Constants.CONTENT_TYPE, diff + "");
-                            Log.e("埋点", "埋点：视频播放完成---" + jsonString);
                         }
                     } else {
                         if (null != item) {
                             String jsonString = BuriedPointModelManager.getVideoPlayComplate(item.getId() + "", item.getTitle(), "", "", "", ""
                                     , item.getIssueTimeStamp(), Constants.CONTENT_TYPE, mDuration + "");
-                            Log.e("埋点", "埋点：视频播放完成---" + jsonString);
                         }
                     }
                 }

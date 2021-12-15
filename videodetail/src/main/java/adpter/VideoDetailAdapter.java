@@ -348,7 +348,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             public void onClick(View v) {
                 //获取子View的id
                 int mPosition = viewFlipper.getDisplayedChild();
-                Log.e("yqh", "子View的id:" + mPosition);
                 try {
                     param.recommendUrl(list.get(mPosition).getUrl(), null);
                 } catch (Exception e) {

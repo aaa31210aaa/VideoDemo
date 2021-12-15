@@ -66,6 +66,7 @@ import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;
 import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
@@ -224,7 +225,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     private void initPlayer() {
         mSuperPlayer = new SuperPlayerImpl(mContext, mTXCloudVideoView, this);
         mSuperPlayer.setObserver(mSuperPlayerObserver);
-        Log.e("mSuperPlayerObserver", "mSuperPlayerObserver");
         if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
             addView(mFullScreenPlayer);
             mFullScreenPlayer.hide();
@@ -374,7 +374,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                 }
 
                             } else if (json.get("code").toString().equals(token_error)) {
-                                Log.e("addOrCancelLike", "无token,跳转登录");
+                                DebugLogUtils.DebugLog("无token,跳转登录");
                                 try {
                                     param.toLogin();
                                 } catch (Exception e) {
@@ -448,7 +448,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                     contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
                             } else if (json.get("code").toString().equals(token_error)) {
-                                Log.e("addOrCancelFavor", "无token 去跳登录");
+                                DebugLogUtils.DebugLog("无token 去跳登录");
                                 try {
                                     param.toLogin();
                                 } catch (Exception e) {
@@ -940,7 +940,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public void rotateScreenOrientation(SuperPlayerDef.Orientation orientation) {
         switch (orientation) {
             case PORTRAIT:
-                Log.e("T800", "PORTRAIT");
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
                 if (mControllerCallback != null && mTargetPlayerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
@@ -951,7 +950,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 if (((Activity) mContext).getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                     return;
                 }
-                Log.e("T800", "LANDSCAPE");
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
                     SystemUtils.hideSystemUI(decorView);
@@ -961,7 +959,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 if (((Activity) mContext).getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
                     return;
                 }
-                Log.e("T800", "LANDSCAPE_REVERSE");
                 ((Activity) mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
                 if (mTargetPlayerMode != SuperPlayerDef.PlayerMode.WINDOW) {
                     SystemUtils.hideSystemUI(decorView);

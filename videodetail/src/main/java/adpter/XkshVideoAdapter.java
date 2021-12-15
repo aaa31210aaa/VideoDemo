@@ -229,9 +229,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 if (TextUtils.isEmpty(item.getIssuerId())) {
                     return;
                 }
-                //行为埋点 点击他人头像
-                Log.d("xkshadapter", "用户id(user_id)" + item.getCreateBy() + "---" +
-                        "是否关注(is_notice)" + isFollow + "---" + "入口来源(module_source)" + "" + "---" + "用户昵称(user_nickname)" + item.getIssuerName());
                 //跳转H5头像TA人主页
                 try {
                     if (Utils.mIsDebug) {
@@ -560,7 +557,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 //行为埋点 button_name 记录关联框服务名称
                 //获取子View的id
                 int mPosition = viewFlipper.getDisplayedChild();
-                Log.e("yqh", "子View的id:" + mPosition);
                 try {
                     param.recommendUrl(list.get(mPosition).getUrl(), null);
                 } catch (Exception e) {

@@ -17,6 +17,7 @@ import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.constants.Constants;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
+import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.ToastUtils;
 
 import ui.activity.VideoDetailActivity;
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 VideoInteractiveParam.getInstance().setGdyTokenCallBack(new GetGdyTokenCallBack() {
                     @Override
                     public void checkLoginStatus(String gdyToken) {
-                        Log.e("Main",gdyToken);
+                        DebugLogUtils.DebugLog(gdyToken);
                     }
                 });
 

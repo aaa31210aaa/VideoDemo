@@ -1,6 +1,8 @@
 package com.wdcs.callback;
 
 
+import android.util.Log;
+
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.wdcs.http.ApiConstants;
@@ -123,9 +125,9 @@ public class VideoInteractiveParam {
      *
      * @return
      */
-    public void checkLoginStatus() throws Exception{
+    public void checkLoginStatus() {
         if (gdyTokenCallBack == null) {
-            throw new Exception("获取失败,请重试");
+            Log.e("VideoInteractiveParam", "获取失败，请重试");
         } else {
             getUserToken();
         }
@@ -171,8 +173,9 @@ public class VideoInteractiveParam {
                                 }
                                 transformationToken = response.body().getData().getToken();
                                 PersonInfoManager.getInstance().setTransformationToken(transformationToken);
-
-                                gdyTokenCallBack.checkLoginStatus(transformationToken);
+                                if (null != gdyTokenCallBack) {
+                                    gdyTokenCallBack.checkLoginStatus(transformationToken);
+                                }
                             } else {
                                 ToastUtils.showShort(response.body().getMessage());
                             }
@@ -194,7 +197,9 @@ public class VideoInteractiveParam {
                     });
         } else {
             //本地有的时候
-            gdyTokenCallBack.checkLoginStatus(PersonInfoManager.getInstance().getGdyToken());
+            if (null != gdyTokenCallBack) {
+                gdyTokenCallBack.checkLoginStatus(PersonInfoManager.getInstance().getGdyToken());
+            }
         }
     }
 }

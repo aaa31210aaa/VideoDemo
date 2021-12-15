@@ -134,15 +134,15 @@ public class PersonInfoManager {
                 if (!TextUtils.isEmpty(PersonInfoManager.getInstance().getTgtCode())) { //本地token不为空
                     if (TextUtils.equals(PersonInfoManager.getInstance().getTgtCode(),
                             VideoInteractiveParam.getInstance().getCode())) {
-                        Log.e("YQH_Token", "我的长沙已登录_数智已登");
+                        DebugLogUtils.DebugLog("我的长沙已登录_数智已登");
                         return false;
                     } else {
-                        Log.e("YQH_Token", "获取到的tgt和本地tgt不一致,我的长沙切换了用户_重登数智融媒");
+                        DebugLogUtils.DebugLog("获取到的tgt和本地tgt不一致,我的长沙切换了用户_重登数智融媒");
                         clearToken();
                         return true;
                     }
                 } else {
-                    Log.e("YQH_Token", "本地tgt为空，相当于第一次登录，需要请求");
+                    DebugLogUtils.DebugLog("本地tgt为空，相当于第一次登录，需要请求");
                     return true;
                 }
 

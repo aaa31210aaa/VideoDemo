@@ -58,6 +58,7 @@ import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
+import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NoScrollViewPager;
@@ -335,7 +336,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
-                Log.e("T8000", "onInitComplete");
                 rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
                 OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
@@ -347,7 +347,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onPageRelease(boolean isNext, int position) {
-                Log.e("T8000", "onPageRelease: " + isNext + ", " + position);
             }
 
             @Override
@@ -405,7 +404,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         BigDecimal two = new BigDecimal(uploadPercent);
                         double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
                         uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory()), Constants.CMS_VIDEO_OVER_AUTO);
-                        Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                        DebugLogUtils.DebugLog( "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
 
@@ -950,9 +949,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
-                    .showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+                    .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
         } else {
-            popupWindow.showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+            popupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
         }
 //        SystemUtils.hideBottomUIMenuForPopupWindow(popupWindow);
         popupWindow.getPopupWindow().setOnDismissListener(new PopupWindow.OnDismissListener() {
@@ -1794,6 +1793,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
         playerView.mSuperPlayer.pause();
         isPause = true;
+        if (null == mDataDTO) {
+            return;
+        }
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
                 if (mDuration != 0 && mProgress != 0) {

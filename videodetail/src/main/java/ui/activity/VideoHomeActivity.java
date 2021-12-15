@@ -242,7 +242,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 public void onStopTrackingTouch(PointSeekBar seekBar) {
                     int curProgress = seekBar.getProgress();
                     int maxProgress = seekBar.getMax();
-                    Log.e("Touch", "onStopTrackingTouch------");
                     if (mTargetPlayerMode == SuperPlayerDef.PlayerMode.WINDOW) {
                         videoVp.setScroll(true);
                         videoDetailFragment.videoDetailmanager.setCanScoll(true);
@@ -815,7 +814,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
                     public void onSuccess(Response<TrackingUploadModel> response) {
-                        Log.e("uploadBuriedPoint", response.body() + "埋点类型===" + trackingType);
                     }
 
                     @Override

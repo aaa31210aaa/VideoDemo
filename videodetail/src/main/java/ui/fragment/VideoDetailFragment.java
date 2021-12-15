@@ -59,6 +59,7 @@ import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
+import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
@@ -331,7 +332,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
-                Log.e("T8000", "onInitComplete");
                 rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
                 OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
@@ -386,7 +386,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
             @Override
             public void onPageRelease(boolean isNext, int position) {
-                Log.e("T8000", "onPageRelease: " + isNext + ", " + position);
             }
 
             @Override
@@ -420,7 +419,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     }
                 }
 
-                Log.e("翻页----", mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
+                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
                         videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
                                 Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
@@ -450,7 +449,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             event = Constants.CMS_VIDEO_OVER_AUTO;
                         }
                         uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory()), event);
-                        Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
 
@@ -704,7 +703,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     } else {
                         event = Constants.CMS_VIDEO_OVER_AUTO;
                     }uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory()), event);
-                    Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                    DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
 
@@ -1039,9 +1038,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
-                    .showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+                    .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
         } else {
-            popupWindow.showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+            popupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
         }
 //        SystemUtils.hideBottomUIMenuForPopupWindow(popupWindow);
         popupWindow.getPopupWindow().setOnDismissListener(new PopupWindow.OnDismissListener() {
@@ -1266,7 +1265,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             }
 
                             if (response.body().getData().size() == 0) {
-                                Log.e("loadMoreData", "没有更多视频了");
                                 adapter.loadMoreComplete();
                                 adapter.setOnLoadMoreListener(null, videoDetailRv);
                                 if (null != footerView && null != footerView.getParent()) {
@@ -1281,7 +1279,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             mDatas.addAll(response.body().getData());
                             setDataWifiState(mDatas, getActivity());
 //                            adapter.setNewData(mDatas);
-                            Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                             adapter.loadMoreComplete();
                         } else {
                             adapter.loadMoreFail();
@@ -1852,6 +1849,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
         playerView.mSuperPlayer.pause();
         isPause = true;
+        if (null == mDataDTO) {
+            return;
+        }
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
 

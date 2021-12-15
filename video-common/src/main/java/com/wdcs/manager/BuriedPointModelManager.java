@@ -276,7 +276,6 @@ public class BuriedPointModelManager {
             double reportEndTime = System.currentTimeMillis();
             double diff = (reportEndTime - mReportVodStartTime) / 1000;
             String jsonString = BuriedPointModelManager.getVideoDuration(contentId, title, contentKey,contentList,firstClassify, secondClassify,publishTime, NumberFormatTool.save2Num(diff));
-            Log.e("埋点", "埋点：视频播放内容时长---" + jsonString);
         }
     }
 }
