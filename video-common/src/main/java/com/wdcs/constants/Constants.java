@@ -66,7 +66,7 @@ public class Constants {
      * 上报内容埋点固定传参
      */
     public static final String ENTER_FROM = "click_category";
-    public static final String CATEGORY_NAME = "c2402539";
+//    public static final String CATEGORY_NAME = "c2402539";
     public static final String PARAMS_FOR_SPECIAL = "content_manager_system";
 
     /**

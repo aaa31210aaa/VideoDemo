@@ -200,7 +200,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         contentId = getIntent().getStringExtra("contentId");
 
         if (null == getIntent().getStringExtra("category_name")) {
-            category_name = Constants.CATEGORY_NAME;
+            category_name = "";
         } else {
             category_name = getIntent().getStringExtra("category_name");
         }
@@ -461,7 +461,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void ReadPlayCallback() {
                 videoDetailOldTime = DateUtils.getTimeCurrent();
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY, category_name), Constants.CMS_VIDEO_PLAY);
+                if (!TextUtils.isEmpty(category_name)) {
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY, category_name), Constants.CMS_VIDEO_PLAY);
+                }
             }
         };
 
@@ -474,8 +476,10 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 //                final String event;
                 String event = Constants.CMS_VIDEO_OVER;
                 if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                    //拖动/自动播放结束上报埋点
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event, category_name), event);
+                    if (!TextUtils.isEmpty(category_name)) {
+                        //拖动/自动播放结束上报埋点
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDatas.get(0).getThirdPartyId(), String.valueOf(mDuration * 1000), "100", event, category_name), event);
+                    }
                 }
                 playerView.mSuperPlayer.reStart();
             }
@@ -1695,7 +1699,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         if (rootview != null) {
             rootview.addView(playerView, 1);
             //露出即上报
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, category_name), Constants.CMS_CLIENT_SHOW);
+            if (!TextUtils.isEmpty(category_name)) {
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(this, mDatas.get(0).getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, category_name), Constants.CMS_CLIENT_SHOW);
+            }
             play(mDatas.get(0).getPlayUrl(), mDatas.get(0).getTitle());
         }
 

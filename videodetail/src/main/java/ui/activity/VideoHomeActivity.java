@@ -543,32 +543,39 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void ReadPlayCallback() {
                 if (xkshFragment.mIsVisibleToUser) {
+                    if (null == xkshFragment.mDataDTO || TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
+                        return;
+                    }
                     if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
 //                    //不为重播
                         xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
-                    }
-                    String event;
-                    if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
-                        event = Constants.CMS_VIDEO_PLAY;
-                    } else {
-                        event = Constants.CMS_VIDEO_PLAY_AUTO;
+                        String event;
+                        if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                            event = Constants.CMS_VIDEO_PLAY;
+                        } else {
+                            event = Constants.CMS_VIDEO_PLAY_AUTO;
+                        }
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory()), event);
                     }
 
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), event);
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                    if (null == videoDetailFragment.mDataDTO || TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
+                        return;
+                    }
                     if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
 //                    //不为重播
                         videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
+
+                        String event;
+                        if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                            event = Constants.CMS_VIDEO_PLAY;
+                        } else {
+                            event = Constants.CMS_VIDEO_PLAY_AUTO;
+                        }
+
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory()), event);
                     }
 
-                    String event;
-                    if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
-                        event = Constants.CMS_VIDEO_PLAY;
-                    } else {
-                        event = Constants.CMS_VIDEO_PLAY_AUTO;
-                    }
-
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", Constants.CMS_VIDEO_PLAY_AUTO, Constants.CATEGORY_NAME), event);
                 }
             }
         });
@@ -582,22 +589,34 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 }
                 String event = "";
                 maxPercent = 100;
+                String volcCategory = "";
                 if (xkshFragment.mIsVisibleToUser) {
                     lsCotentnId = xkshFragment.mDataDTO.getThirdPartyId();
                     event = Constants.CMS_VIDEO_OVER_AUTO;
+                    if (null != xkshFragment.mDataDTO) {
+                        volcCategory = xkshFragment.mDataDTO.getVolcCategory();
+                    }
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     lsCotentnId = videoDetailFragment.mDataDTO.getThirdPartyId();
-                    if (TextUtils.equals(videoDetailFragment.mDataDTO.getVolcCategory(), "0")) {
-                        event = Constants.CMS_VIDEO_OVER_AUTO;
-                    } else {
-                        event = Constants.CMS_VIDEO_OVER;
+                    if (null != videoDetailFragment.mDataDTO) {
+                        volcCategory = videoDetailFragment.mDataDTO.getVolcCategory();
+
+                        if (TextUtils.equals(videoDetailFragment.mDataDTO.getVolcCategory(), "0")) {
+                            event = Constants.CMS_VIDEO_OVER_AUTO;
+                        } else {
+                            event = Constants.CMS_VIDEO_OVER;
+                        }
                     }
+
                 }
                 String renew = playerView.buriedPointModel.getIs_renew();
                 if (null == renew || TextUtils.equals("false", renew)) {
                     //不为重播
                     //拖动/自动播放结束上报埋点
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event, Constants.CATEGORY_NAME), event);
+                    if (!TextUtils.isEmpty(volcCategory)) {
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, lsCotentnId, String.valueOf(mDuration * 1000), "100", event, volcCategory), event);
+                    }
+
                 }
 
                 playerView.mSuperPlayer.reStart();

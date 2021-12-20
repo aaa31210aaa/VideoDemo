@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, VideoHomeActivity.class);
                 intent.putExtra("panelId", panelCode.getText().toString());
                 intent.putExtra("contentId", contentId.getText().toString());
-                intent.putExtra("category_name", Constants.CATEGORY_NAME);
+                intent.putExtra("category_name", "123456");
                 startActivity(intent);
             }
         });
