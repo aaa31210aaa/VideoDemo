@@ -367,22 +367,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
 
                 playerView.mWindowPlayer.hide();
-                mDataDTO = mDatas.get(position);
 
-                if (isVisibleNoWifiView(getActivity())) {
-                    playerView.setOrientation(false);
-                } else {
-                    playerView.setOrientation(true);
-                }
-
-                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
-                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
-                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
-                    }
-                }
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                     if (mDuration != 0 && mProgress != 0) {
                         //上报埋点
@@ -407,6 +392,24 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         DebugLogUtils.DebugLog( "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
+
+                mDataDTO = mDatas.get(position);
+
+                if (isVisibleNoWifiView(getActivity())) {
+                    playerView.setOrientation(false);
+                } else {
+                    playerView.setOrientation(true);
+                }
+
+                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
 
                 //重置重播标识
                 if (null != playerView && null != playerView.buriedPointModel) {

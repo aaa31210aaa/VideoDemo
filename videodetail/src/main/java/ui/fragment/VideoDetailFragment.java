@@ -409,19 +409,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 //露出 即上报
 //              ContentBuriedPointManager.setContentBuriedPoint();
                 playerView.mWindowPlayer.hide();
-                mDataDTO = mDatas.get(position);
-                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
-                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
-                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
-                    }
-                }
 
-                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
-                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
-                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                     if (mDuration != 0 && mProgress != 0) {
                         //上报埋点
@@ -450,8 +438,24 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         }
                         uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory()), event);
                         DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                        Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
+
+                mDataDTO = mDatas.get(position);
+                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
+                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
+                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
+
 
                 //滑动下一条或者上一条视频
                 playerView.mWindowPlayer.setRecordDuration(0);
@@ -703,7 +707,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     } else {
                         event = Constants.CMS_VIDEO_OVER_AUTO;
                     }uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory()), event);
-                    DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                    Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
 
