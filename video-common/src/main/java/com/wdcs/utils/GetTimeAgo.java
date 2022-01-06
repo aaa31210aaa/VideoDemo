@@ -1,5 +1,8 @@
 package com.wdcs.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 public class GetTimeAgo {
     private static final Long SECOND_MILLIS = Long.valueOf(1000);
     private static final Long MINUTE_MILLIS = 60 * SECOND_MILLIS;
@@ -49,5 +52,14 @@ public class GetTimeAgo {
         } else {
             return diff / YEAR_MILLIS + "年前";
         }
+    }
+
+    public static String timetodate(String time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(Long.valueOf(time));
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");//这里的格式可换"yyyy年-MM月dd日-HH时mm分ss秒"等等格式
+        String date = sf.format(calendar.getTime());
+        return date;
+
     }
 }

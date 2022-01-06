@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.lzy.okgo.OkGo;
@@ -38,7 +39,6 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
-import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
@@ -47,7 +47,8 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
-import com.wdcs.model.CommentModel;
+import com.wdcs.model.CommentLv1Model;
+import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
@@ -60,7 +61,6 @@ import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.KeyboardUtils;
-import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NoScrollViewPager;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
@@ -81,7 +81,6 @@ import java.util.List;
 import adpter.CommentPopRvAdapter;
 import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
-import ui.activity.TgtCodeActivity;
 import ui.activity.UploadActivity;
 import ui.activity.VideoHomeActivity;
 import widget.CustomLoadMoreView;
@@ -91,11 +90,9 @@ import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 
 import static android.widget.RelativeLayout.BELOW;
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
-import static com.tencent.liteav.demo.superplayer.contants.Contants.delayMillis;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
-import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -107,6 +104,7 @@ import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static utils.NetworkUtil.setDataWifiState;
 
+
 public class XkshFragment extends Fragment implements View.OnClickListener {
     private RecyclerView videoDetailRv;
     public XkshVideoAdapter adapter;
@@ -114,8 +112,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     //视频列表数据
     public List<DataDTO> mDatas = new ArrayList<>();
     //评论列表数据
-    private List<CommentModel.DataDTO.RecordsDTO> mCommentPopRvData;
-    private List<CommentModel.DataDTO> mCommentPopDtoData;
+    private List<MultiItemEntity> mCommentPopRvData;
+    private List<CommentLv1Model.DataDTO.RecordsDTO> mCommentPopDtoData;
     private SuperPlayerView playerView;
     private ImageView videoStaticBg;
     private ImageView startPlay;
@@ -209,6 +207,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private View footView;
     public long xkshOldSystemTime;
     public long xkshReportTime;
+    private boolean isReply = false;
+    private String replyId;
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String categoryName) {
         this.mVideoTab = videoTab;
@@ -315,7 +315,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     adapter.getViewByPosition(0, R.id.follow).setVisibility(View.VISIBLE);
                 }
 
-                SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                 if (isVisibleNoWifiView(getActivity())) {
                     playerView.setOrientation(false);
                 } else {
@@ -389,7 +389,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         BigDecimal two = new BigDecimal(uploadPercent);
                         double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
                         uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory()), Constants.CMS_VIDEO_OVER_AUTO);
-                        DebugLogUtils.DebugLog( "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                        DebugLogUtils.DebugLog("埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
 
@@ -419,7 +419,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mWindowPlayer.setRecordDuration(0);
                 lsDuration = 0;
                 maxPercent = 0;
-                SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
+                mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
                 playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
                 playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
@@ -502,7 +502,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 if (TextUtils.isEmpty(edtInput.getText())) {
                     Toast.makeText(getActivity(), "请输入评论", Toast.LENGTH_SHORT).show();
                 } else {
-                    toComment(edtInput.getText().toString(), myContentId);
+                    if (isReply) {
+                        toReply(replyId);
+                    } else {
+                        toComment(edtInput.getText().toString(), myContentId);
+                    }
                 }
             }
         });
@@ -918,11 +922,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         commentPopRv.setLayoutManager(linearLayoutManager);
-        commentPopRvAdapter = new CommentPopRvAdapter(R.layout.comment_pop_rv_item, mCommentPopRvData, getActivity());
+        commentPopRvAdapter = new CommentPopRvAdapter(mCommentPopRvData, getActivity());
         commentPopRvAdapter.bindToRecyclerView(commentPopRv);
         commentPopRvAdapter.setEmptyView(R.layout.comment_list_empty);
+        commentPopRvAdapter.expandAll();
         commentPopRv.setAdapter(commentPopRvAdapter);
-        commentPopRvAdapter.notifyDataSetChanged();
         commentPopRvAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
@@ -935,6 +939,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 });
             }
         }, commentPopRv);
+
     }
 
 
@@ -1228,25 +1233,25 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             jsonObject.put("contentId", myContentId);
             jsonObject.put("pageIndex", pageIndex);
             jsonObject.put("pageSize", pageSize);
-            jsonObject.put("pcommentId", "");
+            jsonObject.put("pcommentId", "0");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        OkGo.<CommentModel>post(ApiConstants.getInstance().getCommentListUrl())
+        OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentWithReply())
                 .tag(VIDEOTAG)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
-                .execute(new JsonCallback<CommentModel>(CommentModel.class) {
+                .execute(new JsonCallback<CommentLv1Model>(CommentLv1Model.class) {
                     @Override
-                    public void onSuccess(Response<CommentModel> response) {
+                    public void onSuccess(Response<CommentLv1Model> response) {
                         if (null == response.body()) {
                             ToastUtils.showShort(R.string.data_err);
                             return;
                         }
 
-                        if (response.body().getCode() == 200) {
+                        if (response.body().getCode().equals("200")) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
                                 return;
@@ -1256,15 +1261,67 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 mCommentPopRvData.clear();
                                 mCommentPopDtoData.clear();
                             }
-                            mCommentPopRvData.addAll(response.body().getData().getRecords());
-                            mCommentPopDtoData.add(response.body().getData());
+
+                            //评论集合
+                            List<CommentLv1Model.DataDTO.RecordsDTO> lv1List = response.body().getData().getRecords();
+                            for (int i = 0; i < lv1List.size(); i++) {
+                                CommentLv1Model.DataDTO.RecordsDTO lv1Model = lv1List.get(i);
+                                lv1Model.setPosition(i);
+                                lv1Model.setShow(true);
+                                List<ReplyLv2Model.ReplyListDTO> lv2List = lv1Model.getReply().getReplyList();
+                                for (int j = 0; j < lv2List.size(); j++) {
+                                    ReplyLv2Model.ReplyListDTO lv2Model = lv2List.get(j);
+                                    lv2Model.setPosition(j);
+                                    lv2Model.setParentPosition(i);
+                                    lv1Model.addSubItem(lv2Model);
+                                }
+                                mCommentPopRvData.add(lv1Model);
+                            }
+
+                            mCommentPopDtoData.addAll(lv1List);
+                            commentPopRvAdapter.setContentId(myContentId);
+                            commentPopRvAdapter.setSrc(mCommentPopRvData);
                             commentPopRvAdapter.setNewData(mCommentPopRvData);
+
+                            //第一级评论点击
+                            commentPopRvAdapter.setLv1CommentClick(new CommentPopRvAdapter.Lv1CommentClick() {
+                                @Override
+                                public void Lv1Comment(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第一级评论第一条回复点击
+                            commentPopRvAdapter.setLv1No1Click(new CommentPopRvAdapter.Lv1No1Click() {
+                                @Override
+                                public void lv1No1Click(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第一级评论第二条回复点击
+                            commentPopRvAdapter.setLv1No2Click(new CommentPopRvAdapter.Lv1No2Click() {
+                                @Override
+                                public void lv1No2Click(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第二级回复点击
+                            commentPopRvAdapter.setLv2ReplyClick(new CommentPopRvAdapter.Lv2ReplyClick() {
+                                @Override
+                                public void Lv2ReplyClick(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+
                             if (mCommentPopDtoData.isEmpty()) {
                                 commentTotal.setText("(0)");
                                 commentPopCommentTotal.setText("(0)");
                             } else {
-                                commentTotal.setText("(" + mCommentPopDtoData.get(0).getTotal() + ")");
-                                commentPopCommentTotal.setText("(" + mCommentPopDtoData.get(0).getTotal() + ")");
+                                commentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
                             }
 
                             if (response.body().getData().getRecords().size() == 0) {
@@ -1280,10 +1337,18 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     }
 
                     @Override
-                    public void onError(Response<CommentModel> response) {
+                    public void onError(Response<CommentLv1Model> response) {
                         commentPopRvAdapter.loadMoreFail();
                     }
                 });
+    }
+
+    private void toSetHint(String id, String replyName) {
+        KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+        showInputEdittextAndSend();
+        edtInput.setHint("回复@" + replyName);
+        isReply = true;
+        replyId = id;
     }
 
     /**
@@ -1360,6 +1425,72 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     }
                 });
     }
+
+    /**
+     * 回复
+     */
+    private void toReply(String id) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", id);
+            jsonObject.put("reply", edtInput.getText().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(ApiConstants.getInstance().addUserReply())
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        try {
+                            JSONObject mJsonObject = new JSONObject(response.body());
+                            String code = mJsonObject.get("code").toString();
+
+                            if (code.equals(success_code)) {
+                                ToastUtils.showShort("回复已提交，请等待审核通过！");
+                                if (null != inputAndSendPop) {
+                                    inputAndSendPop.dissmiss();
+                                }
+                                KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
+                                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                            } else if (code.equals(token_error)) {
+                                try {
+                                    param.toLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (null != mJsonObject.getString("message")) {
+                                    ToastUtils.showShort(mJsonObject.getString("message"));
+                                } else {
+                                    ToastUtils.showShort("回复失败");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showShort("回复失败");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
+
 
     /**
      * 获取收藏点赞状态
@@ -1696,7 +1827,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
-        if (playerView != null) {
+        if (playerView != null && null != mDataDTO) {
+            mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
@@ -1870,6 +2002,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             } else {
                 KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
                 showInputEdittextAndSend();
+                edtInput.setHint("留下你精彩的评论...");
             }
         } else if (id == R.id.video_detail_white_comment_rl) {
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
@@ -1879,8 +2012,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     e.printStackTrace();
                 }
             } else {
-                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
-                showInputEdittextAndSend();
+//                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+//                showInputEdittextAndSend();
+                showCommentPopWindow();
             }
         } else if (id == R.id.no_login_tips_cancel) {
             if (null != noLoginTipsPop) {
@@ -1975,7 +2109,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         edtInput.setFocusable(true);
         edtInput.setFocusableInTouchMode(true);
         edtInput.requestFocus();
-
     }
 
     /**
@@ -2091,7 +2224,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        SuperPlayerImpl.mCurrentPlayVideoURL = null;
+        mCurrentPlayVideoURL = null;
         if (playerView != null) {
             playerView.stopPlay();
             playerView.release();

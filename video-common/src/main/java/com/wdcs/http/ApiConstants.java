@@ -54,10 +54,24 @@ public class ApiConstants {
     }
 
     /**
+     * 获取盖楼评论列表
+     */
+    public String getCommentWithReply() {
+        return getBaseUrl() + "api/cms/client/comment/getCommentWithReply";
+    }
+
+    /**
      * 添加评论
      */
     public String addComment() {
         return getBaseUrl() + "api/cms/client/comment/add";
+    }
+
+    /**
+     * 添加回复
+     */
+    public String addUserReply(){
+        return getBaseUrl() + "api/cms/client/comment/addUserReply";
     }
 
     /**

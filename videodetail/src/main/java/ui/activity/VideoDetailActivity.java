@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,6 +24,7 @@ import android.widget.ViewFlipper;
 import com.alibaba.fastjson.JSON;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
@@ -36,8 +36,6 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
-import com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer;
-import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
@@ -46,10 +44,12 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.model.CommentLv1Model;
 import com.wdcs.model.CommentModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
+import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.TokenModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
@@ -70,12 +70,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailCommentPopRvAdapter;
 import utils.GlideUtil;
 import widget.LoadingView;
 
 import static android.widget.RelativeLayout.BELOW;
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
@@ -86,9 +86,7 @@ import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static com.wdcs.utils.ShareUtils.toShare;
 import static ui.activity.VideoHomeActivity.lsDuration;
-import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
-import static ui.fragment.VideoDetailFragment.videoIsNormal;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailActivity extends AppCompatActivity implements View.OnClickListener {
@@ -140,8 +138,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private int mPageIndex = 1; //评论列表页数
     private int mPageSize = 10; //评论列表每页多少条
     //评论列表数据
-    private List<CommentModel.DataDTO.RecordsDTO> mCommentPopRvData;
-    private List<CommentModel.DataDTO> mCommentPopDtoData;
+    private List<MultiItemEntity> mCommentPopRvData;
+    private List<CommentLv1Model.DataDTO.RecordsDTO> mCommentPopDtoData;
     private VideoDetailCommentPopRvAdapter commentPopRvAdapter;
     private VideoInteractiveParam param;
     private String transformationToken = "";
@@ -171,6 +169,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public String category_name; //火山埋点场景标识
     private TextView watched;
     public double detailMaxPercent = 0; //记录最大百分比
+    private boolean isReply = false;
+    private String replyId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -606,7 +606,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         commentPopRv.setLayoutManager(linearLayoutManager);
-        commentPopRvAdapter = new VideoDetailCommentPopRvAdapter(R.layout.comment_pop_rv_item, mCommentPopRvData, this);
+        commentPopRvAdapter = new VideoDetailCommentPopRvAdapter(mCommentPopRvData, this);
         commentPopRvAdapter.bindToRecyclerView(commentPopRv);
         commentPopRvAdapter.setEmptyView(R.layout.comment_list_empty);
         commentPopRv.setAdapter(commentPopRvAdapter);
@@ -755,25 +755,25 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             jsonObject.put("contentId", contentId);
             jsonObject.put("pageIndex", pageIndex);
             jsonObject.put("pageSize", pageSize);
-            jsonObject.put("pcommentId", "");
+            jsonObject.put("pcommentId", "0");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        OkGo.<CommentModel>post(ApiConstants.getInstance().getCommentListUrl())
+        OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentWithReply())
                 .tag(VIDEOTAG)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
-                .execute(new JsonCallback<CommentModel>(CommentModel.class) {
+                .execute(new JsonCallback<CommentLv1Model>(CommentLv1Model.class) {
                     @Override
-                    public void onSuccess(Response<CommentModel> response) {
+                    public void onSuccess(Response<CommentLv1Model> response) {
                         if (null == response.body()) {
                             ToastUtils.showShort(R.string.data_err);
                             return;
                         }
 
-                        if (response.body().getCode() == 200) {
+                        if (response.body().getCode().equals("200")) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
                                 return;
@@ -783,15 +783,67 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 mCommentPopRvData.clear();
                                 mCommentPopDtoData.clear();
                             }
-                            mCommentPopRvData.addAll(response.body().getData().getRecords());
-                            mCommentPopDtoData.add(response.body().getData());
+
+                            //评论集合
+                            List<CommentLv1Model.DataDTO.RecordsDTO> lv1List = response.body().getData().getRecords();
+                            for (int i = 0; i < lv1List.size(); i++) {
+                                CommentLv1Model.DataDTO.RecordsDTO lv1Model = lv1List.get(i);
+                                lv1Model.setPosition(i);
+                                lv1Model.setShow(true);
+                                List<ReplyLv2Model.ReplyListDTO> lv2List = lv1Model.getReply().getReplyList();
+                                for (int j = 0; j < lv2List.size(); j++) {
+                                    ReplyLv2Model.ReplyListDTO lv2Model = lv2List.get(j);
+                                    lv2Model.setPosition(j);
+                                    lv2Model.setParentPosition(i);
+                                    lv1Model.addSubItem(lv2Model);
+                                }
+                                mCommentPopRvData.add(lv1Model);
+                            }
+
+                            mCommentPopDtoData.addAll(lv1List);
+                            commentPopRvAdapter.setContentId(contentId);
+                            commentPopRvAdapter.setSrc(mCommentPopRvData);
                             commentPopRvAdapter.setNewData(mCommentPopRvData);
+
+                            //第一级评论点击
+                            commentPopRvAdapter.setLv1CommentClick(new CommentPopRvAdapter.Lv1CommentClick() {
+                                @Override
+                                public void Lv1Comment(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第一级评论第一条回复点击
+                            commentPopRvAdapter.setLv1No1Click(new CommentPopRvAdapter.Lv1No1Click() {
+                                @Override
+                                public void lv1No1Click(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第一级评论第二条回复点击
+                            commentPopRvAdapter.setLv1No2Click(new CommentPopRvAdapter.Lv1No2Click() {
+                                @Override
+                                public void lv1No2Click(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第二级回复点击
+                            commentPopRvAdapter.setLv2ReplyClick(new CommentPopRvAdapter.Lv2ReplyClick() {
+                                @Override
+                                public void Lv2ReplyClick(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+
                             if (mCommentPopDtoData.isEmpty()) {
                                 commentTotal.setText("(0)");
                                 commentPopCommentTotal.setText("(0)");
                             } else {
-                                commentTotal.setText("(" + mCommentPopDtoData.get(0).getTotal() + ")");
-                                commentPopCommentTotal.setText("(" + mCommentPopDtoData.get(0).getTotal() + ")");
+                                commentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
                             }
 
                             if (response.body().getData().getRecords().size() == 0) {
@@ -807,7 +859,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     }
 
                     @Override
-                    public void onError(Response<CommentModel> response) {
+                    public void onError(Response<CommentLv1Model> response) {
                         commentPopRvAdapter.loadMoreFail();
                     }
                 });
@@ -887,6 +939,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         edtInput.setText("");
                     }
                 });
+    }
+
+    private void toSetHint(String id, String replyName) {
+        KeyboardUtils.toggleSoftInput(getWindow().getDecorView());
+        showInputEdittextAndSend();
+        edtInput.setHint("回复@" + replyName);
+        isReply = true;
+        replyId = id;
     }
 
     /**

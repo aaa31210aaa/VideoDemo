@@ -18,12 +18,14 @@
         <entry key="videodetail/src/main/res/drawable/choose_pop_bg.xml" value="0.139453125" />
         <entry key="videodetail/src/main/res/drawable/choose_pop_rv_item_choose.xml" value="0.139453125" />
         <entry key="videodetail/src/main/res/drawable/corners_radius_button.xml" value="0.1586872586872587" />
+        <entry key="videodetail/src/main/res/layout/activity_main.xml" value="0.1523224043715847" />
         <entry key="videodetail/src/main/res/layout/activity_tgt_code.xml" value="0.134375" />
         <entry key="videodetail/src/main/res/layout/activity_upload.xml" value="0.25" />
         <entry key="videodetail/src/main/res/layout/activity_video_detail.xml" value="0.1" />
         <entry key="videodetail/src/main/res/layout/activity_video_main.xml" value="0.14002732240437157" />
         <entry key="videodetail/src/main/res/layout/comment_list_empty.xml" value="0.13319672131147542" />
-        <entry key="videodetail/src/main/res/layout/comment_pop_rv_item.xml" value="0.165" />
+        <entry key="videodetail/src/main/res/layout/comment_pop_lv2_item.xml" value="0.25" />
+        <entry key="videodetail/src/main/res/layout/comment_pop_rv_item.xml" value="0.25" />
         <entry key="videodetail/src/main/res/layout/custom_load_more_view.xml" value="0.13934426229508196" />
         <entry key="videodetail/src/main/res/layout/footer_view.xml" value="0.13319672131147542" />
         <entry key="videodetail/src/main/res/layout/fragment_live.xml" value="0.13319672131147542" />
@@ -31,6 +33,7 @@
         <entry key="videodetail/src/main/res/layout/fragment_video_detail.xml" value="0.165" />
         <entry key="videodetail/src/main/res/layout/fragment_xksh.xml" value="0.165" />
         <entry key="videodetail/src/main/res/layout/item_tag_layout.xml" value="0.1437841530054645" />
+        <entry key="videodetail/src/main/res/layout/layout_input_window.xml" value="0.13671875" />
         <entry key="videodetail/src/main/res/layout/video_detail_item.xml" value="0.12734375" />
         <entry key="videodetail/src/main/res/layout/video_fragment_item.xml" value="0.165" />
         <entry key="videodetail/src/main/res/layout/xksh_video_item_layout.xml" value="0.165" />

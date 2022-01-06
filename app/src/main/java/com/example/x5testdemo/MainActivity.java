@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText contentId;
     private TextView fxsys;
     private TextView setCode;
+    private TextView label_details;
+    private TextView leaderboard_list;
+    private TextView others_home_page;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "0aff2b97-850c-41b2-9ee0-219868a0987b";
+                        return "23ae2606-b339-481d-9c38-afc711771f23";
                     }
 
                     @Override

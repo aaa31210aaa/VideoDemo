@@ -27,6 +27,7 @@ import android.widget.ViewFlipper;
 import com.alibaba.fastjson.JSON;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.lzy.okgo.OkGo;
@@ -49,7 +50,8 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
-import com.wdcs.model.CommentModel;
+import com.wdcs.model.CommentLv1Model;
+import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
@@ -89,8 +91,6 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.utils.NoScrollViewPager;
 
 import static android.widget.RelativeLayout.BELOW;
-import static android.widget.RelativeLayout.CENTER_IN_PARENT;
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.PANELCODE;
@@ -98,10 +98,8 @@ import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static ui.activity.VideoHomeActivity.isPause;
-import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
-import static ui.fragment.VideoDetailFragment.videoIsNormal;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailFragment extends Fragment implements View.OnClickListener {
@@ -111,8 +109,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     //视频列表数据
     public List<DataDTO> mDatas = new ArrayList<>();
     //评论列表数据
-    private List<CommentModel.DataDTO.RecordsDTO> mCommentPopRvData;
-    private List<CommentModel.DataDTO> mCommentPopDtoData;
+    private List<MultiItemEntity> mCommentPopRvData;
+    private List<CommentLv1Model.DataDTO.RecordsDTO> mCommentPopDtoData;
     public SuperPlayerView playerView;
     private ImageView videoStaticBg;
     private ImageView startPlay;
@@ -211,7 +209,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     public long videoOldSystemTime;
     public long videoReportTime;
     private String mCategoryName = "";
-
+    private boolean isReply = false;
+    private String replyId;
 
     public VideoDetailFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String contentId, String categoryName) {
         this.mVideoTab = videoTab;
@@ -452,9 +451,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     }
                 }
 
-                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
-                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
-                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
+//                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
+//                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+//                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
 
 
                 //滑动下一条或者上一条视频
@@ -546,7 +545,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 if (TextUtils.isEmpty(edtInput.getText())) {
                     Toast.makeText(getActivity(), "请输入评论", Toast.LENGTH_SHORT).show();
                 } else {
-                    toComment(edtInput.getText().toString(), myContentId);
+                    if (isReply) {
+                        toReply(replyId);
+                    } else {
+                        toComment(edtInput.getText().toString(), myContentId);
+                    }
                 }
             }
         });
@@ -1008,11 +1011,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         commentPopRv.setLayoutManager(linearLayoutManager);
-        commentPopRvAdapter = new CommentPopRvAdapter(R.layout.comment_pop_rv_item, mCommentPopRvData, getActivity());
+        commentPopRvAdapter = new CommentPopRvAdapter(mCommentPopRvData, getActivity());
         commentPopRvAdapter.bindToRecyclerView(commentPopRv);
         commentPopRvAdapter.setEmptyView(R.layout.comment_list_empty);
+        commentPopRvAdapter.expandAll();
         commentPopRv.setAdapter(commentPopRvAdapter);
-        commentPopRvAdapter.notifyDataSetChanged();
         commentPopRvAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
@@ -1316,25 +1319,25 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             jsonObject.put("contentId", myContentId);
             jsonObject.put("pageIndex", pageIndex);
             jsonObject.put("pageSize", pageSize);
-            jsonObject.put("pcommentId", "");
+            jsonObject.put("pcommentId", "0");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        OkGo.<CommentModel>post(ApiConstants.getInstance().getCommentListUrl())
+        OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentWithReply())
                 .tag(VIDEOTAG)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
-                .execute(new JsonCallback<CommentModel>(CommentModel.class) {
+                .execute(new JsonCallback<CommentLv1Model>(CommentLv1Model.class) {
                     @Override
-                    public void onSuccess(Response<CommentModel> response) {
+                    public void onSuccess(Response<CommentLv1Model> response) {
                         if (null == response.body()) {
                             ToastUtils.showShort(R.string.data_err);
                             return;
                         }
 
-                        if (response.body().getCode() == 200) {
+                        if (response.body().getCode().equals("200")) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
                                 return;
@@ -1344,15 +1347,67 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 mCommentPopRvData.clear();
                                 mCommentPopDtoData.clear();
                             }
-                            mCommentPopRvData.addAll(response.body().getData().getRecords());
-                            mCommentPopDtoData.add(response.body().getData());
+
+                            //评论集合
+                            List<CommentLv1Model.DataDTO.RecordsDTO> lv1List = response.body().getData().getRecords();
+                            for (int i = 0; i < lv1List.size(); i++) {
+                                CommentLv1Model.DataDTO.RecordsDTO lv1Model = lv1List.get(i);
+                                lv1Model.setPosition(i);
+                                lv1Model.setShow(true);
+                                List<ReplyLv2Model.ReplyListDTO> lv2List = lv1Model.getReply().getReplyList();
+                                for (int j = 0; j < lv2List.size(); j++) {
+                                    ReplyLv2Model.ReplyListDTO lv2Model = lv2List.get(j);
+                                    lv2Model.setPosition(j);
+                                    lv2Model.setParentPosition(i);
+                                    lv1Model.addSubItem(lv2Model);
+                                }
+                                mCommentPopRvData.add(lv1Model);
+                            }
+
+                            mCommentPopDtoData.addAll(lv1List);
+                            commentPopRvAdapter.setContentId(myContentId);
+                            commentPopRvAdapter.setSrc(mCommentPopRvData);
                             commentPopRvAdapter.setNewData(mCommentPopRvData);
+
+                            //第一级评论点击
+                            commentPopRvAdapter.setLv1CommentClick(new CommentPopRvAdapter.Lv1CommentClick() {
+                                @Override
+                                public void Lv1Comment(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第一级评论第一条回复点击
+                            commentPopRvAdapter.setLv1No1Click(new CommentPopRvAdapter.Lv1No1Click() {
+                                @Override
+                                public void lv1No1Click(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第一级评论第二条回复点击
+                            commentPopRvAdapter.setLv1No2Click(new CommentPopRvAdapter.Lv1No2Click() {
+                                @Override
+                                public void lv1No2Click(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+                            //第二级回复点击
+                            commentPopRvAdapter.setLv2ReplyClick(new CommentPopRvAdapter.Lv2ReplyClick() {
+                                @Override
+                                public void Lv2ReplyClick(String id, String replyName) {
+                                    toSetHint(id,replyName);
+                                }
+                            });
+
+
                             if (mCommentPopDtoData.isEmpty()) {
                                 commentTotal.setText("(0)");
                                 commentPopCommentTotal.setText("(0)");
                             } else {
-                                commentTotal.setText("(" + mCommentPopDtoData.get(0).getTotal() + ")");
-                                commentPopCommentTotal.setText("(" + mCommentPopDtoData.get(0).getTotal() + ")");
+                                commentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
                             }
 
                             if (response.body().getData().getRecords().size() == 0) {
@@ -1368,10 +1423,18 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     }
 
                     @Override
-                    public void onError(Response<CommentModel> response) {
+                    public void onError(Response<CommentLv1Model> response) {
                         commentPopRvAdapter.loadMoreFail();
                     }
                 });
+    }
+
+    private void toSetHint(String id, String replyName) {
+        KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+        showInputEdittextAndSend();
+        edtInput.setHint("回复@" + replyName);
+        isReply = true;
+        replyId = id;
     }
 
     /**
@@ -1446,6 +1509,71 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     public void onFinish() {
                         super.onFinish();
                         edtInput.setText("");
+                    }
+                });
+    }
+
+    /**
+     * 回复
+     */
+    private void toReply(String id) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", id);
+            jsonObject.put("reply", edtInput.getText().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(ApiConstants.getInstance().addUserReply())
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        try {
+                            JSONObject mJsonObject = new JSONObject(response.body());
+                            String code = mJsonObject.get("code").toString();
+
+                            if (code.equals(success_code)) {
+                                ToastUtils.showShort("回复已提交，请等待审核通过！");
+                                if (null != inputAndSendPop) {
+                                    inputAndSendPop.dissmiss();
+                                }
+                                KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
+                                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                            } else if (code.equals(token_error)) {
+                                try {
+                                    param.toLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (null != mJsonObject.getString("message")) {
+                                    ToastUtils.showShort(mJsonObject.getString("message"));
+                                } else {
+                                    ToastUtils.showShort("回复失败");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showShort("回复失败");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
                     }
                 });
     }
