@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
@@ -171,6 +172,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     public double detailMaxPercent = 0; //记录最大百分比
     private boolean isReply = false;
     private String replyId;
+    private String collectionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,9 +247,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onClick(View view) {
                 if (TextUtils.isEmpty(edtInput.getText())) {
-                    ToastUtils.showShort("请输入评论");
+                    Toast.makeText(VideoDetailActivity.this, "请输入评论", Toast.LENGTH_SHORT).show();
                 } else {
-                    toComment(edtInput.getText().toString(), contentId);
+                    if (isReply) {
+                        toReply(replyId);
+                    } else {
+                        toComment(edtInput.getText().toString(), contentId);
+                    }
                 }
             }
         });
@@ -948,6 +954,72 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         isReply = true;
         replyId = id;
     }
+
+    /**
+     * 回复
+     */
+    private void toReply(String id) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", id);
+            jsonObject.put("reply", edtInput.getText().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(ApiConstants.getInstance().addUserReply())
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+                        try {
+                            JSONObject mJsonObject = new JSONObject(response.body());
+                            String code = mJsonObject.get("code").toString();
+
+                            if (code.equals(success_code)) {
+                                ToastUtils.showShort("回复已提交，请等待审核通过！");
+                                if (null != inputAndSendPop) {
+                                    inputAndSendPop.dissmiss();
+                                }
+                                KeyboardUtils.hideKeyboard(getWindow().getDecorView());
+                                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                            } else if (code.equals(token_error)) {
+                                try {
+                                    param.toLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (null != mJsonObject.getString("message")) {
+                                    ToastUtils.showShort(mJsonObject.getString("message"));
+                                } else {
+                                    ToastUtils.showShort("回复失败");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showShort("回复失败");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
+
 
     /**
      * 获取收藏点赞状态
