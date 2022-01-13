@@ -9,7 +9,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,6 +44,7 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
+import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
@@ -47,6 +53,7 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.model.CollectionLabelModel;
 import com.wdcs.model.CommentLv1Model;
 import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.ContentStateModel;
@@ -56,6 +63,7 @@ import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
+import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
@@ -76,13 +84,17 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import adpter.CommentPopRvAdapter;
 import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
 import ui.activity.UploadActivity;
+import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
+import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
 
@@ -146,7 +158,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public SmartRefreshLayout refreshLayout;
     private String transformationToken = "";
     private String panelCode = "";
-    private RelativeLayout commentListEmptyRl;
     private String recordContentId;//记录的内容id
     private boolean initialize = true;
     private int mVideoSize = 20; //每页视频多少条
@@ -209,6 +220,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public long xkshReportTime;
     private boolean isReply = false;
     private String replyId;
+    private List<CollectionLabelModel.DataDTO> collectionList;
+    private List<String> collectionTvList;
+    private List<String> collectionStrList;
 
     public XkshFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String categoryName) {
         this.mVideoTab = videoTab;
@@ -250,7 +264,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         loadingProgress = view.findViewById(R.id.xksh_loading_progress);
         loadingProgress.setVisibility(View.VISIBLE);
         commentEdittext = view.findViewById(R.id.comment_edittext);
-        commentListEmptyRl = view.findViewById(R.id.comment_list_empty_rl);
         videoDetailRv = view.findViewById(R.id.video_detail_rv);
         videoDetailRv.setHasFixedSize(true);
         videoDetailCollectionImage = view.findViewById(R.id.video_detail_collection_image);
@@ -307,6 +320,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
+                getThematicCollection(myContentId);
                 String localUserId = PersonInfoManager.getInstance().getUserId();
                 String userId = mDataDTO.getCreateBy();
                 if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
@@ -321,7 +335,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 } else {
                     playerView.setOrientation(true);
                 }
-
+                currentIndex = 0;
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
                     videoDetailWhiteCommentRl.setEnabled(false);
@@ -388,7 +402,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                         BigDecimal two = new BigDecimal(uploadPercent);
                         double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory()), Constants.CMS_VIDEO_OVER_AUTO);
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_VIDEO_OVER_AUTO);
                         DebugLogUtils.DebugLog("埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
@@ -445,6 +459,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
+                getThematicCollection(myContentId);
                 String localUserId = PersonInfoManager.getInstance().getUserId();
                 String userId = mDataDTO.getCreateBy();
                 if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
@@ -620,7 +635,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                     BigDecimal two = new BigDecimal(uploadPercent);
                     double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory()), Constants.CMS_VIDEO_OVER_AUTO);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_VIDEO_OVER_AUTO);
                     Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
@@ -826,12 +841,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             rlLp.addView(playerView, 1);
             //露出即上报
             if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory()), Constants.CMS_CLIENT_SHOW);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_CLIENT_SHOW);
             }
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
-
-
     }
 
     private void initSmartRefresh(View view) {
@@ -1114,17 +1127,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
                             }
                             videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                            commentListEmptyRl.setVisibility(View.GONE);
                         } else {
                             videoDetailCommentBtn.setVisibility(View.GONE);
-                            commentListEmptyRl.setVisibility(View.VISIBLE);
                         }
                         if (null != refreshLayout) {
                             refreshLayout.finishRefresh();
                         }
-//                        if (null != playerView) {
-//                            playerView.resetPlayer();
-//                        }
                     }
 
                     @Override
@@ -1287,7 +1295,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             commentPopRvAdapter.setLv1CommentClick(new CommentPopRvAdapter.Lv1CommentClick() {
                                 @Override
                                 public void Lv1Comment(String id, String replyName) {
-                                    toSetHint(id,replyName);
+                                    toSetHint(id, replyName);
                                 }
                             });
 
@@ -1295,7 +1303,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             commentPopRvAdapter.setLv1No1Click(new CommentPopRvAdapter.Lv1No1Click() {
                                 @Override
                                 public void lv1No1Click(String id, String replyName) {
-                                    toSetHint(id,replyName);
+                                    toSetHint(id, replyName);
                                 }
                             });
 
@@ -1303,7 +1311,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             commentPopRvAdapter.setLv1No2Click(new CommentPopRvAdapter.Lv1No2Click() {
                                 @Override
                                 public void lv1No2Click(String id, String replyName) {
-                                    toSetHint(id,replyName);
+                                    toSetHint(id, replyName);
                                 }
                             });
 
@@ -1311,7 +1319,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             commentPopRvAdapter.setLv2ReplyClick(new CommentPopRvAdapter.Lv2ReplyClick() {
                                 @Override
                                 public void Lv2ReplyClick(String id, String replyName) {
-                                    toSetHint(id,replyName);
+                                    toSetHint(id, replyName);
                                 }
                             });
 
@@ -1532,6 +1540,126 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             return;
                         }
                         ToastUtils.showShort(R.string.net_err);
+                    }
+                });
+    }
+
+    /**
+     * 获取专题合集标签
+     */
+    public void getThematicCollection(String contentId) {
+        OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId)
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new JsonCallback<CollectionLabelModel>(CollectionLabelModel.class) {
+                    @Override
+                    public void onSuccess(Response<CollectionLabelModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        if (response.body().getCode().equals(success_code)) {
+                            if (null == response.body().getData()) {
+                                return;
+                            }
+                            collectionList = new ArrayList<>();
+                            collectionTvList = new ArrayList<>();
+                            collectionStrList = new ArrayList<>();
+                            String collectionStr = "";
+                            collectionList.addAll(response.body().getData());
+                            for (int i = 0; i < collectionList.size(); i++) {
+                                collectionStr = collectionStr + collectionList.get(i).getTitle();
+                                collectionStrList.add(collectionList.get(i).getTitle());
+                                if (i == collectionList.size() - 1) {
+                                    collectionTvList.add(collectionList.get(i).getTitle());
+                                } else {
+                                    if (i == 0) {
+                                        collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");
+                                    } else {
+                                        collectionTvList.add(collectionList.get(i).getTitle() + "｜");
+                                    }
+
+                                }
+                            }
+
+                            TextView foldTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.fold_text);
+                            TextView expendTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.expend_text);
+                            String brief = "";
+                            String spaceStr = "";
+                            DataDTO item = adapter.getItem(currentIndex);
+                            if (null == item) {
+                                return;
+                            }
+                            if (TextUtils.isEmpty(adapter.getItem(currentIndex).getBrief())) {
+                                brief = item.getTitle();
+                            } else {
+                                brief = item.getBrief();
+                            }
+                            SpannableStringBuilder builder = new SpannableStringBuilder();
+                            if (collectionList.isEmpty()) {
+                                return;
+                            } else {
+                                for (int i = 0; i < collectionList.size(); i++) {
+                                    ImageSpan imgSpan = new ImageSpan(getActivity(),
+                                            R.drawable.collection_image,
+                                            ImageSpan.ALIGN_CENTER);
+                                    final String str = collectionTvList.get(i);
+                                    final String strChun = collectionStrList.get(i);
+                                    SpannableString sp = new SpannableString(str);
+                                    if (i == 0) {
+                                        sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    final String classId = String.valueOf(collectionList.get(i).getId());
+                                    /**
+                                     * 每一个合集标签点击事件
+                                     */
+                                    sp.setSpan(new CollectionClickble(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            //合集标签点击事件
+                                            Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
+                                            intent.putExtra("classId", classId);
+                                            intent.putExtra("className", strChun.trim());
+                                            startActivity(intent);
+                                        }
+                                    }, getActivity()), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    if (i == collectionList.size() - 1) {
+                                        builder.append(sp);
+                                        builder.append("  " + brief);
+                                    } else {
+                                        builder.append(sp);
+                                    }
+                                }
+                                foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                foldTextView.setText(builder);
+                                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+                                    adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.VISIBLE);
+                                } else {
+                                    adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.GONE);
+                                }
+                                expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                expendTextView.setText(builder);
+                            }
+                        } else {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<CollectionLabelModel> response) {
+                        super.onError(response);
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                            return;
+                        }
+                        ToastUtils.showShort(R.string.net_err);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
                     }
                 });
     }
@@ -1828,7 +1956,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             return;
         }
         if (playerView != null && null != mDataDTO) {
-            mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
+            SuperPlayerImpl.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
@@ -1958,7 +2086,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
                     lsDuration = mProgress;
                     //上报埋点
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory()), event);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
                     Log.e("xksh_md", "埋点事件：" + event + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }

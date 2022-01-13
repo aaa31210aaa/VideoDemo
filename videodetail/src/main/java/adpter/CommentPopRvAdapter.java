@@ -209,6 +209,7 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                     public void onClick(View v) {
                         //如果存在第一级里面的回复列表没有值 代表第一次展开
                         if (lv1Model.getReplyLv2CacheList().isEmpty()) {
+                            lv1Extend.setVisibility(View.GONE);
                             getReCommentList("1", "9999", lv1Model.getId(), lv1Model, helper);
                         } else {
                             //从第一级缓存的回复列表里拿数据展开
@@ -410,7 +411,7 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
             e.printStackTrace();
         }
 
-        OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentWithReply())
+        OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentListUrl())
                 .tag(VIDEOTAG)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())

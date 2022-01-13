@@ -15,6 +15,7 @@ public class ParamsModel {
     private String percent;
     private String params_for_special;
     private String duration;
+    private String requestId;
 
     public String getEnter_from() {
         return enter_from;
@@ -78,6 +79,14 @@ public class ParamsModel {
 
     public void setDuration(String duration) {
         this.duration = duration;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     @Keep

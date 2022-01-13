@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:resizeableActivity="true"
+    android:background="@color/video_black"
     tools:context="ui.activity.VideoHomeActivity">
 
     <com.wdcs.utils.NoScrollViewPager
@@ -23,21 +24,21 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/video_dp50"
             android:background="@color/transparent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <RelativeLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                >
+                android:layout_centerInParent="true">
 
                 <com.flyco.tablayout.SlidingTabLayout
                     android:id="@+id/video_tab"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
-                    android:layout_marginRight="@dimen/video_dp45"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginRight="@dimen/video_dp35"
                     android:background="@color/transparent"
-                    android:gravity="center"
                     app:tl_indicator_corner_radius="2dp"
                     app:tl_indicator_height="2dp"
                     app:tl_indicator_width="20dp"

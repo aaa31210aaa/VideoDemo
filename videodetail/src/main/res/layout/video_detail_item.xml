@@ -1,92 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools"
     android:id="@+id/item_relativelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/video_black">
 
-    <TextView
-        android:id="@+id/video_detail_title"
+
+    <ImageView
+        android:id="@+id/cover_picture"
         android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop" />
+
+
+    <ImageView
+        android:id="@+id/vertical_video_wdcs_logo"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="@dimen/video_dp20"
+        android:layout_marginTop="120dp"
+        android:src="@drawable/video_wdcs_logo"
+        android:visibility="gone">
+
+    </ImageView>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="@dimen/video_dp10"
-        android:layout_marginTop="@dimen/video_dp10"
-        android:layout_marginRight="@dimen/video_dp10"
-        android:ellipsize="end"
-        android:maxLines="3"
-        android:textColor="@color/video_white"
-        android:textSize="18sp"
-        tool:text="" />
+        android:layout_centerInParent="true">
 
-    <LinearLayout
-        android:id="@+id/video_detail_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/video_detail_title"
-        android:layout_marginTop="10dp">
+        <ImageView
+            android:id="@+id/horizontal_video_wdcs_logo"
+            android:layout_width="35dp"
+            android:layout_height="30dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="280dp"
+            android:src="@drawable/video_wdcs_logo"
+            android:visibility="gone">
 
-        <TextView
-            android:id="@+id/video_detail_from_media"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/video_dp10"
-            android:textColor="@color/record_settings_tip"
-            android:textSize="12sp"
-            tool:text="湖南">
+        </ImageView>
 
-        </TextView>
-
-        <TextView
-            android:id="@+id/video_detail_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:textColor="@color/record_settings_tip"
-            android:textSize="12sp"
-            tool:text="2021-05-21 11:30:46"></TextView>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/video_detail_choose_rl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/video_detail_info"
-        android:layout_marginBottom="20dp"
-        android:orientation="horizontal">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/video_detail_keyword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-        </androidx.recyclerview.widget.RecyclerView>
-
-        <TextView
-            android:id="@+id/video_detail_item_choose_btn"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="@dimen/video_dp10"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/anthology_bg"
-            android:drawableLeft="@drawable/choose_icon"
-            android:drawablePadding="5dp"
-            android:gravity="center"
-            android:paddingLeft="15dp"
-            android:paddingTop="5dp"
-            android:paddingRight="15dp"
-            android:paddingBottom="5dp"
-            android:text="选集"
-            android:textColor="@color/video_black"
-            android:textSize="12sp"
-            tool:text="选集">
-
-        </TextView>
-    </LinearLayout>
+    </RelativeLayout>
 
 
     <RelativeLayout
@@ -94,13 +51,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:orientation="vertical"
         android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginBottom="30dp"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -128,51 +83,165 @@
 
     </RelativeLayout>
 
-    <ViewFlipper
-        android:id="@+id/video_flipper"
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <LinearLayout
+            android:id="@+id/superplayer_iv_fullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="290dp"
+            android:background="@drawable/full_watch_btn_bg"
+            android:padding="7dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/superplayer_ic_vod_fullscreen"></ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="全屏观看"
+                android:textColor="@color/video_white"
+                android:textSize="10sp"></TextView>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/introduce_lin"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_above="@+id/fold_text"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginTop="@dimen/video_dp5"
         android:layout_marginRight="@dimen/video_dp10"
-        android:layout_marginBottom="@dimen/video_dp5"
-        android:autoStart="false"
-        android:flipInterval="2000"
-        android:inAnimation="@anim/vf_anim_in"
-        android:outAnimation="@anim/vf_anim_out" />
+        android:layout_marginBottom="90dp"
+        android:orientation="vertical">
 
-
-        <widget.OverLineTextView
-            android:id="@+id/fold_text"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:ellipsize="end"
-            android:maxLines="3"
-            android:layout_marginBottom="@dimen/video_dp10"
-            android:layout_marginLeft="@dimen/video_dp10"
-            android:layout_marginRight="@dimen/video_dp10"
-            android:textColor="@color/video_c9"
-            android:textSize="12sp">
+            android:layout_above="@+id/introduce_lin"
+            android:layout_marginTop="@dimen/video_dp10"
+            android:layout_marginBottom="@dimen/video_dp10">
 
-        </widget.OverLineTextView>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/publisher_bg">
 
-<!--        <TextView-->
-<!--            android:id="@+id/expandable_text"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:ellipsize="end"-->
-<!--            android:maxHeight="200dp"-->
-<!--            android:layout_marginBottom="@dimen/dp10"-->
-<!--            android:layout_marginLeft="@dimen/dp10"-->
-<!--            android:layout_marginRight="@dimen/dp10"-->
-<!--            android:maxLines="5"-->
-<!--            android:text=""-->
-<!--            android:textColor="@color/video_c9"-->
-<!--            android:textSize="12sp"-->
-<!--            android:visibility="invisible">-->
+                <TextView
+                    android:id="@+id/publisher_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="@dimen/video_dp5"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxEms="9"
+                    android:paddingLeft="@dimen/video_dp25"
+                    android:singleLine="true"
+                    android:textColor="@color/video_white"
+                    android:textSize="@dimen/sp_16"
+                    tool:text="软装推荐软装推荐大苏打似的">
 
-<!--        </TextView>-->
+                </TextView>
+
+
+                <ImageView
+                    android:id="@+id/official_certification_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="@dimen/video_dp5"
+                    android:layout_toRightOf="@+id/publisher_name"
+                    android:src="@drawable/official_certification">
+
+                </ImageView>
+
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/publisher_headimg"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:scaleType="fitXY">
+
+            </ImageView>
+
+            <TextView
+                android:id="@+id/watched"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/number_of_visitors_title"
+                android:textColor="@color/video_white"
+                android:textSize="@dimen/sp_12"
+                tool:text="1.1万"></TextView>
+
+            <TextView
+                android:id="@+id/number_of_visitors_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="人看过"
+                android:textColor="@color/video_white"
+                android:textSize="@dimen/sp_12">
+
+            </TextView>
+        </RelativeLayout>
+
+
+        <ViewFlipper
+            android:id="@+id/video_flipper"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="@dimen/video_dp5"
+            android:autoStart="false"
+            android:flipInterval="2000"
+            android:inAnimation="@anim/vf_anim_in"
+            android:outAnimation="@anim/vf_anim_out"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <widget.EllipsizeTextView
+                android:id="@+id/fold_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                tool:text="">
+
+            </widget.EllipsizeTextView>
+
+            <TextView
+                android:id="@+id/expend_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textColor="@color/p80_opacity_white"
+                android:textSize="15sp"
+                android:visibility="gone"></TextView>
+
+        </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

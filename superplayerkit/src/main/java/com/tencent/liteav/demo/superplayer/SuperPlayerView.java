@@ -67,6 +67,7 @@ import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DebugLogUtils;
+import com.wdcs.utils.GsonUtil;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
@@ -438,7 +439,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                     contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
                                     int num;
-                                    num = Integer.parseInt(NumberFormatTool.getNumStr( mFullScreenPlayer.fullscreenCollection.getText().toString()));
+                                    num = Integer.parseInt(NumberFormatTool.getNumStr(mFullScreenPlayer.fullscreenCollection.getText().toString()));
                                     if (num > 0) {
                                         num--;
                                     }
@@ -598,7 +599,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
                     decorView.setSystemUiVisibility(View.VISIBLE);
                 } else if (Build.VERSION.SDK_INT >= 19) {
-//                    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                 }
 //                ((Activity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             }
@@ -655,6 +656,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         @Override
         public void onSwitchPlayMode(SuperPlayerDef.PlayerMode playerMode) {
             playModeCallBack.getPlayMode(playerMode);
+            mWindowPlayer.getLayoutParams();
             if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN && playerMode == SuperPlayerDef.PlayerMode.WINDOW) {
                 // 全屏到窗口
                 sensorEnable = true;

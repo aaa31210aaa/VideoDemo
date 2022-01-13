@@ -10,9 +10,9 @@
     android:orientation="vertical"
     tools:context="ui.activity.VideoDetailActivity">
 
-    <include
-        layout="@layout/comment_list_empty"
-        android:visibility="gone"></include>
+<!--    <include-->
+<!--        layout="@layout/comment_list_empty"-->
+<!--        android:visibility="gone"></include>-->
 
     <widget.LoadingView
         android:id="@+id/video_loading_progress"
@@ -47,7 +47,6 @@
         android:id="@+id/activity_linear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/video_title_view"
         android:layout_marginTop="165dp"
         android:orientation="vertical">
 

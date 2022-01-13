@@ -1,9 +1,21 @@
 package adpter;
 
+import static com.wdcs.callback.VideoInteractiveParam.param;
+import static com.wdcs.constants.Constants.BLUE_V;
+import static com.wdcs.constants.Constants.YELLOW_V;
+import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
+import static ui.fragment.VideoDetailFragment.videoIsNormal;
+
 import android.content.Context;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,7 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
@@ -22,48 +33,39 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.ViewPagerLayoutManager;
-import com.wdcs.model.DataDTO;
+import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
 import com.wdcs.model.RecommendModel;
-import com.wdcs.utils.ButtonSpan;
+import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.utils.NumberFormatTool;
-import com.wdcs.utils.PersonInfoManager;
-import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.ScreenUtils;
-import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ui.activity.VideoHomeActivity;
+import ui.activity.VideoDetailActivity;
 import utils.GlideUtil;
 import widget.EllipsizeTextView;
 
-import static com.wdcs.callback.VideoInteractiveParam.param;
-import static com.wdcs.constants.Constants.BLUE_V;
-import static com.wdcs.constants.Constants.YELLOW_V;
-import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
-import static ui.fragment.VideoDetailFragment.videoIsNormal;
-import static ui.fragment.XkshFragment.isFollow;
-
-@Keep
-public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
+public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseViewHolder> {
     private Context mContext;
-    private List<DataDTO> mDatas;
+    private List<RecordsDTO> mDatas;
     private List<RecommendModel.DataDTO.RecordsDTO> recommendList = new ArrayList<>();
     private boolean mIsAuto;
     private String brief;
+    private String spaceStr = "";
     private SuperPlayerView superPlayerView;
-    private ToAddPlayerViewClick click;
-    private FollowViewClick followViewClick;
+    private VideoDetailAdapter.ToAddPlayerViewClick click;
     private SmartRefreshLayout mRefreshlayout;
     private RelativeLayout mVideoDetailCommentBtn;
     private ViewPagerLayoutManager mVideoDetailmanager;
-    private String spaceStr = "";
-//    private String topicNameStr;
+    private String topicNameStr;
+    private String mClassName;
 
-    public XkshVideoAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
-                            SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
+    public VideoCollectionAdapter(int layoutResId, @Nullable List<RecordsDTO> data, Context context,
+                                  SuperPlayerView playerView, SmartRefreshLayout refreshLayout,
+                                  RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager,
+                                  String className) {
         super(layoutResId, data);
         this.mContext = context;
         this.mDatas = data;
@@ -71,10 +73,15 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         this.mRefreshlayout = refreshLayout;
         this.mVideoDetailCommentBtn = videoDetailCommentBtn;
         this.mVideoDetailmanager = videoDetailmanager;
+        this.mClassName = className;
     }
 
+
     @Override
-    protected void convert(final BaseViewHolder helper, final DataDTO item) {
+    protected void convert(final BaseViewHolder helper, final RecordsDTO item) {
+        if (null == item) {
+            return;
+        }
         RelativeLayout itemRootView = helper.getView(R.id.item_relativelayout);
         LinearLayout introduceLin = helper.getView(R.id.introduce_lin);
         final RelativeLayout noWifiLl = helper.getView(R.id.agree_nowifi_play);
@@ -82,7 +89,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         LinearLayout fullLin = helper.getView(R.id.superplayer_iv_fullscreen);
         ImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
         TextView publisherName = helper.getView(R.id.publisher_name);
-        TextView follow = helper.getView(R.id.follow);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
         final EllipsizeTextView foldTextView = helper.getView(R.id.fold_text);
@@ -92,11 +98,11 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         ImageView coverPicture = helper.getView(R.id.cover_picture);
         final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
 
-
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
-        ((VideoHomeActivity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        ((VideoDetailActivity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         double widthPixel = outMetrics.widthPixels;
+        double heightPixel = outMetrics.heightPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //横板标准视频
@@ -106,8 +112,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
+                    && !((VideoDetailActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(item.getImagesUrl())
                         .into(coverPicture);
@@ -115,20 +121,20 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         } else if (TextUtils.equals("1", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //竖版视频
-            if (phoneIsNormal()) {
-                layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            } else {
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            }
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
 
-            layoutParams.setMargins(0, 0, 0, 0);
+            if (phoneIsNormal()) {
+                layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                layoutParams.setMargins(0, 0, 0, 0);
+            } else {
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            }
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
+                    && !((VideoDetailActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(item.getImagesUrl())
                         .into(coverPicture);
@@ -147,35 +153,19 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             mHeight = layoutParams.width / percent;
             layoutParams.height = (int) mHeight;
 
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
+                    && !((VideoDetailActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(item.getImagesUrl())
                         .into(coverPicture);
             }
         }
-        coverPicture.setLayoutParams(layoutParams);
 
+        //非wifi状态下布局是否显示
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
         } else {
             noWifiLl.setVisibility(View.VISIBLE);
-        }
-
-//        //全屏按钮是否显示
-//        if (item.isFullBtnIsShow()) {
-//            fullLin.setVisibility(View.VISIBLE);
-//        } else {
-//            fullLin.setVisibility(View.GONE);
-//        }
-
-        String localUserId = PersonInfoManager.getInstance().getUserId();
-        String userId = item.getCreateBy();
-
-        if (TextUtils.isEmpty(item.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
-            follow.setVisibility(View.GONE);
-        } else {
-            follow.setVisibility(View.VISIBLE);
         }
 
 
@@ -191,13 +181,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-        follow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                followViewClick.followClick(helper.getAdapterPosition());
-            }
-        });
-
         //全屏按钮
         fullLin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,17 +188,15 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 if (isVisibleNoWifiView(mContext)) {
                     return;
                 }
-
                 if (superPlayerView.mWindowPlayer.mControllerCallback != null) {
                     superPlayerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.FULLSCREEN);
                 }
             }
         });
-
-        if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                && !((VideoHomeActivity) mContext).isDestroyed()) {
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+        if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
+                && !((VideoDetailActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
+                    && !((VideoDetailActivity) mContext).isDestroyed()) {
                 GlideUtil.displayCircle(publisherHeadimg, item.getIssuerImageUrl(), true, mContext);
 //                Glide.with(mContext)
 //                        .load(item.getIssuerImageUrl())
@@ -227,19 +208,12 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (TextUtils.isEmpty(item.getIssuerId())) {
-                    return;
-                }
-                //跳转H5头像TA人主页
-                try {
-                    if (Utils.mIsDebug) {
-                        param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy(), null);
-                    } else {
-                        param.recommendUrl(Constants.HEAD_OTHER_ZS + item.getCreateBy(), null);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                //跳转H5头像TA人主页  视频模块不需要跳转
+//                try {
+//                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
             }
         });
 
@@ -254,7 +228,14 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         }
 
+        //观看人数
         watched.setText(NumberFormatTool.formatNum(item.getViewCountShow(), false));
+
+        if (TextUtils.isEmpty(item.getBelongTopicName()) || null == item.getBelongTopicName()) {
+            topicNameStr = "";
+        } else {
+            topicNameStr = "#" + item.getBelongTopicName();
+        }
 
         if (TextUtils.isEmpty(item.getBrief())) {
             brief = item.getTitle();
@@ -262,7 +243,18 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             brief = item.getBrief();
         }
 
-        foldTextView.setText(brief);
+        SpannableString sp = new SpannableString(mClassName);
+        ImageSpan imgSpan = new ImageSpan(mContext,
+                R.drawable.collection_image,
+                ImageSpan.ALIGN_CENTER);
+        sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sp.setSpan(new ForegroundColorSpan(Color.WHITE), 0, mClassName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        builder.append(sp);
+        builder.append(" "+brief);
+        foldTextView.setText(builder);
+
+//        foldTextView.setText(brief);
         if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
             ellipsisTv.setVisibility(View.VISIBLE);
         } else {
@@ -279,7 +271,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-        expendText.setText(brief);
+        expendText.setText(builder);
         expendText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -287,6 +279,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
                 }
+
                 if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
                     ellipsisTv.setVisibility(View.VISIBLE);
                 } else {
@@ -295,32 +288,22 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-
-        /**
-         * 推荐服务
-         */
-        ViewFlipper viewFlipper = helper.getView(R.id.video_flipper);
-
-        if (item.isRecommendVisible() && !item.isClosed()) {
-            viewFlipper.setVisibility(View.VISIBLE);
-        } else {
-            viewFlipper.setVisibility(View.GONE);
-        }
-
-        getViewFlipperData(recommendList, viewFlipper, item);
     }
 
     /**
      * 获取首页滚动消息
      */
-    private void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list,
-                                    final ViewFlipper viewFlipper, final DataDTO mItem) {
+    public void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list,
+                                   final ViewFlipper viewFlipper, final RecordsDTO mItem) {
+        if (null == mContext) {
+            return;
+        }
         for (int i = 0; i < list.size(); i++) {
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
+                    && !((VideoDetailActivity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);
@@ -345,7 +328,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         viewFlipper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //行为埋点 button_name 记录关联框服务名称
                 //获取子View的id
                 int mPosition = viewFlipper.getDisplayedChild();
                 try {
@@ -355,36 +337,14 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 }
             }
         });
-
-
-        if (mIsAuto) {
-            viewFlipper.startFlipping();
-            viewFlipper.setAutoStart(true);
-        } else {
-            viewFlipper.setAutoStart(false);
-        }
-    }
-
-    public void setRecommendList(List<RecommendModel.DataDTO.RecordsDTO> mRecommendList,
-                                 boolean isAuto) {
-        this.recommendList = mRecommendList;
-        this.mIsAuto = isAuto;
     }
 
     public interface ToAddPlayerViewClick {
         void clickNoWifi(int position);
     }
 
-    public void setToAddPlayerViewClick(ToAddPlayerViewClick listener) {
+    public void setToAddPlayerViewClick(VideoDetailAdapter.ToAddPlayerViewClick listener) {
         this.click = listener;
-    }
-
-    public interface FollowViewClick {
-        void followClick(int position);
-    }
-
-    public void setFollowViewClick(FollowViewClick mFollow) {
-        this.followViewClick = mFollow;
     }
 
     /**

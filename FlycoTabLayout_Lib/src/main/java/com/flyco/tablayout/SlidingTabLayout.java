@@ -312,9 +312,20 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         /** 每一个Tab的布局参数 */
 
         if (0 == position) {
-            lp_tab = mTabSpaceEqual ?
-                    new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
-                    new LinearLayout.LayoutParams(dp2px(130), LayoutParams.MATCH_PARENT);
+            if (mTabSpaceEqual) {
+                lp_tab = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f);
+            } else {
+                if (title.length() >= 6) {
+                    lp_tab = new LinearLayout.LayoutParams(dp2px(130), LayoutParams.MATCH_PARENT);
+                } else if (title.length() <= 5 && title.length() > 2){
+                    lp_tab = new LinearLayout.LayoutParams(dp2px(110), LayoutParams.MATCH_PARENT);
+                } else if (title.length() <= 2){
+                    lp_tab = new LinearLayout.LayoutParams(dp2px(75), LayoutParams.MATCH_PARENT);
+                }
+            }
+//            lp_tab = mTabSpaceEqual ?
+//                    new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
+//                    new LinearLayout.LayoutParams(dp2px(130), LayoutParams.MATCH_PARENT);
         } else if (1 == position) {
             lp_tab = mTabSpaceEqual ?
                     new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :

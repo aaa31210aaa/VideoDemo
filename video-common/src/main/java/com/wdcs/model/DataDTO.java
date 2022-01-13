@@ -2,9 +2,11 @@ package com.wdcs.model;
 
 import androidx.annotation.Keep;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Keep
 public  class DataDTO {
-
     private String shareTitle;
     private String shareUrl;
     private String shareImageUrl;
@@ -81,6 +83,10 @@ public  class DataDTO {
     private String  thirdPartyCode;
     private String logoType;
     private String volcCategory;
+    private String extendTextVisible;
+    private String requestId;
+    private List<VideoCollectionModel.DataDTO> collectionList = new ArrayList<>();
+
     /**
      *  0 是自动上报事件  1 是手动上报事件
      */
@@ -994,6 +1000,36 @@ public  class DataDTO {
 
     public void setIsAutoReportEvent(String isAutoReportEvent) {
         this.isAutoReportEvent = isAutoReportEvent;
+    }
+
+    public String getExtendTextVisible() {
+        if (null == extendTextVisible) {
+            return "false";
+        }
+        return extendTextVisible;
+    }
+
+    public void setExtendTextVisible(String extendTextVisible) {
+        this.extendTextVisible = extendTextVisible;
+    }
+
+    public String getRequestId() {
+        if (null == requestId) {
+            return "false";
+        }
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public List<VideoCollectionModel.DataDTO> getCollectionList() {
+        return collectionList;
+    }
+
+    public void setCollectionList(List<VideoCollectionModel.DataDTO> collectionList) {
+        this.collectionList = collectionList;
     }
 
     @Keep

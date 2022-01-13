@@ -19,10 +19,9 @@
         android:layout_width="35dp"
         android:layout_height="30dp"
         android:layout_marginLeft="@dimen/video_dp20"
-        android:src="@drawable/video_wdcs_logo"
         android:layout_marginTop="120dp"
-        android:visibility="gone"
-        >
+        android:src="@drawable/video_wdcs_logo"
+        android:visibility="gone">
 
     </ImageView>
 
@@ -35,11 +34,10 @@
             android:id="@+id/horizontal_video_wdcs_logo"
             android:layout_width="35dp"
             android:layout_height="30dp"
-            android:src="@drawable/video_wdcs_logo"
-            android:layout_marginBottom="280dp"
             android:layout_centerHorizontal="true"
-            android:visibility="gone"
-            >
+            android:layout_marginBottom="280dp"
+            android:src="@drawable/video_wdcs_logo"
+            android:visibility="gone">
 
         </ImageView>
 
@@ -93,9 +91,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="300dp"
-            android:visibility="gone"
             android:background="@drawable/full_watch_btn_bg"
-            android:padding="7dp">
+            android:padding="7dp"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="10dp"
@@ -128,16 +126,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/introduce_lin"
-            android:layout_marginBottom="@dimen/video_dp10"
-            android:layout_marginTop="@dimen/video_dp10">
+            android:layout_marginTop="@dimen/video_dp10"
+            android:layout_marginBottom="@dimen/video_dp10">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
-                android:layout_marginLeft="16dp"
-                android:gravity="center"
                 android:layout_centerVertical="true"
-                android:background="@drawable/publisher_bg">
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/publisher_bg"
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/publisher_name"
@@ -191,8 +189,7 @@
                 android:id="@+id/publisher_headimg"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_centerVertical="true"
-                >
+                android:layout_centerVertical="true">
 
             </ImageView>
 
@@ -239,36 +236,41 @@
                 android:id="@+id/expend_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
                 android:textColor="@color/p80_opacity_white"
                 android:textSize="15sp"
-                android:layout_centerVertical="true"
                 android:visibility="gone"></TextView>
 
-            <TextView
-                android:id="@+id/fold_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:layout_centerVertical="true"
-                android:textColor="@color/p80_opacity_white"
-                android:textSize="15sp"
-                tool:text="">
-
-            </TextView>
-
-            <TextView
-                android:id="@+id/huati"
+            <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                tool:text="#测试测试测试测试测试测试测试">
+                android:layout_height="45dp">
 
-            </TextView>
+                <TextView
+                    android:id="@+id/ellipsis_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="2dp"
+                    android:text="..."
+                    android:textColor="@color/white"></TextView>
+
+                <widget.EllipsizeTextView
+                    android:id="@+id/fold_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:paddingRight="10dp"
+                    android:textColor="@color/p80_opacity_white"
+                    android:textSize="15sp"
+                    tool:text="测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测">
+
+                </widget.EllipsizeTextView>
+            </RelativeLayout>
+
+
         </RelativeLayout>
     </LinearLayout>
 

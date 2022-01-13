@@ -1,6 +1,7 @@
 package adpter;
 
 import android.content.Context;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -37,6 +38,7 @@ import java.util.List;
 
 import ui.activity.VideoHomeActivity;
 import utils.GlideUtil;
+import widget.EllipsizeTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
@@ -84,12 +86,13 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         TextView publisherName = helper.getView(R.id.publisher_name);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
-        final TextView foldTextView = helper.getView(R.id.fold_text);
+        final EllipsizeTextView foldTextView = helper.getView(R.id.fold_text);
         final TextView expendText = helper.getView(R.id.expend_text);
-        TextView huati = helper.getView(R.id.huati);
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
         ImageView coverPicture = helper.getView(R.id.cover_picture);
+        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
+
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
@@ -154,7 +157,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                         .into(coverPicture);
             }
         }
-
 
         //非wifi状态下布局是否显示
         if (item.isWifi()) {
@@ -237,30 +239,33 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         } else {
             topicNameStr = "#" + item.getBelongTopicName();
         }
-        huati.setText(ButtonSpan.subStrByLen(topicNameStr, 24));
-        huati.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+
+//        huati.setText(ButtonSpan.subStrByLen(topicNameStr, 24));
+//        huati.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
                 //行为埋点 话题点击
                 //跳转H5话题详情
-                try {
-                    if (Utils.mIsDebug) {
-                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
-                    } else {
-                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(), null);
-                    }
+//                try {
+//                    if (Utils.mIsDebug) {
+//                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
+//                    } else {
+//                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(), null);
+//                    }
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
-        if (TextUtils.isEmpty(item.getBrief())) {
-            brief = item.getTitle();
-        } else {
-            brief = item.getBrief();
-        }
+//            }
+//        });
+
+//        if (TextUtils.isEmpty(item.getBrief())) {
+//            brief = item.getTitle();
+//        } else {
+//            brief = item.getBrief();
+//        }
 
 //        if (TextUtils.isEmpty(brief)) {
 //            foldTextView.setVisibility(View.GONE);
@@ -268,22 +273,32 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
 //            foldTextView.setVisibility(View.VISIBLE);
 //        }
 
-        if (huati.getText().length() != 0) {
-            int num;
-            if (huati.getText().length() > 13) {
-                num = 12 + 3;
-            } else {
-                num = huati.getText().length() + 1;
-            }
-
-            for (int i = 0; i < num; i++) {
-                spaceStr = spaceStr + "\u3000";
-                item.setSpaceStr(spaceStr);
-            }
-            spaceStr = "";
+//        if (huati.getText().length() != 0) {
+//            int num;
+//            if (huati.getText().length() > 13) {
+//                num = 12 + 3;
+//            } else {
+//                num = huati.getText().length() + 1;
+//            }
+//
+//            for (int i = 0; i < num; i++) {
+//                spaceStr = spaceStr + "\u3000";
+//                item.setSpaceStr(spaceStr);
+//            }
+//            spaceStr = "";
+//        }
+        if (TextUtils.isEmpty(item.getBrief())) {
+            brief = item.getTitle();
+        } else {
+            brief = item.getBrief();
         }
 
-        foldTextView.setText(item.getSpaceStr() + brief);
+        foldTextView.setText(brief);
+        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+            ellipsisTv.setVisibility(View.VISIBLE);
+        } else {
+            ellipsisTv.setVisibility(View.GONE);
+        }
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -295,13 +310,19 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             }
         });
 
-        expendText.setText(item.getSpaceStr() + brief);
+        expendText.setText(brief);
         expendText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (expendText.getVisibility() == View.VISIBLE) {
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
+                }
+
+                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+                    ellipsisTv.setVisibility(View.VISIBLE);
+                } else {
+                    ellipsisTv.setVisibility(View.GONE);
                 }
             }
         });

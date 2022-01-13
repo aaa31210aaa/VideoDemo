@@ -70,7 +70,7 @@ public class ApiConstants {
     /**
      * 添加回复
      */
-    public String addUserReply(){
+    public String addUserReply() {
         return getBaseUrl() + "api/cms/client/comment/addUserReply";
     }
 
@@ -132,6 +132,7 @@ public class ApiConstants {
 
     /**
      * 上传视频
+     *
      * @return
      */
     public String uploadVideo() {
@@ -140,17 +141,18 @@ public class ApiConstants {
 
     /**
      * 获取话题
+     *
      * @return
      */
-    public String topicData(){
-        return getBaseUrl()+"api/cms/client/content/page";
+    public String topicData() {
+        return getBaseUrl() + "api/cms/client/content/page";
     }
 
     /**
      * 发布内容
      */
-    public String releaseContent(){
-        return getBaseUrl() +"api/cms/client/content/activity/works/create";
+    public String releaseContent() {
+        return getBaseUrl() + "api/cms/client/content/activity/works/create";
     }
 
     /**
@@ -163,7 +165,7 @@ public class ApiConstants {
     /**
      * 取消关注
      */
-    public String cancelFollow(){
+    public String cancelFollow() {
         return getBaseUrl() + "api/sys/user/me/unfollow/";
     }
 
@@ -177,7 +179,25 @@ public class ApiConstants {
     /**
      * 话题
      */
-    public String getTopic(){
+    public String getTopic() {
         return getBaseUrl() + "api/cms/client/content/page";
+    }
+
+    /**
+     * 单条视频获取视频合集
+     */
+    public String getCollectToVideo() {
+        return getBaseUrl() + "api/cms/client/video/getCollectToVideo/";
+    }
+
+    /**
+     * 视频合集列表接口
+     */
+    public String getSpecList() {
+        return getBaseUrl() + "api/cms/client/content/getSpecList";
+    }
+
+    public String getCategoryData() {
+        return getBaseUrl()+"api/cms/client/category/getCategoryData";
     }
 }

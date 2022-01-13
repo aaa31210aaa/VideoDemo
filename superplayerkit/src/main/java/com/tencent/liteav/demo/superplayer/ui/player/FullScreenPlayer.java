@@ -47,6 +47,7 @@ import com.wdcs.utils.NoScrollViewPager;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
 
 import static com.wdcs.utils.ShareUtils.toShare;
 
@@ -151,6 +152,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private ImageView fullscreenShareCircle;
     private ImageView fullscreenShareQq;
     private DataDTO item;
+    private RecordsDTO recordsDTO;
     private boolean mIsTurnPage;
 
     private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow, translateAniBottomHide;
@@ -370,6 +372,10 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
 
     public void setDataDTO(DataDTO mItem) {
         this.item = mItem;
+    }
+
+    public void setRecordsDTO(RecordsDTO mRecordsDTO){
+        this.recordsDTO = mRecordsDTO;
     }
 
     public DataDTO getDataDTO() {
@@ -796,11 +802,23 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         } else if (i == R.id.superplayer_fullscreen_share) {    //分享
             showSharePop(mContext);
         } else if (i == R.id.fullscreen_share_wx) {
-            toShare(item, Constants.SHARE_WX);
+            if (null != item) {
+                toShare(item, Constants.SHARE_WX);
+            } else if (null != recordsDTO) {
+                toShare(recordsDTO, Constants.SHARE_WX);
+            }
         } else if (i == R.id.fullscreen_share_circle) {
-            toShare(item, Constants.SHARE_CIRCLE);
+            if (null != item) {
+                toShare(item, Constants.SHARE_CIRCLE);
+            } else if (null != recordsDTO) {
+                toShare(recordsDTO, Constants.SHARE_CIRCLE);
+            }
         } else if (i == R.id.fullscreen_share_qq) {
-            toShare(item, Constants.SHARE_QQ);
+            if (null != item) {
+                toShare(item, Constants.SHARE_QQ);
+            } else if (null != recordsDTO) {
+                toShare(recordsDTO, Constants.SHARE_QQ);
+            }
         } else if (i == R.id.superplayer_iv_snapshot) {         //截屏按钮
             if (mControllerCallback != null) {
                 mControllerCallback.onSnapshot();

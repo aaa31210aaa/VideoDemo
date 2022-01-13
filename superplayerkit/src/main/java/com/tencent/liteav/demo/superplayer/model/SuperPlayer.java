@@ -139,5 +139,4 @@ public interface SuperPlayer {
      * 设置视频显示模式
      */
     void setRenderMode(int renderMode);
-
 }

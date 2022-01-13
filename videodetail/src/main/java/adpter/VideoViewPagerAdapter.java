@@ -72,6 +72,20 @@ public class VideoViewPagerAdapter extends FragmentPagerAdapter {
         notifyDataSetChanged();
     }
 
+    public void addItems2(@Nullable List<VideoChannelModel> channelBeanList, SlidingTabLayout videoTab,
+                         SuperPlayerView playerView, String contentId, String categoryName) {
+        titleList.clear();
+        fragmentList.clear();
+        titleList.addAll(channelBeanList);
+        for (VideoChannelModel videoChannelModel : channelBeanList) {
+            if (TextUtils.equals("1", videoChannelModel.getColumnBean().getColumnId())) {
+                VideoDetailFragment fragment = new VideoDetailFragment(videoTab, playerView, contentId,categoryName);
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel));
+            }
+        }
+        notifyDataSetChanged();
+    }
+
 
     public void remove(@Nullable VideoChannelModel bean) {
         int pos = titleList.indexOf(bean);

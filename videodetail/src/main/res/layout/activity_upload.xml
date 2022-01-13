@@ -59,12 +59,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/video_dp15"
+                    android:visibility="gone"
                     android:layout_marginRight="@dimen/video_dp15">
 
                     <TextView
@@ -88,7 +90,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/video_dp20"
-                    app:max_select="1">
+                    app:max_select="1"
+                    android:visibility="gone">
 
                 </com.zhy.view.flowlayout.TagFlowLayout>
 

@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText contentId;
     private TextView fxsys;
     private TextView setCode;
-    private TextView label_details;
+    private TextView classList;
     private TextView leaderboard_list;
     private TextView others_home_page;
 
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         panelCode.setText("48662");
         contentId = findViewById(R.id.contentid);
         fxsys = findViewById(R.id.fxsys);
-
+        classList = findViewById(R.id.class_list);
         fxsys.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -51,6 +51,19 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        classList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
+                intent.putExtra("panelId", "mycs.video.video");
+                intent.putExtra("classId", "10299204");
+                intent.putExtra("contentId", contentId.getText().toString());
+                intent.putExtra("category_name", "123456");
+                startActivity(intent);
+            }
+        });
+
         setCode = findViewById(R.id.set_code);
 
         setCode.setOnClickListener(new View.OnClickListener() {

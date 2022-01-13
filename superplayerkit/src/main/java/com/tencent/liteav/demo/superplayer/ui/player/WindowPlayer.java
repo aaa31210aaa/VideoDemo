@@ -31,6 +31,8 @@ import com.wdcs.constants.Constants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
+import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.utils.NoScrollViewPager;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
@@ -89,10 +91,13 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private float mWaterMarkBmpY;                         // 水印y坐标
     private long mLastClickTime;                         // 上次点击事件的时间
     private DataDTO item;
+    private RecordsDTO recordsDTO;
     private double mReportVodStartTime = -1;  //播放状态记录的当前时间戳
     private double mReportVodNoPlayingTime = -1; //非播放状态纪录当前时间戳
     private boolean mIsTurnPage; //是否为翻页
+    private boolean mIsVideoDetailTurnPage; //是否为翻页
     private DataDTO mPreviousDTO;
+    private RecordsDTO mPreviousRecordsDTO;
     private boolean isShowSelfProgress;
     private ImageView zdyIvPause;
     private ViewPagerLayoutManager myManager;
@@ -286,31 +291,42 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         return item;
     }
 
+    public void setRecordsDTO(RecordsDTO mRecordsDTO, RecordsDTO previousRecordsDTO) {
+        this.recordsDTO = mRecordsDTO;
+        this.mPreviousRecordsDTO = previousRecordsDTO;
+    }
+
     public void setIsTurnPages(boolean isTurnPages) {
         this.mIsTurnPage = isTurnPages;
     }
 
-    public void setManager(ViewPagerLayoutManager manager){
+    public void setIsVideoDetailTurnPage(boolean isVideoDetailTurnPage){
+        this.mIsVideoDetailTurnPage = isVideoDetailTurnPage;
+    }
+
+
+    public void setManager(ViewPagerLayoutManager manager) {
         this.myManager = manager;
     }
 
-    public void setViewpager(NoScrollViewPager viewpager){
+    public void setViewpager(NoScrollViewPager viewpager) {
         this.mViewpager = viewpager;
     }
 
     /**
      * 记录上报时的播放时长
+     *
      * @param duration
      */
-    public void setRecordDuration(long duration){
+    public void setRecordDuration(long duration) {
         this.reportDuration = duration;
     }
 
-    public long getRecordDuration(){
-       return reportDuration;
+    public long getRecordDuration() {
+        return reportDuration;
     }
 
-    public void setVideoDetailReportDuration(long duration){
+    public void setVideoDetailReportDuration(long duration) {
         this.videoDetailReportDuration = duration;
     }
 
@@ -433,7 +449,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         void UpdatePlayStateCallback(SuperPlayerDef.PlayerState playState);
     }
 
-    public void setUpdatePlayStateCallback(UpdatePlayStateCallback callback){
+    public void setUpdatePlayStateCallback(UpdatePlayStateCallback callback) {
         this.updatePlayStateCallback = callback;
     }
 
@@ -461,6 +477,15 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                         BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
                                 "", "", "", item.getIssueTimeStamp());
                     }
+                } else if (null != recordsDTO) {
+                    if (mIsVideoDetailTurnPage) {
+                        BuriedPointModelManager.reportPlayTime(mReportVodStartTime, mPreviousRecordsDTO.getId() + "", mPreviousRecordsDTO.getTitle(), "",
+                                "", "", "", mPreviousRecordsDTO.getIssueTimeStamp());
+
+                    } else {
+                        BuriedPointModelManager.reportPlayTime(mReportVodStartTime, recordsDTO.getId() + "", recordsDTO.getTitle(), "",
+                                "", "", "", recordsDTO.getIssueTimeStamp());
+                    }
                 }
 
                 mIsTurnPage = false;
@@ -474,6 +499,9 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 if (null != item) {
                     BuriedPointModelManager.reportPlayTime(mReportVodStartTime, item.getId() + "", item.getTitle(), "",
                             "", "", "", item.getIssueTimeStamp());
+                } else if (null != recordsDTO) {
+                    BuriedPointModelManager.reportPlayTime(mReportVodStartTime, recordsDTO.getId() + "", recordsDTO.getTitle(), "",
+                            "", "", "", recordsDTO.getIssueTimeStamp());
                 }
 
                 mIsTurnPage = false;

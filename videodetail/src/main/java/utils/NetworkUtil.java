@@ -6,6 +6,8 @@ import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
+import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.utils.SPUtils;
 
 import java.io.IOException;
@@ -180,6 +182,23 @@ public class NetworkUtil {
     }
 
     public static void setDataWifiState(List<DataDTO> data, Context context) {
+        if (SPUtils.isVisibleNoWifiView(context)) {
+            for (int i = 0; i < data.size(); i++) {
+                if (null != data.get(i)) {
+                    data.get(i).setWifi(false);
+                }
+
+            }
+        } else {
+            for (int i = 0; i < data.size(); i++) {
+                if (null != data.get(i)) {
+                    data.get(i).setWifi(true);
+                }
+            }
+        }
+    }
+
+    public static void setDataWifiStates(List<RecordsDTO> data, Context context) {
         if (SPUtils.isVisibleNoWifiView(context)) {
             for (int i = 0; i < data.size(); i++) {
                 if (null != data.get(i)) {

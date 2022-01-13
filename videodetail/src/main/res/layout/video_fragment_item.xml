@@ -12,8 +12,8 @@
         android:id="@+id/cover_picture"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_alignParentTop="true"
-        android:scaleType="centerCrop"></ImageView>
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop" />
 
 
     <ImageView
@@ -136,8 +136,8 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
-                android:layout_marginLeft="16dp"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
                 android:background="@drawable/publisher_bg">
 
                 <TextView
@@ -219,18 +219,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/fold_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textColor="@color/p80_opacity_white"
-                android:textSize="15sp"
-                tool:text="">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="45dp">
 
-            </TextView>
+                <TextView
+                    android:id="@+id/ellipsis_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="2dp"
+                    android:text="..."
+                    android:textColor="@color/white"></TextView>
+
+                <widget.EllipsizeTextView
+                    android:id="@+id/fold_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:paddingRight="10dp"
+                    android:textColor="@color/p80_opacity_white"
+                    android:textSize="15sp"
+                    tool:text="测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测">
+
+                </widget.EllipsizeTextView>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/expend_text"
@@ -241,20 +257,6 @@
                 android:textSize="15sp"
                 android:visibility="gone"></TextView>
 
-            <TextView
-                android:id="@+id/huati"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:ellipsize="end"
-                android:focusable="true"
-                android:maxEms="11"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                tool:text="#测试测试测试测试测试测试测试">
-
-            </TextView>
         </RelativeLayout>
     </LinearLayout>
 
