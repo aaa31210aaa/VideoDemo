@@ -25,7 +25,7 @@
             android:layout_marginTop="@dimen/video_dp50"
             android:background="@color/transparent"
             android:orientation="horizontal"
-            android:visibility="gone">
+            >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginRight="@dimen/video_dp35"
+                    android:layout_marginRight="@dimen/video_dp70"
                     android:background="@color/transparent"
                     app:tl_indicator_corner_radius="2dp"
                     app:tl_indicator_height="2dp"
@@ -65,7 +65,7 @@
                 android:id="@+id/search_icon"
                 android:layout_width="17dp"
                 android:layout_height="50dp"
-                android:layout_marginRight="@dimen/video_dp20"
+                android:layout_marginRight="@dimen/video_dp15"
                 android:layout_toLeftOf="@+id/personal_center"
                 android:src="@drawable/video_search"></ImageView>
 
@@ -74,7 +74,7 @@
                 android:layout_width="17dp"
                 android:layout_height="50dp"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="@dimen/video_dp15"
+                android:layout_marginRight="@dimen/video_dp10"
                 android:src="@drawable/video_user">
 
 

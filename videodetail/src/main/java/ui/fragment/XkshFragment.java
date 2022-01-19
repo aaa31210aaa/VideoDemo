@@ -63,7 +63,6 @@ import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
-import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
@@ -84,9 +83,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import adpter.CommentPopRvAdapter;
 import adpter.XkshVideoAdapter;
@@ -348,7 +345,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
-                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                getCommentList("1", String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
                 OkGo.getInstance().cancelTag(recommendTag);
@@ -457,7 +454,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
-                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                getCommentList("1", String.valueOf(mPageSize), true);
                 getContentState(myContentId);
                 getThematicCollection(myContentId);
                 String localUserId = PersonInfoManager.getInstance().getUserId();
@@ -522,6 +519,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     } else {
                         toComment(edtInput.getText().toString(), myContentId);
                     }
+                    edtInput.setText("");
                 }
             }
         });
@@ -1399,7 +1397,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 }
                                 KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
                                 mPageIndex = 1;
-                                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                                getCommentList("1", String.valueOf(mPageSize), true);
                             } else if (code.equals(token_error)) {
                                 Log.e("addComment", "无token 去跳登录");
                                 try {
@@ -1466,8 +1464,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 if (null != inputAndSendPop) {
                                     inputAndSendPop.dissmiss();
                                 }
+                                mPageIndex = 1;
                                 KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
-                                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                                getCommentList("1", String.valueOf(mPageSize), true);
                             } else if (code.equals(token_error)) {
                                 try {
                                     param.toLogin();
@@ -1963,6 +1962,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 playerView.mSuperPlayer.reStart();
             }
         }
+        Log.e("yqh_yqh","onResume播放地址："+SuperPlayerImpl.mCurrentPlayVideoURL);
         isPause = false;
         xkshOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
@@ -2129,8 +2129,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
             } else {
                 KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+                edtInput.setHint("留下你的精彩评论");
+                isReply = false;
                 showInputEdittextAndSend();
-                edtInput.setHint("留下你精彩的评论...");
             }
         } else if (id == R.id.video_detail_white_comment_rl) {
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
@@ -2140,8 +2141,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     e.printStackTrace();
                 }
             } else {
-//                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
-//                showInputEdittextAndSend();
+                edtInput.setHint("留下你的精彩评论");
+                isReply = false;
                 showCommentPopWindow();
             }
         } else if (id == R.id.no_login_tips_cancel) {

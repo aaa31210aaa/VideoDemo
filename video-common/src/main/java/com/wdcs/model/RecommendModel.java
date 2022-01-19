@@ -62,7 +62,7 @@ public class RecommendModel {
     }
 
     public DataDTO getData() {
-        if (null == detail) {
+        if (null == data) {
             return new DataDTO();
         }
         return data;
@@ -102,10 +102,6 @@ public class RecommendModel {
         }
 
         public List<RecordsDTO> getRecords() {
-            if (null == records) {
-                List<RecordsDTO> list = new ArrayList<>();
-                return list;
-            }
             return records;
         }
 

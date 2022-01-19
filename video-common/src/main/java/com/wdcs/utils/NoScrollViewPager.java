@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager;
 
 public class NoScrollViewPager extends ViewPager {
     private boolean isScroll = true;
+    private boolean isOritention = false;
 
     public NoScrollViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,6 +59,7 @@ public class NoScrollViewPager extends ViewPager {
         //super.onTouchEvent(ev); //不行,
         //虽然onInterceptTouchEvent中拦截了,
         //但是如果viewpage里面子控件不是viewgroup,还是会调用这个方法.
+
         if (isScroll) {
             return super.onTouchEvent(ev);
         } else {

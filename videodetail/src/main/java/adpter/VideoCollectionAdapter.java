@@ -124,13 +124,13 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
 
-            if (phoneIsNormal()) {
+//            if (phoneIsNormal()) {
                 layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-                layoutParams.setMargins(0, 0, 0, 0);
-            } else {
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            }
+//            } else {
+//                layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+//                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//            }
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
             if (null != mContext && !((VideoDetailActivity) mContext).isFinishing()
@@ -243,16 +243,23 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
             brief = item.getBrief();
         }
 
-        SpannableString sp = new SpannableString(mClassName);
-        ImageSpan imgSpan = new ImageSpan(mContext,
-                R.drawable.collection_image,
-                ImageSpan.ALIGN_CENTER);
-        sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sp.setSpan(new ForegroundColorSpan(Color.WHITE), 0, mClassName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        builder.append(sp);
-        builder.append(" "+brief);
-        foldTextView.setText(builder);
+        if (TextUtils.isEmpty(mClassName)) {
+            foldTextView.setText(brief);
+            expendText.setText(brief);
+        } else {
+            SpannableString sp = new SpannableString(mClassName);
+            ImageSpan imgSpan = new ImageSpan(mContext,
+                    R.drawable.collection_image,
+                    ImageSpan.ALIGN_CENTER);
+            sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sp.setSpan(new ForegroundColorSpan(Color.WHITE), 0, mClassName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            builder.append(sp);
+            builder.append(" "+brief);
+            foldTextView.setText(builder);
+            expendText.setText(builder);
+        }
+
 
 //        foldTextView.setText(brief);
         if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
@@ -271,7 +278,7 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
             }
         });
 
-        expendText.setText(builder);
+
         expendText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

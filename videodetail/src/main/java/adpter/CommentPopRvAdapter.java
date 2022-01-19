@@ -2,6 +2,7 @@ package adpter;
 
 import static com.wdcs.constants.Constants.VIDEOTAG;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.Html;
 import android.text.TextUtils;
@@ -112,8 +113,8 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                 //Lv1展开更多
                 final LinearLayout lv1Extend = helper.getView(R.id.lv1_extend);
                 final CommentLv1Model.DataDTO.RecordsDTO lv1Model = (CommentLv1Model.DataDTO.RecordsDTO) item;
-                if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                        && !((VideoHomeActivity) mContext).isDestroyed()) {
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
                     GlideUtil.displayCircle(commentUserHead, lv1Model.getHead(), true, mContext);
                 }
                 helper.setText(R.id.comment_pop_username, lv1Model.getNickname());

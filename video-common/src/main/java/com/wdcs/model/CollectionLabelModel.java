@@ -3,6 +3,7 @@ package com.wdcs.model;
 import androidx.annotation.Keep;
 
 import java.util.List;
+
 @Keep
 public class CollectionLabelModel {
 
@@ -60,6 +61,7 @@ public class CollectionLabelModel {
     public void setTime(String time) {
         this.time = time;
     }
+
     @Keep
     public static class DataDTO {
         private String shareTitle;
@@ -684,6 +686,7 @@ public class CollectionLabelModel {
             this.pid = pid;
         }
 
+        @Keep
         public static class ExtendDTO {
         }
     }

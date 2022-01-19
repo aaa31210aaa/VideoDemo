@@ -306,6 +306,11 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
+                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+                        ellipsisTv.setVisibility(View.VISIBLE);
+                    } else {
+                        ellipsisTv.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -318,7 +323,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
                 }
-
                 if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
                     ellipsisTv.setVisibility(View.VISIBLE);
                 } else {

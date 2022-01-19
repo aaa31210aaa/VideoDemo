@@ -8,9 +8,10 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -19,20 +20,16 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.lzy.okgo.OkGo;
-import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.model.Response;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
-import com.tencent.liteav.demo.superplayer.ui.player.FullScreenPlayer;
-import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.constants.Constants;
@@ -42,7 +39,6 @@ import com.wdcs.model.CategoryModel;
 import com.wdcs.model.ColumnModel;
 import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
-import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NetworkUtil;
@@ -62,7 +58,6 @@ import widget.NetBroadcastReceiver;
 
 import com.wdcs.utils.NoScrollViewPager;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
@@ -74,7 +69,7 @@ import static com.wdcs.constants.Constants.TRACKINGUPLOAD;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 
-public class VideoHomeActivity extends AppCompatActivity implements View.OnClickListener {
+public class VideoHomeActivity extends AppCompatActivity implements View.OnClickListener{
     public SlidingTabLayout videoTab;
     public NoScrollViewPager videoVp;
     private String[] mTitlesArrays;
@@ -561,10 +556,12 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
             @Override
             public void AutoPlayOverCallBack() {
-                playerView.mSuperPlayer.reStart();
+                if (!isPause) {
+                    Log.e("yqh_yqh","重播地址："+ SuperPlayerImpl.mCurrentPlayVideoURL);
+                    playerView.mSuperPlayer.reStart();
+                }
             }
         });
-
         translateAnimation();
     }
 
@@ -607,7 +604,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         videoVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                if (null != playerView && null != playerView.mOrientationHelper) {
+                    playerView.mOrientationHelper.disable();
+                }
             }
 
             @Override
@@ -633,7 +632,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                playerView.mOrientationHelper.enable();
             }
         });
     }
@@ -831,7 +830,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             return;
                         }
 
-                        if (response.body().getCode().equals(success_code)) {
+                        if (success_code.equals(response.body().getCode())) {
                             if (null == response.body().getData()) {
                                 ToastUtils.showShort(R.string.data_err);
                                 return;
@@ -842,7 +841,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 return;
                             }
 
-                            mTitlesArrays = new String[categoryModelList.size()];
+                            mTitlesArrays = new String[3];
 
                             for (int i = 0; i < categoryModelList.size(); i++) {
                                 if (TextUtils.equals(categoryModelList.get(i).getCode(),"mycs.xksh")) {

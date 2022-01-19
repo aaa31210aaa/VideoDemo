@@ -5,7 +5,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,10 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Gravity;
@@ -51,7 +48,6 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
-import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
@@ -68,11 +64,9 @@ import com.wdcs.model.RecommendModel;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.model.VideoChannelModel;
-import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
-import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
@@ -88,9 +82,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailAdapter;
@@ -448,7 +440,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
                 addPageViews(myContentId);
                 videoType = mDatas.get(position).getType();
-                mPageIndex = 1;
                 if (mDatas.get(position).getDisableComment()) {
                     videoDetailWhiteCommentRl.setEnabled(false);
                     commentPopRl.setEnabled(false);
@@ -460,6 +451,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
+                mPageIndex = 1;
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
                 getThematicCollection(myContentId);
@@ -524,6 +516,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     } else {
                         toComment(edtInput.getText().toString(), myContentId);
                     }
+                    edtInput.setText("");
                 }
             }
         });
@@ -1518,6 +1511,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 if (null != inputAndSendPop) {
                                     inputAndSendPop.dissmiss();
                                 }
+                                mPageIndex = 1;
                                 KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
                                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                             } else if (code.equals(token_error)) {
@@ -2161,6 +2155,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
             } else {
                 KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+                edtInput.setHint("留下你的精彩评论");
+                isReply = false;
                 showInputEdittextAndSend();
             }
         } else if (id == R.id.video_detail_white_comment_rl) {
@@ -2171,7 +2167,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     e.printStackTrace();
                 }
             } else {
-                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+//                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+                edtInput.setHint("留下你的精彩评论");
+                isReply = false;
                 showInputEdittextAndSend();
             }
         } else if (id == R.id.no_login_tips_cancel) {

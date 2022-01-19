@@ -1,7 +1,10 @@
 package com.wdcs.model;
 
+import androidx.annotation.Keep;
+
 import java.util.List;
 
+@Keep
 public class CategoryModel {
 
     private String code;
@@ -59,6 +62,7 @@ public class CategoryModel {
         this.time = time;
     }
 
+    @Keep
     public static class DataDTO {
         private String id;
         private String name;

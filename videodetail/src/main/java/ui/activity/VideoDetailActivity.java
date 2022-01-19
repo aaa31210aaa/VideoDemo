@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -18,7 +17,6 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -34,11 +32,9 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
-import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
-import com.flyco.tablayout.SlidingTabLayout;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.StringCallback;
@@ -64,7 +60,6 @@ import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.CollectionLabelModel;
 import com.wdcs.model.CommentLv1Model;
-import com.wdcs.model.CommentModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
@@ -74,12 +69,9 @@ import com.wdcs.model.TokenModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
-import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DateUtils;
-import com.wdcs.utils.GsonUtil;
 import com.wdcs.utils.KeyboardUtils;
-import com.wdcs.utils.NoScrollViewPager;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
@@ -89,7 +81,6 @@ import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -100,29 +91,22 @@ import java.util.List;
 import adpter.CommentPopRvAdapter;
 import adpter.VideoCollectionAdapter;
 import adpter.VideoDetailAdapter;
-import adpter.VideoDetailCommentPopRvAdapter;
 import model.bean.ActivityRuleBean;
-import utils.GlideUtil;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
+import com.wdcs.utils.NoScrollViewPager;
 
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
-import static com.wdcs.constants.Constants.BLUE_V;
 import static com.wdcs.constants.Constants.VIDEOTAG;
-import static com.wdcs.constants.Constants.YELLOW_V;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
-import static com.wdcs.utils.ShareUtils.toShare;
-import static ui.activity.VideoHomeActivity.isPause;
-import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
-import static utils.NetworkUtil.setDataWifiState;
 import static utils.NetworkUtil.setDataWifiStates;
 
 public class VideoDetailActivity extends AppCompatActivity implements View.OnClickListener {
@@ -238,6 +222,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private int videoPageIndex = 1;
     private RelativeLayout.LayoutParams playViewParams;
     private String className;
+    private boolean isShow = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -263,7 +248,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             myContentId = getIntent().getStringExtra("contentId");
         }
         className = getIntent().getStringExtra("className");
-        className = "  " + className;
+        if (TextUtils.isEmpty(className)) {
+            className = "";
+        } else {
+            className = "  " + className;
+        }
         backRl = findViewById(R.id.back_rl);
         back = findViewById(R.id.back);
         back.setOnClickListener(this);
@@ -336,6 +325,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     if (null != adapter.getViewByPosition(currentIndex, R.id.cover_picture)) {
                         adapter.getViewByPosition(currentIndex, R.id.cover_picture).setVisibility(View.GONE);
                     }
+
+                    backRl.setVisibility(View.GONE);
+
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     videoDetailmanager.setCanScoll(true);
@@ -361,6 +353,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     if (null != adapter.getViewByPosition(currentIndex, R.id.cover_picture)) {
                         adapter.getViewByPosition(currentIndex, R.id.cover_picture).setVisibility(View.VISIBLE);
                     }
+
+                    backRl.setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -452,7 +446,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         SuperPlayerImpl.setDetailAutoPlayOverCallBack(new SuperPlayerImpl.DetailAutoPlayOverCallBack() {
             @Override
             public void DetailAutoPlayOverCallBack() {
-                playerView.mSuperPlayer.reStart();
+                if (isShow) {
+                    playerView.mSuperPlayer.reStart();
+                }
             }
         });
 
@@ -678,6 +674,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     } else {
                         toComment(edtInput.getText().toString(), myContentId);
                     }
+                    edtInput.setText("");
                 }
             }
         });
@@ -786,6 +783,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         super.onFinish();
                         adapter.loadMoreEnd();
                         refreshLayout.setEnableRefresh(false);
+                        getThematicCollection(myContentId);
                     }
                 });
     }
@@ -925,7 +923,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         playerView.setLayoutParams(playViewParams);
         playerView.setTag(position);
         if (rlLp != null) {
-            rlLp.addView(playerView, 2);
+            rlLp.addView(playerView, 1);
             //露出即上报
             if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                 uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_CLIENT_SHOW);
@@ -1472,6 +1470,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 if (null != inputAndSendPop) {
                                     inputAndSendPop.dissmiss();
                                 }
+                                mPageIndex = 1;
                                 KeyboardUtils.hideKeyboard(VideoDetailActivity.this.getWindow().getDecorView());
                                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                             } else if (code.equals(token_error)) {
@@ -1680,17 +1679,25 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         } else {
             brief = item.getBrief();
         }
-        SpannableString sp = new SpannableString(className);
-        ImageSpan imgSpan = new ImageSpan(VideoDetailActivity.this,
-                R.drawable.collection_image,
-                ImageSpan.ALIGN_CENTER);
-        sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sp.setSpan(new ForegroundColorSpan(Color.WHITE), 0, className.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        builder.append(sp);
-        builder.append(" "+brief);
-        foldTextView.setText(builder);
-        expendTextView.setText(builder);
+
+        if (TextUtils.isEmpty(className)) {
+            foldTextView.setText(brief);
+            expendTextView.setText(brief);
+        } else {
+            SpannableString sp = new SpannableString(className);
+            ImageSpan imgSpan = new ImageSpan(VideoDetailActivity.this,
+                    R.drawable.collection_image,
+                    ImageSpan.ALIGN_CENTER);
+            sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sp.setSpan(new ForegroundColorSpan(Color.WHITE), 0, className.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            builder.append(sp);
+            builder.append(" "+brief);
+            foldTextView.setText(builder);
+            expendTextView.setText(builder);
+        }
+
+
     }
 
 
@@ -2028,7 +2035,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 playerView.mSuperPlayer.reStart();
             }
         }
-        isPause = false;
         videoOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
@@ -2054,7 +2060,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
 
         playerView.mSuperPlayer.pause();
-        isPause = true;
         if (null == mDataDTO) {
             return;
         }
@@ -2096,7 +2101,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onDestroy() {
         super.onDestroy();
-        SuperPlayerImpl.mCurrentPlayVideoURL = null;
+        isShow = false;
         if (playerView != null) {
             playerView.mSuperPlayer.stop();
             playerView.release();
@@ -2136,6 +2141,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     e.printStackTrace();
                 }
             } else {
+                edtInput.setHint("留下你的精彩评论");
+                isReply = false;
                 KeyboardUtils.toggleSoftInput(VideoDetailActivity.this.getWindow().getDecorView());
                 showInputEdittextAndSend();
             }
@@ -2147,6 +2154,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     e.printStackTrace();
                 }
             } else {
+                edtInput.setHint("留下你的精彩评论");
+                isReply = false;
                 KeyboardUtils.toggleSoftInput(VideoDetailActivity.this.getWindow().getDecorView());
                 showInputEdittextAndSend();
             }

@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,26 +15,19 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
-import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.utils.VideoGestureDetector;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.tencent.liteav.demo.superplayer.ui.view.VideoProgressLayout;
 import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayout;
-import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
-import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.utils.NoScrollViewPager;
-
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 
 
 /**

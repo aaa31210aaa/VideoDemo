@@ -46,7 +46,7 @@
             android:layout_weight="1"
             android:textSize="16dp"
             android:gravity="center"
-            android:textColor="#cacaca"
+            android:textColor="@color/video_black"
             android:layout_gravity="bottom"
             android:layout_marginRight="17dp"
             android:text="发布"/>

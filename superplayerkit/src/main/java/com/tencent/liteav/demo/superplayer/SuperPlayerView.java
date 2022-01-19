@@ -128,7 +128,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     private OnSuperPlayerViewCallback mPlayerViewCallback;              // SuperPlayerView回调
     public NetWatcher mWatcher;                         // 网络质量监视器
     public SuperPlayer mSuperPlayer;
-    protected OrientationHelper mOrientationHelper;
+    public OrientationHelper mOrientationHelper;
 
     private SuperPlayerDef.Orientation mDesiredOrientation; // 横向需要的方向
     private boolean sensorEnable = true;// 传感器是否可用
@@ -151,7 +151,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public boolean homeVideoIsLoad;
     public BuriedPointModel buriedPointModel;
     public static SuperPlayerView instance;
-
 
     public static SuperPlayerView getInstance(Context context, View decorView, Boolean isMain) {
         if (instance == null) {
@@ -677,7 +676,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             mFloatPlayer.hide();
             //请求全屏模式
             if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-//                mOrientationHelper.disable();
+                mOrientationHelper.disable();
                 if (mLayoutParamFullScreenMode == null) {
                     return;
                 }
@@ -694,7 +693,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                     mPlayerViewCallback.onStartFullScreenPlay();
                 }
             } else if (playerMode == SuperPlayerDef.PlayerMode.WINDOW) {// 请求窗口模式
-//                mOrientationHelper.disable();
+                mOrientationHelper.disable();
                 // 当前是悬浮窗
                 if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FLOAT) {
                     try {
@@ -967,6 +966,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 }
                 break;
         }
+        mOrientationHelper.enable();
     }
 
     /**
@@ -1007,6 +1007,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 
     @Override
     public void onOrientationChanged(int orientation) {
+
         if (!isOrientation) {
             return;
         }
@@ -1014,6 +1015,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         if (mFullScreenPlayer == null) {
             return;
         }
+
         if (mFullScreenPlayer.mLockScreen) {
             return;
         }
@@ -1135,7 +1137,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         if (mFloatPlayer != null) {
             mFloatPlayer.release();
         }
-//        mOrientationHelper.disable();
+        mOrientationHelper.disable();
     }
 
     @Override
