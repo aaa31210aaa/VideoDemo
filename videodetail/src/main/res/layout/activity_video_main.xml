@@ -28,16 +28,16 @@
             >
 
             <RelativeLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true">
+                android:layout_centerInParent="true"
+                android:layout_marginRight="120dp">
 
                 <com.flyco.tablayout.SlidingTabLayout
                     android:id="@+id/video_tab"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginRight="@dimen/video_dp70"
                     android:background="@color/transparent"
                     app:tl_indicator_corner_radius="2dp"
                     app:tl_indicator_height="2dp"
@@ -66,6 +66,7 @@
                 android:layout_width="17dp"
                 android:layout_height="50dp"
                 android:layout_marginRight="@dimen/video_dp15"
+                android:layout_marginLeft="50dp"
                 android:layout_toLeftOf="@+id/personal_center"
                 android:src="@drawable/video_search"></ImageView>
 

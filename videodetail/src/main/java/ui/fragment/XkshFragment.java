@@ -1350,11 +1350,19 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     }
 
     private void toSetHint(String id, String replyName) {
-        KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
-        showInputEdittextAndSend();
-        edtInput.setHint("回复@" + replyName);
-        isReply = true;
-        replyId = id;
+        if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+            try {
+                noLoginTipsPop();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+            showInputEdittextAndSend();
+            edtInput.setHint("回复@" + replyName);
+            isReply = true;
+            replyId = id;
+        }
     }
 
     /**
@@ -2229,7 +2237,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .setFocusable(true)
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                     .setAnimationStyle(R.style.take_popwindow_anim)
-                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, ButtonSpan.dip2px(50))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, ViewGroup.LayoutParams.WRAP_CONTENT)
                     .create()
                     .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
         } else {

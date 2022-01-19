@@ -613,11 +613,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             public void onPageSelected(int position) {
                 if (0 == position && null != videoTab) {
                     videoTab.hideMsg(position);
-                    playerView.setOrientation(true);
                     //滑动切换到小康生活  事件名：short_video_home_click
                     //属性名：button_name
                 } else if (1 == position) {
-                    playerView.setOrientation(true);
                     videoTab.hideMsg(position);
                     //滑动切换到小康生活  事件名：short_video_home_click
                     //属性名：button_name

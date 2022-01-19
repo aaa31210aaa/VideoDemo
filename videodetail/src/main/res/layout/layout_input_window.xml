@@ -26,7 +26,7 @@
         <EditText
             android:id="@+id/edtInput"
             android:layout_width="wrap_content"
-            android:layout_weight="3"
+            android:layout_weight="1"
             android:minHeight="32dp"
             android:maxHeight="70dp"
             android:layout_height="wrap_content"
@@ -37,13 +37,15 @@
             android:maxLength="150"
             android:textColor="#222222"
             android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="5dp"
             android:layout_marginLeft="12dp"
+            android:text=""
             android:background="@drawable/comment_input_bg"/>
         <TextView
             android:id="@+id/tvSend"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:textSize="16dp"
             android:gravity="center"
             android:textColor="@color/video_black"
