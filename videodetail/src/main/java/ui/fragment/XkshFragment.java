@@ -157,7 +157,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private String panelCode = "";
     private String recordContentId;//记录的内容id
     private boolean initialize = true;
-    private int mVideoSize = 20; //每页视频多少条
+    private int mVideoSize = 15; //每页视频多少条
     private int mPageIndex = 1; //评论列表页数
     private int mPageSize = 10; //评论列表每页多少条
     public String myContentId = ""; //记录当前视频id
@@ -400,7 +400,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         BigDecimal two = new BigDecimal(uploadPercent);
                         double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
                         uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_VIDEO_OVER_AUTO);
-                        DebugLogUtils.DebugLog("埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                        Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
 
@@ -1580,7 +1580,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 collectionStr = collectionStr + collectionList.get(i).getTitle();
                                 collectionStrList.add(collectionList.get(i).getTitle());
                                 if (i == collectionList.size() - 1) {
-                                    collectionTvList.add(collectionList.get(i).getTitle());
+                                    collectionTvList.add("  " + collectionList.get(i).getTitle());
                                 } else {
                                     if (i == 0) {
                                         collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");

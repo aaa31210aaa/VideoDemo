@@ -828,7 +828,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         } else if (i == R.id.superplayer_iv_lock) {             //锁屏按钮
             toggleLockState();
         } else if (i == R.id.superplayer_ll_replay) {           //重播按钮
-            isReplayClick.getFullReplayClick();
+//            isReplayClick.getFullReplayClick();
             replay();
         } else if (i == R.id.superplayer_tv_back_to_live) {     //返回直播按钮
             if (mControllerCallback != null) {

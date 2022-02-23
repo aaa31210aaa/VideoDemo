@@ -155,7 +155,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private String transformationToken = "";
     private String panelCode = "";
     private boolean initialize = true;
-    private String mVideoSize = "20"; //每页视频多少条
+    private String mVideoSize = "15"; //每页视频多少条
     private int mPageIndex = 1; //评论列表页数
     private int mPageSize = 10; //评论列表每页多少条
     public String myContentId = ""; //记录当前视频id
@@ -1626,7 +1626,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 collectionStr = collectionStr + collectionList.get(i).getTitle();
                                 collectionStrList.add(collectionList.get(i).getTitle());
                                 if (i == collectionList.size() - 1) {
-                                    collectionTvList.add(collectionList.get(i).getTitle());
+                                    collectionTvList.add("  " + collectionList.get(i).getTitle());
                                 } else {
                                     if (i == 0) {
                                         collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");
