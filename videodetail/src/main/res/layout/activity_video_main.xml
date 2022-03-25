@@ -65,8 +65,8 @@
                 android:id="@+id/search_icon"
                 android:layout_width="17dp"
                 android:layout_height="50dp"
-                android:layout_marginRight="@dimen/video_dp15"
                 android:layout_marginLeft="50dp"
+                android:layout_marginRight="@dimen/video_dp15"
                 android:layout_toLeftOf="@+id/personal_center"
                 android:src="@drawable/video_search"></ImageView>
 

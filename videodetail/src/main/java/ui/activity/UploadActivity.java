@@ -30,9 +30,13 @@ import com.lzy.okgo.model.Progress;
 import com.lzy.okgo.model.Response;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.wdcs.callback.JsonCallback;
+import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
+import com.wdcs.manager.FinderBuriedPointManager;
+import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.TopicModel;
 import com.wdcs.model.TopicModel.DataDTO.RecordsDTO;
+import com.wdcs.model.UploadVideoModel;
 import com.wdcs.utils.DataCleanUtils;
 import com.wdcs.utils.FileUtils;
 import com.wdcs.utils.PersonInfoManager;
@@ -134,7 +138,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("activityCode", "xksh");
-            jsonObject.put("type","activity.topic");
+            jsonObject.put("type", "activity.topic");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -166,7 +170,6 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
-
     /**
      * 获取话题数据
      */
@@ -185,7 +188,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public boolean onTagClick(View view, int position, FlowLayout parent) {
                 Log.e("onTagClick", list.get(position).getTitle());
-                topicSelectId = list.get(position).getId()+"";
+                topicSelectId = list.get(position).getId() + "";
                 selectTopicStr = list.get(position).getTitle();
                 return true;
             }
@@ -208,12 +211,13 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        if  (id == R.id.tvChooseImage) {
+        if (id == R.id.tvChooseImage) {
             chooseVideo();
             uploadVideoWindow.dissmiss();
         } else if (id == R.id.tvDismiss) {
             uploadVideoWindow.dissmiss();
         } else if (id == R.id.upload_btn) {
+            FinderBuriedPointManager.setFinderCommon(Constants.SHORT_VIDEO_START_MAKE, null);
             showChooseVideoPop();
         } else if (id == R.id.upload_video_cancel) {
             uploadVideoCancel.setVisibility(View.GONE);
@@ -244,7 +248,6 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                 orientation = "1";
             }
 
-
             releaseContent(topicSelectId, uploadVideoBean.getWidth(), uploadVideoBean.getHeight(),
                     uploadVideoBean.getCoverImageUrl(), orientation, uploadVideoBean.getDuration()
                     , uploadVideoBean.getUrl(), briefIntroduction.getText().toString());
@@ -267,9 +270,9 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 //    private Set<MimeType> mimeTypes;
+
     /**
      * 选择视频
-     *
      */
     private void chooseVideo() {
         new RxPermissions(this).request(permissionsGroup).subscribe(new Consumer<Boolean>() {
@@ -380,8 +383,8 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                         uploadVideoCancel.setVisibility(View.VISIBLE);
                         worksDuration = Float.parseFloat(uploadVideoBean.getDuration());
                         //行为埋点 点击上传作品按钮时触发
-                        Log.d("upLoadActivity","话题："+selectTopicStr+"---"+"内容id"+""+"---"+ "作品简介"+briefIntroduction.getText().toString()
-                                +"---"+"作品时长"+worksDuration+"---"+"作品大小"+worksSize);
+                        Log.d("upLoadActivity", "话题：" + selectTopicStr + "---" + "内容id" + "" + "---" + "作品简介" + briefIntroduction.getText().toString()
+                                + "---" + "作品时长" + worksDuration + "---" + "作品大小" + worksSize);
                     }
 
                     @Override
@@ -411,7 +414,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                                 String orientation, String playDuration, String playUrl, String title) {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("id","");
+            jsonObject.put("id", "");
             jsonObject.put("belongTopicId", belongTopicId);
             jsonObject.put("width", width);
             jsonObject.put("height", height);
@@ -423,26 +426,32 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        OkGo.<ResponseBean>post(ApiConstants.getInstance().releaseContent())
+        OkGo.<UploadVideoModel>post(ApiConstants.getInstance().releaseContent())
                 .tag(TAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
-                .execute(new JsonCallback<ResponseBean>() {
+                .execute(new JsonCallback<UploadVideoModel>(UploadVideoModel.class) {
                     @Override
-                    public void onSuccess(Response<ResponseBean> response) {
+                    public void onSuccess(Response<UploadVideoModel> response) {
                         if (null != response.body()) {
                             //行为埋点 编辑视频发布
                             //selectTopicStr workDuration  worksSize
 
-                            ResponseBean bean = response.body();
+                            UploadVideoModel bean = response.body();
                             ToastUtils.showShort(bean.getMessage());
+                            FinderPointModel model = new FinderPointModel();
+                            model.setContent_id(bean.getData().getId());
+                            model.setContent_name(bean.getData().getTitle());
+                            model.setWorks_brief(bean.getData().getPlayDuration());
+                            model.setWorks_size(worksSize + "");
+                            FinderBuriedPointManager.setFinderCommon(Constants.SHORT_VIDEO_SUBMIT, model);
                             finish();
                         }
                     }
 
                     @Override
-                    public void onError(Response<ResponseBean> response) {
+                    public void onError(Response<UploadVideoModel> response) {
                         super.onError(response);
                         if (null != response.body()) {
                             ToastUtils.showShort(response.body().getMessage());

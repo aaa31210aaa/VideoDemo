@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.OnTabSelectListener;
+import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
@@ -32,11 +33,14 @@ import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.wdcs.callback.JsonCallback;
+import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.CategoryModel;
 import com.wdcs.model.ColumnModel;
+import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.utils.DateUtils;
@@ -69,7 +73,7 @@ import static com.wdcs.constants.Constants.TRACKINGUPLOAD;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 
-public class VideoHomeActivity extends AppCompatActivity implements View.OnClickListener{
+public class VideoHomeActivity extends AppCompatActivity implements View.OnClickListener {
     public SlidingTabLayout videoTab;
     public NoScrollViewPager videoVp;
     private String[] mTitlesArrays;
@@ -80,7 +84,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private RelativeLayout videoTitleView;
     public VideoDetailFragment videoDetailFragment;
     public XkshFragment xkshFragment;
-    private SuperPlayerView playerView;
+    public SuperPlayerView playerView;
 
     private ImageView searchIcon;
     private ImageView personalCenter;
@@ -99,6 +103,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private String categoryName;
     public static boolean isPause;
     private List<CategoryModel.DataDTO> categoryModelList = new ArrayList<>();
+    private boolean toFirst = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -515,9 +520,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void ReadPlayCallback() {
                 if (xkshFragment.mIsVisibleToUser) {
-                    if (null == xkshFragment.mDataDTO || TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
-                        return;
-                    }
+                    String isRenew = "";
                     if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
 //                    //不为重播
                         xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
@@ -527,13 +530,18 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         } else {
                             event = Constants.CMS_VIDEO_PLAY_AUTO;
                         }
-                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory(), xkshFragment.mDataDTO.getRequestId()), event);
+                        if (null != xkshFragment.mDataDTO && !TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
+                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory(), xkshFragment.mDataDTO.getRequestId()), event);
+                        }
+                        isRenew = "否";
+                    } else {
+                        isRenew = "是";
                     }
+                    //Finder 埋点 视频开始播放
+                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO);
 
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    if (null == videoDetailFragment.mDataDTO || TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
-                        return;
-                    }
+                    String isRenew = "";
                     if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
 //                    //不为重播
                         videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
@@ -544,10 +552,16 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         } else {
                             event = Constants.CMS_VIDEO_PLAY_AUTO;
                         }
+                        if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
+                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
+                        }
 
-                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
+                        isRenew = "否";
+                    } else {
+                        isRenew = "是";
                     }
-
+                    //Finder 埋点 视频开始播放
+                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO);
                 }
             }
         });
@@ -557,7 +571,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void AutoPlayOverCallBack() {
                 if (!isPause) {
-                    Log.e("yqh_yqh","重播地址："+ SuperPlayerImpl.mCurrentPlayVideoURL);
+                    Log.e("yqh_yqh", "重播地址：" + SuperPlayerImpl.mCurrentPlayVideoURL);
                     playerView.mSuperPlayer.reStart();
                 }
             }
@@ -615,16 +629,23 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     videoTab.hideMsg(position);
                     //滑动切换到小康生活  事件名：short_video_home_click
                     //属性名：button_name
+                    FinderBuriedPointManager.setFinderClick("tab_" + mTitlesArrays[position]);
                 } else if (1 == position) {
                     videoTab.hideMsg(position);
+                    if (toFirst) {
+                        toFirst = false;
+                        return;
+                    }
                     //滑动切换到小康生活  事件名：short_video_home_click
                     //属性名：button_name
+                    FinderBuriedPointManager.setFinderClick("tab_" + mTitlesArrays[position]);
                 } else if (2 == position) {
                     playerView.mSuperPlayer.pause();
                     //切换到直播的时候  不允许旋转
                     playerView.setOrientation(false);
                     //滑动切换到小康生活  事件名：short_video_home_click
                     //属性名：button_name
+                    FinderBuriedPointManager.setFinderClick("tab_" + mTitlesArrays[position]);
                 }
             }
 
@@ -634,6 +655,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             }
         });
     }
+
 
     private void initViewPagerData() {
         for (int i = 0; i < mTitlesArrays.length; i++) {
@@ -653,7 +675,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, videoTab, playerView, contentId, categoryName);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }
@@ -700,7 +722,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 } else {
                     param.recommendUrl(Constants.SEARCHPLUS_ZS, null);
                 }
-
+                FinderBuriedPointManager.setFinderClick("搜索");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -715,6 +737,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     } else {
                         param.recommendUrl(Constants.PERSONAL_CENTER_ZS, null);
                     }
+                    FinderBuriedPointManager.setFinderClick("视频个人中心");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -753,6 +776,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         maxPercent = 0;
         lsDuration = 0;
         unregisterReceiver(netWorkStateReceiver);
+        FinderBuriedPointManager.setFinderClick("页面关闭");
 //        OkGo.getInstance().cancelTag(VIDEOTAG);
     }
 
@@ -842,7 +866,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             mTitlesArrays = new String[3];
 
                             for (int i = 0; i < categoryModelList.size(); i++) {
-                                if (TextUtils.equals(categoryModelList.get(i).getCode(),"mycs.xksh")) {
+                                if (TextUtils.equals(categoryModelList.get(i).getCode(), "mycs.xksh")) {
                                     mTitlesArrays[0] = categoryModelList.get(i).getName();
 //                                    mTitlesArrays[0] = "我的小康生活";
                                 }

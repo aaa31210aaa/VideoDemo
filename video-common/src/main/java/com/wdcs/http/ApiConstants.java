@@ -152,7 +152,7 @@ public class ApiConstants {
      * 发布内容
      */
     public String releaseContent() {
-        return getBaseUrl() + "api/cms/client/content/activity/works/create";
+        return getBaseUrl() + "api/cms/client/content/activity/works/create/v2";
     }
 
     /**

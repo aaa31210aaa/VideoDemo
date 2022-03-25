@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,7 +12,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.wdcs.callback.GetGdyTokenCallBack;
+import com.wdcs.callback.VideoFinderPointCallBack;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.constants.Constants;
@@ -20,6 +23,9 @@ import com.wdcs.model.ShareInfo;
 import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.ToastUtils;
 
+import org.json.JSONObject;
+
+import io.reactivex.functions.Consumer;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
 
@@ -32,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView classList;
     private TextView leaderboard_list;
     private TextView others_home_page;
+    private static final String[] permissionsGroup = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override
                     public String setCode() {
-                        return "9ae1ae3d-4a2f-425d-ade5-a8d972de8cc8";
+                        return "89603e3c-e23f-455e-bfc4-401c9f2f30ff";
                     }
 
                     @Override
@@ -124,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     @Override
     protected void onDestroy() {

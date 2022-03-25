@@ -25,6 +25,9 @@ public class Constants {
     public static final String QQ_STRING = "qq";
     public static final String PARAME_VIDEO_CHANNEL = "videochannletype";
     public static final String PANELCODE = "panelCode";
+    public static final String VIDEOTAB = "videoTab";
+    public static final String CONTENTID = "contentId";
+    public static final String CATEGORYNAME = "categoryName";
     public static final String VIDEOTAG = "videoTag";
     public static final String TRACKINGUPLOAD = "TrackingUpload";
     public static final String BLUE_V = "blue-v";
@@ -82,17 +85,10 @@ public class Constants {
      */
     public static final String SHORT_VIDEO_HOME_CLICK = "short_video_home_click"; //短视频首页上的点击事件
     public static final String WELL_LIFE_HOME_CLICK = "well_life_home_click"; //我的小康生活页面上的点击事件
-    public static final String SHORT_VIDEO_START_MAKE = "short_video_start_make"; //点击视频发布 （点击发布那个加号时触发）
     public static final String SHORT_VIDEO_START_UPLOAD = "short_video_start_upload"; //点击上传作品 （点击上传作品按钮时触发）
-    public static final String SHORT_VIDEO_SUBMIT = "short_video_submit"; //编辑视频发布 （提交发布成功时触发）
-    public static final String SHORT_VIDEO_LIKE_RANKING = "short_video_like_ranking"; //点赞排行榜按钮点击 (搜索页面右上角排行榜标志点击时触发)
     public static final String SHORT_VIDEO_TOPIC_LISTPAGE = "short_video_topic_listpage"; //热门话题列表页点击
-    public static final String CLICK_USER ="click_user"; //点击其他用户（非自己）
-    public static final String NOTICE_USER = "notice_user"; //关注用户
     public static final String SHORT_VIDEO_PERSONAL_BUTTON = "short_video_personal_button"; //视频个人中心页点击（非视频按钮）
-    public static final String CONTENT_VIDEO_PLAY = "content_video_play";  //视频开始播放
-    public static final String CONTENT_VIDEO_FINISH = "content_video_finish"; //视频播放完成
-    public static final String CONTENT_VIDEO_DURATION = "content_video_duration"; //视频播放时长
+
     public static final String CONTENT_LIVE_LIST_PAGE = "content_live_list_page"; //浏览直播专区
     public static final String CONTENT_LIVE_CLICK_LIST = "content_live_click_list"; //点击直播列表页
     public static final String CONTENT_LIVE_ENTER_PAGE = "content_live_enter_page"; //进入直播页
@@ -101,5 +97,19 @@ public class Constants {
     public static final double Horizontal_Proportion = 1.7777;
     public static final double Portrait_Proportion = 0.5625;
 
-
+    /**
+     * Finder埋点 上报事件名
+     */
+    public static final String SHORT_VIDEO_PAGE_CLICK = "short_video_page_click";//短视频页面点击
+    public static final String SHORT_VIDEO_SUBMIT = "short_video_submit";//点击视频发布
+    public static final String SHORT_VIDEO_LIKE_RANKING = "short_video_like_ranking"; //点赞排行榜按钮点击 (搜索页面右上角排行榜标志点击时触发)
+    public static final String CLICK_USER ="click_user"; //点击其他用户（非自己）
+    public static final String NOTICE_USER = "notice_user"; //关注用户
+    public static final String SHORT_VIDEO_START_MAKE = "short_video_start_make"; //点击视频发布  点击发布加号时触发
+    public static final String CONTENT_FAVORITE = "content_favorite"; //收藏
+    public static final String CONTENT_LIKE = "content_like"; //点赞
+    public static final String CONTENT_TRANSMIT = "content_transmit"; //分享
+    public static final String VIDEO_CLICK_SPEED = "video_click_speed"; //短视频播放点击倍速
+    public static final String CONTENT_VIDEO_PLAY = "content_video_play";  //视频开始播放
+    public static final String CONTENT_VIDEO_DURATION = "content_video_duration"; //视频播放时长
 }

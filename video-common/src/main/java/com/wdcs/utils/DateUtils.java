@@ -81,6 +81,13 @@ public enum DateUtils {
         return "0";
     }
 
+    public static String getDateToString(long milSecond) {
+        Date date = new Date(milSecond);
+        String dateStr = formatterYMDHMS.format(date);
+        return dateStr;
+
+    }
+
     /**
      * 获取当前日期后几天的日期
      */

@@ -22,8 +22,10 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.utils.AppUtils;
 import com.wdcs.utils.ButtonSpan;
@@ -39,6 +41,7 @@ import java.util.List;
 import ui.activity.VideoHomeActivity;
 import utils.GlideUtil;
 import widget.EllipsizeTextView;
+import widget.MyTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
@@ -91,7 +94,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
         ImageView coverPicture = helper.getView(R.id.cover_picture);
-        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
+//        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
 
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
@@ -136,7 +139,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                         .into(coverPicture);
             }
         } else {
-            //非标准视频
             //非标准视频
             verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
             horizontalVideoWdcsLogo.setVisibility(View.GONE);
@@ -240,53 +242,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             topicNameStr = "#" + item.getBelongTopicName();
         }
 
-//        huati.setText(ButtonSpan.subStrByLen(topicNameStr, 24));
-//        huati.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-                //行为埋点 话题点击
-                //跳转H5话题详情
-//                try {
-//                    if (Utils.mIsDebug) {
-//                        param.recommendUrl(Constants.TOPIC_DETAILS + item.getBelongTopicId(), null);
-//                    } else {
-//                        param.recommendUrl(Constants.TOPIC_DETAILS_ZS + item.getBelongTopicId(), null);
-//                    }
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-
-
-//            }
-//        });
-
-//        if (TextUtils.isEmpty(item.getBrief())) {
-//            brief = item.getTitle();
-//        } else {
-//            brief = item.getBrief();
-//        }
-
-//        if (TextUtils.isEmpty(brief)) {
-//            foldTextView.setVisibility(View.GONE);
-//        } else {
-//            foldTextView.setVisibility(View.VISIBLE);
-//        }
-
-//        if (huati.getText().length() != 0) {
-//            int num;
-//            if (huati.getText().length() > 13) {
-//                num = 12 + 3;
-//            } else {
-//                num = huati.getText().length() + 1;
-//            }
-//
-//            for (int i = 0; i < num; i++) {
-//                spaceStr = spaceStr + "\u3000";
-//                item.setSpaceStr(spaceStr);
-//            }
-//            spaceStr = "";
-//        }
         if (TextUtils.isEmpty(item.getBrief())) {
             brief = item.getTitle();
         } else {
@@ -294,23 +249,24 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         }
 
         foldTextView.setText(brief);
-        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-            ellipsisTv.setVisibility(View.VISIBLE);
-        } else {
-            ellipsisTv.setVisibility(View.GONE);
-        }
+//        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+//            ellipsisTv.setVisibility(View.VISIBLE);
+//        } else {
+//            ellipsisTv.setVisibility(View.GONE);
+//        }
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //行为埋点 button_name 展开简介
+                FinderBuriedPointManager.setFinderClick("展开简介");
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
-                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-                        ellipsisTv.setVisibility(View.VISIBLE);
-                    } else {
-                        ellipsisTv.setVisibility(View.GONE);
-                    }
+//                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+//                        ellipsisTv.setVisibility(View.VISIBLE);
+//                    } else {
+//                        ellipsisTv.setVisibility(View.GONE);
+//                    }
                 }
             }
         });
@@ -323,11 +279,11 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
                 }
-                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-                    ellipsisTv.setVisibility(View.VISIBLE);
-                } else {
-                    ellipsisTv.setVisibility(View.GONE);
-                }
+//                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+//                    ellipsisTv.setVisibility(View.VISIBLE);
+//                } else {
+//                    ellipsisTv.setVisibility(View.GONE);
+//                }
             }
         });
 
@@ -378,6 +334,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                FinderBuriedPointManager.setFinderClick("服务_"+ list.get(mPosition).getTitle());
             }
         });
     }

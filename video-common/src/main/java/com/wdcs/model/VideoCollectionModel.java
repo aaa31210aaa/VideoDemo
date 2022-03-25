@@ -99,6 +99,7 @@ public class VideoCollectionModel {
         public void setPageSize(String pageSize) {
             this.pageSize = pageSize;
         }
+
         @Keep
         public static class RecordsDTO {
             private String shareTitle;
@@ -175,6 +176,9 @@ public class VideoCollectionModel {
             private String spaceStr;
             private String requestId;
             private String className;
+            private List<String> keywordsShow;
+            private List<String> tagsShow;
+            private String createTime;
 
             public String getShareTitle() {
                 return shareTitle;
@@ -770,6 +774,30 @@ public class VideoCollectionModel {
 
             public void setClassName(String className) {
                 this.className = className;
+            }
+
+            public List<String> getKeywordsShow() {
+                return keywordsShow;
+            }
+
+            public void setKeywordsShow(List<String> keywordsShow) {
+                this.keywordsShow = keywordsShow;
+            }
+
+            public List<String> getTagsShow() {
+                return tagsShow;
+            }
+
+            public void setTagsShow(List<String> tagsShow) {
+                this.tagsShow = tagsShow;
+            }
+
+            public String getCreateTime() {
+                return createTime;
+            }
+
+            public void setCreateTime(String createTime) {
+                this.createTime = createTime;
             }
 
             public static class ExtendDTO {

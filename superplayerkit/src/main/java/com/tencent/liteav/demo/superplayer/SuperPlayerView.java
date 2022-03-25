@@ -60,6 +60,7 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.PlayImageSpriteInfo;
@@ -284,6 +285,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mFullScreenPlayer.mLike.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mFullScreenPlayer.item);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -296,6 +298,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mFullScreenPlayer.mCollection.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mFullScreenPlayer.item);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {

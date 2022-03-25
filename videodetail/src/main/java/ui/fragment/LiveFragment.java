@@ -114,12 +114,15 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         noLoginTipsOk.setOnClickListener(this);
         adapter = new LiveRvAdapter(R.layout.live_rv_item_layout, mDatas, getActivity());
         liveRv.setAdapter(adapter);
-        footview = View.inflate(getActivity(),R.layout.footer_view,null);
+        footview = View.inflate(getActivity(), R.layout.footer_view, null);
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                if (mDatas.size() == 0) {
+                    return;
+                }
                 ShareInfo shareInfo = ShareInfo.getInstance(mDatas.get(position).getShareUrl(), mDatas.get(position).getShareImageUrl(),
-                mDatas.get(position).getShareBrief(), mDatas.get(position).getShareTitle(), "");
+                        mDatas.get(position).getShareBrief(), mDatas.get(position).getShareTitle(), "");
 
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
@@ -166,7 +169,9 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                loadMoreData(mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true", Constants.LOADMORE_TYPE);
+                if (mDatas.size() > 0) {
+                    loadMoreData(mDatas.get(mDatas.size() - 1).getId() + "", panelCode, "true", Constants.LOADMORE_TYPE);
+                }
             }
         });
 
@@ -195,7 +200,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
      * @param panelCode
      * @param removeFirst
      */
-    private void getPullDownData(String pageSize, String panelCode, String removeFirst,String refreshType) {
+    private void getPullDownData(String pageSize, String panelCode, String removeFirst, String refreshType) {
         mDatas.clear();
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
@@ -248,7 +253,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     /**
      * 获取更多数据
      */
-    private void loadMoreData(String contentId, String panelCode, String removeFirst,String refreshType) {
+    private void loadMoreData(String contentId, String panelCode, String removeFirst, String refreshType) {
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
                 .params("contentId", contentId)

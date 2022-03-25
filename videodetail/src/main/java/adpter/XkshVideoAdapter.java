@@ -21,8 +21,10 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.constants.Constants;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
@@ -82,15 +84,15 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         LinearLayout fullLin = helper.getView(R.id.superplayer_iv_fullscreen);
         ImageView publisherHeadimg = helper.getView(R.id.publisher_headimg);
         TextView publisherName = helper.getView(R.id.publisher_name);
-        TextView follow = helper.getView(R.id.follow);
+        final TextView follow = helper.getView(R.id.follow);
         ImageView officialCertificationImg = helper.getView(R.id.official_certification_img);
         TextView watched = helper.getView(R.id.watched);
-        final EllipsizeTextView foldTextView = helper.getView(R.id.fold_text);
+        final TextView foldTextView = helper.getView(R.id.fold_text);
         final TextView expendText = helper.getView(R.id.expend_text);
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
         ImageView coverPicture = helper.getView(R.id.cover_picture);
-        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
+//        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
 
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
@@ -237,6 +239,15 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                     } else {
                         param.recommendUrl(Constants.HEAD_OTHER_ZS + item.getCreateBy(), null);
                     }
+                    FinderPointModel model = new FinderPointModel();
+                    model.setUser_id(item.getCreateBy());
+                    if (TextUtils.equals("关注", follow.getText().toString())) {
+                        model.setIs_notice("否");
+                    } else {
+                        model.setIs_notice("是");
+                    }
+                    model.setModule_source("视频播放");
+                    FinderBuriedPointManager.setFinderCommon(Constants.CLICK_USER,model);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -263,23 +274,14 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         }
 
         foldTextView.setText(brief);
-        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-            ellipsisTv.setVisibility(View.VISIBLE);
-        } else {
-            ellipsisTv.setVisibility(View.GONE);
-        }
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //行为埋点 button_name 展开简介
+                FinderBuriedPointManager.setFinderClick("展开简介");
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
-                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-                        ellipsisTv.setVisibility(View.VISIBLE);
-                    } else {
-                        ellipsisTv.setVisibility(View.GONE);
-                    }
                 }
             }
         });
@@ -291,11 +293,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 if (expendText.getVisibility() == View.VISIBLE) {
                     expendText.setVisibility(View.GONE);
                     foldTextView.setVisibility(View.VISIBLE);
-                }
-                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-                    ellipsisTv.setVisibility(View.VISIBLE);
-                } else {
-                    ellipsisTv.setVisibility(View.GONE);
                 }
             }
         });
@@ -350,7 +347,6 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         viewFlipper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //行为埋点 button_name 记录关联框服务名称
                 //获取子View的id
                 int mPosition = viewFlipper.getDisplayedChild();
                 try {
@@ -358,6 +354,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                //行为埋点 button_name 记录关联框服务名称
+                FinderBuriedPointManager.setFinderClick("服务_"+ list.get(mPosition).getTitle());
             }
         });
 

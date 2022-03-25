@@ -15,6 +15,7 @@ public  class DataDTO {
     private String issueTimeStamp;
     private String startTime;
     private Integer id;
+    private String idShow;
     private String readCount;
     private String commentCount;
     private Integer commentCountShow;
@@ -86,6 +87,9 @@ public  class DataDTO {
     private String extendTextVisible;
     private String requestId;
     private List<VideoCollectionModel.DataDTO> collectionList = new ArrayList<>();
+    private List<String> keywordsShow;
+    private List<String> tagsShow;
+    private String createTime;
 
     /**
      *  0 是自动上报事件  1 是手动上报事件
@@ -182,6 +186,14 @@ public  class DataDTO {
         } else {
             return id;
         }
+    }
+
+    public String getIdShow() {
+        return idShow;
+    }
+
+    public void setIdShow(String idShow) {
+        this.idShow = idShow;
     }
 
     public void setId(Integer id) {
@@ -1018,6 +1030,30 @@ public  class DataDTO {
             return "false";
         }
         return requestId;
+    }
+
+    public List<String> getKeywordsShow() {
+        return keywordsShow;
+    }
+
+    public void setKeywordsShow(List<String> keywordsShow) {
+        this.keywordsShow = keywordsShow;
+    }
+
+    public List<String> getTagsShow() {
+        return tagsShow;
+    }
+
+    public void setTagsShow(List<String> tagsShow) {
+        this.tagsShow = tagsShow;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     public void setRequestId(String requestId) {

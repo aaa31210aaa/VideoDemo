@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.library'
-    id 'com.github.dcendents.android-maven'
 }
 
 android {
@@ -15,6 +14,7 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro","proguard-rules"
+        manifestPlaceholders.put("APPLOG_SCHEME", "rangersapplog.9d59ea54c6d1a6e8".toLowerCase())
     }
 
     buildTypes {
@@ -50,13 +50,5 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.73'
     implementation 'com.alibaba:fastjson:1.1.72.android'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61"
-    //无全埋点的基础版本
-    api 'com.bytedance.applog:RangersAppLog-Lite-cn:6.8.0'
-    //如 Debug 阶段需要埋点检测及圈选功能，则须引用下面的包含 scheme 文件，
-    //为保证合规风险，请务必确保在上线前移除。
-    implementation "com.bytedance.applog:RangersAppLog-All-scheme:6.8.0"
-//    //为使广告监测中的反作弊识别准确度更高，需引入下面的风控子库
-//    implementation 'com.volcengine:metasec_ml:4.3.4'
-//    implementation "com.bytedance.applog:RangersAppLog-All-metasec-cn:6.8.0"
+    api "com.github.tbruyelle:rxpermissions:0.10.2"
 }

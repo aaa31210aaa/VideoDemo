@@ -56,6 +56,7 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.CollectionLabelModel;
@@ -95,6 +96,7 @@ import model.bean.ActivityRuleBean;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
+
 import com.wdcs.utils.NoScrollViewPager;
 
 import static android.widget.RelativeLayout.BELOW;
@@ -429,16 +431,21 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
-                if (null == mDataDTO || TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-                    return;
-                }
+                String isRenew = "";
                 if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-//                    //不为重播
+//                      //不为重播
+                    isRenew = "否";
                     videoOldSystemTime = DateUtils.getTimeCurrent();
                     String event;
                     event = Constants.CMS_VIDEO_PLAY;
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDataDTO.getThirdPartyId(), "", "", event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                    if (null != mDataDTO && !TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDataDTO.getThirdPartyId(), "", "", event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                    }
+                } else {
+                    isRenew = "是";
                 }
+
+                FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, mDataDTO);
             }
         });
 
@@ -480,7 +487,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 playerView.mWindowPlayer.setViewpager((NoScrollViewPager) VideoDetailActivity.this.findViewById(R.id.video_vp));
                 playerView.mWindowPlayer.setIsTurnPages(false);
                 playerView.mWindowPlayer.setManager(videoDetailmanager);
-//                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                playerView.mFullScreenPlayer.setRecordsDTO(mDataDTO);
                 myContentId = String.valueOf(mDatas.get(0).getId());
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
@@ -563,6 +570,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
+                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
 
                 mDataDTO = mDatas.get(position);
                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
@@ -586,7 +594,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                 playUrl = mDatas.get(position).getPlayUrl();
 //                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
-//                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                playerView.mFullScreenPlayer.setRecordsDTO(mDataDTO);
                 playerView.mWindowPlayer.setIsTurnPages(true);
                 currentIndex = position;
 //                choosePopDatas.clear();
@@ -1582,7 +1590,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             collectionList.addAll(response.body().getData());
                             for (int i = 0; i < collectionList.size(); i++) {
                                 collectionStr = collectionStr + collectionList.get(i).getTitle();
-                                if (i == collectionList.size() - 1) {
+                                if (collectionList.size() == 1) {
                                     collectionTvList.add("  " + collectionList.get(i).getTitle());
                                 } else {
                                     if (i == 0) {
@@ -1640,14 +1648,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         builder.append(sp);
                                     }
                                 }
-                                foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                                foldTextView.setText(builder);
-                                int count = foldTextView.getLineCount();
-                                if (foldTextView.getLineCount() > 2) {
-
+                                if (null != foldTextView && null != expendTextView) {
+                                    foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                    foldTextView.setText(builder);
+                                    expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                    expendTextView.setText(builder);
                                 }
-                                expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                                expendTextView.setText(builder);
                             }
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
@@ -1700,7 +1706,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             sp.setSpan(new ForegroundColorSpan(Color.WHITE), 0, className.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             SpannableStringBuilder builder = new SpannableStringBuilder();
             builder.append(sp);
-            builder.append(" "+brief);
+            builder.append(" " + brief);
             foldTextView.setText(builder);
             expendTextView.setText(builder);
         }
@@ -2104,6 +2110,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }
+        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
     }
 
     @Override
@@ -2123,6 +2130,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         if (id == R.id.back) {
             finish();
         } else if (id == R.id.video_detail_collection) {//收藏
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 noLoginTipsPop();
             } else {
@@ -2130,6 +2138,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
 
         } else if (id == R.id.video_detail_likes) {//点赞
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 noLoginTipsPop();
             } else {
@@ -2184,33 +2193,23 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareClick(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, "");
-            Log.e("埋点", "埋点：分享按钮---" + jsonString);
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
+//            FinderBuriedPointManager.setFinderClick("分享");
             sharePop();
         } else if (id == R.id.share_wx_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.WX_STRING);
-            Log.e("埋点", "埋点：分享到微信朋友---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_WX);
         } else if (id == R.id.share_circle_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.CIRCLE_STRING);
-            Log.e("埋点", "埋点：分享到微信朋友圈---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_CIRCLE);
         } else if (id == R.id.share_qq_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.QQ_STRING);
-            Log.e("埋点", "埋点：分享到QQ---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_QQ);
         }
     }

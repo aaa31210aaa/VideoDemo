@@ -55,8 +55,10 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.ContentBuriedPointManager;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.CollectionLabelModel;
 import com.wdcs.model.CommentLv1Model;
+import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
@@ -92,6 +94,7 @@ import ui.activity.VideoHomeActivity;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
+import widget.MyTextView;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
@@ -100,7 +103,10 @@ import com.wdcs.utils.NoScrollViewPager;
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
+import static com.wdcs.constants.Constants.CATEGORYNAME;
+import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.PANELCODE;
+import static com.wdcs.constants.Constants.VIDEOTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
@@ -118,7 +124,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     //评论列表数据
     private List<MultiItemEntity> mCommentPopRvData;
     private List<CommentLv1Model.DataDTO.RecordsDTO> mCommentPopDtoData;
-    public SuperPlayerView playerView;
+    //    public SuperPlayerView playerView;
     private ImageView videoStaticBg;
     private ImageView startPlay;
 
@@ -194,7 +200,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private VideoChannelModel channelModel;
     private Bundle args;
     public boolean videoFragmentIsVisibleToUser;
-    private SlidingTabLayout mVideoTab;
+    //    private SlidingTabLayout mVideoTab;
     //    private RelativeLayout.LayoutParams lp;
     private LoadingView loadingProgress;
     private boolean isFollow; //是否关注
@@ -220,19 +226,19 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private List<CollectionLabelModel.DataDTO> collectionList;
     private List<String> collectionTvList;
     private List<String> collectionStrList;
+    private SuperPlayerView playerView;
 
-    public VideoDetailFragment(SlidingTabLayout videoTab, SuperPlayerView mPlayerView, String contentId, String categoryName) {
-        this.mVideoTab = videoTab;
-        this.playerView = mPlayerView;
-        this.negativeScreenContentId = contentId;
-        if (!TextUtils.isEmpty(categoryName)) {
-            this.mCategoryName = categoryName;
-        }
+    public VideoDetailFragment() {
     }
 
-    public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel) {
+    public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
+        args.putString(CONTENTID, contentId);
+        if (!TextUtils.isEmpty(categoryName)) {
+            args.putString(CATEGORYNAME, categoryName);
+            args.putString(CONTENTID, contentId);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -242,6 +248,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             panelCode = getArguments().getString(PANELCODE);
+            myContentId = getArguments().getString(CONTENTID);
         }
     }
 
@@ -258,6 +265,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             getOneVideo(negativeScreenContentId);
         }
         return view;
+    }
+
+    public void setPlayView(SuperPlayerView mPlayView) {
+        this.playerView = mPlayView;
     }
 
 
@@ -296,6 +307,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             @Override
             public void onInitComplete() {
                 if (initialize) {
+                    return;
+                }
+
+                if (null == playerView) {
                     return;
                 }
                 initialize = true;
@@ -400,11 +415,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         } else {
                             event = Constants.CMS_VIDEO_OVER_AUTO;
                         }
-                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(),mDataDTO.getRequestId()), event);
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
 //                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                         Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
+                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
 
                 mDataDTO = mDatas.get(position);
                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
@@ -677,10 +693,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     } else {
                         event = Constants.CMS_VIDEO_OVER_AUTO;
                     }
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(),mDataDTO.getRequestId()), event);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
                     Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
+            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
 
             playerView.mSuperPlayer.pause();
             if (null != rlLp) {
@@ -719,8 +736,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
                             if (null != activityRuleBean.getData() && null != activityRuleBean.getData().getConfig().getJumpUrl()
                                     && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
-                                mVideoTab.showMsg(1, "活动");
-                                mVideoTab.setMsgMargin(1, ButtonSpan.dip2px(7), ButtonSpan.dip2px(10));
+                                ((SlidingTabLayout) getActivity().findViewById(R.id.video_tab)).showMsg(1, "活动");
+                                ((SlidingTabLayout) getActivity().findViewById(R.id.video_tab)).setMsgMargin(1, ButtonSpan.dip2px(7), ButtonSpan.dip2px(10));
                                 if (null != activityRuleImg) {
                                     activityRuleImg.setVisibility(View.VISIBLE);
                                 }
@@ -749,6 +766,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 @Override
                                 public void onClick(View view) {
                                     try {
+                                        FinderBuriedPointManager.setFinderClick("活动规则");
                                         param.recommendUrl(activityRuleBean.getData().getConfig().getJumpUrl(), null);
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -880,7 +898,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             rlLp.addView(playerView, 1);
             //露出即上报
             if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory(),mDataDTO.getRequestId()), Constants.CMS_CLIENT_SHOW);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_CLIENT_SHOW);
             }
             play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
         }
@@ -1625,7 +1643,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             for (int i = 0; i < collectionList.size(); i++) {
                                 collectionStr = collectionStr + collectionList.get(i).getTitle();
                                 collectionStrList.add(collectionList.get(i).getTitle());
-                                if (i == collectionList.size() - 1) {
+                                if (collectionList.size() == 1) {
                                     collectionTvList.add("  " + collectionList.get(i).getTitle());
                                 } else {
                                     if (i == 0) {
@@ -1659,6 +1677,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                             R.drawable.collection_image,
                                             ImageSpan.ALIGN_CENTER);
                                     final String str = collectionTvList.get(i);
+                                    final String strChun = collectionStrList.get(i);
                                     SpannableString sp = new SpannableString(str);
                                     if (i == 0) {
                                         sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1670,28 +1689,32 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     sp.setSpan(new CollectionClickble(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
-                                            //合集标签点击事件
+//                                            //合集标签点击事件
                                             Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
                                             intent.putExtra("classId", classId);
+                                            intent.putExtra("className", strChun.trim());
                                             startActivity(intent);
+                                            FinderBuriedPointManager.setFinderClick("集合_" + strChun);
                                         }
                                     }, getActivity()), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                     if (i == collectionList.size() - 1) {
                                         builder.append(sp);
-                                        builder.append("  "+brief);
+                                        builder.append("  " + brief);
                                     } else {
                                         builder.append(sp);
                                     }
                                 }
-                                foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                                foldTextView.setText(builder);
-                                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-                                    adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.VISIBLE);
-                                } else {
-                                    adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.GONE);
+                                if (null != foldTextView && null != expendTextView) {
+                                    foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                    foldTextView.setText(builder);
+//                                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+//                                        adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.VISIBLE);
+//                                    } else {
+//                                        adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.GONE);
+//                                    }
+                                    expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                    expendTextView.setText(builder);
                                 }
-                                expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                                expendTextView.setText(builder);
                             }
                         } else {
                             ToastUtils.showShort(response.body().getMessage());
@@ -2118,12 +2141,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         event = Constants.CMS_VIDEO_OVER_AUTO;
                     }
                     //上报埋点
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(),mDataDTO.getRequestId()), event);
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
                     Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
         }
-
+        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
     }
 
     @Override
@@ -2136,6 +2159,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.video_detail_collection) {//收藏
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 noLoginTipsPop();
             } else {
@@ -2143,6 +2167,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             }
 
         } else if (id == R.id.video_detail_likes) {//点赞
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 noLoginTipsPop();
             } else {
@@ -2153,6 +2178,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 popupWindow.dissmiss();
             }
         } else if (id == R.id.video_detail_comment_btn) {
+            FinderBuriedPointManager.setFinderClick("评论");
             showCommentPopWindow();
         } else if (id == R.id.comment_pop_rl) {
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
@@ -2168,6 +2194,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 showInputEdittextAndSend();
             }
         } else if (id == R.id.video_detail_white_comment_rl) {
+            FinderBuriedPointManager.setFinderClick("评论");
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 try {
                     noLoginTipsPop();
@@ -2197,33 +2224,26 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareClick(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, "");
-            Log.e("埋点", "埋点：分享按钮---" + jsonString);
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
+            FinderBuriedPointManager.setFinderClick("分享");
             sharePop();
         } else if (id == R.id.share_wx_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.WX_STRING);
-            Log.e("埋点", "埋点：分享到微信朋友---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_WX);
         } else if (id == R.id.share_circle_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.CIRCLE_STRING);
-            Log.e("埋点", "埋点：分享到微信朋友圈---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_CIRCLE);
         } else if (id == R.id.share_qq_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
-            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
-                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.QQ_STRING);
-            Log.e("埋点", "埋点：分享到QQ---" + jsonString);
+//            String jsonString = BuriedPointModelManager.getShareType(myContentId, mDatas.get(currentIndex).getTitle(), "",
+//                    "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE, Constants.QQ_STRING);
+//            Log.e("埋点", "埋点：分享到QQ---" + jsonString);
             toShare(mDataDTO, Constants.SHARE_QQ);
         }
     }

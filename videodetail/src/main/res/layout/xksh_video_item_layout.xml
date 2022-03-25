@@ -245,16 +245,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="45dp">
 
-                <TextView
-                    android:id="@+id/ellipsis_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="2dp"
-                    android:text="..."
-                    android:textColor="@color/white"></TextView>
-
                 <widget.EllipsizeTextView
                     android:id="@+id/fold_text"
                     android:layout_width="match_parent"

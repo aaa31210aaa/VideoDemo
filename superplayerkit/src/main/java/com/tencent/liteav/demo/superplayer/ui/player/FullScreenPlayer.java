@@ -36,6 +36,7 @@ import com.tencent.liteav.demo.superplayer.ui.view.VolumeBrightnessProgressLayou
 import com.tencent.rtmp.TXImageSprite;
 import com.wdcs.constants.Constants;
 import com.wdcs.manager.BuriedPointModelManager;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
@@ -149,8 +150,8 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
     private ImageView fullscreenShareWx;
     private ImageView fullscreenShareCircle;
     private ImageView fullscreenShareQq;
-    private DataDTO item;
-    private RecordsDTO recordsDTO;
+    public DataDTO item;
+    public RecordsDTO recordsDTO;
     private boolean mIsTurnPage;
 
     private TranslateAnimation translateAniRightShow, translateAniRightHide, translateAniBottomShow, translateAniBottomHide;
@@ -798,6 +799,8 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         } else if (i == R.id.superplayer_iv_pause) {            //暂停\播放按钮
             togglePlayState();
         } else if (i == R.id.superplayer_fullscreen_share) {    //分享
+            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, recordsDTO);
+            FinderBuriedPointManager.setFinderClick("分享");
             showSharePop(mContext);
         } else if (i == R.id.fullscreen_share_wx) {
             if (null != item) {
@@ -842,6 +845,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             mRadioGroup.startAnimation(translateAniRightShow);
             mRadioGroup.setVisibility(VISIBLE);
         } else if (i == R.id.superplayer_rb_speed05) {
+            FinderBuriedPointManager.setFinderSpeed(Constants.VIDEO_CLICK_SPEED,item,"0.5");
             pointSpeed(0.5+"");
             mRbSpeed05.setChecked(true);
             strSpeed = "0.5";
@@ -850,6 +854,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed05.getText());
         } else if (i == R.id.superplayer_rb_speed075) {
+            FinderBuriedPointManager.setFinderSpeed(Constants.VIDEO_CLICK_SPEED,item,"0.75");
             pointSpeed(0.75+"");
             mRbSpeed075.setChecked(true);
             strSpeed = "0.75";
@@ -865,6 +870,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText("倍速");
         } else if (i == R.id.superplayer_rb_speed125) {
+            FinderBuriedPointManager.setFinderSpeed(Constants.VIDEO_CLICK_SPEED,item,"1.25");
             pointSpeed(1.25+"");
             mRbSpeed125.setChecked(true);
             strSpeed = "1.25";
@@ -873,6 +879,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed125.getText());
         } else if (i == R.id.superplayer_rb_speed15) {
+            FinderBuriedPointManager.setFinderSpeed(Constants.VIDEO_CLICK_SPEED,item,"1.5");
             pointSpeed(1.5+"");
             mRbSpeed15.setChecked(true);
             strSpeed = "1.5";
@@ -881,6 +888,7 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
             }
             superplayerSpeed.setText(mRbSpeed15.getText());
         } else if (i == R.id.superplayer_rb_speed2) {
+            FinderBuriedPointManager.setFinderSpeed(Constants.VIDEO_CLICK_SPEED,item,"2");
             pointSpeed(2+"");
             mRbSpeed2.setChecked(true);
             strSpeed = "2";

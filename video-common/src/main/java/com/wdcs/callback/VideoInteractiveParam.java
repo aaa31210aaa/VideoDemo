@@ -3,10 +3,15 @@ package com.wdcs.callback;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.BuriedPointModel;
+import com.wdcs.model.FinderPointModel;
+import com.wdcs.model.FinderPointVideoPlay;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.utils.PersonInfoManager;
@@ -21,6 +26,7 @@ import org.json.JSONObject;
 public class VideoInteractiveParam {
     public VideoParamCallBack callBack;
     public GetGdyTokenCallBack gdyTokenCallBack;
+    public VideoFinderPointCallBack videoFinderPointCallBack;
     public static VideoInteractiveParam param;
     private String transformationToken;
 
@@ -42,8 +48,12 @@ public class VideoInteractiveParam {
         this.callBack = callBack;
     }
 
-    public void setGdyTokenCallBack(GetGdyTokenCallBack callBack){
+    public void setGdyTokenCallBack(GetGdyTokenCallBack callBack) {
         this.gdyTokenCallBack = callBack;
+    }
+
+    public void setVideoFinderPointCallBack(VideoFinderPointCallBack finderPointCallBack) {
+        this.videoFinderPointCallBack = finderPointCallBack;
     }
 
 
@@ -132,6 +142,53 @@ public class VideoInteractiveParam {
             getUserToken();
         }
     }
+
+    /**
+     * 获取Finder埋点数据
+     */
+    public void setFinderPoint(String eventStr, FinderPointModel model) {
+        if (videoFinderPointCallBack == null) {
+            Log.e("videoFinderPoint:", "获取失败，请重试");
+        } else {
+            if (model != null) {
+                Gson gson = new Gson();
+                String paramJson = gson.toJson(model);
+                JSONObject json = null;
+                try {
+                    json = new JSONObject(paramJson);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                videoFinderPointCallBack.getFinderPoint(eventStr, json);
+            } else {
+                videoFinderPointCallBack.getFinderPoint(eventStr, new JSONObject());
+            }
+        }
+    }
+
+    /**
+     * 获取Finder埋点数据
+     */
+    public void setFinderPoint(String eventStr, FinderPointVideoPlay model) {
+        if (videoFinderPointCallBack == null) {
+            Log.e("videoFinderPoint:", "获取失败，请重试");
+        } else {
+            if (model != null) {
+                Gson gson = new Gson();
+                String paramJson = gson.toJson(model);
+                JSONObject json = null;
+                try {
+                    json = new JSONObject(paramJson);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                videoFinderPointCallBack.getFinderPoint(eventStr, json);
+            } else {
+                videoFinderPointCallBack.getFinderPoint(eventStr, new JSONObject());
+            }
+        }
+    }
+
 
     /**
      * 使用获取的code去换token

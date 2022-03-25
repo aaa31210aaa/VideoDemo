@@ -32,7 +32,9 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.constants.Constants;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
+import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.model.VideoCollectionModel;
@@ -96,7 +98,7 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
         ImageView coverPicture = helper.getView(R.id.cover_picture);
-        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
+//        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
@@ -208,7 +210,7 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                //跳转H5头像TA人主页  视频模块不需要跳转
+                  //跳转H5头像TA人主页
 //                try {
 //                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy());
 //                } catch (Exception e) {
@@ -262,15 +264,16 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
 
 
 //        foldTextView.setText(brief);
-        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-            ellipsisTv.setVisibility(View.VISIBLE);
-        } else {
-            ellipsisTv.setVisibility(View.GONE);
-        }
+//        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+//            ellipsisTv.setVisibility(View.VISIBLE);
+//        } else {
+//            ellipsisTv.setVisibility(View.GONE);
+//        }
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //行为埋点 button_name 展开简介
+                FinderBuriedPointManager.setFinderClick("展开简介");
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
@@ -287,11 +290,11 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
                     foldTextView.setVisibility(View.VISIBLE);
                 }
 
-                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-                    ellipsisTv.setVisibility(View.VISIBLE);
-                } else {
-                    ellipsisTv.setVisibility(View.GONE);
-                }
+//                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
+//                    ellipsisTv.setVisibility(View.VISIBLE);
+//                } else {
+//                    ellipsisTv.setVisibility(View.GONE);
+//                }
             }
         });
 
@@ -342,6 +345,7 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                FinderBuriedPointManager.setFinderClick("服务_"+ list.get(mPosition).getTitle());
             }
         });
     }

@@ -29,6 +29,11 @@ public class NumberFormatTool {
     }
 
     public static StringBuffer formatNum(int num, Boolean b) {
+        if (!isNumeric(String.valueOf(num))) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("");
+            return sb;
+        }
         StringBuffer sb = new StringBuffer();
         BigDecimal b0 = new BigDecimal("100");
         BigDecimal b1 = new BigDecimal("10000");
@@ -80,6 +85,11 @@ public class NumberFormatTool {
     }
 
     public static StringBuffer formatNum(long num, Boolean b) {
+        if (!isNumeric(String.valueOf(num))) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("");
+            return sb;
+        }
         StringBuffer sb = new StringBuffer();
         BigDecimal b0 = new BigDecimal("100");
         BigDecimal b1 = new BigDecimal("10000");
