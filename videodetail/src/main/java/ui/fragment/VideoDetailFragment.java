@@ -209,7 +209,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private long lsDuration = 0; //每一次上报临时保存的播放时长
     private boolean isCheckState; //是否请求了检查点赞收藏状态的接口
     private TextView zxpl;
-    private String negativeScreenContentId;
     private DataDTO negativeScreenDto;
     private RelativeLayout.LayoutParams playViewParams;
     private View footerView;
@@ -237,7 +236,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         args.putString(CONTENTID, contentId);
         if (!TextUtils.isEmpty(categoryName)) {
             args.putString(CATEGORYNAME, categoryName);
-            args.putString(CONTENTID, contentId);
         }
         fragment.setArguments(args);
         return fragment;
@@ -249,6 +247,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (getArguments() != null) {
             panelCode = getArguments().getString(PANELCODE);
             myContentId = getArguments().getString(CONTENTID);
+            mCategoryName = getArguments().getString(CATEGORYNAME);
         }
     }
 
@@ -259,10 +258,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_video_detail, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        if (TextUtils.isEmpty(negativeScreenContentId)) {
+        if (TextUtils.isEmpty(myContentId)) {
             getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
         } else {
-            getOneVideo(negativeScreenContentId);
+            getOneVideo(myContentId);
         }
         return view;
     }
