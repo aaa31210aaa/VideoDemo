@@ -819,30 +819,34 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
 
-                        if (response.body().getCode().equals(success_code)) {
-                            if (null == response.body().getData() && response.body().getData().getRecords().size() == 0) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
+                        try {
+                            if (response.body().getCode().equals(success_code)) {
+                                if (null == response.body().getData() && response.body().getData().getRecords().size() == 0) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
 
-                            mDatas.addAll(response.body().getData().getRecords());
-                            for (int i = 0; i < mDatas.size(); i++) {
-                                String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-                                        Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-                                mDatas.get(i).setLogoType(videoType);
-                            }
+                                mDatas.addAll(response.body().getData().getRecords());
+                                for (int i = 0; i < mDatas.size(); i++) {
+                                    String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+                                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+                                    mDatas.get(i).setLogoType(videoType);
+                                }
 
-                            setDataWifiStates(mDatas, VideoDetailActivity.this);
-                            adapter.setNewData(mDatas);
-                            if (mDatas.size() > 0) {
-                                initialize = false;
+                                setDataWifiStates(mDatas, VideoDetailActivity.this);
+                                adapter.setNewData(mDatas);
+                                if (mDatas.size() > 0) {
+                                    initialize = false;
+                                }
+    //                            videoDetailCommentBtn.setVisibility(View.VISIBLE);
+                            } else {
+    //                            videoDetailCommentBtn.setVisibility(View.GONE);
                             }
-//                            videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                        } else {
-//                            videoDetailCommentBtn.setVisibility(View.GONE);
-                        }
-                        if (null != refreshLayout) {
-                            refreshLayout.finishRefresh();
+                            if (null != refreshLayout) {
+                                refreshLayout.finishRefresh();
+                            }
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -1191,36 +1195,40 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
 
-                        if (response.body().getCode().equals(success_code)) {
-                            if (null == response.body().getData() && response.body().getData().getRecords().size() == 0) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
-
-                            if (response.body().getData().getRecords().size() == 0) {
-                                adapter.loadMoreEnd();
-                                adapter.setOnLoadMoreListener(null, videoDetailRv);
-                                if (null != footerView && null != footerView.getParent()) {
-                                    ((ViewGroup) footerView.getParent()).removeView(footerView);
-                                }
-                                adapter.addFooterView(footerView);
-                                isLoadComplate = true;
-                            } else {
-                                adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
-                                isLoadComplate = false;
-                                mDatas.addAll(response.body().getData().getRecords());
-                                for (int i = 0; i < mDatas.size(); i++) {
-                                    String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
-                                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
-                                    mDatas.get(i).setLogoType(videoType);
+                        try {
+                            if (response.body().getCode().equals(success_code)) {
+                                if (null == response.body().getData() && response.body().getData().getRecords().size() == 0) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
                                 }
 
-                                setDataWifiStates(mDatas, VideoDetailActivity.this);
-                                adapter.setNewData(mDatas);
+                                if (response.body().getData().getRecords().size() == 0) {
+                                    adapter.loadMoreEnd();
+                                    adapter.setOnLoadMoreListener(null, videoDetailRv);
+                                    if (null != footerView && null != footerView.getParent()) {
+                                        ((ViewGroup) footerView.getParent()).removeView(footerView);
+                                    }
+                                    adapter.addFooterView(footerView);
+                                    isLoadComplate = true;
+                                } else {
+                                    adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
+                                    isLoadComplate = false;
+                                    mDatas.addAll(response.body().getData().getRecords());
+                                    for (int i = 0; i < mDatas.size(); i++) {
+                                        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getWidth())),
+                                                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(i).getHeight())));
+                                        mDatas.get(i).setLogoType(videoType);
+                                    }
+
+                                    setDataWifiStates(mDatas, VideoDetailActivity.this);
+                                    adapter.setNewData(mDatas);
+                                }
                             }
-                        }
-                        if (null != refreshLayout) {
-                            refreshLayout.finishRefresh();
+                            if (null != refreshLayout) {
+                                refreshLayout.finishRefresh();
+                            }
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -1270,87 +1278,91 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
 
-                        if (response.body().getCode().equals("200")) {
-                            if (null == response.body().getData()) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
-
-                            if (isRefresh) {
-                                mCommentPopRvData.clear();
-                                mCommentPopDtoData.clear();
-                            }
-
-                            //评论集合
-                            List<CommentLv1Model.DataDTO.RecordsDTO> lv1List = response.body().getData().getRecords();
-                            for (int i = 0; i < lv1List.size(); i++) {
-                                CommentLv1Model.DataDTO.RecordsDTO lv1Model = lv1List.get(i);
-                                lv1Model.setPosition(i);
-                                lv1Model.setShow(true);
-                                List<ReplyLv2Model.ReplyListDTO> lv2List = lv1Model.getReply().getReplyList();
-                                for (int j = 0; j < lv2List.size(); j++) {
-                                    ReplyLv2Model.ReplyListDTO lv2Model = lv2List.get(j);
-                                    lv2Model.setPosition(j);
-                                    lv2Model.setParentPosition(i);
-                                    lv1Model.addSubItem(lv2Model);
+                        try {
+                            if (response.body().getCode().equals("200")) {
+                                if (null == response.body().getData()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
                                 }
-                                mCommentPopRvData.add(lv1Model);
-                            }
 
-                            mCommentPopDtoData.addAll(lv1List);
-                            commentPopRvAdapter.setContentId(myContentId);
-                            commentPopRvAdapter.setSrc(mCommentPopRvData);
-                            commentPopRvAdapter.setNewData(mCommentPopRvData);
-
-                            //第一级评论点击
-                            commentPopRvAdapter.setLv1CommentClick(new CommentPopRvAdapter.Lv1CommentClick() {
-                                @Override
-                                public void Lv1Comment(String id, String replyName) {
-                                    toSetHint(id, replyName);
+                                if (isRefresh) {
+                                    mCommentPopRvData.clear();
+                                    mCommentPopDtoData.clear();
                                 }
-                            });
 
-                            //第一级评论第一条回复点击
-                            commentPopRvAdapter.setLv1No1Click(new CommentPopRvAdapter.Lv1No1Click() {
-                                @Override
-                                public void lv1No1Click(String id, String replyName) {
-                                    toSetHint(id, replyName);
+                                //评论集合
+                                List<CommentLv1Model.DataDTO.RecordsDTO> lv1List = response.body().getData().getRecords();
+                                for (int i = 0; i < lv1List.size(); i++) {
+                                    CommentLv1Model.DataDTO.RecordsDTO lv1Model = lv1List.get(i);
+                                    lv1Model.setPosition(i);
+                                    lv1Model.setShow(true);
+                                    List<ReplyLv2Model.ReplyListDTO> lv2List = lv1Model.getReply().getReplyList();
+                                    for (int j = 0; j < lv2List.size(); j++) {
+                                        ReplyLv2Model.ReplyListDTO lv2Model = lv2List.get(j);
+                                        lv2Model.setPosition(j);
+                                        lv2Model.setParentPosition(i);
+                                        lv1Model.addSubItem(lv2Model);
+                                    }
+                                    mCommentPopRvData.add(lv1Model);
                                 }
-                            });
 
-                            //第一级评论第二条回复点击
-                            commentPopRvAdapter.setLv1No2Click(new CommentPopRvAdapter.Lv1No2Click() {
-                                @Override
-                                public void lv1No2Click(String id, String replyName) {
-                                    toSetHint(id, replyName);
+                                mCommentPopDtoData.addAll(lv1List);
+                                commentPopRvAdapter.setContentId(myContentId);
+                                commentPopRvAdapter.setSrc(mCommentPopRvData);
+                                commentPopRvAdapter.setNewData(mCommentPopRvData);
+
+                                //第一级评论点击
+                                commentPopRvAdapter.setLv1CommentClick(new CommentPopRvAdapter.Lv1CommentClick() {
+                                    @Override
+                                    public void Lv1Comment(String id, String replyName) {
+                                        toSetHint(id, replyName);
+                                    }
+                                });
+
+                                //第一级评论第一条回复点击
+                                commentPopRvAdapter.setLv1No1Click(new CommentPopRvAdapter.Lv1No1Click() {
+                                    @Override
+                                    public void lv1No1Click(String id, String replyName) {
+                                        toSetHint(id, replyName);
+                                    }
+                                });
+
+                                //第一级评论第二条回复点击
+                                commentPopRvAdapter.setLv1No2Click(new CommentPopRvAdapter.Lv1No2Click() {
+                                    @Override
+                                    public void lv1No2Click(String id, String replyName) {
+                                        toSetHint(id, replyName);
+                                    }
+                                });
+
+                                //第二级回复点击
+                                commentPopRvAdapter.setLv2ReplyClick(new CommentPopRvAdapter.Lv2ReplyClick() {
+                                    @Override
+                                    public void Lv2ReplyClick(String id, String replyName) {
+                                        toSetHint(id, replyName);
+                                    }
+                                });
+
+
+                                if (mCommentPopDtoData.isEmpty()) {
+                                    commentTotal.setText("(0)");
+                                    commentPopCommentTotal.setText("(0)");
+                                } else {
+                                    commentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                    commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
                                 }
-                            });
 
-                            //第二级回复点击
-                            commentPopRvAdapter.setLv2ReplyClick(new CommentPopRvAdapter.Lv2ReplyClick() {
-                                @Override
-                                public void Lv2ReplyClick(String id, String replyName) {
-                                    toSetHint(id, replyName);
+                                if (response.body().getData().getRecords().size() == 0) {
+                                    commentPopRvAdapter.loadMoreEnd();
+                                } else {
+                                    commentPopRvAdapter.loadMoreComplete();
                                 }
-                            });
 
-
-                            if (mCommentPopDtoData.isEmpty()) {
-                                commentTotal.setText("(0)");
-                                commentPopCommentTotal.setText("(0)");
                             } else {
-                                commentTotal.setText("(" + response.body().getData().getTotal() + ")");
-                                commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                commentPopRvAdapter.loadMoreFail();
                             }
-
-                            if (response.body().getData().getRecords().size() == 0) {
-                                commentPopRvAdapter.loadMoreEnd();
-                            } else {
-                                commentPopRvAdapter.loadMoreComplete();
-                            }
-
-                        } else {
-                            commentPopRvAdapter.loadMoreFail();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
                     }
@@ -1537,19 +1549,23 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
 
-                        if (response.body().getCode().equals(success_code)) {
-                            if (null == response.body().getData()) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
-                            }
+                        try {
+                            if (response.body().getCode().equals(success_code)) {
+                                if (null == response.body().getData()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
 
-                            playerView.contentStateModel = response.body().getData();
-                            if (null != playerView.contentStateModel) {
-                                setLikeCollection(playerView.contentStateModel);
-                                playerView.setContentStateModel(myContentId, videoType);
+                                playerView.contentStateModel = response.body().getData();
+                                if (null != playerView.contentStateModel) {
+                                    setLikeCollection(playerView.contentStateModel);
+                                    playerView.setContentStateModel(myContentId, videoType);
+                                }
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
                             }
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -1580,83 +1596,87 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
 
-                        if (response.body().getCode().equals(success_code)) {
-                            if (null == response.body().getData()) {
-                                return;
-                            }
-                            collectionList = new ArrayList<>();
-                            collectionTvList = new ArrayList<>();
-                            String collectionStr = "";
-                            collectionList.addAll(response.body().getData());
-                            for (int i = 0; i < collectionList.size(); i++) {
-                                collectionStr = collectionStr + collectionList.get(i).getTitle();
-                                if (collectionList.size() == 1) {
-                                    collectionTvList.add("  " + collectionList.get(i).getTitle());
-                                } else {
-                                    if (i == 0) {
-                                        collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");
-                                    } else {
-                                        collectionTvList.add(collectionList.get(i).getTitle() + "｜");
-                                    }
-
+                        try {
+                            if (response.body().getCode().equals(success_code)) {
+                                if (null == response.body().getData()) {
+                                    return;
                                 }
-                            }
-
-                            TextView foldTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.fold_text);
-                            TextView expendTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.expend_text);
-                            String brief = "";
-                            String spaceStr = "";
-                            RecordsDTO item = adapter.getItem(currentIndex);
-                            if (null == item) {
-                                return;
-                            }
-                            if (TextUtils.isEmpty(adapter.getItem(currentIndex).getBrief())) {
-                                brief = item.getTitle();
-                            } else {
-                                brief = item.getBrief();
-                            }
-                            SpannableStringBuilder builder = new SpannableStringBuilder();
-                            if (collectionList.isEmpty()) {
-                                return;
-                            } else {
+                                collectionList = new ArrayList<>();
+                                collectionTvList = new ArrayList<>();
+                                String collectionStr = "";
+                                collectionList.addAll(response.body().getData());
                                 for (int i = 0; i < collectionList.size(); i++) {
-                                    ImageSpan imgSpan = new ImageSpan(VideoDetailActivity.this,
-                                            R.drawable.collection_image,
-                                            ImageSpan.ALIGN_CENTER);
-                                    final String str = collectionTvList.get(i);
-                                    SpannableString sp = new SpannableString(str);
-                                    if (i == 0) {
-                                        sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }
-                                    final String classId = String.valueOf(collectionList.get(i).getId());
-                                    /**
-                                     * 每一个合集标签点击事件
-                                     */
-                                    sp.setSpan(new CollectionClickble(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            //合集标签点击事件
-                                            Intent intent = new Intent(VideoDetailActivity.this, VideoDetailActivity.class);
-                                            intent.putExtra("classId", classId);
-                                            startActivity(intent);
-                                        }
-                                    }, VideoDetailActivity.this), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    if (i == collectionList.size() - 1) {
-                                        builder.append(sp);
-                                        builder.append("  " + brief);
+                                    collectionStr = collectionStr + collectionList.get(i).getTitle();
+                                    if (collectionList.size() == 1) {
+                                        collectionTvList.add("  " + collectionList.get(i).getTitle());
                                     } else {
-                                        builder.append(sp);
+                                        if (i == 0) {
+                                            collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");
+                                        } else {
+                                            collectionTvList.add(collectionList.get(i).getTitle() + "｜");
+                                        }
+
                                     }
                                 }
-                                if (null != foldTextView && null != expendTextView) {
-                                    foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                                    foldTextView.setText(builder);
-                                    expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                                    expendTextView.setText(builder);
+
+                                TextView foldTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.fold_text);
+                                TextView expendTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.expend_text);
+                                String brief = "";
+                                String spaceStr = "";
+                                RecordsDTO item = adapter.getItem(currentIndex);
+                                if (null == item) {
+                                    return;
                                 }
+                                if (TextUtils.isEmpty(adapter.getItem(currentIndex).getBrief())) {
+                                    brief = item.getTitle();
+                                } else {
+                                    brief = item.getBrief();
+                                }
+                                SpannableStringBuilder builder = new SpannableStringBuilder();
+                                if (collectionList.isEmpty()) {
+                                    return;
+                                } else {
+                                    for (int i = 0; i < collectionList.size(); i++) {
+                                        ImageSpan imgSpan = new ImageSpan(VideoDetailActivity.this,
+                                                R.drawable.collection_image,
+                                                ImageSpan.ALIGN_CENTER);
+                                        final String str = collectionTvList.get(i);
+                                        SpannableString sp = new SpannableString(str);
+                                        if (i == 0) {
+                                            sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        }
+                                        final String classId = String.valueOf(collectionList.get(i).getId());
+                                        /**
+                                         * 每一个合集标签点击事件
+                                         */
+                                        sp.setSpan(new CollectionClickble(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                //合集标签点击事件
+                                                Intent intent = new Intent(VideoDetailActivity.this, VideoDetailActivity.class);
+                                                intent.putExtra("classId", classId);
+                                                startActivity(intent);
+                                            }
+                                        }, VideoDetailActivity.this), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        if (i == collectionList.size() - 1) {
+                                            builder.append(sp);
+                                            builder.append("  " + brief);
+                                        } else {
+                                            builder.append(sp);
+                                        }
+                                    }
+                                    if (null != foldTextView && null != expendTextView) {
+                                        foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                        foldTextView.setText(builder);
+                                        expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                                        expendTextView.setText(builder);
+                                    }
+                                }
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
                             }
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -1999,27 +2019,31 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
 
-                        if (response.body().getCode() == 200) {
-                            if (null == response.body().getData()) {
-                                ToastUtils.showShort(R.string.data_err);
-                                return;
+                        try {
+                            if (response.body().getCode() == 200) {
+                                if (null == response.body().getData()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
+                                Log.d("mycs_token", "转换成功");
+                                try {
+                                    PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
+                                    PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
+                                    PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
+                                    PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                transformationToken = response.body().getData().getToken();
+                                PersonInfoManager.getInstance().setTransformationToken(transformationToken);
+                                if (!TextUtils.isEmpty(myContentId)) {
+                                    getContentState(myContentId);
+                                }
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
                             }
-                            Log.d("mycs_token", "转换成功");
-                            try {
-                                PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
-                                PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
-                                PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
-                                PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            transformationToken = response.body().getData().getToken();
-                            PersonInfoManager.getInstance().setTransformationToken(transformationToken);
-                            if (!TextUtils.isEmpty(myContentId)) {
-                                getContentState(myContentId);
-                            }
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -2306,39 +2330,43 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             ToastUtils.showShort(R.string.data_err);
                             return;
                         }
-                        if (response.body().getCode().equals("200")) {
-                            recommondList.clear();
-                            recommondList.addAll(response.body().getData().getRecords());
+                        try {
+                            if (response.body().getCode().equals("200")) {
+                                recommondList.clear();
+                                recommondList.addAll(response.body().getData().getRecords());
 
-                            ViewFlipper viewFlipper = (ViewFlipper) adapter.getViewByPosition(position, R.id.video_flipper);
+                                ViewFlipper viewFlipper = (ViewFlipper) adapter.getViewByPosition(position, R.id.video_flipper);
 
-                            if (null == viewFlipper) {
-                                return;
+                                if (null == viewFlipper) {
+                                    return;
+                                }
+
+                                if (null != adapter.getItem(position) && adapter.getItem(position).isClosed()) {
+                                    viewFlipper.setVisibility(View.GONE);
+                                    return;
+                                }
+
+                                if (recommondList.size() > 1) {
+                                    viewFlipper.setVisibility(View.VISIBLE);
+                                    viewFlipper.startFlipping();
+                                    viewFlipper.setAutoStart(true);
+                                } else if (recommondList.size() == 1) {
+                                    viewFlipper.setVisibility(View.VISIBLE);
+                                    viewFlipper.setAutoStart(false);
+                                } else if (recommondList.size() == 0) {
+                                    viewFlipper.setVisibility(View.GONE);
+                                }
+                                adapter.getViewFlipperData(recommondList, viewFlipper, mDatas.get(position));
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
                             }
-
-                            if (adapter.getItem(position).isClosed()) {
-                                viewFlipper.setVisibility(View.GONE);
-                                return;
+                            if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
+                                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
+                            } else {
+                                addPlayView(position);
                             }
-
-                            if (recommondList.size() > 1) {
-                                viewFlipper.setVisibility(View.VISIBLE);
-                                viewFlipper.startFlipping();
-                                viewFlipper.setAutoStart(true);
-                            } else if (recommondList.size() == 1) {
-                                viewFlipper.setVisibility(View.VISIBLE);
-                                viewFlipper.setAutoStart(false);
-                            } else if (recommondList.size() == 0) {
-                                viewFlipper.setVisibility(View.GONE);
-                            }
-                            adapter.getViewFlipperData(recommondList, viewFlipper, mDatas.get(position));
-                        } else {
-                            ToastUtils.showShort(response.body().getMessage());
-                        }
-                        if (SPUtils.isVisibleNoWifiView(VideoDetailActivity.this)) {
-                            SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
-                        } else {
-                            addPlayView(position);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 
