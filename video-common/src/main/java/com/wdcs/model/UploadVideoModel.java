@@ -1,8 +1,11 @@
 package com.wdcs.model;
 
 
+import androidx.annotation.Keep;
+
 import java.util.List;
 
+@Keep
 public class UploadVideoModel {
 
     private String code;
@@ -60,6 +63,7 @@ public class UploadVideoModel {
         this.time = time;
     }
 
+    @Keep
     public static class DataDTO {
         private String id;
         private String type;
@@ -737,9 +741,11 @@ public class UploadVideoModel {
             this.pid = pid;
         }
 
+        @Keep
         public static class ExtendDTO {
         }
 
+        @Keep
         public static class PanelContentsDTO {
             private String id;
             private String panelId;

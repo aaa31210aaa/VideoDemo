@@ -24,21 +24,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/video_dp50"
             android:background="@color/transparent"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:layout_centerInParent="true"
-                android:layout_marginRight="120dp">
+                >
 
                 <com.flyco.tablayout.SlidingTabLayout
                     android:id="@+id/video_tab"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
-                    android:layout_centerHorizontal="true"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
                     android:background="@color/transparent"
+                    android:paddingRight="15dp"
                     app:tl_indicator_corner_radius="2dp"
                     app:tl_indicator_height="2dp"
                     app:tl_indicator_width="20dp"
@@ -46,7 +48,7 @@
                     app:tl_textSelsize="15sp"
                     app:tl_textUnselectColor="#7fffffff"
                     app:tl_textsize="13sp" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/back_lin"

@@ -2092,22 +2092,23 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        if (!videoFragmentIsVisibleToUser) {
-            return;
-        }
-
-        if (playerView != null) {
+        if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {
                 playerView.mSuperPlayer.reStart();
             }
         }
-        isPause = false;
+
         videoOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
         }
+        if (!videoFragmentIsVisibleToUser) {
+            return;
+        }
+
+        isPause = false;
 
         if (PersonInfoManager.getInstance().isRequestToken()) {
             try {

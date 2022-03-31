@@ -1,5 +1,6 @@
 package com.tencent.liteav.demo.superplayer;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
@@ -655,6 +656,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
      * 初始化controller回调
      */
     public Player.Callback mControllerCallback = new Player.Callback() {
+        @SuppressLint("WrongConstant")
         @Override
         public void onSwitchPlayMode(SuperPlayerDef.PlayerMode playerMode) {
             playModeCallBack.getPlayMode(playerMode);

@@ -184,7 +184,7 @@ public class ContentBuriedPointModel {
         public void setTraffic_type(String traffic_type) {
             this.traffic_type = traffic_type;
         }
-
+        @Keep
         public static class CustomDTO {
             private String app_language;
             private String app_region;

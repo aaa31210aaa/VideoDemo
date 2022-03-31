@@ -1,26 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="ui.activity.TgtCodeActivity">
 
+
     <TextView
-        android:id="@+id/tgt"
+        android:id="@+id/wdTgt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="@color/video_black"
+        android:textColor="@color/white"></TextView>
+
+    <TextView
+        android:id="@+id/localTgt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_marginTop="20dp"
+        android:textColor="@color/white"
         tools:ignore="MissingConstraints"></TextView>
 
     <TextView
-        android:id="@+id/to_video"
+        android:id="@+id/gdyTgt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="视频详情"
-        android:layout_centerInParent="true"
-        android:padding="20dp"
-        ></TextView>
+        android:layout_marginTop="20dp"
+        android:text=""
+        android:textColor="@color/white"></TextView>
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/localToken"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text=""
+        android:textColor="@color/white"></TextView>
+
+    <TextView
+        android:id="@+id/getWdtgt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@color/video_black"
+        android:padding="20dp"
+        android:text="调用万达获取tgt"
+        android:textColor="@color/white"></TextView>
+
+</LinearLayout>

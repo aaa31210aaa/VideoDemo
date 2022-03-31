@@ -318,7 +318,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
                 if (title.length() >= 6) {
                     lp_tab = new LinearLayout.LayoutParams(dp2px(130), LayoutParams.MATCH_PARENT);
                 } else if (title.length() <= 5 && title.length() > 2){
-                    lp_tab = new LinearLayout.LayoutParams(dp2px(120), LayoutParams.MATCH_PARENT);
+                    lp_tab = new LinearLayout.LayoutParams(dp2px(115), LayoutParams.MATCH_PARENT);
                 } else if (title.length() <= 2){
                     lp_tab = new LinearLayout.LayoutParams(dp2px(75), LayoutParams.MATCH_PARENT);
                 }
@@ -333,7 +333,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         } else if (2 == position) {
             lp_tab = mTabSpaceEqual ?
                     new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f) :
-                    new LinearLayout.LayoutParams(dp2px(45), LayoutParams.MATCH_PARENT);
+                    new LinearLayout.LayoutParams(dp2px(65), LayoutParams.MATCH_PARENT);
         }
 
 

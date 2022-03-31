@@ -225,6 +225,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private RelativeLayout.LayoutParams playViewParams;
     private String className;
     private boolean isShow = true;
+//    private TextView commentTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -646,6 +647,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         commentPopCommentTotal = contentView.findViewById(R.id.comment_pop_comment_total);
         edtInput = sendPopContentView.findViewById(R.id.edtInput);
         tvSend = sendPopContentView.findViewById(R.id.tvSend);
+//        commentTitle = contentView.findViewById(R.id.comment_title);
+//        commentTitle.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                startActivity(new Intent(VideoDetailActivity.this, TgtCodeActivity.class));
+//                return true;
+//            }
+//        });
 
         noLoginTipsView = View.inflate(VideoDetailActivity.this, R.layout.no_login_tips, null);
         noLoginTipsCancel = noLoginTipsView.findViewById(R.id.no_login_tips_cancel);
@@ -838,9 +847,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 if (mDatas.size() > 0) {
                                     initialize = false;
                                 }
-    //                            videoDetailCommentBtn.setVisibility(View.VISIBLE);
+                                //                            videoDetailCommentBtn.setVisibility(View.VISIBLE);
                             } else {
-    //                            videoDetailCommentBtn.setVisibility(View.GONE);
+                                //                            videoDetailCommentBtn.setVisibility(View.GONE);
                             }
                             if (null != refreshLayout) {
                                 refreshLayout.finishRefresh();
@@ -1177,9 +1186,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      * 获取更多数据
      */
     private void loadMoreData(String collectionId, String mPageIndex, String mPageSize) {
-        if (null != playerView && null != playerView.getParent()) {
-            ((ViewGroup) playerView.getParent()).removeView(playerView);
-        }
         OkGo.<VideoCollectionModel>get(ApiConstants.getInstance().getSpecList())
                 .tag(VIDEOTAG)
                 .params("classId", collectionId)
@@ -2066,7 +2072,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onResume() {
         super.onResume();
-        if (playerView != null) {
+        if (playerView != null && !SPUtils.isVisibleNoWifiView(this)) {
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
             } else {

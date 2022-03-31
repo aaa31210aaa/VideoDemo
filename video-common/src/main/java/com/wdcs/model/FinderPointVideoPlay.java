@@ -1,7 +1,9 @@
 package com.wdcs.model;
 
-import java.util.List;
+import androidx.annotation.Keep;
 
+import java.util.List;
+@Keep
 public class FinderPointVideoPlay {
     private String module_source;
     private String is_renew;

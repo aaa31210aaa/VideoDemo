@@ -1996,7 +1996,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
-        if (playerView != null && null != mDataDTO) {
+        if (playerView != null && null != mDataDTO && !SPUtils.isVisibleNoWifiView(getActivity())) {
             SuperPlayerImpl.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();

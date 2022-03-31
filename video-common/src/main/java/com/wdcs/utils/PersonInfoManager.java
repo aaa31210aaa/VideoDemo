@@ -130,10 +130,11 @@ public class PersonInfoManager {
      */
     public boolean isRequestToken() {
         try {
-            if (!TextUtils.isEmpty(VideoInteractiveParam.getInstance().getCode())) {//获取的token不为空
-                if (!TextUtils.isEmpty(PersonInfoManager.getInstance().getTgtCode())) { //本地token不为空
-                    if (TextUtils.equals(PersonInfoManager.getInstance().getTgtCode(),
-                            VideoInteractiveParam.getInstance().getCode())) {
+            String wdTgt = VideoInteractiveParam.getInstance().getCode(); //从万达拿的tgt
+            String localTgt = PersonInfoManager.getInstance().getTgtCode(); //本地存储的tgt
+            if (!TextUtils.isEmpty(wdTgt)) {//获取的token不为空
+                if (!TextUtils.isEmpty(localTgt)) { //本地token不为空
+                    if (TextUtils.equals(localTgt, wdTgt)) {
 //                        DebugLogUtils.DebugLog("我的长沙已登录_数智已登");
                         return false;
                     } else {
