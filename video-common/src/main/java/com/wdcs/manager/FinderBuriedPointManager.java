@@ -45,6 +45,9 @@ public class FinderBuriedPointManager {
     }
 
     public static void setFinderLikeFavoriteShare(String eventStr, DataDTO mDataDTO) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointModel model = new FinderPointModel();
         model.setContent_id(mDataDTO.getId() + "");
         model.setContent_name(mDataDTO.getBrief());
@@ -73,6 +76,9 @@ public class FinderBuriedPointManager {
      * @param mDataDTO
      */
     public static void setFinderLikeFavoriteShare(String eventStr, VideoCollectionModel.DataDTO.RecordsDTO mDataDTO) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointModel model = new FinderPointModel();
         model.setContent_id(mDataDTO.getId() + "");
         model.setContent_name(mDataDTO.getBrief());
@@ -98,6 +104,9 @@ public class FinderBuriedPointManager {
      * 视频播放倍速finder埋点
      */
     public static void setFinderSpeed(String eventStr, DataDTO mDataDTO, String speed) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointModel model = new FinderPointModel();
         model.setSpeed_n(speed);
         model.setContent_id(mDataDTO.getId() + "");
@@ -120,6 +129,9 @@ public class FinderBuriedPointManager {
      * 播放时长
      */
     public static void setFinderVideo(String eventStr, String isRenew, DataDTO mDataDTO, long duration) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointModel model = new FinderPointModel();
 //        model.setModule_source("");
         if (TextUtils.equals(Constants.CONTENT_VIDEO_PLAY, eventStr)) {
@@ -152,6 +164,9 @@ public class FinderBuriedPointManager {
      * 开始播放
      */
     public static void setFinderVideoPlay(String eventStr, String isRenew, DataDTO mDataDTO) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointVideoPlay model = new FinderPointVideoPlay();
         model.setIs_renew(isRenew);
         model.setContent_id(mDataDTO.getId() + "");
@@ -172,6 +187,9 @@ public class FinderBuriedPointManager {
      * 开始播放
      */
     public static void setFinderVideoPlay(String eventStr, String isRenew, VideoCollectionModel.DataDTO.RecordsDTO mDataDTO) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointVideoPlay model = new FinderPointVideoPlay();
         model.setIs_renew(isRenew);
         model.setContent_id(mDataDTO.getId() + "");
@@ -190,6 +208,9 @@ public class FinderBuriedPointManager {
 
 
     public static void setFinderVideo(String eventStr, String isRenew, VideoCollectionModel.DataDTO.RecordsDTO mDataDTO, long duration) {
+        if (null == mDataDTO) {
+            return;
+        }
         FinderPointModel model = new FinderPointModel();
 //        model.setModule_source("");
         if (TextUtils.equals(Constants.CONTENT_VIDEO_PLAY, eventStr)) {

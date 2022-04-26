@@ -166,7 +166,7 @@ public class ContentStateModel {
 
         public String getWhetherLike() {
             if (TextUtils.isEmpty(whetherLike)){
-                return "";
+                return "false";
             }
             return whetherLike;
         }

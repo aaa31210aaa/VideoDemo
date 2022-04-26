@@ -19,7 +19,7 @@
             android:id="@+id/view_flipper_icon"
             android:layout_width="13dp"
             android:layout_height="13dp"
-            android:layout_marginLeft="@dimen/video_dp15"
+            android:layout_marginLeft="@dimen/video_dp10"
             android:layout_centerVertical="true"
              />
 

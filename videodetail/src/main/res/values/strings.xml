@@ -12,7 +12,7 @@
     <string name="net_err" translatable="false">请求失败,请检查网络</string>
     <string name="no_wifi" translatable="false">当前为非WI-FI,继续播放将消耗流量</string>
     <string name="no_more_video" translatable="false">没有更多视频了</string>
-
+    <string name="upload_agreement_tips" translatable="false"></string>
     <string name="title_activity_rtmp_room_demo">RtmpRoomDemoActivity</string>
 
     <string name="str_room_id_tips">输入房间号</string>

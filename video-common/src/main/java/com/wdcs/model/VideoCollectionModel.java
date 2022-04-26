@@ -141,7 +141,7 @@ public class VideoCollectionModel {
             private boolean disableComment;
             private String label;
             private String orientation;
-            private String whetherLike;
+            private boolean whetherLike;
             private String whetherFavor;
             private String whetherFollow;
             private String isTop;
@@ -492,11 +492,11 @@ public class VideoCollectionModel {
                 this.orientation = orientation;
             }
 
-            public String isWhetherLike() {
+            public boolean getWhetherLike() {
                 return whetherLike;
             }
 
-            public void setWhetherLike(String whetherLike) {
+            public void setWhetherLike(boolean whetherLike) {
                 this.whetherLike = whetherLike;
             }
 

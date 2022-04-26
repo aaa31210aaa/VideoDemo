@@ -59,19 +59,18 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
     private ToAddPlayerViewClick click;
     private FollowViewClick followViewClick;
     private SmartRefreshLayout mRefreshlayout;
-    private RelativeLayout mVideoDetailCommentBtn;
     private ViewPagerLayoutManager mVideoDetailmanager;
     private String spaceStr = "";
-//    private String topicNameStr;
+    //    private String topicNameStr;
+    private boolean isClick = true;
 
     public XkshVideoAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
-                            SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
+                            SuperPlayerView playerView, SmartRefreshLayout refreshLayout, ViewPagerLayoutManager videoDetailmanager) {
         super(layoutResId, data);
         this.mContext = context;
         this.mDatas = data;
         this.superPlayerView = playerView;
         this.mRefreshlayout = refreshLayout;
-        this.mVideoDetailCommentBtn = videoDetailCommentBtn;
         this.mVideoDetailmanager = videoDetailmanager;
     }
 
@@ -92,7 +91,16 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
         ImageView coverPicture = helper.getView(R.id.cover_picture);
-//        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
+        LinearLayout videoDetailLikes = helper.getView(R.id.video_detail_likes);
+        final ImageView videoDetailLikesImage = helper.getView(R.id.video_detail_likes_image);
+        final TextView likesNum = helper.getView(R.id.likes_num);
+        LinearLayout videoDetailCollection = helper.getView(R.id.video_detail_collection);
+        final ImageView videoDetailCollectionImage = helper.getView(R.id.video_detail_collection_image);
+        final TextView collectionNum = helper.getView(R.id.collection_num);
+        LinearLayout videoDetailCommentLl = helper.getView(R.id.video_detail_comment_ll);
+        final TextView commentNum = helper.getView(R.id.comment_num);
+        LinearLayout share = helper.getView(R.id.share);
+        LinearLayout publishWorks = helper.getView(R.id.publish_works);
 
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
@@ -247,7 +255,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                         model.setIs_notice("是");
                     }
                     model.setModule_source("视频播放");
-                    FinderBuriedPointManager.setFinderCommon(Constants.CLICK_USER,model);
+                    FinderBuriedPointManager.setFinderCommon(Constants.CLICK_USER, model);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -290,10 +298,13 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         expendText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (expendText.getVisibility() == View.VISIBLE) {
-                    expendText.setVisibility(View.GONE);
-                    foldTextView.setVisibility(View.VISIBLE);
+                if (isClick) {
+                    if (expendText.getVisibility() == View.VISIBLE) {
+                        expendText.setVisibility(View.GONE);
+                        foldTextView.setVisibility(View.VISIBLE);
+                    }
                 }
+                isClick = true;
             }
         });
 
@@ -310,13 +321,108 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         }
 
         getViewFlipperData(recommendList, viewFlipper, item);
+
+        //点赞
+        videoDetailLikes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLikeListener.likeClick(v, item, videoDetailLikesImage, likesNum);
+            }
+        });
+
+        //收藏
+        videoDetailCollection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCollectionListener.collectionClick(v, item, videoDetailCollectionImage, collectionNum);
+            }
+        });
+
+        //评论
+        videoDetailCommentLl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCommentListener.commentClick(v, item, commentNum);
+            }
+        });
+
+        //转发
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShareListener.shareClick(v, item);
+            }
+        });
+
+        //发布
+        publishWorks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPublishWorksListener.publishWorksClick(v, item);
+            }
+        });
+    }
+
+    public void setTopicClick(boolean isClick) {
+        this.isClick = isClick;
+    }
+
+    public LikeListener mLikeListener;
+
+    public interface LikeListener {
+        void likeClick(View view, DataDTO item, ImageView likeImage, TextView likeNum);
+    }
+
+    public void setlikeListener(LikeListener likeListener) {
+        this.mLikeListener = likeListener;
+    }
+
+    public CollectionListener mCollectionListener;
+
+    public interface CollectionListener {
+        void collectionClick(View view, DataDTO item, ImageView collectionImage, TextView collectionNum);
+    }
+
+    public void setCollectionListener(CollectionListener collectionListener) {
+        this.mCollectionListener = collectionListener;
+    }
+
+    public CommentListener mCommentListener;
+
+    public interface CommentListener {
+        void commentClick(View view, DataDTO item, TextView commentNum);
+    }
+
+    public void setCommentListener(CommentListener commentListener) {
+        this.mCommentListener = commentListener;
+    }
+
+    public PublishWorksListener mPublishWorksListener;
+
+    public interface PublishWorksListener {
+        void publishWorksClick(View view, DataDTO item);
+    }
+
+    public void setPublishWorksListener(PublishWorksListener publishWorksListener) {
+        this.mPublishWorksListener = publishWorksListener;
+    }
+
+
+    public ShareListener mShareListener;
+
+    public interface ShareListener {
+        void shareClick(View view, DataDTO item);
+    }
+
+    public void setShareListener(ShareListener shareListener) {
+        this.mShareListener = shareListener;
     }
 
     /**
      * 获取首页滚动消息
      */
-    private void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list,
-                                    final ViewFlipper viewFlipper, final DataDTO mItem) {
+    public void getViewFlipperData(final List<RecommendModel.DataDTO.RecordsDTO> list,
+                                   final ViewFlipper viewFlipper, final DataDTO mItem) {
         for (int i = 0; i < list.size(); i++) {
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
@@ -355,7 +461,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                     e.printStackTrace();
                 }
                 //行为埋点 button_name 记录关联框服务名称
-                FinderBuriedPointManager.setFinderClick("服务_"+ list.get(mPosition).getTitle());
+                FinderBuriedPointManager.setFinderClick("服务_" + list.get(mPosition).getTitle());
             }
         });
 

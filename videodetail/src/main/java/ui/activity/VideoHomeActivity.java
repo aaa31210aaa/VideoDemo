@@ -310,9 +310,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != videoDetailFragment.sharePop) {
                             videoDetailFragment.sharePop.dissmiss();
                         }
-                        if (null != videoDetailFragment.videoDetailCommentBtn) {
-                            videoDetailFragment.videoDetailCommentBtn.setVisibility(View.GONE);
-                        }
+//                        if (null != videoDetailFragment.videoDetailCommentBtn) {
+//                            videoDetailFragment.videoDetailCommentBtn.setVisibility(View.GONE);
+//                        }
 
                         if (null != videoTitleView) {
                             videoTitleView.setVisibility(View.GONE);
@@ -346,6 +346,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.cover_picture).setVisibility(View.GONE);
                         }
 
+                        if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.video_item_bottom)) {
+                            videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.video_item_bottom).setVisibility(View.GONE);
+                        }
+
+                        if (null != playerView.mWindowPlayer.mLayoutBottom) {
+                            playerView.mWindowPlayer.mLayoutBottom.setVisibility(View.GONE);
+                        }
+
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(false);
                         xkshFragment.refreshLayout.setEnableRefresh(false);
@@ -370,10 +378,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
                         if (null != xkshFragment.sharePop) {
                             xkshFragment.sharePop.dissmiss();
-                        }
-
-                        if (null != xkshFragment.videoDetailCommentBtn) {
-                            xkshFragment.videoDetailCommentBtn.setVisibility(View.GONE);
                         }
 
                         if (null != videoTitleView) {
@@ -410,6 +414,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (null != xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.cover_picture)) {
                             xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.cover_picture).setVisibility(View.GONE);
                         }
+
+                        if (null != xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.video_item_bottom)) {
+                            xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.video_item_bottom).setVisibility(View.GONE);
+                        }
+
+                        if (null != playerView.mWindowPlayer.mLayoutBottom) {
+                            playerView.mWindowPlayer.mLayoutBottom.setVisibility(View.GONE);
+                        }
                     }
 
                     KeyboardUtils.hideKeyboard(getWindow().getDecorView());
@@ -423,9 +435,9 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         videoDetailFragment.refreshLayout.setEnableRefresh(true);
                         videoDetailFragment.adapter.setEnableLoadMore(true);
                         videoDetailFragment.setLikeCollection(playerView.contentStateModel);
-                        if (null != videoDetailFragment.videoDetailCommentBtn) {
-                            videoDetailFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                        }
+//                        if (null != videoDetailFragment.videoDetailCommentBtn) {
+//                            videoDetailFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
+//                        }
                         if (null != videoFragmentFullLin) {
                             videoFragmentFullLin.setVisibility(View.VISIBLE);
                         }
@@ -461,14 +473,19 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.cover_picture).setVisibility(View.VISIBLE);
                         }
 
+                        if (null != videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.video_item_bottom)) {
+                            videoDetailFragment.adapter.getViewByPosition(videoDetailFragment.currentIndex, R.id.video_item_bottom).setVisibility(View.VISIBLE);
+                        }
+
+                        if (null != playerView.mWindowPlayer.mLayoutBottom) {
+                            playerView.mWindowPlayer.mLayoutBottom.setVisibility(View.VISIBLE);
+                        }
+
                     } else if (xkshFragment.mIsVisibleToUser) {
                         xkshFragment.xkshManager.setCanScoll(true);
                         xkshFragment.refreshLayout.setEnableRefresh(true);
                         xkshFragment.adapter.setEnableLoadMore(true);
                         xkshFragment.setLikeCollection(playerView.contentStateModel);
-                        if (null != xkshFragment.videoDetailCommentBtn) {
-                            xkshFragment.videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                        }
 
                         if (null != xkshFullLin) {
                             xkshFullLin.setVisibility(View.VISIBLE);
@@ -503,6 +520,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
                         if (null != xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.cover_picture)) {
                             xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.cover_picture).setVisibility(View.VISIBLE);
+                        }
+
+                        if (null != xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.video_item_bottom)) {
+                            xkshFragment.adapter.getViewByPosition(xkshFragment.currentIndex, R.id.video_item_bottom).setVisibility(View.VISIBLE);
+                        }
+
+                        if (null != playerView.mWindowPlayer.mLayoutBottom) {
+                            playerView.mWindowPlayer.mLayoutBottom.setVisibility(View.VISIBLE);
                         }
 
                     }
@@ -675,7 +700,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView, toCurrentTab);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }
@@ -894,4 +919,5 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     }
                 });
     }
+
 }

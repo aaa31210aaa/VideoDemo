@@ -191,8 +191,8 @@ public class PointSeekBar extends RelativeLayout {
         mWidth = w;
         mHeight = h;
 
-        mSeekBarLeft = mHalfDrawableWidth;
-        mSeekBarRight = mWidth - mHalfDrawableWidth;
+        mSeekBarLeft = 0;
+        mSeekBarRight = mWidth - 10;
 
 
         float barPaddingTop = (mHeight - mBarHeightPx) / 2;

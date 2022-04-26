@@ -68,11 +68,11 @@
         <RelativeLayout
             android:id="@+id/comment_pop_rl"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/video_dp10"
+            android:layout_weight="1"
             android:background="@drawable/comment_input_bg"
             android:paddingLeft="10dp"
-            android:layout_marginLeft="@dimen/video_dp10"
             android:paddingTop="5dp"
             android:paddingBottom="5dp">
 
@@ -100,13 +100,13 @@
         <TextView
             android:id="@+id/publish"
             android:layout_width="wrap_content"
-            android:text="发布"
-            android:textSize="@dimen/sp_16"
+            android:layout_height="match_parent"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:gravity="center"
+            android:text="发布"
             android:textColor="@color/video_black"
-            android:layout_height="match_parent">
+            android:textSize="@dimen/sp_16">
 
         </TextView>
     </LinearLayout>

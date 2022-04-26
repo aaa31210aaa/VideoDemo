@@ -1,6 +1,8 @@
 package com.wdcs.callback;
 
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,7 @@ public class VideoInteractiveParam {
     public VideoFinderPointCallBack videoFinderPointCallBack;
     public static VideoInteractiveParam param;
     private String transformationToken;
+    private Context context;
 
     private VideoInteractiveParam() {
     }

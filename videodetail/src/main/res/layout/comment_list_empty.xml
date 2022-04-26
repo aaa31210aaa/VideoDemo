@@ -14,13 +14,13 @@
     </ImageView>
 
     <TextView
+        android:id="@+id/comment_list_tips"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/comment_list_empty_img"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/video_dp10"
-        android:textColor="@color/c9"
-        android:text="@string/comment_list_empty">
+        android:textColor="@color/video_c9">
 
     </TextView>
 </RelativeLayout>

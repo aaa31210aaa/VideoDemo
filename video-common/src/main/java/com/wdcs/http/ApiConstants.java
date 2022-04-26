@@ -152,7 +152,7 @@ public class ApiConstants {
      * 发布内容
      */
     public String releaseContent() {
-        return getBaseUrl() + "api/cms/client/content/activity/works/create/v2";
+        return getBaseUrl() + "api/cms/client/content/createArticle";
     }
 
     /**
@@ -198,6 +198,25 @@ public class ApiConstants {
     }
 
     public String getCategoryData() {
-        return getBaseUrl()+"api/cms/client/category/getCategoryData";
+        return getBaseUrl() + "api/cms/client/category/getCategoryData";
     }
+
+    /**
+     * 获取话题
+     */
+    public String getTopics() {
+        return getBaseUrl() + "api/cms/client/content/topics";
+    }
+
+    /**
+     * 修改草稿
+     */
+    public String updateArticle() {
+        return getBaseUrl() + "api/cms/client/content/updateArticle";
+    }
+
+    public String readArticle(){
+        return getBaseUrl() + "api/cms/client/content/ugc/";
+    }
+
 }

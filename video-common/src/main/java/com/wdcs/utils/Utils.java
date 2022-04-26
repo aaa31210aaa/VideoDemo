@@ -42,7 +42,7 @@ public final class Utils {
             //UAT测试环境
             ApiConstants.getInstance().setBaseUrl("https://uat-fuse-api-gw.zhcs.csbtv.com/");
         } else {
-            //正式环境
+            //正式环境 https://fuse-api-gw.zhcs.csbtv.com/
             ApiConstants.getInstance().setBaseUrl("https://fuse-api-gw.zhcs.csbtv.com/");
         }
     }

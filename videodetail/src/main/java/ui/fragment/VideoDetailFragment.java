@@ -9,6 +9,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -16,8 +19,10 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ImageSpan;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -48,6 +53,7 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
+import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
@@ -65,6 +71,7 @@ import com.wdcs.model.DataDTO;
 import com.wdcs.model.RecommendModel;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
+import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.model.VideoDetailModel;
 import com.wdcs.utils.ButtonSpan;
@@ -88,13 +95,17 @@ import java.util.List;
 
 import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailAdapter;
+import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
+import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
-import widget.MyTextView;
+import widget.MyClickListener;
+
+import com.wdcs.widget.YALikeAnimationView;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
@@ -104,12 +115,14 @@ import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
+import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.PANELCODE;
-import static com.wdcs.constants.Constants.VIDEOTAB;
+import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
+import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.activity.VideoHomeActivity.isPause;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
@@ -128,12 +141,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private ImageView videoStaticBg;
     private ImageView startPlay;
 
-    public RelativeLayout videoDetailCommentBtn;
+    //    public RelativeLayout videoDetailCommentBtn;
     //评论列表弹窗
     public CustomPopWindow popupWindow;
     private boolean popupWindowIsShow;
-    private LinearLayout videoDetailCollection;
-    private LinearLayout videoDetailLikes;
+//    private LinearLayout videoDetailCollection;
+//    private LinearLayout videoDetailLikes;
 
     private View contentView;
     private View chooseContentView;
@@ -150,7 +163,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private View rootView;
     private EditText edtInput;
     private TextView tvSend;
-    private RelativeLayout videoDetailWhiteCommentRl;
+    //    private RelativeLayout videoDetailWhiteCommentRl;
     //选择集数弹窗
     public CustomPopWindow choosePop;
     private RecyclerView videoDetailChoosePopRv;
@@ -166,17 +179,16 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private int mPageSize = 10; //评论列表每页多少条
     public String myContentId = ""; //记录当前视频id
     public int currentIndex = 0; //记录当前视频列表的位置
-    private TextView commentTotal;
+    //    private TextView commentTotal;
     private TextView commentPopCommentTotal;
-    private ImageView videoDetailCollectionImage; //收藏图标
+//    private ImageView videoDetailCollectionImage; //收藏图标
 
-    private ImageView videoDetailLikesImage; //点赞图标
-    private TextView likesNum; //点赞数
-    private TextView collectionNum; //收藏数
+    //    private ImageView videoDetailLikesImage; //点赞图标
+//    private TextView likesNum; //点赞数
+//    private TextView collectionNum; //收藏数
     private String videoType; //视频类型
     private VideoInteractiveParam param;
     public String playUrl;
-    private TextView commentEdittext;
     private String recommendTag = "recommend";
     private boolean isLoadComplate = false;
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
@@ -186,7 +198,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private View noLoginTipsView;
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
-    private LinearLayout share;
+    //    private LinearLayout share;
     public CustomPopWindow sharePop;
     private View sharePopView;
     private ImageView shareWxBtn;
@@ -222,18 +234,30 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private String mCategoryName = "";
     private boolean isReply = false;
     private String replyId;
-    private List<CollectionLabelModel.DataDTO> collectionList;
+    private List<CollectionLabelModel.DataDTO.ListDTO> collectionList;
     private List<String> collectionTvList;
     private List<String> collectionStrList;
     private SuperPlayerView playerView;
+    private YALikeAnimationView loveIcon;
+    private View commentEmptyView;
+    private TextView commentListTips;
+    private int index = 0;
+    private String topicName;
+    private Handler handler;
+    private int clickCount = 0;//记录连续点击次数
+    private boolean likeIsRequesting;
+    private long beforeClickTime = 0;
+    private int toCurrentTab;
 
     public VideoDetailFragment() {
     }
 
-    public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName) {
+    public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName
+            , int toCurrentTab) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         args.putString(CONTENTID, contentId);
+        args.putInt(TOCURRENTTAB, toCurrentTab);
         if (!TextUtils.isEmpty(categoryName)) {
             args.putString(CATEGORYNAME, categoryName);
         }
@@ -248,6 +272,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             panelCode = getArguments().getString(PANELCODE);
             myContentId = getArguments().getString(CONTENTID);
             mCategoryName = getArguments().getString(CATEGORYNAME);
+            toCurrentTab = getArguments().getInt(TOCURRENTTAB);
         }
     }
 
@@ -258,10 +283,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_video_detail, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        if (TextUtils.isEmpty(myContentId)) {
-            getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
-        } else {
+        if (!TextUtils.isEmpty(myContentId) && 1 == toCurrentTab ) {
             getOneVideo(myContentId);
+        } else {
+            getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
         }
         return view;
     }
@@ -282,23 +307,25 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //        });
 
         param = VideoInteractiveParam.getInstance();
-        share = view.findViewById(R.id.share);
-        share.setOnClickListener(this);
+//        share = view.findViewById(R.id.share);
+//        share.setOnClickListener(this);
         mDataDTO = new DataDTO();
         recommondList = new ArrayList<>();
         loadingProgress = view.findViewById(R.id.video_loading_progress);
         loadingProgress.setVisibility(View.VISIBLE);
-        commentEdittext = view.findViewById(R.id.comment_edittext);
         videoDetailRv = view.findViewById(R.id.video_detail_rv);
         videoDetailRv.setHasFixedSize(true);
-        videoDetailCollectionImage = view.findViewById(R.id.video_detail_collection_image);
-        videoDetailLikesImage = view.findViewById(R.id.video_detail_likes_image);
-        likesNum = view.findViewById(R.id.likes_num);
-        collectionNum = view.findViewById(R.id.collection_num);
+//        videoDetailCollectionImage = view.findViewById(R.id.video_detail_collection_image);
+//        videoDetailLikesImage = view.findViewById(R.id.video_detail_likes_image);
+//        likesNum = view.findViewById(R.id.likes_num);
+//        collectionNum = view.findViewById(R.id.collection_num);
+        loveIcon = view.findViewById(R.id.love_icon);
 
         videoDetailmanager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(videoDetailmanager);
         footerView = View.inflate(getActivity(), R.layout.footer_view, null);
+        commentEmptyView = View.inflate(getActivity(), R.layout.comment_list_empty, null);
+        commentListTips = commentEmptyView.findViewById(R.id.comment_list_tips);
         setSoftKeyBoardListener();
         videoDetailmanager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -336,22 +363,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
-                getThematicCollection(myContentId);
 
                 SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                 currentIndex = 0;
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
-                    videoDetailWhiteCommentRl.setEnabled(false);
+                    commentListTips.setText("当前页面评论功能已关闭");
                     commentPopRl.setEnabled(false);
-                    commentEdittext.setText("评论关闭");
-                    commentEdtInput.setHint("评论关闭");
+                    commentEdtInput.setHint("当前页面评论功能已关闭");
                 } else {
-                    videoDetailWhiteCommentRl.setEnabled(true);
+                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
                     commentPopRl.setEnabled(true);
-                    commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
+                commentPopRvAdapter.setEmptyView(commentEmptyView);
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
@@ -456,20 +481,18 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 addPageViews(myContentId);
                 videoType = mDatas.get(position).getType();
                 if (mDatas.get(position).getDisableComment()) {
-                    videoDetailWhiteCommentRl.setEnabled(false);
+                    commentListTips.setText("当前页面评论功能已关闭");
                     commentPopRl.setEnabled(false);
-                    commentEdittext.setText("评论关闭");
-                    commentEdtInput.setHint("评论关闭");
+                    commentEdtInput.setHint("当前页面评论功能已关闭");
                 } else {
-                    videoDetailWhiteCommentRl.setEnabled(true);
+                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
                     commentPopRl.setEnabled(true);
-                    commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
+                commentPopRvAdapter.setEmptyView(commentEmptyView);
                 mPageIndex = 1;
                 getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
                 getContentState(myContentId);
-                getThematicCollection(myContentId);
 
                 rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(position);
                 OkGo.getInstance().cancelTag(recommendTag);
@@ -484,11 +507,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         });
 
         initSmartRefresh(view);
-        commentTotal = view.findViewById(R.id.comment_total);
-        videoDetailCollection = view.findViewById(R.id.video_detail_collection);
-        videoDetailCollection.setOnClickListener(this);
-        videoDetailLikes = view.findViewById(R.id.video_detail_likes);
-        videoDetailLikes.setOnClickListener(this);
+//        commentTotal = view.findViewById(R.id.comment_total);
+//        videoDetailCollection = view.findViewById(R.id.video_detail_collection);
+//        videoDetailCollection.setOnClickListener(this);
+//        videoDetailLikes = view.findViewById(R.id.video_detail_likes);
+//        videoDetailLikes.setOnClickListener(this);
 
         contentView = View.inflate(getActivity(), R.layout.fragment_video_comment_pop, null);
         sendPopContentView = View.inflate(getActivity(), R.layout.layout_input_window, null);
@@ -544,16 +567,56 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         commentEdtInput = contentView.findViewById(R.id.comment_edtInput);
         commentPopRl = contentView.findViewById(R.id.comment_pop_rl);
         commentPopRl.setOnClickListener(this);
-        videoDetailCommentBtn = view.findViewById(R.id.video_detail_comment_btn);
-        videoDetailCommentBtn.setOnClickListener(this);
-        videoDetailWhiteCommentRl = view.findViewById(R.id.video_detail_white_comment_rl);
-        videoDetailWhiteCommentRl.setOnClickListener(this);
+
+//        videoDetailCommentBtn = view.findViewById(R.id.video_detail_comment_btn);
+//        videoDetailCommentBtn.setOnClickListener(this);
+//        videoDetailWhiteCommentRl = view.findViewById(R.id.video_detail_white_comment_rl);
+//        videoDetailWhiteCommentRl.setOnClickListener(this);
         initCommentPopRv();
         adapter = new VideoDetailAdapter(R.layout.video_fragment_item, mDatas, getActivity(),
-                playerView, refreshLayout, videoDetailCommentBtn, videoDetailmanager);
+                playerView, refreshLayout, videoDetailmanager);
         adapter.setLoadMoreView(new CustomLoadMoreView());
         adapter.setPreLoadNumber(2);
         adapter.openLoadAnimation();
+
+        handler = new Handler() {
+            @Override
+            public void dispatchMessage(@NonNull Message msg) {
+                switch (msg.what) {
+                    case 1:
+                        //单击
+                        playerView.mWindowPlayer.togglePlayState();
+                        break;
+                    case 2:
+                        //双击
+                        if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                            noLoginTipsPop();
+                        } else {
+                            loveIcon.startAnimation();
+                            if (TextUtils.equals("false", playerView.contentStateModel.getWhetherLike()) && !likeIsRequesting) {
+                                likeIsRequesting = true;
+                                ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
+                                TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+                                addOrCancelLike(myContentId, videoType, likeImage, likeNum);
+                            }
+                        }
+                        break;
+                }
+            }
+        };
+        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(final BaseQuickAdapter adapter, View view, int position) {
+                if (System.currentTimeMillis() - beforeClickTime < CLICK_INTERVAL_TIME) {
+                    handler.removeMessages(1);
+                    handler.sendEmptyMessage(2);
+                } else {
+                    if (!handler.hasMessages(2) && !handler.hasMessages(1))
+                        handler.sendEmptyMessageDelayed(1, CLICK_INTERVAL_TIME);
+                }
+                beforeClickTime = System.currentTimeMillis();
+            }
+        });
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
         /**
          * 无wifi 继续播放点击
@@ -578,6 +641,110 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 ((VideoHomeActivity) getActivity()).xkshFragment.adapter.notifyDataSetChanged();
             }
         });
+
+        //点赞
+        adapter.setlikeListener(new VideoDetailAdapter.LikeListener() {
+            @Override
+            public void likeClick(View view, DataDTO item, ImageView likeImage, TextView likeNum) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    addOrCancelLike(myContentId, videoType, likeImage, likeNum);
+                }
+            }
+        });
+
+        //收藏
+        adapter.setCollectionListener(new VideoDetailAdapter.CollectionListener() {
+            @Override
+            public void collectionClick(View view, DataDTO item, ImageView collectionImage, TextView collectionNum) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    addOrCancelFavor(myContentId, videoType, collectionImage, collectionNum);
+                }
+            }
+        });
+
+        //评论
+        adapter.setCommentListener(new VideoDetailAdapter.CommentListener() {
+            @Override
+            public void commentClick(View view, DataDTO item, TextView commentNum) {
+                FinderBuriedPointManager.setFinderClick("评论");
+                showCommentPopWindow();
+            }
+        });
+
+        //转发
+        adapter.setShareListener(new VideoDetailAdapter.ShareListener() {
+            @Override
+            public void shareClick(View view, DataDTO item) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
+                FinderBuriedPointManager.setFinderClick("分享");
+                sharePop();
+            }
+        });
+
+        //发布
+        adapter.setPublishWorksListener(new VideoDetailAdapter.PublishWorksListener() {
+            @Override
+            public void publishWorksClick(View view, DataDTO item) {
+                //行为埋点 点击视频发布
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    try {
+                        noLoginTipsPop();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    startActivity(new Intent(getActivity(), UploadActivity.class));
+                }
+            }
+        });
+
+        /**
+         * 关注按钮
+         */
+        adapter.setFollowViewClick(new VideoDetailAdapter.FollowViewClick() {
+            @Override
+            public void followClick(int position) {
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    if (isFollow) {
+                        //调用取消关注接口
+                        cancelFollow(mDatas.get(position).getCreateBy());
+                    } else {
+                        //调用关注接口
+                        toFollow(mDatas.get(position).getCreateBy());
+                    }
+                }
+                FinderPointModel model = new FinderPointModel();
+                model.setUser_id(mDatas.get(position).getCreateBy());
+                FinderBuriedPointManager.setFinderCommon(Constants.NOTICE_USER, model);
+            }
+        });
+
+        //窗口视频双击点击监听
+        if (null != playerView) {
+            playerView.mWindowPlayer.setOnDoubleClick(new WindowPlayer.DoubleClick() {
+                @Override
+                public void onDoubleClick(DataDTO item) {
+                    if (videoFragmentIsVisibleToUser) {
+                        if (System.currentTimeMillis() - beforeClickTime < CLICK_INTERVAL_TIME) {
+                            handler.removeMessages(1);
+                            handler.sendEmptyMessage(2);
+                        } else {
+                            if (!handler.hasMessages(2) && !handler.hasMessages(1))
+                                handler.sendEmptyMessageDelayed(1, CLICK_INTERVAL_TIME);
+                        }
+                        beforeClickTime = System.currentTimeMillis();
+                    }
+                }
+            });
+        }
 
         videoDetailRv.setAdapter(adapter);
     }
@@ -665,6 +832,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
                 addPlayView(currentIndex);
             }
+            getContentState(myContentId);
         } else {
             if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                 if (mDuration != 0 && mProgress != 0) {
@@ -837,8 +1005,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (null == playerView) {
             return;
         }
-        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.video_item_bottom);
+//        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
@@ -848,10 +1016,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
 
+
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
-        if (TextUtils.equals("0", videoType)) { //这个页面是对的
+
+
+        if (TextUtils.equals("0", videoType)) {
             double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
             double mHeight;
             mHeight = getResources().getDisplayMetrics().widthPixels / percent;
@@ -864,8 +1035,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
 
             playerView.setOrientation(false);
-            if (linearLayout != null) {
-                linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            if (itemRelativelayout != null) {
+                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
         } else if (TextUtils.equals("1", videoType)) {
             int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
@@ -875,12 +1046,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
                 playerView.setOrientation(false);
             } else {
-                playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
-            if (linearLayout != null) {
-                linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            if (itemRelativelayout != null) {
+                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
         } else {
             int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Horizontal_Proportion);
@@ -888,9 +1059,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
-            mLayoutBottomParams.addRule(BELOW, playerView.getId());
-            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
-            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
+//            mLayoutBottomParams.addRule(BELOW, playerView.getId());
+//            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
+//            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
             if (null != itemRelativelayout) {
                 itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
@@ -1002,7 +1173,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         commentPopRv.setLayoutManager(linearLayoutManager);
         commentPopRvAdapter = new CommentPopRvAdapter(mCommentPopRvData, getActivity());
         commentPopRvAdapter.bindToRecyclerView(commentPopRv);
-        commentPopRvAdapter.setEmptyView(R.layout.comment_list_empty);
+        commentPopRvAdapter.setEmptyView(commentEmptyView);
         commentPopRvAdapter.expandAll();
         commentPopRv.setAdapter(commentPopRvAdapter);
         commentPopRvAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
@@ -1196,9 +1367,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 if (mDatas.size() > 0) {
                                     initialize = false;
                                 }
-                                videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                            } else {
-                                videoDetailCommentBtn.setVisibility(View.GONE);
                             }
                             if (null != refreshLayout) {
                                 refreshLayout.finishRefresh();
@@ -1277,7 +1445,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 }
                                 mDatas.addAll(response.body().getData());
                                 setDataWifiState(mDatas, getActivity());
-    //                            adapter.setNewData(mDatas);
                                 adapter.loadMoreComplete();
                             } else {
                                 adapter.loadMoreFail();
@@ -1397,12 +1564,16 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     }
                                 });
 
-
+                                TextView commentNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.comment_num);
                                 if (mCommentPopDtoData.isEmpty()) {
-                                    commentTotal.setText("(0)");
+                                    if (null != commentNum) {
+                                        commentNum.setText("评论");
+                                    }
                                     commentPopCommentTotal.setText("(0)");
                                 } else {
-                                    commentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                    if (null != commentNum) {
+                                        commentNum.setText(response.body().getData().getTotal());
+                                    }
                                     commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
                                 }
 
@@ -1609,7 +1780,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     ToastUtils.showShort(R.string.data_err);
                                     return;
                                 }
-
                                 playerView.contentStateModel = response.body().getData();
                                 if (null != playerView.contentStateModel) {
                                     setLikeCollection(playerView.contentStateModel);
@@ -1634,11 +1804,17 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 });
     }
 
+
     /**
      * 获取专题合集标签
      */
     public void getThematicCollection(String contentId) {
-        OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId)
+        String belongTopicId = mDataDTO.getBelongTopicId();
+        if (TextUtils.isEmpty(belongTopicId)) {
+            belongTopicId = "0";
+        }
+
+        OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId + "/" + belongTopicId)
                 .tag(VIDEOTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1652,14 +1828,22 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
                         try {
                             if (response.body().getCode().equals(success_code)) {
-                                if (null == response.body().getData()) {
+                                if (null == response.body().getData() || null == response.body().getData().getList()) {
                                     return;
                                 }
                                 collectionList = new ArrayList<>();
                                 collectionTvList = new ArrayList<>();
                                 collectionStrList = new ArrayList<>();
                                 String collectionStr = "";
-                                collectionList.addAll(response.body().getData());
+                                collectionList.addAll(response.body().getData().getList());
+                                topicName = response.body().getData().getTopicName();
+                                if (!TextUtils.isEmpty(topicName)) {
+                                    CollectionLabelModel.DataDTO.ListDTO listDTO = new CollectionLabelModel.DataDTO.ListDTO();
+                                    listDTO.setTitle("#" + topicName);
+                                    listDTO.setId("");
+                                    collectionList.add(listDTO);
+                                }
+
                                 for (int i = 0; i < collectionList.size(); i++) {
                                     collectionStr = collectionStr + collectionList.get(i).getTitle();
                                     collectionStrList.add(collectionList.get(i).getTitle());
@@ -1669,12 +1853,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                         if (i == 0) {
                                             collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");
                                         } else {
-                                            collectionTvList.add(collectionList.get(i).getTitle() + "｜");
+                                            if (i == collectionList.size() - 1) {
+                                                collectionTvList.add(collectionList.get(i).getTitle());
+                                            } else {
+                                                collectionTvList.add(collectionList.get(i).getTitle() + "｜");
+                                            }
                                         }
-
                                     }
                                 }
-
                                 TextView foldTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.fold_text);
                                 TextView expendTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.expend_text);
                                 String brief = "";
@@ -1693,13 +1879,17 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     return;
                                 } else {
                                     for (int i = 0; i < collectionList.size(); i++) {
-                                        ImageSpan imgSpan = new ImageSpan(getActivity(),
-                                                R.drawable.collection_image,
-                                                ImageSpan.ALIGN_CENTER);
+                                        ImageSpan imgSpan = null;
+                                        if (!TextUtils.isEmpty(collectionList.get(i).getId())) {
+                                            imgSpan = new ImageSpan(getActivity(),
+                                                    R.drawable.collection_image,
+                                                    ImageSpan.ALIGN_CENTER);
+                                        }
+
                                         final String str = collectionTvList.get(i);
                                         final String strChun = collectionStrList.get(i);
                                         SpannableString sp = new SpannableString(str);
-                                        if (i == 0) {
+                                        if (i == 0 && !TextUtils.isEmpty(collectionList.get(i).getId())) {
                                             sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         }
                                         final String classId = String.valueOf(collectionList.get(i).getId());
@@ -1709,12 +1899,17 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                         sp.setSpan(new CollectionClickble(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-    //                                            //合集标签点击事件
-                                                Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
-                                                intent.putExtra("classId", classId);
-                                                intent.putExtra("className", strChun.trim());
-                                                startActivity(intent);
-                                                FinderBuriedPointManager.setFinderClick("集合_" + strChun);
+                                                //合集标签点击事件
+                                                if (TextUtils.isEmpty(classId) && str.contains("#")) {
+                                                    adapter.setTopicClick(false);
+                                                    Log.e("topic", "点击的话题");
+                                                } else {
+                                                    Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
+                                                    intent.putExtra("classId", classId);
+                                                    intent.putExtra("className", strChun.trim());
+                                                    startActivity(intent);
+                                                    FinderBuriedPointManager.setFinderClick("集合_" + strChun);
+                                                }
                                             }
                                         }, getActivity()), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         if (i == collectionList.size() - 1) {
@@ -1727,11 +1922,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     if (null != foldTextView && null != expendTextView) {
                                         foldTextView.setMovementMethod(LinkMovementMethod.getInstance());
                                         foldTextView.setText(builder);
-    //                                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-    //                                        adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.VISIBLE);
-    //                                    } else {
-    //                                        adapter.getViewByPosition(currentIndex, R.id.ellipsis_tv).setVisibility(View.GONE);
-    //                                    }
                                         expendTextView.setMovementMethod(LinkMovementMethod.getInstance());
                                         expendTextView.setText(builder);
                                     }
@@ -1762,24 +1952,37 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     }
 
     public void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
-        if (contentStateModel.getWhetherFavor().equals("true")) {
-            videoDetailCollectionImage.setImageResource(R.drawable.collection);
-        } else {
-            videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
+        ImageView collectionImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_collection_image);
+        TextView collectionNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.collection_num);
+        ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
+        TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+
+        if (null != collectionImage) {
+            if (contentStateModel.getWhetherFavor().equals("true")) {
+                collectionImage.setImageResource(R.drawable.collection);
+            } else {
+                collectionImage.setImageResource(R.drawable.collection_icon);
+            }
         }
 
-        collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
-
-        if (contentStateModel.getWhetherLike().equals("true")) {
-            videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
-        } else {
-            videoDetailLikesImage.setImageResource(R.drawable.favourite);
+        if (null != collectionNum) {
+            collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
         }
 
-        if (contentStateModel.getLikeCountShow().equals("0")) {
-            likesNum.setText("赞");
-        } else {
-            likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+        if (null != likeImage) {
+            if (contentStateModel.getWhetherLike().equals("true")) {
+                likeImage.setImageResource(R.drawable.favourite_select);
+            } else {
+                likeImage.setImageResource(R.drawable.favourite);
+            }
+        }
+
+        if (null != likeNum) {
+            if (contentStateModel.getLikeCountShow().equals("0")) {
+                likeNum.setText("赞");
+            } else {
+                likeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+            }
         }
 
         TextView followView = (TextView) adapter.getViewByPosition(currentIndex, R.id.follow);
@@ -1794,13 +1997,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 isFollow = false;
             }
         }
-
     }
 
     /**
      * 收藏/取消收藏
      */
-    private void addOrCancelFavor(String contentId, String type) {
+    private void addOrCancelFavor(String contentId, String type, final ImageView collectionImage, final TextView collectionNum) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("contentId", contentId);
@@ -1840,7 +2042,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    videoDetailCollectionImage.setImageResource(R.drawable.collection);
+                                    collectionImage.setImageResource(R.drawable.collection);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                     playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
@@ -1850,7 +2052,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                         num--;
                                     }
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
+                                    collectionImage.setImageResource(R.drawable.collection_icon);
                                     playerView.contentStateModel.setWhetherFavor("false");
                                     playerView.contentStateModel.setFavorCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
@@ -1885,10 +2087,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 });
     }
 
+
     /**
      * 点赞/取消点赞
      */
-    private void addOrCancelLike(String targetId, String type) {
+    private void addOrCancelLike(String targetId, String type, final ImageView likeImage, final TextView likeNum) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("targetId", targetId);
@@ -1922,26 +2125,39 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                     Log.e("埋点", "埋点：点赞---" + jsonString);
                                 }
 
+
                                 if (json.get("data").toString().equals("1")) {
-                                    int num;
-                                    videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
-                                    num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
-                                    num++;
-                                    likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    int num = 0;
+                                    if (null != likeImage) {
+                                        likeImage.setImageResource(R.drawable.favourite_select);
+                                    }
+
+                                    if (null != likeNum) {
+                                        num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
+                                        num++;
+                                        likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                    }
+
+                                    mDataDTO.setWhetherLike(true);
                                     playerView.contentStateModel.setWhetherLike("true");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
-                                    int num;
-                                    videoDetailLikesImage.setImageResource(R.drawable.favourite);
-                                    num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
-                                    if (num > 0) {
-                                        num--;
+                                    int num = 0;
+                                    if (null != likeImage) {
+                                        likeImage.setImageResource(R.drawable.favourite);
                                     }
-                                    if (num == 0) {
-                                        likesNum.setText("赞");
-                                    } else {
-                                        likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    if (null != likeNum) {
+                                        num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
+                                        if (num > 0) {
+                                            num--;
+                                        }
+                                        if (num == 0) {
+                                            likeNum.setText("赞");
+                                        } else {
+                                            likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                        }
                                     }
+                                    mDataDTO.setWhetherLike(false);
                                     playerView.contentStateModel.setWhetherLike("false");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
@@ -1972,6 +2188,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     @Override
                     public void onError(Response<String> response) {
                         ToastUtils.showShort("点赞失败");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        likeIsRequesting = false;
                     }
                 });
     }
@@ -2186,29 +2408,32 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        if (id == R.id.video_detail_collection) {//收藏
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                noLoginTipsPop();
-            } else {
-                addOrCancelFavor(myContentId, videoType);
-            }
-
-        } else if (id == R.id.video_detail_likes) {//点赞
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                noLoginTipsPop();
-            } else {
-                addOrCancelLike(myContentId, videoType);
-            }
-        } else if (id == R.id.dismiss_pop) {
+//        if (id == R.id.video_detail_collection) {//收藏
+//            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
+//            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                noLoginTipsPop();
+//            } else {
+//                addOrCancelFavor(myContentId, videoType);
+//            }
+//
+//        } else if (id == R.id.video_detail_likes) {//点赞
+//            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
+//            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                noLoginTipsPop();
+//            } else {
+//                addOrCancelLike(myContentId, videoType);
+//            }
+//        } else
+        if (id == R.id.dismiss_pop) {
             if (popupWindow != null) {
                 popupWindow.dissmiss();
             }
-        } else if (id == R.id.video_detail_comment_btn) {
-            FinderBuriedPointManager.setFinderClick("评论");
-            showCommentPopWindow();
-        } else if (id == R.id.comment_pop_rl) {
+        }
+//        else if (id == R.id.video_detail_comment_btn) {
+//            FinderBuriedPointManager.setFinderClick("评论");
+//            showCommentPopWindow();
+//        }
+        else if (id == R.id.comment_pop_rl) {
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 try {
                     noLoginTipsPop();
@@ -2221,21 +2446,23 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 isReply = false;
                 showInputEdittextAndSend();
             }
-        } else if (id == R.id.video_detail_white_comment_rl) {
-            FinderBuriedPointManager.setFinderClick("评论");
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                try {
-                    noLoginTipsPop();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-//                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
-                edtInput.setHint("留下你的精彩评论");
-                isReply = false;
-                showCommentPopWindow();
-            }
-        } else if (id == R.id.no_login_tips_cancel) {
+        }
+//        else if (id == R.id.video_detail_white_comment_rl) {
+//            FinderBuriedPointManager.setFinderClick("评论");
+//            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                try {
+//                    noLoginTipsPop();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+////                KeyboardUtils.toggleSoftInput(getActivity().getWindow().getDecorView());
+//                edtInput.setHint("留下你的精彩评论");
+//                isReply = false;
+//                showCommentPopWindow();
+//            }
+//        }
+        else if (id == R.id.no_login_tips_cancel) {
             if (null != noLoginTipsPop) {
                 noLoginTipsPop.dissmiss();
             }
@@ -2248,14 +2475,16 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (id == R.id.share || id == R.id.comment_share) {
-            if (mDatas.isEmpty()) {
-                return;
-            }
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
-            FinderBuriedPointManager.setFinderClick("分享");
-            sharePop();
-        } else if (id == R.id.share_wx_btn) {
+        }
+//        else if (id == R.id.share || id == R.id.comment_share) {
+//            if (mDatas.isEmpty()) {
+//                return;
+//            }
+//            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
+//            FinderBuriedPointManager.setFinderClick("分享");
+//            sharePop();
+//        }
+        else if (id == R.id.share_wx_btn) {
             if (mDatas.isEmpty()) {
                 return;
             }
@@ -2398,11 +2627,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             } else {
                                 ToastUtils.showShort(response.body().getMessage());
                             }
-                            if (SPUtils.isVisibleNoWifiView(getActivity())) {
-                                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
-                            } else {
-                                addPlayView(position);
-                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -2416,19 +2640,122 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                             return;
                         }
                         ToastUtils.showShort(R.string.net_err);
-                        if (SPUtils.isVisibleNoWifiView(getActivity())) {
-                            SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
-                        } else {
-                            addPlayView(position);
-                        }
                     }
 
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                        if (isVisibleNoWifiView(getActivity())) {
+                            SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
+                        }
                         loadingProgress.setVisibility(View.GONE);
+                        getThematicCollection(myContentId);
+                        addPlayView(position);
                     }
                 });
+    }
+
+
+    /**
+     * 关注
+     *
+     * @param targetUserId
+     */
+    private void toFollow(String targetUserId) {
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow() + targetUserId)
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .execute(new JsonCallback<TrackingUploadModel>() {
+                    @Override
+                    public void onSuccess(Response<TrackingUploadModel> response) {
+                        try {
+                            if (200 == response.body().getCode()) {
+                                setFollowView("true");
+                                //行为埋点 关注用户 关注的用户id mDataDTO.getCreateBy()
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<TrackingUploadModel> response) {
+                        super.onError(response);
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+                        ToastUtils.showShort(R.string.net_err);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
+
+    /**
+     * 取消关注
+     *
+     * @param targetUserId
+     */
+    private void cancelFollow(String targetUserId) {
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().cancelFollow() + targetUserId)
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .execute(new JsonCallback<TrackingUploadModel>() {
+                    @Override
+                    public void onSuccess(Response<TrackingUploadModel> response) {
+                        if (200 == response.body().getCode()) {
+                            setFollowView("false");
+                        } else {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<TrackingUploadModel> response) {
+                        super.onError(response);
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                        }
+                        ToastUtils.showShort(R.string.net_err);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
+
+    /**
+     * 设置关注
+     */
+    private void setFollowView(String whetherFollow) {
+        /**
+         * 设置关注
+         */
+        TextView followText = (TextView) adapter.getViewByPosition(currentIndex, R.id.follow);
+        String localUserId = PersonInfoManager.getInstance().getUserId();
+        String userId = mDataDTO.getCreateBy();
+
+        if (null == followText) {
+            return;
+        }
+        if (TextUtils.equals(whetherFollow, "true")) {
+            //已关注
+            isFollow = true;
+            followText.setText("已关注");
+            followText.setBackgroundResource(R.drawable.followed_bg);
+        } else {
+            //未关注
+            isFollow = false;
+            followText.setText("关注");
+            followText.setBackgroundResource(R.drawable.follow_bg);
+        }
     }
 
 

@@ -89,13 +89,26 @@
     </TextView>
 
     <TextView
-        android:id="@+id/others_home_page"
+        android:id="@+id/upload_video_page"
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
-        android:text="排行榜列表"
+        android:text="上传视频页面"
+        android:textColor="@color/video_white"
+        android:textColorHint="@color/video_white">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/tgt_page"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/shape_input_bg"
+        android:gravity="center"
+        android:text="测试页面"
         android:textColor="@color/video_white"
         android:textColorHint="@color/video_white">
 

@@ -52,7 +52,8 @@ public class VideoViewPagerAdapter extends FragmentPagerAdapter {
         notifyDataSetChanged();
     }
 
-    public void addItems(@Nullable List<VideoChannelModel> channelBeanList, String contentId, String categoryName, SuperPlayerView playerView) {
+    public void addItems(@Nullable List<VideoChannelModel> channelBeanList, String contentId, String categoryName, SuperPlayerView playerView
+            , int toCurrentTab) {
         titleList.clear();
         fragmentList.clear();
         titleList.addAll(channelBeanList);
@@ -63,11 +64,11 @@ public class VideoViewPagerAdapter extends FragmentPagerAdapter {
             } else if (TextUtils.equals("1", videoChannelModel.getColumnBean().getColumnId())) {
                 VideoDetailFragment fragment = new VideoDetailFragment();
                 fragment.setPlayView(playerView);
-                fragmentList.add(fragment.newInstance(fragment, videoChannelModel,contentId,categoryName));
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, contentId, categoryName, toCurrentTab));
             } else {
                 XkshFragment fragment = new XkshFragment();
                 fragment.setPlayView(playerView);
-                fragmentList.add(fragment.newInstance(fragment, videoChannelModel));
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, contentId, categoryName, toCurrentTab));
             }
         }
         notifyDataSetChanged();

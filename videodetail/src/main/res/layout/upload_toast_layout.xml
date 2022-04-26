@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/upload_text"
+        android:layout_width="140dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/upload_toast_bg"
+        android:gravity="center"
+        android:paddingLeft="28dp"
+        android:paddingTop="9dp"
+        android:paddingRight="28dp"
+        android:paddingBottom="9dp"
+        android:text=""
+        android:textColor="@color/video_white"
+        android:textSize="16sp"></TextView>
+</RelativeLayout>

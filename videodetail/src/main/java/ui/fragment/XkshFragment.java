@@ -9,6 +9,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -28,7 +31,9 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
+import com.alibaba.fastjson.JSON;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
@@ -46,6 +51,7 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerModel;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
+import com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer;
 import com.tencent.rtmp.TXLiveConstants;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoFinderPointCallBack;
@@ -89,6 +95,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.CommentPopRvAdapter;
+import adpter.VideoDetailAdapter;
 import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
 import ui.activity.UploadActivity;
@@ -100,12 +107,17 @@ import widget.LoadingView;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
+import com.wdcs.widget.YALikeAnimationView;
 
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
+import static com.wdcs.constants.Constants.CATEGORYNAME;
+import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
+import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.PANELCODE;
+import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
@@ -129,11 +141,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private ImageView videoStaticBg;
     private ImageView startPlay;
 
-    public RelativeLayout videoDetailCommentBtn;
     //评论列表弹窗
     public CustomPopWindow popupWindow;
-    private LinearLayout videoDetailCollection;
-    private LinearLayout videoDetailLikes;
 
     private View contentView;
     private View chooseContentView;
@@ -148,7 +157,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private LinearLayout edtParent;
     private EditText edtInput;
     private TextView tvSend;
-    private RelativeLayout videoDetailWhiteCommentRl;
     //选择集数弹窗
     public CustomPopWindow choosePop;
 
@@ -157,24 +165,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public SmartRefreshLayout refreshLayout;
     private String transformationToken = "";
     private String panelCode = "";
-    private String recordContentId;//记录的内容id
     private boolean initialize = true;
-    private int mVideoSize = 15; //每页视频多少条
+    private String mVideoSize = "15"; //每页视频多少条
     private int mPageIndex = 1; //评论列表页数
     private int mPageSize = 10; //评论列表每页多少条
     public String myContentId = ""; //记录当前视频id
     public int currentIndex = 0; //记录当前视频列表的位置
-    private TextView commentTotal;
     private TextView commentPopCommentTotal;
-    private ImageView videoDetailCollectionImage; //收藏图标
 
-    private ImageView videoDetailLikesImage; //点赞图标
-    private TextView likesNum; //点赞数
-    private TextView collectionNum; //收藏数
     private String videoType; //视频类型
     private VideoInteractiveParam param;
     public String playUrl;
-    private TextView commentEdittext;
     private String videoTag = "videoTag";
     private String recommendTag = "recommend";
     private boolean isLoadComplate = false;
@@ -185,7 +186,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private View noLoginTipsView;
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
-    private LinearLayout share;
     public CustomPopWindow sharePop;
     private View sharePopView;
     private ImageView shareWxBtn;
@@ -199,7 +199,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private VideoChannelModel channelModel;
     private Bundle args;
     public boolean mIsVisibleToUser;
-    private LinearLayout shotAlike;
     private LoadingView loadingProgress;
     private RelativeLayout.LayoutParams lp;
     public static boolean isFollow; //是否关注
@@ -218,18 +217,35 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public long xkshReportTime;
     private boolean isReply = false;
     private String replyId;
-    private List<CollectionLabelModel.DataDTO> collectionList;
+    private List<CollectionLabelModel.DataDTO.ListDTO> collectionList;
     private List<String> collectionTvList;
     private List<String> collectionStrList;
     private SuperPlayerView playerView;
+    private View commentEmptyView;
+    private TextView commentListTips;
+    private String topicName;
+    private YALikeAnimationView loveIcon;
+    private Handler handler = new Handler();
+    private boolean likeIsRequesting;
+    private DataDTO negativeScreenDto;
+    private String mCategoryName = "";
+    private long beforeClickTime = 0;
+    private int toCurrentTab;
+    private View footerView;
+
 
     public XkshFragment() {
 
     }
 
-    public XkshFragment newInstance(XkshFragment fragment, VideoChannelModel videoChannelModel) {
+    public XkshFragment newInstance(XkshFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName, int toCurrentTab) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
+        args.putString(CONTENTID, contentId);
+        args.putInt(TOCURRENTTAB, toCurrentTab);
+        if (!TextUtils.isEmpty(categoryName)) {
+            args.putString(CATEGORYNAME, categoryName);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -239,6 +255,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             panelCode = getArguments().getString(PANELCODE);
+            myContentId = getArguments().getString(CONTENTID);
+            mCategoryName = getArguments().getString(CATEGORYNAME);
+            toCurrentTab = getArguments().getInt(TOCURRENTTAB);
         }
     }
 
@@ -249,7 +268,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_xksh, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        getPullDownData(String.valueOf(mVideoSize), panelCode, "false", Constants.REFRESH_TYPE);
+        if (!TextUtils.isEmpty(myContentId) && 0 == toCurrentTab) {
+            getOneVideo(myContentId);
+        } else {
+            getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
+        }
         return view;
     }
 
@@ -259,34 +282,27 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
     private void initView(View view) {
         param = VideoInteractiveParam.getInstance();
-        share = view.findViewById(R.id.share);
-        share.setOnClickListener(this);
         mDataDTO = new DataDTO();
         recommondList = new ArrayList<>();
         loadingProgress = view.findViewById(R.id.xksh_loading_progress);
         loadingProgress.setVisibility(View.VISIBLE);
-        commentEdittext = view.findViewById(R.id.comment_edittext);
         videoDetailRv = view.findViewById(R.id.video_detail_rv);
         videoDetailRv.setHasFixedSize(true);
-        videoDetailCollectionImage = view.findViewById(R.id.video_detail_collection_image);
-        videoDetailLikesImage = view.findViewById(R.id.video_detail_likes_image);
-        likesNum = view.findViewById(R.id.likes_num);
-        collectionNum = view.findViewById(R.id.collection_num);
-        shotAlike = view.findViewById(R.id.shot_alike);
-        shotAlike.setOnClickListener(this);
         rankList = view.findViewById(R.id.rank_list);
         rankList.setOnClickListener(this);
         activityRuleImg = view.findViewById(R.id.activity_rule_img);
         activityRuleImg.setOnClickListener(this);
-
+        loveIcon = view.findViewById(R.id.love_icon);
         activityToAbbreviation = view.findViewById(R.id.activity_to_abbreviation);
         activityToAbbreviation.setOnClickListener(this);
         activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
         activityRuleAbbreviation.setOnClickListener(this);
-
+        footerView = View.inflate(getActivity(), R.layout.footer_view, null);
         xkshManager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(xkshManager);
         footView = View.inflate(getActivity(), R.layout.footer_view, null);
+        commentEmptyView = View.inflate(getActivity(), R.layout.comment_list_empty, null);
+        commentListTips = commentEmptyView.findViewById(R.id.comment_list_tips);
         setSoftKeyBoardListener();
         xkshManager.setOnViewPagerListener(new OnViewPagerListener() {
 
@@ -322,14 +338,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 addPageViews(myContentId);
                 OkGo.getInstance().cancelTag("contentState");
                 getContentState(myContentId);
-                getThematicCollection(myContentId);
-                String localUserId = PersonInfoManager.getInstance().getUserId();
-                String userId = mDataDTO.getCreateBy();
-                if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
-                    adapter.getViewByPosition(0, R.id.follow).setVisibility(View.GONE);
-                } else {
-                    adapter.getViewByPosition(0, R.id.follow).setVisibility(View.VISIBLE);
-                }
 
                 mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                 if (isVisibleNoWifiView(getActivity())) {
@@ -340,24 +348,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 currentIndex = 0;
                 mPageIndex = 1;
                 if (mDatas.get(0).getDisableComment()) {
-                    videoDetailWhiteCommentRl.setEnabled(false);
+                    commentListTips.setText("当前页面评论功能已关闭");
                     commentPopRl.setEnabled(false);
-                    commentEdittext.setText("评论关闭");
-                    commentEdtInput.setHint("评论关闭");
+                    commentEdtInput.setHint("当前页面评论功能已关闭");
                 } else {
-                    videoDetailWhiteCommentRl.setEnabled(true);
+                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
                     commentPopRl.setEnabled(true);
-                    commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
+                commentPopRvAdapter.setEmptyView(commentEmptyView);
                 getCommentList("1", String.valueOf(mPageSize), true);
                 videoType = mDatas.get(0).getType();
                 rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
                 OkGo.getInstance().cancelTag(recommendTag);
                 //获取推荐列表
-                if (mIsVisibleToUser) {
-                    getRecommend(myContentId, 0);
-                }
+                getRecommend(myContentId, 0);
 //                initChoosePop();
             }
 
@@ -374,7 +379,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 if (null != playerView.getTag() && position == (int) playerView.getTag()) {
                     return;
                 }
-                //避免越界
+                //避免越界addOrCancelLike
                 if (mDatas.isEmpty()) {
                     return;
                 }
@@ -451,19 +456,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 videoType = mDatas.get(position).getType();
                 mPageIndex = 1;
                 if (mDatas.get(position).getDisableComment()) {
-                    videoDetailWhiteCommentRl.setEnabled(false);
+                    commentListTips.setText("当前页面评论功能已关闭");
                     commentPopRl.setEnabled(false);
-                    commentEdittext.setText("评论关闭");
-                    commentEdtInput.setHint("评论关闭");
+                    commentEdtInput.setHint("当前页面评论功能已关闭");
                 } else {
-                    videoDetailWhiteCommentRl.setEnabled(true);
+                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
                     commentPopRl.setEnabled(true);
-                    commentEdittext.setText("写评论...");
                     commentEdtInput.setHint("写评论...");
                 }
+                commentPopRvAdapter.setEmptyView(commentEmptyView);
                 getCommentList("1", String.valueOf(mPageSize), true);
                 getContentState(myContentId);
-                getThematicCollection(myContentId);
                 String localUserId = PersonInfoManager.getInstance().getUserId();
                 String userId = mDataDTO.getCreateBy();
                 if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
@@ -485,11 +488,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         });
 
         initSmartRefresh(view);
-        commentTotal = view.findViewById(R.id.comment_total);
-        videoDetailCollection = view.findViewById(R.id.video_detail_collection);
-        videoDetailCollection.setOnClickListener(this);
-        videoDetailLikes = view.findViewById(R.id.video_detail_likes);
-        videoDetailLikes.setOnClickListener(this);
 
         contentView = View.inflate(getActivity(), R.layout.fragment_video_comment_pop, null);
         sendPopContentView = View.inflate(getActivity(), R.layout.layout_input_window, null);
@@ -540,15 +538,50 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         commentPopRl = contentView.findViewById(R.id.comment_pop_rl);
         commentPopRl.setOnClickListener(this);
         initCommentPopRv();
-        videoDetailCommentBtn = view.findViewById(R.id.video_detail_comment_btn);
-        videoDetailCommentBtn.setOnClickListener(this);
-        videoDetailWhiteCommentRl = view.findViewById(R.id.video_detail_white_comment_rl);
-        videoDetailWhiteCommentRl.setOnClickListener(this);
         adapter = new XkshVideoAdapter(R.layout.xksh_video_item_layout, mDatas, getActivity(),
-                playerView, refreshLayout, videoDetailCommentBtn, xkshManager);
+                playerView, refreshLayout, xkshManager);
         adapter.setLoadMoreView(new CustomLoadMoreView());
         adapter.setPreLoadNumber(2);
         adapter.openLoadAnimation();
+        handler = new Handler() {
+            @Override
+            public void dispatchMessage(@NonNull Message msg) {
+                switch (msg.what) {
+                    case 1:
+                        //单击
+                        playerView.mWindowPlayer.togglePlayState();
+                        break;
+                    case 2:
+                        //双击
+                        if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                            noLoginTipsPop();
+                        } else {
+                            loveIcon.startAnimation();
+                            if (TextUtils.equals("false", playerView.contentStateModel.getWhetherLike()) && !likeIsRequesting) {
+                                likeIsRequesting = true;
+                                ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
+                                TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+                                addOrCancelLike(myContentId, videoType, likeImage, likeNum);
+                            }
+                        }
+                        break;
+                }
+            }
+        };
+        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(final BaseQuickAdapter adapter, View view, int position) {
+                if (System.currentTimeMillis() - beforeClickTime < CLICK_INTERVAL_TIME) {
+                    handler.removeMessages(1);
+                    handler.sendEmptyMessage(2);
+                } else {
+                    if (!handler.hasMessages(2) && !handler.hasMessages(1))
+                        handler.sendEmptyMessageDelayed(1, CLICK_INTERVAL_TIME);
+                }
+                beforeClickTime = System.currentTimeMillis();
+            }
+        });
+
         adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
         /**
          * 无wifi 继续播放点击
@@ -574,6 +607,69 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+        //点赞
+        adapter.setlikeListener(new XkshVideoAdapter.LikeListener() {
+            @Override
+            public void likeClick(View view, DataDTO item, ImageView likeImage, TextView likeNum) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    addOrCancelLike(myContentId, videoType, likeImage, likeNum);
+                }
+            }
+        });
+
+        //收藏
+        adapter.setCollectionListener(new XkshVideoAdapter.CollectionListener() {
+            @Override
+            public void collectionClick(View view, DataDTO item, ImageView collectionImage, TextView collectionNum) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    noLoginTipsPop();
+                } else {
+                    addOrCancelFavor(myContentId, videoType, collectionImage, collectionNum);
+                }
+            }
+        });
+
+        //评论
+        adapter.setCommentListener(new XkshVideoAdapter.CommentListener() {
+            @Override
+            public void commentClick(View view, DataDTO item, TextView commentNum) {
+                FinderBuriedPointManager.setFinderClick("评论");
+                showCommentPopWindow();
+            }
+        });
+
+        //转发
+        adapter.setShareListener(new XkshVideoAdapter.ShareListener() {
+            @Override
+            public void shareClick(View view, DataDTO item) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
+                FinderBuriedPointManager.setFinderClick("分享");
+                sharePop();
+            }
+        });
+
+        //发布
+        adapter.setPublishWorksListener(new XkshVideoAdapter.PublishWorksListener() {
+            @Override
+            public void publishWorksClick(View view, DataDTO item) {
+                //行为埋点 点击视频发布
+                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+                    try {
+                        noLoginTipsPop();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    startActivity(new Intent(getActivity(), UploadActivity.class));
+                }
+            }
+        });
+
+
         /**
          * 关注按钮
          */
@@ -597,7 +693,85 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+        //窗口视频双击点击监听
+        if (null != playerView) {
+            playerView.mWindowPlayer.setOnDoubleClickxksh(new WindowPlayer.DoubleClickxksh() {
+                @Override
+                public void onDoubleClickxksh(DataDTO item) {
+                    if (mIsVisibleToUser) {
+                        if (System.currentTimeMillis() - beforeClickTime < CLICK_INTERVAL_TIME) {
+                            handler.removeMessages(1);
+                            handler.sendEmptyMessage(2);
+                        } else {
+                            if (!handler.hasMessages(2) && !handler.hasMessages(1))
+                                handler.sendEmptyMessageDelayed(1, CLICK_INTERVAL_TIME);
+                        }
+                        beforeClickTime = System.currentTimeMillis();
+                    }
+                }
+            });
+        }
+
         videoDetailRv.setAdapter(adapter);
+    }
+
+    /**
+     * 获取单条视频详情
+     */
+    private void getOneVideo(final String contentId) {
+        OkGo.<String>get(ApiConstants.getInstance().getVideoDetailUrl() + contentId)
+                .tag(VIDEOTAG)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response.body());
+                                if (jsonObject.get("code").toString().equals(success_code)) {
+                                    String json = jsonObject.optJSONObject("data").toString();
+                                    if (null == json || TextUtils.isEmpty(json)) {
+                                        ToastUtils.showShort(R.string.data_err);
+                                        return;
+                                    }
+                                    DataDTO dataDTO = JSON.parseObject(json, DataDTO.class);
+                                    if (null == dataDTO) {
+                                        return;
+                                    }
+
+                                    negativeScreenDto = dataDTO;
+                                    getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
+                                } else {
+                                    ToastUtils.showShort(jsonObject.get("message").toString());
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        try {
+                            if (null == response.body()) {
+                                ToastUtils.showShort(R.string.net_err);
+                            } else {
+                                JSONObject jsonObject = new JSONObject(response.body());
+                                ToastUtils.showShort(jsonObject.getString("message"));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
     }
 
     /**
@@ -622,6 +796,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 addPlayView(currentIndex);
             }
+            getContentState(myContentId);
         } else {
             if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                 if (mDuration != 0 && mProgress != 0) {
@@ -688,8 +863,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                                 if (null != activityRuleBean.getData().getConfig().getJumpUrl()
                                         && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
-                                    ((SlidingTabLayout)getActivity().findViewById(R.id.video_tab)).showMsg(0, "活动");
-                                    ((SlidingTabLayout)getActivity().findViewById(R.id.video_tab)).setMsgMargin(0, ButtonSpan.dip2px(7), ButtonSpan.dip2px(10));
+                                    ((SlidingTabLayout) getActivity().findViewById(R.id.video_tab)).showMsg(0, "活动");
+                                    ((SlidingTabLayout) getActivity().findViewById(R.id.video_tab)).setMsgMargin(0, ButtonSpan.dip2px(7), ButtonSpan.dip2px(10));
                                     if (null != activityRuleImg) {
                                         activityRuleImg.setVisibility(View.VISIBLE);
                                     }
@@ -798,7 +973,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
         LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
 
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
@@ -817,23 +992,24 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
 
             playerView.setOrientation(false);
-            if (linearLayout != null) {
-                linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            if (null != itemRelativelayout) {
+                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
         } else if (TextUtils.equals("1", videoType)) {
             int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
+                playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
                 playerView.setOrientation(false);
             } else {
-                playViewParams.addRule(RelativeLayout.ABOVE, videoDetailCommentBtn.getId());
+                playViewParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
-            if (linearLayout != null) {
-                linearLayout.addView(playerView.mWindowPlayer.mLayoutBottom, 0);
+            if (null != itemRelativelayout) {
+                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
         } else {
             int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Horizontal_Proportion);
@@ -841,9 +1017,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
-            mLayoutBottomParams.addRule(BELOW, playerView.getId());
-            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
-            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
             if (null != itemRelativelayout) {
                 itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
@@ -1099,12 +1272,18 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (null != playerView && null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
+        mDatas.clear();
+        //从负一屏 拿到的视频  添加到集合里
+        if (null != negativeScreenDto) {
+            negativeScreenDto.setVolcCategory(mCategoryName);
+            negativeScreenDto.setIsAutoReportEvent("1");
+            mDatas.add(negativeScreenDto);
+        }
         try {
             deviceId = param.getDeviceId();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mDatas.clear();
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
                 .tag(VIDEOTAG)
                 .params("pageSize", pageSize)
@@ -1139,11 +1318,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 adapter.setNewData(mDatas);
                                 if (mDatas.size() > 0) {
                                     initialize = false;
-                                    recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
                                 }
-                                videoDetailCommentBtn.setVisibility(View.VISIBLE);
-                            } else {
-                                videoDetailCommentBtn.setVisibility(View.GONE);
                             }
                             if (null != refreshLayout) {
                                 refreshLayout.finishRefresh();
@@ -1195,7 +1370,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onSuccess(Response<VideoDetailModel> response) {
                         if (null == response.body()) {
-                            isLoadComplate = true;
                             ToastUtils.showShort(R.string.data_err);
                             return;
                         }
@@ -1209,29 +1383,27 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 }
 
                                 if (response.body().getData().size() == 0) {
-                                    Log.e("loadMoreData", "没有更多视频了");
                                     adapter.loadMoreComplete();
                                     adapter.setOnLoadMoreListener(null, videoDetailRv);
-                                    if (null != footView && null != footView.getParent()) {
-                                        ((ViewGroup) footView.getParent()).removeView(footView);
+                                    if (null != footerView && null != footerView.getParent()) {
+                                        ((ViewGroup) footerView.getParent()).removeView(footerView);
                                     }
-                                    adapter.addFooterView(footView);
+                                    adapter.addFooterView(footerView);
                                     isLoadComplate = true;
-                                    return;
                                 } else {
                                     adapter.setOnLoadMoreListener(requestLoadMoreListener, videoDetailRv);
                                     isLoadComplate = false;
                                 }
                                 mDatas.addAll(response.body().getData());
                                 setDataWifiState(mDatas, getActivity());
-    //                            adapter.setNewData(mDatas);
-                                recordContentId = String.valueOf(mDatas.get(mDatas.size() - 1).getId());
-                                Log.e("loadMoreData", "loadMoreData========" + mDatas.size());
                                 adapter.loadMoreComplete();
                             } else {
                                 adapter.loadMoreFail();
                             }
-                        } catch (Exception e) {
+                            if (null != refreshLayout) {
+                                refreshLayout.finishRefresh();
+                            }
+                        } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
                     }
@@ -1346,12 +1518,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     }
                                 });
 
-
+                                TextView commentNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.comment_num);
                                 if (mCommentPopDtoData.isEmpty()) {
-                                    commentTotal.setText("(0)");
+                                    if (null != commentNum) {
+                                        commentNum.setText("评论");
+                                    }
                                     commentPopCommentTotal.setText("(0)");
                                 } else {
-                                    commentTotal.setText("(" + response.body().getData().getTotal() + ")");
+                                    if (null != commentNum) {
+                                        commentNum.setText(response.body().getData().getTotal());
+                                    }
                                     commentPopCommentTotal.setText("(" + response.body().getData().getTotal() + ")");
                                 }
 
@@ -1587,7 +1763,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * 获取专题合集标签
      */
     public void getThematicCollection(String contentId) {
-        OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId)
+        String belongTopicId = mDataDTO.getBelongTopicId();
+        if (TextUtils.isEmpty(belongTopicId)) {
+            belongTopicId = "0";
+        }
+        OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId + "/" + belongTopicId)
                 .tag(VIDEOTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1601,14 +1781,22 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                         try {
                             if (response.body().getCode().equals(success_code)) {
-                                if (null == response.body().getData()) {
+                                if (null == response.body().getData() || null == response.body().getData().getList()) {
                                     return;
                                 }
                                 collectionList = new ArrayList<>();
                                 collectionTvList = new ArrayList<>();
                                 collectionStrList = new ArrayList<>();
                                 String collectionStr = "";
-                                collectionList.addAll(response.body().getData());
+                                collectionList.addAll(response.body().getData().getList());
+                                topicName = response.body().getData().getTopicName();
+                                if (!TextUtils.isEmpty(topicName)) {
+                                    CollectionLabelModel.DataDTO.ListDTO listDTO = new CollectionLabelModel.DataDTO.ListDTO();
+                                    listDTO.setTitle("#" + topicName);
+                                    listDTO.setId("");
+                                    collectionList.add(listDTO);
+                                }
+
                                 for (int i = 0; i < collectionList.size(); i++) {
                                     collectionStr = collectionStr + collectionList.get(i).getTitle();
                                     collectionStrList.add(collectionList.get(i).getTitle());
@@ -1618,12 +1806,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                         if (i == 0) {
                                             collectionTvList.add("  " + collectionList.get(i).getTitle() + "｜");
                                         } else {
-                                            collectionTvList.add(collectionList.get(i).getTitle() + "｜");
+                                            if (i == collectionList.size() - 1) {
+                                                collectionTvList.add(collectionList.get(i).getTitle());
+                                            } else {
+                                                collectionTvList.add(collectionList.get(i).getTitle() + "｜");
+                                            }
                                         }
-
                                     }
                                 }
-
                                 TextView foldTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.fold_text);
                                 TextView expendTextView = (TextView) adapter.getViewByPosition(currentIndex, R.id.expend_text);
                                 String brief = "";
@@ -1642,13 +1832,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     return;
                                 } else {
                                     for (int i = 0; i < collectionList.size(); i++) {
-                                        ImageSpan imgSpan = new ImageSpan(getActivity(),
-                                                R.drawable.collection_image,
-                                                ImageSpan.ALIGN_CENTER);
+                                        ImageSpan imgSpan = null;
+                                        if (!TextUtils.isEmpty(collectionList.get(i).getId())) {
+                                            imgSpan = new ImageSpan(getActivity(),
+                                                    R.drawable.collection_image,
+                                                    ImageSpan.ALIGN_CENTER);
+                                        }
+
                                         final String str = collectionTvList.get(i);
                                         final String strChun = collectionStrList.get(i);
                                         SpannableString sp = new SpannableString(str);
-                                        if (i == 0) {
+                                        if (i == 0 && !TextUtils.isEmpty(collectionList.get(i).getId())) {
                                             sp.setSpan(imgSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         }
                                         final String classId = String.valueOf(collectionList.get(i).getId());
@@ -1659,11 +1853,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                             @Override
                                             public void onClick(View v) {
                                                 //合集标签点击事件
-                                                Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
-                                                intent.putExtra("classId", classId);
-                                                intent.putExtra("className", strChun.trim());
-                                                startActivity(intent);
-                                                FinderBuriedPointManager.setFinderClick("集合_" + strChun);
+                                                if (TextUtils.isEmpty(classId) && str.contains("#")) {
+                                                    adapter.setTopicClick(false);
+                                                    Log.e("topic", "点击的话题");
+                                                } else {
+                                                    adapter.setTopicClick(true);
+                                                    Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
+                                                    intent.putExtra("classId", classId);
+                                                    intent.putExtra("className", strChun.trim());
+                                                    startActivity(intent);
+                                                    FinderBuriedPointManager.setFinderClick("集合_" + strChun);
+                                                }
                                             }
                                         }, getActivity()), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         if (i == collectionList.size() - 1) {
@@ -1706,24 +1906,37 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     }
 
     public void setLikeCollection(ContentStateModel.DataDTO contentStateModel) {
-        if (contentStateModel.getWhetherFavor().equals("true")) {
-            videoDetailCollectionImage.setImageResource(R.drawable.collection);
-        } else {
-            videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
+        ImageView collectionImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_collection_image);
+        TextView collectionNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.collection_num);
+        ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
+        TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+
+        if (null != collectionImage) {
+            if (contentStateModel.getWhetherFavor().equals("true")) {
+                collectionImage.setImageResource(R.drawable.collection);
+            } else {
+                collectionImage.setImageResource(R.drawable.collection_icon);
+            }
         }
 
-        collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
-
-        if (contentStateModel.getWhetherLike().equals("true")) {
-            videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
-        } else {
-            videoDetailLikesImage.setImageResource(R.drawable.favourite);
+        if (null != collectionNum) {
+            collectionNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getFavorCountShow())), false));
         }
 
-        if (contentStateModel.getLikeCountShow().equals("0")) {
-            likesNum.setText("赞");
-        } else {
-            likesNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+        if (null != likeImage) {
+            if (contentStateModel.getWhetherLike().equals("true")) {
+                likeImage.setImageResource(R.drawable.favourite_select);
+            } else {
+                likeImage.setImageResource(R.drawable.favourite);
+            }
+        }
+
+        if (null != likeNum) {
+            if (contentStateModel.getLikeCountShow().equals("0")) {
+                likeNum.setText("赞");
+            } else {
+                likeNum.setText(NumberFormatTool.formatNum(Long.parseLong(NumberFormatTool.getNumStr(contentStateModel.getLikeCountShow())), false));
+            }
         }
 
         TextView followView = (TextView) adapter.getViewByPosition(currentIndex, R.id.follow);
@@ -1771,7 +1984,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     /**
      * 收藏/取消收藏
      */
-    private void addOrCancelFavor(String contentId, String type) {
+    private void addOrCancelFavor(String contentId, String type, final ImageView collectionImage, final TextView collectionNum) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("contentId", contentId);
@@ -1811,7 +2024,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(collectionNum.getText().toString()));
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    videoDetailCollectionImage.setImageResource(R.drawable.collection);
+                                    collectionImage.setImageResource(R.drawable.collection);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                 } else {
                                     int num;
@@ -1820,7 +2033,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                         num--;
                                     }
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
-                                    videoDetailCollectionImage.setImageResource(R.drawable.collection_icon);
+                                    collectionImage.setImageResource(R.drawable.collection_icon);
                                     playerView.contentStateModel.setWhetherFavor("false");
                                 }
                                 if (null != playerView.contentStateModel) {
@@ -1857,7 +2070,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     /**
      * 点赞/取消点赞
      */
-    private void addOrCancelLike(String targetId, String type) {
+    private void addOrCancelLike(String targetId, String type, final ImageView likeImage, final TextView likeNum) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("targetId", targetId);
@@ -1892,25 +2105,37 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 }
 
                                 if (json.get("data").toString().equals("1")) {
-                                    int num;
-                                    videoDetailLikesImage.setImageResource(R.drawable.favourite_select);
-                                    num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
-                                    num++;
-                                    likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    int num = 0;
+                                    if (null != likeImage) {
+                                        likeImage.setImageResource(R.drawable.favourite_select);
+                                    }
+
+                                    if (null != likeNum) {
+                                        num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
+                                        num++;
+                                        likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                    }
+
+                                    mDataDTO.setWhetherLike(true);
                                     playerView.contentStateModel.setWhetherLike("true");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 } else {
-                                    int num;
-                                    videoDetailLikesImage.setImageResource(R.drawable.favourite);
-                                    num = Integer.parseInt(NumberFormatTool.getNumStr(likesNum.getText().toString()));
-                                    if (num > 0) {
-                                        num--;
+                                    int num = 0;
+                                    if (null != likeImage) {
+                                        likeImage.setImageResource(R.drawable.favourite);
                                     }
-                                    if (num == 0) {
-                                        likesNum.setText("赞");
-                                    } else {
-                                        likesNum.setText(NumberFormatTool.formatNum(num, false));
+                                    if (null != likeNum) {
+                                        num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
+                                        if (num > 0) {
+                                            num--;
+                                        }
+                                        if (num == 0) {
+                                            likeNum.setText("赞");
+                                        } else {
+                                            likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                        }
                                     }
+                                    mDataDTO.setWhetherLike(false);
                                     playerView.contentStateModel.setWhetherLike("false");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
                                 }
@@ -1941,6 +2166,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onError(Response<String> response) {
                         ToastUtils.showShort("点赞失败");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        likeIsRequesting = false;
                     }
                 });
     }
@@ -2149,30 +2380,17 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        if (id == R.id.video_detail_collection) {//收藏
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                noLoginTipsPop();
-            } else {
-                addOrCancelFavor(myContentId, videoType);
-            }
-
-        } else if (id == R.id.video_detail_likes) {//点赞
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                noLoginTipsPop();
-            } else {
-                addOrCancelLike(myContentId, videoType);
-            }
-        } else if (id == R.id.dismiss_pop) {
+        if (id == R.id.dismiss_pop) {
             if (popupWindow != null) {
                 popupWindow.dissmiss();
             }
-        } else if (id == R.id.video_detail_comment_btn) {
-            //Finder埋点
-            FinderBuriedPointManager.setFinderClick("评论");
-            showCommentPopWindow();
-        } else if (id == R.id.comment_pop_rl) {
+        }
+//        else if (id == R.id.video_detail_comment_btn) {
+//            //Finder埋点
+//            FinderBuriedPointManager.setFinderClick("评论");
+//            showCommentPopWindow();
+//        }
+        else if (id == R.id.comment_pop_rl) {
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 try {
                     noLoginTipsPop();
@@ -2185,20 +2403,22 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 isReply = false;
                 showInputEdittextAndSend();
             }
-        } else if (id == R.id.video_detail_white_comment_rl) {
-            FinderBuriedPointManager.setFinderClick("评论");
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                try {
-                    noLoginTipsPop();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                edtInput.setHint("留下你的精彩评论");
-                isReply = false;
-                showCommentPopWindow();
-            }
-        } else if (id == R.id.no_login_tips_cancel) {
+        }
+//        else if (id == R.id.video_detail_white_comment_rl) {
+//            FinderBuriedPointManager.setFinderClick("评论");
+//            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                try {
+//                    noLoginTipsPop();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+//                edtInput.setHint("留下你的精彩评论");
+//                isReply = false;
+//                showCommentPopWindow();
+//            }
+//        }
+        else if (id == R.id.no_login_tips_cancel) {
             if (null != noLoginTipsPop) {
                 noLoginTipsPop.dissmiss();
             }
@@ -2211,13 +2431,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (id == R.id.share || id == R.id.comment_share) {
-            if (mDatas.isEmpty()) {
-                return;
-            }
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, mDataDTO);
-            FinderBuriedPointManager.setFinderClick("分享");
-            sharePop();
         } else if (id == R.id.share_wx_btn) {
             if (mDatas.isEmpty()) {
                 return;
@@ -2233,17 +2446,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 return;
             }
             toShare(mDataDTO, Constants.SHARE_QQ);
-        } else if (id == R.id.shot_alike) {
-            //行为埋点 点击视频发布
-            if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                try {
-                    noLoginTipsPop();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                startActivity(new Intent(getActivity(), UploadActivity.class));
-            }
         } else if (id == R.id.rank_list) {
 //            startActivity(new Intent(getActivity(),TgtCodeActivity.class));
             //跳转H5排行榜
@@ -2358,20 +2560,37 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             if (response.body().getCode().equals("200")) {
                                 recommondList.clear();
                                 recommondList.addAll(response.body().getData().getRecords());
-                                if (recommondList.size() > 1) {
-                                    adapter.setRecommendList(recommondList, true);
-                                    mDatas.get(position).setRecommendVisible(true);
-                                } else if (recommondList.size() == 1) {
-                                    adapter.setRecommendList(recommondList, false);
-                                    mDatas.get(position).setRecommendVisible(true);
-                                } else if (recommondList.size() == 0) {
-                                    adapter.setRecommendList(recommondList, false);
-                                    mDatas.get(position).setRecommendVisible(false);
+
+                                ViewFlipper viewFlipper = (ViewFlipper) adapter.getViewByPosition(position, R.id.video_flipper);
+
+                                if (null == viewFlipper) {
+                                    return;
                                 }
-                                adapter.notifyDataSetChanged();
+
+                                if (null != adapter.getItem(position) && adapter.getItem(position).isClosed()) {
+                                    viewFlipper.setVisibility(View.GONE);
+                                    return;
+                                }
+
+                                if (recommondList.size() > 1) {
+                                    viewFlipper.setVisibility(View.VISIBLE);
+                                    viewFlipper.startFlipping();
+                                    viewFlipper.setAutoStart(true);
+                                } else if (recommondList.size() == 1) {
+                                    viewFlipper.setVisibility(View.VISIBLE);
+                                    viewFlipper.setAutoStart(false);
+                                } else if (recommondList.size() == 0) {
+                                    viewFlipper.setVisibility(View.GONE);
+                                }
+                                adapter.getViewFlipperData(recommondList, viewFlipper, mDatas.get(position));
                             } else {
                                 ToastUtils.showShort(response.body().getMessage());
                             }
+//                            if (SPUtils.isVisibleNoWifiView(getActivity())) {
+//                                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
+//                            } else {
+//                                addPlayView(position);
+//                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -2395,6 +2614,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             SPUtils.getInstance().put(Constants.AGREE_NETWORK, "0");
                         }
                         loadingProgress.setVisibility(View.GONE);
+                        getThematicCollection(myContentId);
                         addPlayView(position);
                     }
                 });

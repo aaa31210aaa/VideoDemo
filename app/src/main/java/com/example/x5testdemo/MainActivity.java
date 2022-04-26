@@ -26,6 +26,8 @@ import com.wdcs.utils.ToastUtils;
 import org.json.JSONObject;
 
 import io.reactivex.functions.Consumer;
+import ui.activity.TgtCodeActivity;
+import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
 
@@ -36,8 +38,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView fxsys;
     private TextView setCode;
     private TextView classList;
-    private TextView leaderboard_list;
+    private TextView uploadVideoPage;
     private TextView others_home_page;
+    private TextView tgt_page;
     private static final String[] permissionsGroup = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
 
     @Override
@@ -48,8 +51,10 @@ public class MainActivity extends AppCompatActivity {
         panelCode = findViewById(R.id.panelid);
         panelCode.setText("48662");
         contentId = findViewById(R.id.contentid);
+        uploadVideoPage = findViewById(R.id.upload_video_page);
         fxsys = findViewById(R.id.fxsys);
         classList = findViewById(R.id.class_list);
+        tgt_page = findViewById(R.id.tgt_page);
         fxsys.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
-                    @Override
+                    @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     public String setCode() {
-                        return "f8d01481-f359-4719-9335-2151e45fca1d";
+                        return "7c27b1a0-d352-4142-ba03-ba8529f09416";
                     }
 
                     @Override
@@ -130,6 +135,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+
+        uploadVideoPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, UploadActivity.class);
+                intent.putExtra("draftId", "40054463");
+                startActivity(intent);
+            }
+        });
+
+        tgt_page.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, TgtCodeActivity.class));
+            }
+        });
+
     }
 
 

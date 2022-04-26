@@ -17,11 +17,16 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.StringCallback;
+import com.lzy.okgo.model.Response;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
+import com.wdcs.http.ApiConstants;
+import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
@@ -30,8 +35,10 @@ import com.wdcs.model.RecommendModel;
 import com.wdcs.utils.AppUtils;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.NumberFormatTool;
+import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
 import com.wdcs.utils.ScreenUtils;
+import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
@@ -45,9 +52,14 @@ import widget.MyTextView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.BLUE_V;
+import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.YELLOW_V;
+import static com.wdcs.constants.Constants.token_error;
 import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.fragment.VideoDetailFragment.videoIsNormal;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
     private Context mContext;
@@ -59,21 +71,19 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
     private SuperPlayerView superPlayerView;
     private ToAddPlayerViewClick click;
     private SmartRefreshLayout mRefreshlayout;
-    private RelativeLayout mVideoDetailCommentBtn;
     private ViewPagerLayoutManager mVideoDetailmanager;
     private String topicNameStr;
+    private boolean isClick = true;
 
     public VideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
-                              SuperPlayerView playerView, SmartRefreshLayout refreshLayout, RelativeLayout videoDetailCommentBtn, ViewPagerLayoutManager videoDetailmanager) {
+                              SuperPlayerView playerView, SmartRefreshLayout refreshLayout, ViewPagerLayoutManager videoDetailmanager) {
         super(layoutResId, data);
         this.mContext = context;
         this.mDatas = data;
         this.superPlayerView = playerView;
         this.mRefreshlayout = refreshLayout;
-        this.mVideoDetailCommentBtn = videoDetailCommentBtn;
         this.mVideoDetailmanager = videoDetailmanager;
     }
-
 
     @Override
     protected void convert(final BaseViewHolder helper, final DataDTO item) {
@@ -94,8 +104,17 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         ImageView verticalVideoWdcsLogo = helper.getView(R.id.vertical_video_wdcs_logo);
         ImageView horizontalVideoWdcsLogo = helper.getView(R.id.horizontal_video_wdcs_logo);
         ImageView coverPicture = helper.getView(R.id.cover_picture);
-//        final TextView ellipsisTv = helper.getView(R.id.ellipsis_tv);
-
+        LinearLayout videoDetailLikes = helper.getView(R.id.video_detail_likes);
+        final ImageView videoDetailLikesImage = helper.getView(R.id.video_detail_likes_image);
+        final TextView likesNum = helper.getView(R.id.likes_num);
+        LinearLayout videoDetailCollection = helper.getView(R.id.video_detail_collection);
+        final ImageView videoDetailCollectionImage = helper.getView(R.id.video_detail_collection_image);
+        final TextView collectionNum = helper.getView(R.id.collection_num);
+        LinearLayout videoDetailCommentLl = helper.getView(R.id.video_detail_comment_ll);
+        final TextView commentNum = helper.getView(R.id.comment_num);
+        LinearLayout share = helper.getView(R.id.share);
+        LinearLayout publishWorks = helper.getView(R.id.publish_works);
+        final TextView follow = helper.getView(R.id.follow);
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
@@ -173,6 +192,15 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             noWifiLl.setVisibility(View.VISIBLE);
         }
 
+        String localUserId = PersonInfoManager.getInstance().getUserId();
+        String userId = item.getCreateBy();
+
+        if (TextUtils.isEmpty(item.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
+            follow.setVisibility(View.GONE);
+        } else {
+            follow.setVisibility(View.VISIBLE);
+        }
+
 
         //无wifi时继续播放按钮
         continuePlay.setOnClickListener(new View.OnClickListener() {
@@ -183,6 +211,13 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 if (null != superPlayerView) {
                     superPlayerView.setOrientation(true);
                 }
+            }
+        });
+
+        follow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mFollowViewClick.followClick(helper.getAdapterPosition());
             }
         });
 
@@ -213,12 +248,28 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                //跳转H5头像TA人主页  视频模块不需要跳转
-//                try {
-//                    param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy());
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
+                if (TextUtils.isEmpty(item.getIssuerId())) {
+                    return;
+                }
+                //跳转H5头像TA人主页
+                try {
+                    if (Utils.mIsDebug) {
+                        param.recommendUrl(Constants.HEAD_OTHER + item.getCreateBy(), null);
+                    } else {
+                        param.recommendUrl(Constants.HEAD_OTHER_ZS + item.getCreateBy(), null);
+                    }
+                    FinderPointModel model = new FinderPointModel();
+                    model.setUser_id(item.getCreateBy());
+                    if (TextUtils.equals("关注", follow.getText().toString())) {
+                        model.setIs_notice("否");
+                    } else {
+                        model.setIs_notice("是");
+                    }
+                    model.setModule_source("视频播放");
+                    FinderBuriedPointManager.setFinderCommon(Constants.CLICK_USER,model);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -249,11 +300,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         }
 
         foldTextView.setText(brief);
-//        if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-//            ellipsisTv.setVisibility(View.VISIBLE);
-//        } else {
-//            ellipsisTv.setVisibility(View.GONE);
-//        }
         foldTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -262,11 +308,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 if (foldTextView.getVisibility() == View.VISIBLE) {
                     foldTextView.setVisibility(View.GONE);
                     expendText.setVisibility(View.VISIBLE);
-//                    if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-//                        ellipsisTv.setVisibility(View.VISIBLE);
-//                    } else {
-//                        ellipsisTv.setVisibility(View.GONE);
-//                    }
                 }
             }
         });
@@ -275,18 +316,121 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         expendText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (expendText.getVisibility() == View.VISIBLE) {
-                    expendText.setVisibility(View.GONE);
-                    foldTextView.setVisibility(View.VISIBLE);
+                if (isClick) {
+                    if (expendText.getVisibility() == View.VISIBLE) {
+                        expendText.setVisibility(View.GONE);
+                        foldTextView.setVisibility(View.VISIBLE);
+                    }
                 }
-//                if (foldTextView.getLineCount() > 2 && foldTextView.getVisibility() == View.VISIBLE) {
-//                    ellipsisTv.setVisibility(View.VISIBLE);
-//                } else {
-//                    ellipsisTv.setVisibility(View.GONE);
-//                }
+                isClick = true;
             }
         });
 
+        //点赞
+        videoDetailLikes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLikeListener.likeClick(v, item, videoDetailLikesImage, likesNum);
+            }
+        });
+
+        //收藏
+        videoDetailCollection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCollectionListener.collectionClick(v, item, videoDetailCollectionImage, collectionNum);
+            }
+        });
+
+        //评论
+        videoDetailCommentLl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCommentListener.commentClick(v, item, commentNum);
+            }
+        });
+
+        //转发
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShareListener.shareClick(v, item);
+            }
+        });
+
+        //发布
+        publishWorks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPublishWorksListener.publishWorksClick(v, item);
+            }
+        });
+    }
+
+
+    public void setTopicClick(boolean isClick) {
+        this.isClick = isClick;
+    }
+
+    public LikeListener mLikeListener;
+
+    public interface LikeListener {
+        void likeClick(View view, DataDTO item, ImageView likeImage, TextView likeNum);
+    }
+
+    public void setlikeListener(LikeListener likeListener) {
+        this.mLikeListener = likeListener;
+    }
+
+    public CollectionListener mCollectionListener;
+
+    public interface CollectionListener {
+        void collectionClick(View view, DataDTO item, ImageView collectionImage, TextView collectionNum);
+    }
+
+    public void setCollectionListener(CollectionListener collectionListener) {
+        this.mCollectionListener = collectionListener;
+    }
+
+    public CommentListener mCommentListener;
+
+    public interface CommentListener {
+        void commentClick(View view, DataDTO item, TextView commentNum);
+    }
+
+    public void setCommentListener(CommentListener commentListener) {
+        this.mCommentListener = commentListener;
+    }
+
+    public PublishWorksListener mPublishWorksListener;
+
+    public interface PublishWorksListener {
+        void publishWorksClick(View view, DataDTO item);
+    }
+
+    public void setPublishWorksListener(PublishWorksListener publishWorksListener) {
+        this.mPublishWorksListener = publishWorksListener;
+    }
+
+
+    public ShareListener mShareListener;
+
+    public interface ShareListener {
+        void shareClick(View view, DataDTO item);
+    }
+
+    public void setShareListener(ShareListener shareListener) {
+        this.mShareListener = shareListener;
+    }
+
+    private FollowViewClick mFollowViewClick;
+
+    public interface FollowViewClick {
+        void followClick(int position);
+    }
+
+    public void setFollowViewClick(FollowViewClick mFollow) {
+        this.mFollowViewClick = mFollow;
     }
 
     /**
@@ -334,7 +478,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                FinderBuriedPointManager.setFinderClick("服务_"+ list.get(mPosition).getTitle());
+                FinderBuriedPointManager.setFinderClick("服务_" + list.get(mPosition).getTitle());
             }
         });
     }
@@ -361,4 +505,5 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             return false;
         }
     }
+
 }

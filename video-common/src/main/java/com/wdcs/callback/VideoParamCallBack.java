@@ -42,4 +42,5 @@ public interface VideoParamCallBack {
      * 获取设备id
      */
     String setDeviceId();
+
 }

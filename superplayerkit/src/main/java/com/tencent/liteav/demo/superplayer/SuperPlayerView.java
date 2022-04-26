@@ -64,6 +64,7 @@ import com.wdcs.manager.ContentBuriedPointManager;
 import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ContentStateModel;
+import com.wdcs.model.DataDTO;
 import com.wdcs.model.PlayImageSpriteInfo;
 import com.wdcs.model.PlayKeyFrameDescInfo;
 import com.wdcs.model.VideoQuality;

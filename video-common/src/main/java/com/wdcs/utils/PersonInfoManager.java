@@ -91,7 +91,7 @@ public class PersonInfoManager {
         SPUtils.getInstance().put(Constants.TGT_CODE, tgt);
     }
 
-    public String getTgtCode(){
+    public String getTgtCode() {
         return SPUtils.getInstance().getString(Constants.TGT_CODE, "");
     }
 
@@ -109,7 +109,18 @@ public class PersonInfoManager {
      * return
      */
     public String getTransformationToken() {
-        return SPUtils.getInstance().getString(Constants.TRANSFORMATION_TOKEN, "");
+        return SPUtils.getInstance().getString(Constants.TRANSFORMATION_TOKEN, null);
+    }
+
+    public void setUploadAgreement(String uploadAgreement) {
+        SPUtils.getInstance().put(Constants.UPLOAD_AGREEMENT, uploadAgreement);
+    }
+
+    /**
+     * 上传视频协议是否显示
+     */
+    public String getUploadAgreement() {
+        return SPUtils.getInstance().getString(Constants.UPLOAD_AGREEMENT, "");
     }
 
     /**
@@ -117,7 +128,7 @@ public class PersonInfoManager {
      */
     public void clearToken() {
         PersonInfoManager.getInstance().setToken("");
-        PersonInfoManager.getInstance().setTransformationToken("");
+        PersonInfoManager.getInstance().setTransformationToken(null);
         PersonInfoManager.getInstance().setTgtCode("");
         PersonInfoManager.getInstance().setUserId("");
         PersonInfoManager.getInstance().setGdyToken("");

@@ -27,12 +27,16 @@ public class Constants {
     public static final String PANELCODE = "panelCode";
     public static final String VIDEOTAB = "videoTab";
     public static final String CONTENTID = "contentId";
+    public static final String TOCURRENTTAB = "toCurrentTab";
     public static final String CATEGORYNAME = "categoryName";
     public static final String VIDEOTAG = "videoTag";
     public static final String TRACKINGUPLOAD = "TrackingUpload";
     public static final String BLUE_V = "blue-v";
     public static final String YELLOW_V = "yellow-v";
     public static final String RED_V = "red-v";
+    public static final String UPLOAD_AGREEMENT = "upload_agreement";
+    public static final String PORTRAIT_STR = "Portrait";
+
     /**
      * 1.排行榜https://uat-h5.zhcs.csbtv.com/act/xksh/#/ranking
      * 2.话题详情https://uat-h5.zhcs.csbtv.com/act/xksh/#/topicDetails?id=215403
@@ -43,19 +47,23 @@ public class Constants {
     public static final String RANKING_LIST = "https://uat-h5.zhcs.csbtv.com/act/xksh/#/ranking";
     public static final String TOPIC_DETAILS = "https://uat-h5.zhcs.csbtv.com/act/xksh/#/topicDetails?id=";
     public static final String PERSONAL_CENTER = "https://uat-h5.zhcs.csbtv.com/act/xksh/#/me";
-    public static final String HEAD_OTHER = "https://uat-h5.zhcs.csbtv.com/act/xksh/#/others?id=";
+    public static final String HEAD_OTHER = "https://uat-h5.zhcs.csbtv.com/act/xksh/index.html#/me?id=";
     public static final String SEARCHPLUS = "https://uat-h5.zhcs.csbtv.com/fuse/news/#/searchPlus";
 
     public static final String RANKING_LIST_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/ranking";
     public static final String TOPIC_DETAILS_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/topicDetails?id=";
     public static final String PERSONAL_CENTER_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/me";
-    public static final String HEAD_OTHER_ZS = "https://h5.zhcs.csbtv.com/act/xksh/#/others?id=";
+    public static final String HEAD_OTHER_ZS = "https://h5.zhcs.csbtv.com/act/xksh/index.html#/me?id=";
     public static final String SEARCHPLUS_ZS = "https://h5.zhcs.csbtv.com/fuse/news/#/searchPlus";
 
 //    /**
 //     * ssid 火山需要传入的设备id (暂时先固定填上测试  后续需从万达拿)
 //     */
 //    public static final String SSID = param.getYmSSid();
+    /**
+     * 双击点击相隔时间
+     */
+    public static final long CLICK_INTERVAL_TIME = 300;
     /**
      * 刷新操作标识
      */

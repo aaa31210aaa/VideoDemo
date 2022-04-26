@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.tencent.liteav.demo.superplayer.R;
@@ -28,6 +29,7 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.VideoCollectionModel.DataDTO.RecordsDTO;
 import com.wdcs.utils.NoScrollViewPager;
+import com.wdcs.widget.YALikeAnimationView;
 
 
 /**
@@ -95,6 +97,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private ViewPagerLayoutManager myManager;
     private NoScrollViewPager mViewpager;
     private boolean mIsFragmentShow;
+    private RelativeLayout windowPlayerRoot;
 
     public WindowPlayer(Context context) {
         super(context);
@@ -111,6 +114,36 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         initialize(context);
     }
 
+    public DoubleClick mDoubleClick;
+
+    public interface DoubleClick {
+        void onDoubleClick(DataDTO item);
+    }
+
+    public void setOnDoubleClick(DoubleClick doubleClick) {
+        this.mDoubleClick = doubleClick;
+    }
+
+    public DoubleClickxksh mDoubleClickxksh;
+
+    public interface DoubleClickxksh {
+        void onDoubleClickxksh(DataDTO item);
+    }
+
+    public void setOnDoubleClickxksh(DoubleClickxksh doubleClick) {
+        this.mDoubleClickxksh = doubleClick;
+    }
+
+    public DoubleClickDetail mDoubleClickDetail;
+
+    public interface DoubleClickDetail {
+        void onDoubleClickDetail(DataDTO item);
+    }
+
+    public void setOnDoubleClickDetail(DoubleClickDetail doubleClick) {
+        this.mDoubleClickDetail = doubleClick;
+    }
+
 
     /**
      * 初始化控件、手势检测监听器、亮度/音量/播放进度的回调
@@ -123,12 +156,12 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 if (mCurrentPlayState == SuperPlayerDef.PlayerState.LOADING) {
                     return false;
                 }
-                togglePlayState();
-//                show();
-                if (mHideViewRunnable != null) {
-                    removeCallbacks(mHideViewRunnable);
-                    postDelayed(mHideViewRunnable, Contants.delayMillis);
-                }
+//                togglePlayState();
+////                show();
+//                if (mHideViewRunnable != null) {
+//                    removeCallbacks(mHideViewRunnable);
+//                    postDelayed(mHideViewRunnable, Contants.delayMillis);
+//                }
                 return true;
             }
 
@@ -137,7 +170,9 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 if (mCurrentPlayState == SuperPlayerDef.PlayerState.LOADING) {
                     return false;
                 }
-                toggle();
+
+                togglePlayState();
+//                toggle();
 //                togglePlayState();
 //                show();
 //                if (mHideViewRunnable != null) {
@@ -250,6 +285,25 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         mLoadBar = findViewById(R.id.superplayer_loadbar_progress);
         mLoadBar.setProgress(100);
         mLoadBar.setMax(100);
+        windowPlayerRoot = findViewById(R.id.window_player_root);
+
+        windowPlayerRoot.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //双击点赞
+                if (null != mDoubleClick) {
+                    mDoubleClick.onDoubleClick(item);
+                }
+
+                if (null != mDoubleClickxksh) {
+                    mDoubleClickxksh.onDoubleClickxksh(item);
+                }
+
+                if (null != mDoubleClickDetail) {
+                    mDoubleClickDetail.onDoubleClickDetail(item);
+                }
+            }
+        });
 
         mIvFullScreen = (ImageView) findViewById(R.id.superplayer_iv_fullscreen);
         mTvBackToLive = (TextView) findViewById(R.id.superplayer_tv_back_to_live);
@@ -292,7 +346,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         this.mIsTurnPage = isTurnPages;
     }
 
-    public void setIsVideoDetailTurnPage(boolean isVideoDetailTurnPage){
+    public void setIsVideoDetailTurnPage(boolean isVideoDetailTurnPage) {
         this.mIsVideoDetailTurnPage = isVideoDetailTurnPage;
     }
 
@@ -413,8 +467,8 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     @Override
     public void show() {
         isShowing = true;
-        mLayoutTop.setVisibility(View.VISIBLE);
-        mLayoutBottom.setVisibility(View.VISIBLE);
+//        mLayoutTop.setVisibility(View.VISIBLE);
+//        mLayoutBottom.setVisibility(View.VISIBLE);
 
         if (mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
             mTvBackToLive.setVisibility(View.VISIBLE);
@@ -427,8 +481,8 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     @Override
     public void hide() {
         isShowing = false;
-        mLayoutTop.setVisibility(View.GONE);
-        mLayoutBottom.setVisibility(View.GONE);
+//        mLayoutTop.setVisibility(View.GONE);
+//        mLayoutBottom.setVisibility(View.GONE);
 
         if (mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
             mTvBackToLive.setVisibility(View.GONE);
@@ -587,18 +641,18 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         switch (type) {
             case VOD:
                 mTvBackToLive.setVisibility(View.GONE);
-                mTvDuration.setVisibility(View.VISIBLE);
+//                mTvDuration.setVisibility(View.VISIBLE);
                 break;
             case LIVE:
                 mTvBackToLive.setVisibility(View.GONE);
-                mTvDuration.setVisibility(View.GONE);
+//                mTvDuration.setVisibility(View.GONE);
                 mSeekBarProgress.setProgress(100);
                 break;
             case LIVE_SHIFT:
                 if (mLayoutBottom.getVisibility() == VISIBLE) {
                     mTvBackToLive.setVisibility(View.VISIBLE);
                 }
-                mTvDuration.setVisibility(View.GONE);
+//                mTvDuration.setVisibility(View.GONE);
                 break;
         }
     }

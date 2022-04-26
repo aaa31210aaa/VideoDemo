@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    android:layout_gravity="center"
+    android:layout_marginLeft="25dp"
+    android:layout_marginRight="25dp"
+    android:background="@drawable/upload_agreement_pop"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:textStyle="bold"
+        android:text="用户内容发布协议"
+        android:textColor="#333333"
+        android:textSize="17sp">
+
+    </TextView>
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/cancel_submit"
+        android:layout_below="@+id/title"
+        android:layout_weight="1"
+        android:background="@drawable/upload_agreement_pop"
+        android:scrollbarSize="@dimen/dp_10"
+        android:scrollbars="vertical"></WebView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@+id/webView"
+        android:background="#EDEDED">
+
+    </View>
+
+    <LinearLayout
+        android:id="@+id/cancel_submit"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/upload_agreement_cancel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="取消"
+            android:textColor="#3E3A39"
+            android:textSize="17sp">
+
+        </TextView>
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="#EDEDED">
+
+        </View>
+
+        <TextView
+            android:id="@+id/upload_agreement_submit"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="确定"
+            android:textColor="#1C337A"
+            android:textSize="17sp">
+
+        </TextView>
+    </LinearLayout>
+</RelativeLayout>
