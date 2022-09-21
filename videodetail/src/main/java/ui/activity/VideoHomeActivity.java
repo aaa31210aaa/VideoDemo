@@ -32,6 +32,7 @@ import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
+import com.wdcs.callback.HomePageInteractive;
 import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;

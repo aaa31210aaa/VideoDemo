@@ -32,3 +32,4 @@
 -keep class model.** { *; }
 -keep class adpter.** { *; }
 -keep class ui.activity.VideoDetailActivity.**
+-keep class com.wdcs.model.** { *; }

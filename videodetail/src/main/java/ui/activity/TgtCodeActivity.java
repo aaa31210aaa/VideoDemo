@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -16,11 +17,11 @@ import com.wdcs.videodetail.demo.R;
 import com.wdcs.widget.YALikeAnimationView;
 
 public class TgtCodeActivity extends AppCompatActivity {
-    private TextView wdTgt;
-    private TextView localTgt;
-    private TextView gdyTgt;
+    private EditText wdTgt;
+    private EditText localTgt;
+    private EditText gdyTgt;
+    private EditText localToken;
     private TextView getWdtgt;
-    private TextView localToken;
     private YALikeAnimationView likeLayout2;
     private RelativeLayout dianzan;
 

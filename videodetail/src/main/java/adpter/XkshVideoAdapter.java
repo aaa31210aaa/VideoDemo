@@ -179,8 +179,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
 //            fullLin.setVisibility(View.GONE);
 //        }
 
-        String localUserId = PersonInfoManager.getInstance().getUserId();
-        String userId = item.getCreateBy();
+        final String localUserId = PersonInfoManager.getInstance().getUserId();
+        final String userId = item.getCreateBy();
 
         if (TextUtils.isEmpty(item.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
             follow.setVisibility(View.GONE);
@@ -237,9 +237,10 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (TextUtils.isEmpty(item.getIssuerId())) {
+                if (TextUtils.isEmpty(item.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
                     return;
                 }
+
                 //跳转H5头像TA人主页
                 try {
                     if (Utils.mIsDebug) {

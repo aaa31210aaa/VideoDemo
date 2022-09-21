@@ -16,6 +16,10 @@ public class FinderPointModel {
      */
     private String content_id;
     /**
+     * 是否完播
+     */
+    private String isFinish;
+    /**
      * 内容名称
      */
     private String content_name;
@@ -119,6 +123,14 @@ public class FinderPointModel {
 
     public void setContent_id(String content_id) {
         this.content_id = content_id;
+    }
+
+    public String getIsFinish() {
+        return isFinish;
+    }
+
+    public void setIsFinish(String isFinish) {
+        this.isFinish = isFinish;
     }
 
     public String getContent_name() {

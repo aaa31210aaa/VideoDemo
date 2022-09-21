@@ -65,6 +65,7 @@ import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.CollectionLabelModel;
 import com.wdcs.model.CommentLv1Model;
 import com.wdcs.model.FinderPointModel;
+import com.wdcs.model.GdyTokenModel;
 import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
@@ -189,7 +190,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private String videoType; //视频类型
     private VideoInteractiveParam param;
     public String playUrl;
-    private String recommendTag = "recommend";
+    private String recommendTag = "recommendfragment";
     private boolean isLoadComplate = false;
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
     public View decorView;
@@ -283,7 +284,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_video_detail, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        if (!TextUtils.isEmpty(myContentId) && 1 == toCurrentTab ) {
+        if (!TextUtils.isEmpty(myContentId) && 1 == toCurrentTab) {
             getOneVideo(myContentId);
         } else {
             getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
@@ -412,6 +413,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 //露出 即上报
 //              ContentBuriedPointManager.setContentBuriedPoint();
                 playerView.mWindowPlayer.hide();
+                String isFinish;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    isFinish = "否";
+                } else {
+                    isFinish = "是";
+                }
 
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                     if (mDuration != 0 && mProgress != 0) {
@@ -444,7 +451,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
-                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
+                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
 
                 mDataDTO = mDatas.get(position);
                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
@@ -597,6 +604,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 likeIsRequesting = true;
                                 ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+                                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
                         }
@@ -864,7 +872,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
-            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
+            String isFinish;
+            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                isFinish = "否";
+            } else {
+                isFinish = "是";
+            }
+            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
 
             playerView.mSuperPlayer.pause();
             if (null != rlLp) {
@@ -1002,11 +1016,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      * @param position
      */
     public void addPlayView(final int position) {
-        if (null == playerView) {
+        if (isVisibleNoWifiView(getActivity())) {
             return;
         }
-        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.video_item_bottom);
-//        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
             ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
@@ -1015,13 +1027,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (null != playerView && null != playerView.getParent()) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         }
-
-
         RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
+
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
-
-
         if (TextUtils.equals("0", videoType)) {
             double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
             double mHeight;
@@ -1034,23 +1043,25 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
 //            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
 
+
             playerView.setOrientation(false);
-            if (itemRelativelayout != null) {
+            if (null != itemRelativelayout) {
                 itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
         } else if (TextUtils.equals("1", videoType)) {
             int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
             playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
             if (phoneIsNormal()) {
+                playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
                 playerView.setOrientation(false);
             } else {
-                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                playViewParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
                 playerView.setOrientation(false);
             }
-            if (itemRelativelayout != null) {
+            if (null != itemRelativelayout) {
                 itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
         } else {
@@ -1059,9 +1070,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
             playerView.setOrientation(true);
-//            mLayoutBottomParams.addRule(BELOW, playerView.getId());
-//            mLayoutBottomParams.setMargins(0, (Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2) + ButtonSpan.dip2px(135), 0, 0);
-//            playerView.mWindowPlayer.mLayoutBottom.setLayoutParams(mLayoutBottomParams);
             if (null != itemRelativelayout) {
                 itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
             }
@@ -1828,15 +1836,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
                         try {
                             if (response.body().getCode().equals(success_code)) {
-                                if (null == response.body().getData() || null == response.body().getData().getList()) {
+                                if (null == response.body().getData()) {
                                     return;
                                 }
+                                topicName = response.body().getData().getTopicName();
                                 collectionList = new ArrayList<>();
                                 collectionTvList = new ArrayList<>();
                                 collectionStrList = new ArrayList<>();
                                 String collectionStr = "";
-                                collectionList.addAll(response.body().getData().getList());
-                                topicName = response.body().getData().getTopicName();
+                                if (null == response.body().getData().getList()) {
+                                    List<CollectionLabelModel.DataDTO.ListDTO> listDTO = new ArrayList<>();
+                                    collectionList.addAll(listDTO);
+                                } else {
+                                    collectionList.addAll(response.body().getData().getList());
+                                }
                                 if (!TextUtils.isEmpty(topicName)) {
                                     CollectionLabelModel.DataDTO.ListDTO listDTO = new CollectionLabelModel.DataDTO.ListDTO();
                                     listDTO.setTitle("#" + topicName);
@@ -2252,6 +2265,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("token", token);
+            jsonObject.put("ignoreGdy", 1);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -2276,7 +2290,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 Log.d("mycs_token", "转换成功");
                                 try {
                                     PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
-                                    PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                     PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
                                     PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                                 } catch (Exception e) {
@@ -2314,6 +2327,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
+        if (!videoFragmentIsVisibleToUser) {
+            return;
+        }
+
         if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
@@ -2325,9 +2342,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         videoOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
-        }
-        if (!videoFragmentIsVisibleToUser) {
-            return;
         }
 
         isPause = false;
@@ -2396,13 +2410,18 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
             }
         }
-        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
+        String isFinish;
+        if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+            isFinish = "否";
+        } else {
+            isFinish = "是";
+        }
+        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
     }
 
     @Override
@@ -2650,7 +2669,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         }
                         loadingProgress.setVisibility(View.GONE);
                         getThematicCollection(myContentId);
-                        addPlayView(position);
+                        if (!isVisibleNoWifiView(getActivity())) {
+                            addPlayView(position);
+                        }
                     }
                 });
     }

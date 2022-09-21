@@ -110,6 +110,13 @@ public class ApiConstants {
     }
 
     /**
+     * 获取广电云token
+     */
+    public String gdyToken(){
+        return getBaseUrl() + "api/sys/getTokenGdyByTgt";
+    }
+
+    /**
      * 浏览量+1接口
      */
     public String addViews() {
@@ -197,6 +204,9 @@ public class ApiConstants {
         return getBaseUrl() + "api/cms/client/content/getSpecList";
     }
 
+    /**
+     * 首页栏目获取
+     */
     public String getCategoryData() {
         return getBaseUrl() + "api/cms/client/category/getCategoryData";
     }
@@ -215,8 +225,29 @@ public class ApiConstants {
         return getBaseUrl() + "api/cms/client/content/updateArticle";
     }
 
-    public String readArticle(){
+    public String readArticle() {
         return getBaseUrl() + "api/cms/client/content/ugc/";
+    }
+
+    /**
+     * 首页负一屏,今日要闻
+     */
+    public String getCategoryCompositeData() {
+        return getBaseUrl() + "api/cms/client/category/getCategoryCompositeData";
+    }
+
+    /**
+     * 获取栏目首页内容
+     */
+    public String getContentData() {
+        return getBaseUrl() + "api/cms/client/category/getContentData";
+    }
+
+    /**
+     * 获取栏目更多内容
+     */
+    public String getContentDate() {
+        return getBaseUrl() + "api/cms/client/content/getContentDate";
     }
 
 }

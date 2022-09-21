@@ -37,7 +37,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':video-common')
-    implementation "com.tencent.liteav:LiteAVSDK_Player:latest.release"
+    implementation "com.tencent.liteav:LiteAVSDK_Player:9.5.29006"
     implementation 'com.github.ctiao:DanmakuFlameMaster:0.5.3'
     implementation 'com.github.pinguo-zhouwei:CustomPopwindow:2.1.1'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'

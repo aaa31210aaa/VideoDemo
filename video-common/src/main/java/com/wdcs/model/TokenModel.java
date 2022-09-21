@@ -83,7 +83,15 @@ public class TokenModel {
         private String token;
         private LoginSysUserVoDTO loginSysUserVo;
         private String gdyToken;
+        private String certificated;
 
+        public String getCertificated() {
+            return certificated;
+        }
+
+        public void setCertificated(String certificated) {
+            this.certificated = certificated;
+        }
         public String getToken() {
             if (TextUtils.isEmpty(token)) {
                 return "";
@@ -203,6 +211,7 @@ public class TokenModel {
             public void setPermissionCodes(String permissionCodes) {
                 this.permissionCodes = permissionCodes;
             }
+
         }
     }
 }

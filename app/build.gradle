@@ -35,7 +35,7 @@ android {
 dependencies {
     implementation project(':videodetail')
     implementation project(':video-common')
-    implementation "com.tencent.liteav:LiteAVSDK_Player:latest.release"
+    implementation "com.tencent.liteav:LiteAVSDK_Player:9.5.29006"
     implementation project(':superplayerkit')
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'

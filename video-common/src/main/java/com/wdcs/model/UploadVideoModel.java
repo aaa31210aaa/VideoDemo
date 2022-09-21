@@ -140,6 +140,15 @@ public class UploadVideoModel {
         private String recommendedContent;
         private String relatedContents;
         private String pid;
+        private String contentId;
+
+        public String getContentId() {
+            return contentId;
+        }
+
+        public void setContentId(String contentId) {
+            this.contentId = contentId;
+        }
 
         public String getId() {
             return id;

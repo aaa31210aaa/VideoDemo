@@ -192,8 +192,8 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             noWifiLl.setVisibility(View.VISIBLE);
         }
 
-        String localUserId = PersonInfoManager.getInstance().getUserId();
-        String userId = item.getCreateBy();
+        final String localUserId = PersonInfoManager.getInstance().getUserId();
+        final String userId = item.getCreateBy();
 
         if (TextUtils.isEmpty(item.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
             follow.setVisibility(View.GONE);
@@ -248,7 +248,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         publisherHeadimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (TextUtils.isEmpty(item.getIssuerId())) {
+                if (TextUtils.isEmpty(item.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
                     return;
                 }
                 //跳转H5头像TA人主页

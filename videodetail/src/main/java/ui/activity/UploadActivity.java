@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
@@ -305,6 +306,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                     && !UploadActivity.this.isDestroyed()) {
                 Glide.with(UploadActivity.this)
                         .load(uploadVideoBean.getCoverImageUrl())
+                        .transform()
                         .into(uploadBtn);
             }
             uploadVideoCancel.setVisibility(View.VISIBLE);
@@ -398,6 +400,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("token", token);
+            jsonObject.put("ignoreGdy", 1);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -422,7 +425,6 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                                 Log.d("mycs_token", "转换成功");
                                 try {
                                     PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
-                                    PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                     PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
                                     PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                                 } catch (Exception e) {
@@ -905,10 +907,11 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
 //                            showToast(tipStr);
                             FinderPointModel model = new FinderPointModel();
                             if (null != bean.getData()) {
-                                model.setContent_id(bean.getData().getId());
-                                model.setContent_name(bean.getData().getTitle());
-                                model.setWorks_brief(bean.getData().getPlayDuration());
+                                model.setContent_id(bean.getData().getContentId());
+                                model.setContent_name(briefIntroduction.getText().toString());
+                                model.setWorks_duration(String.valueOf(worksDuration));
                                 model.setWorks_size(worksSize + "");
+                                model.setWorks_brief(briefIntroduction.getText().toString());
                                 FinderBuriedPointManager.setFinderCommon(Constants.SHORT_VIDEO_SUBMIT, model);
                             }
                             uploadText.setText(tipStr);

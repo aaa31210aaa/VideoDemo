@@ -563,7 +563,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 //露出 即上报
 //              ContentBuriedPointManager.setContentBuriedPoint();
                 playerView.mWindowPlayer.hide();
-
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
                     if (mDuration != 0 && mProgress != 0) {
                         //上报埋点
@@ -591,7 +590,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
-                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
+
+                String isFinish;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    isFinish = "否";
+                } else {
+                    isFinish = "是";
+                }
+                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
 
                 mDataDTO = mDatas.get(position);
                 if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
@@ -743,6 +749,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 likeIsRequesting = true;
                                 ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+                                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
                         }
@@ -874,11 +881,11 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         });
 
         //窗口视频双击点击监听
+        //窗口视频双击点击监听
         if (null != playerView) {
-            playerView.mWindowPlayer.setOnDoubleClickDetail(new WindowPlayer.DoubleClickDetail() {
+            playerView.mWindowPlayer.setOnDoubleClick(new WindowPlayer.DoubleClick() {
                 @Override
-                public void onDoubleClickDetail(DataDTO item) {
-                    loveIcon.startAnimation();
+                public void onDoubleClick(DataDTO item) {
                     if (System.currentTimeMillis() - beforeClickTime < CLICK_INTERVAL_TIME) {
                         handler.removeMessages(1);
                         handler.sendEmptyMessage(2);
@@ -1864,15 +1871,20 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 
                         try {
                             if (response.body().getCode().equals(success_code)) {
-                                if (null == response.body().getData() || null == response.body().getData().getList()) {
+                                if (null == response.body().getData()) {
                                     return;
                                 }
+                                topicName = response.body().getData().getTopicName();
                                 collectionList = new ArrayList<>();
                                 collectionTvList = new ArrayList<>();
                                 collectionStrList = new ArrayList<>();
                                 String collectionStr = "";
-                                collectionList.addAll(response.body().getData().getList());
-                                topicName = response.body().getData().getTopicName();
+                                if (null == response.body().getData().getList()) {
+                                    List<CollectionLabelModel.DataDTO.ListDTO> listDTO = new ArrayList<>();
+                                    collectionList.addAll(listDTO);
+                                } else {
+                                    collectionList.addAll(response.body().getData().getList());
+                                }
                                 if (!TextUtils.isEmpty(topicName)) {
                                     CollectionLabelModel.DataDTO.ListDTO listDTO = new CollectionLabelModel.DataDTO.ListDTO();
                                     listDTO.setTitle("#" + topicName);
@@ -2321,6 +2333,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("token", token);
+            jsonObject.put("ignoreGdy", 1);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -2345,7 +2358,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 Log.d("mycs_token", "转换成功");
                                 try {
                                     PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
-                                    PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                     PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
                                     PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                                 } catch (Exception e) {
@@ -2451,7 +2463,14 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }
-        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime);
+
+        String isFinish;
+        if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+            isFinish = "否";
+        } else {
+            isFinish = "是";
+        }
+        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
     }
 
     @Override

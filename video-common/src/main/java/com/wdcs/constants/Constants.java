@@ -36,6 +36,7 @@ public class Constants {
     public static final String RED_V = "red-v";
     public static final String UPLOAD_AGREEMENT = "upload_agreement";
     public static final String PORTRAIT_STR = "Portrait";
+    public static final String CERTIFICATED = "certificated";
 
     /**
      * 1.排行榜https://uat-h5.zhcs.csbtv.com/act/xksh/#/ranking

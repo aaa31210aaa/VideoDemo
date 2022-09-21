@@ -13,7 +13,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tencent.rtmp.TXLiveBase;
+import com.wdcs.callback.ApplicationIsAgreeCallBack;
 import com.wdcs.callback.GetGdyTokenCallBack;
+import com.wdcs.callback.HomePageInteractive;
 import com.wdcs.callback.VideoFinderPointCallBack;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
@@ -24,6 +27,9 @@ import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.ToastUtils;
 
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.functions.Consumer;
 import ui.activity.TgtCodeActivity;
@@ -55,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         fxsys = findViewById(R.id.fxsys);
         classList = findViewById(R.id.class_list);
         tgt_page = findViewById(R.id.tgt_page);
+        String sdkver = TXLiveBase.getSDKVersionStr();
+        Log.d("liteavsdk", "liteav sdk version is : " + sdkver);
         fxsys.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -95,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     public String setCode() {
-                        return "7c27b1a0-d352-4142-ba03-ba8529f09416";
+                        return "ba9d8150-eaed-4edc-82d8-fdb9eb6cf4f4";
                     }
 
                     @Override
@@ -113,15 +121,22 @@ public class MainActivity extends AppCompatActivity {
                         return "998877665544332212";
                     }
 
+
                 });
 
                 VideoInteractiveParam.getInstance().setGdyTokenCallBack(new GetGdyTokenCallBack() {
                     @Override
                     public void checkLoginStatus(String gdyToken) {
-                        DebugLogUtils.DebugLog(gdyToken);
+                        Log.e("广电云token:", gdyToken);
                     }
                 });
 
+                VideoInteractiveParam.getInstance().setApplicationIsAgreeCallBack(new ApplicationIsAgreeCallBack() {
+                    @Override
+                    public String setIsAgreePrivacy() {
+                        return "1";
+                    }
+                });
             }
         });
 

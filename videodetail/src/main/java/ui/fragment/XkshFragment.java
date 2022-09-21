@@ -64,6 +64,7 @@ import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.CollectionLabelModel;
 import com.wdcs.model.CommentLv1Model;
 import com.wdcs.model.FinderPointModel;
+import com.wdcs.model.GdyTokenModel;
 import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
@@ -232,6 +233,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private long beforeClickTime = 0;
     private int toCurrentTab;
     private View footerView;
+    private boolean isFirst = true;
 
 
     public XkshFragment() {
@@ -413,7 +415,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                     }
                 }
-                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime);
+                String isFinish;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    isFinish = "否";
+                } else {
+                    isFinish = "是";
+                }
+                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
 
 
                 mDataDTO = mDatas.get(position);
@@ -561,6 +569,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 likeIsRequesting = true;
                                 ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
+                                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
                         }
@@ -822,7 +831,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
-            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime);
+            String isFinish;
+            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                isFinish = "否";
+            } else {
+                isFinish = "是";
+            }
+            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
 
 
             playerView.mSuperPlayer.pause();
@@ -961,6 +976,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param position
      */
     public void addPlayView(final int position) {
+        if (!mIsVisibleToUser) {
+            return;
+        }
+
         if (isVisibleNoWifiView(getActivity())) {
             return;
         }
@@ -1781,15 +1800,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                         try {
                             if (response.body().getCode().equals(success_code)) {
-                                if (null == response.body().getData() || null == response.body().getData().getList()) {
+                                if (null == response.body().getData()) {
                                     return;
                                 }
+                                topicName = response.body().getData().getTopicName();
                                 collectionList = new ArrayList<>();
                                 collectionTvList = new ArrayList<>();
                                 collectionStrList = new ArrayList<>();
                                 String collectionStr = "";
-                                collectionList.addAll(response.body().getData().getList());
-                                topicName = response.body().getData().getTopicName();
+                                if (null == response.body().getData().getList()) {
+                                    List<CollectionLabelModel.DataDTO.ListDTO> listDTO = new ArrayList<>();
+                                    collectionList.addAll(listDTO);
+                                } else {
+                                    collectionList.addAll(response.body().getData().getList());
+                                }
+
                                 if (!TextUtils.isEmpty(topicName)) {
                                     CollectionLabelModel.DataDTO.ListDTO listDTO = new CollectionLabelModel.DataDTO.ListDTO();
                                     listDTO.setTitle("#" + topicName);
@@ -2231,11 +2256,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             SuperPlayerImpl.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
             if (playerView.homeVideoIsLoad) {
                 playerView.mSuperPlayer.resume();
+                isFirst = true;
             } else {
-                playerView.mSuperPlayer.reStart();
+                if (!isFirst) {
+                    playerView.mSuperPlayer.reStart();
+                }
             }
         }
-        Log.e("yqh_yqh", "onResume播放地址：" + SuperPlayerImpl.mCurrentPlayVideoURL);
         isPause = false;
         xkshOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
@@ -2261,6 +2288,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("token", token);
+            jsonObject.put("ignoreGdy", 1);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -2285,7 +2313,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 Log.d("mycs_token", "转换成功");
                                 try {
                                     PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
-                                    PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                     PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
                                     PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                                 } catch (Exception e) {
@@ -2368,7 +2395,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
             }
         }
-        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime);
+
+        String isFinish;
+        if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+            isFinish = "否";
+        } else {
+            isFinish = "是";
+        }
+        FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
 
     }
 
@@ -2615,7 +2649,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         }
                         loadingProgress.setVisibility(View.GONE);
                         getThematicCollection(myContentId);
-                        addPlayView(position);
+                        if (!isVisibleNoWifiView(getActivity())) {
+                            addPlayView(position);
+                        }
                     }
                 });
     }

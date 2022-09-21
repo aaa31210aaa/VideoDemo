@@ -32,6 +32,7 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.DataDTO;
+import com.wdcs.model.GdyTokenModel;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.TokenModel;
 import com.wdcs.model.VideoChannelModel;
@@ -49,6 +50,7 @@ import java.util.List;
 
 import adpter.LiveRvAdapter;
 import widget.CustomLoadMoreView;
+import widget.LoadingView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.PANELCODE;
@@ -71,6 +73,8 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
     private View footview;
+    public boolean mIsVisibleToUser;
+    private LoadingView videoLoadingProgress;
 
     public LiveFragment() {
 
@@ -101,6 +105,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
 
 
     private void initView(View view) {
+        videoLoadingProgress = view.findViewById(R.id.video_loading_progress);
         liveRv = view.findViewById(R.id.live_rv);
         liveRv.setHasFixedSize(true);
         mDatas = new ArrayList<>();
@@ -118,33 +123,25 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                if (mDatas.size() == 0) {
-                    return;
-                }
-                ShareInfo shareInfo = ShareInfo.getInstance(mDatas.get(position).getShareUrl(), mDatas.get(position).getShareImageUrl(),
-                        mDatas.get(position).getShareBrief(), mDatas.get(position).getShareTitle(), "");
-
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
-                    try {
-                        String url = mDatas.get(position).getDetailUrl();
-                        if (url.contains("?")) {
-                            param.recommendUrl(url + "&token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
-                        } else {
-                            param.recommendUrl(url + "?token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    videoLoadingProgress.setVisibility(View.VISIBLE);
+                    getGdyToken(PersonInfoManager.getInstance().getTransformationToken(), position);
                 }
+
             }
         });
         initSmartRefresh(view);
 //        adapter.setLoadMoreView(new CustomLoadMoreView());
         adapter.setPreLoadNumber(2);
         adapter.setOnLoadMoreListener(requestLoadMoreListener, liveRv);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        this.mIsVisibleToUser = isVisibleToUser;
     }
 
     @Override
@@ -318,6 +315,9 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+        if (!mIsVisibleToUser) {
+            return;
+        }
         if (PersonInfoManager.getInstance().isRequestToken()) {
             try {
                 getUserToken(VideoInteractiveParam.getInstance().getCode());
@@ -334,6 +334,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("token", token);
+            jsonObject.put("ignoreGdy", 1);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -352,7 +353,6 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                         if (response.body().getCode() == 200) {
                             try {
                                 PersonInfoManager.getInstance().setToken(VideoInteractiveParam.getInstance().getCode());
-                                PersonInfoManager.getInstance().setGdyToken(response.body().getData().getGdyToken());
                                 PersonInfoManager.getInstance().setUserId(response.body().getData().getLoginSysUserVo().getId());
                                 PersonInfoManager.getInstance().setTgtCode(VideoInteractiveParam.getInstance().getCode());
                             } catch (Exception e) {
@@ -376,6 +376,67 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                    }
+                });
+    }
+
+    /**
+     * 换取广电云token
+     * token 融媒token
+     */
+    private void getGdyToken(String token, final int position) {
+        JSONObject jsonObject = new JSONObject();
+        OkGo.<GdyTokenModel>post(ApiConstants.getInstance().gdyToken())
+                .tag("getGdyToken")
+                .headers("token", token)
+                .upJson(jsonObject)
+                .execute(new JsonCallback<GdyTokenModel>(GdyTokenModel.class) {
+                    @Override
+                    public void onSuccess(Response<GdyTokenModel> response) {
+                        try {
+                            if (response.body().getCode() == 200) {
+                                if (null == response.body().getData()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
+                                PersonInfoManager.getInstance().setGdyToken(response.body().getData());
+                                if (mDatas.size() == 0) {
+                                    return;
+                                }
+                                ShareInfo shareInfo = ShareInfo.getInstance(mDatas.get(position).getShareUrl(), mDatas.get(position).getShareImageUrl(),
+                                        mDatas.get(position).getShareBrief(), mDatas.get(position).getShareTitle(), "");
+
+                                try {
+                                    String url = mDatas.get(position).getDetailUrl();
+                                    if (url.contains("?")) {
+                                        param.recommendUrl(url + "&token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
+                                    } else {
+                                        param.recommendUrl(url + "?token=" + PersonInfoManager.getInstance().getGdyToken(), shareInfo);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<GdyTokenModel> response) {
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                            return;
+                        }
+                        ToastUtils.showShort(R.string.net_err);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        videoLoadingProgress.setVisibility(View.GONE);
                     }
                 });
     }

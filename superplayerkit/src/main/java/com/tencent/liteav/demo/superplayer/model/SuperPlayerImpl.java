@@ -84,8 +84,8 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     private int mAppId;
     public int demouration;
     public SuperPlayerView superPlayerView;
-    private boolean noFirst = false;
-    public static boolean xkshNoFirst = false;
+    private boolean noFirst;
+    private boolean xkshNoFirst;
 
     public SuperPlayerImpl(Context context, TXCloudVideoView videoView, SuperPlayerView superPlayerView) {
         initialize(context, videoView);
@@ -156,10 +156,6 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     @Override
     public void onNetStatus(Bundle bundle) {
 
-    }
-
-    public static void setXkshFirst(boolean isFirst) {
-        xkshNoFirst = isFirst;
     }
 
     public static ReadPlayCallBack readPlayCallBack;
@@ -799,7 +795,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             }
 
             noFirst = true;
-            setXkshFirst(true);
+            xkshNoFirst = true;
             playVodURL(mCurrentPlayVideoURL);
         }
     }

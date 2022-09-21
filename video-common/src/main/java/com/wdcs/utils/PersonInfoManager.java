@@ -1,20 +1,13 @@
 package com.wdcs.utils;
 
 
-import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
 public class PersonInfoManager {
     private static PersonInfoManager instance;
-    private Map headMap;
 
     public static PersonInfoManager getInstance() {
         if (instance == null) {
@@ -27,19 +20,6 @@ public class PersonInfoManager {
         return instance;
     }
 
-    public Map getHeadMap() {
-        headMap = new HashMap();
-        headMap.put("deviceId", getANDROID_ID());
-        return headMap;
-    }
-
-    public String getANDROID_ID() {
-        String ANDROID_ID = Settings.System.getString(Utils.getContext().getContentResolver(), Settings.System.ANDROID_ID);
-        if (TextUtils.isEmpty(ANDROID_ID)) {
-            return SPUtils.getInstance().getString(Constants.PUSH_TOKEN, "");
-        }
-        return ANDROID_ID;
-    }
 
     /**
      * 保存用户token
@@ -81,7 +61,7 @@ public class PersonInfoManager {
     }
 
     /**
-     * 保存
+     * 保存广电云token
      */
     public void setGdyToken(String userId) {
         SPUtils.getInstance().put(Constants.GDY_TOKEN, userId);
@@ -121,6 +101,17 @@ public class PersonInfoManager {
      */
     public String getUploadAgreement() {
         return SPUtils.getInstance().getString(Constants.UPLOAD_AGREEMENT, "");
+    }
+
+    /**
+     * 是否已经实名
+     */
+    public String getCertificated() {
+        return SPUtils.getInstance().getString(Constants.CERTIFICATED, "");
+    }
+
+    public void setCertificated(String certificated) {
+        SPUtils.getInstance().put(Constants.CERTIFICATED, certificated);
     }
 
     /**

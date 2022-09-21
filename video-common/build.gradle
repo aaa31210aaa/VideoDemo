@@ -13,8 +13,8 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro","proguard-rules"
-        manifestPlaceholders.put("APPLOG_SCHEME", "rangersapplog.9d59ea54c6d1a6e8".toLowerCase())
+        consumerProguardFiles "consumer-rules.pro","proguard-rules.pro"
+        manifestPlaceholders.put("APPLOG_SCHEME", "rangersapplog.e9e1a775dac7ca49".toLowerCase())
     }
 
     buildTypes {
@@ -47,9 +47,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.github.pinguo-zhouwei:CustomPopwindow:2.1.1'
     implementation 'com.lzy.net:okgo:3.0.4'
-    implementation 'com.alibaba:fastjson:1.2.73'
+    implementation 'com.alibaba:fastjson:1.2.83'
     implementation 'com.alibaba:fastjson:1.1.72.android'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     api 'com.github.jd-alexander:LikeButton:0.2.3'
     api "com.github.tbruyelle:rxpermissions:0.10.2"
 }

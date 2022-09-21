@@ -660,49 +660,52 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         @SuppressLint("WrongConstant")
         @Override
         public void onSwitchPlayMode(SuperPlayerDef.PlayerMode playerMode) {
-            playModeCallBack.getPlayMode(playerMode);
-            mWindowPlayer.getLayoutParams();
-            if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN && playerMode == SuperPlayerDef.PlayerMode.WINDOW) {
-                // 全屏到窗口
-                sensorEnable = true;
-                mTargetPlayerMode = SuperPlayerDef.PlayerMode.WINDOW;
-                showBottomUIMenu();
-            } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW && playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-                // 窗口到全屏
-                sensorEnable = false;
-                mTargetPlayerMode = SuperPlayerDef.PlayerMode.FULLSCREEN;
-            }
-            if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-                fullScreen(true);
-            } else {
-                fullScreen(false);
-            }
-            mFullScreenPlayer.hide();
-            mWindowPlayer.hide();
-            mFloatPlayer.hide();
-            //请求全屏模式
-            if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-                mOrientationHelper.disable();
-                if (mLayoutParamFullScreenMode == null) {
-                    return;
+            try {
+                playModeCallBack.getPlayMode(playerMode);
+                mWindowPlayer.getLayoutParams();
+                if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN && playerMode == SuperPlayerDef.PlayerMode.WINDOW) {
+                    // 全屏到窗口
+                    sensorEnable = true;
+                    mTargetPlayerMode = SuperPlayerDef.PlayerMode.WINDOW;
+                    showBottomUIMenu();
+                } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW && playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                    // 窗口到全屏
+                    sensorEnable = false;
+                    mTargetPlayerMode = SuperPlayerDef.PlayerMode.FULLSCREEN;
                 }
-                removeView(mWindowPlayer);
-                addView(mFullScreenPlayer, mVodControllerFullScreenParams);
-                setLayoutParams(mLayoutParamFullScreenMode);
-                //从窗口到全屏始终是横屏展示
-                if (mDesiredOrientation == LANDSCAPE_REVERSE) {
-                    rotateScreenOrientation(LANDSCAPE_REVERSE);
+                if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                    fullScreen(true);
                 } else {
-                    rotateScreenOrientation(LANDSCAPE);
+                    fullScreen(false);
                 }
-                if (mPlayerViewCallback != null) {
-                    mPlayerViewCallback.onStartFullScreenPlay();
-                }
-            } else if (playerMode == SuperPlayerDef.PlayerMode.WINDOW) {// 请求窗口模式
-                mOrientationHelper.disable();
-                // 当前是悬浮窗
-                if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FLOAT) {
-                    try {
+                mFullScreenPlayer.hide();
+                mWindowPlayer.hide();
+                mFloatPlayer.hide();
+                //请求全屏模式
+                if (playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                    mOrientationHelper.disable();
+                    if (mLayoutParamFullScreenMode == null) {
+                        return;
+                    }
+                    removeView(mWindowPlayer);
+                    if (null != mFullScreenPlayer && null != mFullScreenPlayer.getParent()) {
+                        ((ViewGroup) mFullScreenPlayer.getParent()).removeView(mFullScreenPlayer);
+                    }
+                    addView(mFullScreenPlayer, mVodControllerFullScreenParams);
+                    setLayoutParams(mLayoutParamFullScreenMode);
+                    //从窗口到全屏始终是横屏展示
+                    if (mDesiredOrientation == LANDSCAPE_REVERSE) {
+                        rotateScreenOrientation(LANDSCAPE_REVERSE);
+                    } else {
+                        rotateScreenOrientation(LANDSCAPE);
+                    }
+                    if (mPlayerViewCallback != null) {
+                        mPlayerViewCallback.onStartFullScreenPlay();
+                    }
+                } else if (playerMode == SuperPlayerDef.PlayerMode.WINDOW) {// 请求窗口模式
+                    mOrientationHelper.disable();
+                    // 当前是悬浮窗
+                    if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FLOAT) {
                         Context viewContext = getContext();
                         Intent intent = null;
                         if (viewContext instanceof Activity) {
@@ -719,76 +722,82 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                         mWindowManager.removeView(mFloatPlayer);
                         mSuperPlayer.setPlayerView(mTXCloudVideoView);
                         mSuperPlayer.resume();
+                    } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) { // 当前是全屏模式
+                        if (mLayoutParamWindowMode == null) {
+                            return;
+                        }
+                        removeView(mFullScreenPlayer);
+                        if (null != mWindowPlayer && null != mWindowPlayer.getParent()) {
+                            ((ViewGroup) mWindowPlayer.getParent()).removeView(mWindowPlayer);
+                        }
+                        addView(mWindowPlayer, mVodControllerWindowParams);
+                        setLayoutParams(mLayoutParamWindowMode);
+
+                        rotateScreenOrientation(SuperPlayerDef.Orientation.PORTRAIT);
+                        if (mPlayerViewCallback != null) {
+                            mPlayerViewCallback.onStopFullScreenPlay();
+                        }
+                    }
+                } else if (playerMode == SuperPlayerDef.PlayerMode.FLOAT) {//请求悬浮窗模式
+                    TXCLog.i(TAG, "requestPlayMode Float :" + Build.MANUFACTURER);
+                    SuperPlayerGlobalConfig prefs = SuperPlayerGlobalConfig.getInstance();
+                    if (!prefs.enableFloatWindow) {
+                        return;
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 6.0动态申请悬浮窗权限
+                        if (!Settings.canDrawOverlays(mContext)) {
+                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                            intent.setData(Uri.parse("package:" + mContext.getPackageName()));
+                            mContext.startActivity(intent);
+                            return;
+                        }
+                    } else {
+                        if (!checkOp(mContext, OP_SYSTEM_ALERT_WINDOW)) {
+                            showToast(R.string.superplayer_enter_setting_fail);
+                            return;
+                        }
+                    }
+                    mSuperPlayer.pause();
+
+                    mWindowManager = (WindowManager) mContext.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                    mWindowParams = new WindowManager.LayoutParams();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                    } else {
+                        mWindowParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+                    }
+                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                    mWindowParams.format = PixelFormat.TRANSLUCENT;
+                    mWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
+
+                    SuperPlayerGlobalConfig.TXRect rect = prefs.floatViewRect;
+                    mWindowParams.x = rect.x;
+                    mWindowParams.y = rect.y;
+                    mWindowParams.width = rect.width;
+                    mWindowParams.height = rect.height;
+                    try {
+                        if (null != mFloatPlayer && null != mFloatPlayer.getParent()) {
+                            ((ViewGroup) mFloatPlayer.getParent()).removeView(mFloatPlayer);
+                        }
+                        mWindowManager.addView(mFloatPlayer, mWindowParams);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) { // 当前是全屏模式
-                    if (mLayoutParamWindowMode == null) {
+                        showToast(R.string.superplayer_float_play_fail);
                         return;
                     }
-                    removeView(mFullScreenPlayer);
-                    addView(mWindowPlayer, mVodControllerWindowParams);
-                    setLayoutParams(mLayoutParamWindowMode);
 
-                    rotateScreenOrientation(SuperPlayerDef.Orientation.PORTRAIT);
-                    if (mPlayerViewCallback != null) {
-                        mPlayerViewCallback.onStopFullScreenPlay();
+                    TXCloudVideoView videoView = mFloatPlayer.getFloatVideoView();
+                    if (videoView != null) {
+                        mSuperPlayer.setPlayerView(videoView);
+                        mSuperPlayer.resume();
                     }
+                    // 悬浮窗上报
+                    LogReport.getInstance().uploadLogs(LogReport.ELK_ACTION_FLOATMOE, 0, 0);
                 }
-            } else if (playerMode == SuperPlayerDef.PlayerMode.FLOAT) {//请求悬浮窗模式
-                TXCLog.i(TAG, "requestPlayMode Float :" + Build.MANUFACTURER);
-                SuperPlayerGlobalConfig prefs = SuperPlayerGlobalConfig.getInstance();
-                if (!prefs.enableFloatWindow) {
-                    return;
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 6.0动态申请悬浮窗权限
-                    if (!Settings.canDrawOverlays(mContext)) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setData(Uri.parse("package:" + mContext.getPackageName()));
-                        mContext.startActivity(intent);
-                        return;
-                    }
-                } else {
-                    if (!checkOp(mContext, OP_SYSTEM_ALERT_WINDOW)) {
-                        showToast(R.string.superplayer_enter_setting_fail);
-                        return;
-                    }
-                }
-                mSuperPlayer.pause();
-
-                mWindowManager = (WindowManager) mContext.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-                mWindowParams = new WindowManager.LayoutParams();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                } else {
-                    mWindowParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-                }
-                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                mWindowParams.format = PixelFormat.TRANSLUCENT;
-                mWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
-
-                SuperPlayerGlobalConfig.TXRect rect = prefs.floatViewRect;
-                mWindowParams.x = rect.x;
-                mWindowParams.y = rect.y;
-                mWindowParams.width = rect.width;
-                mWindowParams.height = rect.height;
-                try {
-                    mWindowManager.addView(mFloatPlayer, mWindowParams);
-                } catch (Exception e) {
-                    showToast(R.string.superplayer_float_play_fail);
-                    return;
-                }
-
-                TXCloudVideoView videoView = mFloatPlayer.getFloatVideoView();
-                if (videoView != null) {
-                    mSuperPlayer.setPlayerView(videoView);
-                    mSuperPlayer.resume();
-                }
-                // 悬浮窗上报
-                LogReport.getInstance().uploadLogs(LogReport.ELK_ACTION_FLOATMOE, 0, 0);
+                mSuperPlayer.switchPlayMode(playerMode);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            mSuperPlayer.switchPlayMode(playerMode);
         }
 
         /**

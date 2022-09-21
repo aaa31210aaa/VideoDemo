@@ -128,7 +128,7 @@ public class FinderBuriedPointManager {
     /**
      * 播放时长
      */
-    public static void setFinderVideo(String eventStr, String isRenew, DataDTO mDataDTO, long duration) {
+    public static void setFinderVideo(String eventStr, String isRenew, DataDTO mDataDTO, long duration, String isFinish) {
         if (null == mDataDTO) {
             return;
         }
@@ -156,6 +156,7 @@ public class FinderBuriedPointManager {
         model.setContent_type(mDataDTO.getType());
         model.setCreate_time(mDataDTO.getCreateTime());
         model.setPublish_time(mDataDTO.getStartTime());
+        model.setIsFinish(isFinish);
         VideoInteractiveParam.getInstance().setFinderPoint(eventStr, model);
         Log.e("finder", "上报finder埋点:" + "事件为" + eventStr);
     }
@@ -207,7 +208,7 @@ public class FinderBuriedPointManager {
     }
 
 
-    public static void setFinderVideo(String eventStr, String isRenew, VideoCollectionModel.DataDTO.RecordsDTO mDataDTO, long duration) {
+    public static void setFinderVideo(String eventStr, String isRenew, VideoCollectionModel.DataDTO.RecordsDTO mDataDTO, long duration, String isFinish) {
         if (null == mDataDTO) {
             return;
         }
@@ -235,6 +236,7 @@ public class FinderBuriedPointManager {
         model.setContent_type(mDataDTO.getType());
         model.setCreate_time(mDataDTO.getCreateTime());
         model.setPublish_time(mDataDTO.getStartTime());
+        model.setIsFinish(isFinish);
         VideoInteractiveParam.getInstance().setFinderPoint(eventStr, model);
     }
 
