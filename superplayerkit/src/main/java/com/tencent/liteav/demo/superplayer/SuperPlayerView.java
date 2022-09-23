@@ -287,7 +287,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mFullScreenPlayer.mLike.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mFullScreenPlayer.item);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -300,7 +299,6 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         mFullScreenPlayer.mCollection.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mFullScreenPlayer.item);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -345,6 +343,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                 if (json.get("data").toString().equals("1")) {
                                     int num;
                                     mFullScreenPlayer.mLike.setImageResource(R.drawable.favourite_select);
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mFullScreenPlayer.item);
                                     if (TextUtils.isEmpty(mFullScreenPlayer.fullscreenLikeNum.getText().toString())) {
                                         num = 0;
                                     } else {
@@ -437,6 +436,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                                     int num;
                                     num = Integer.parseInt(NumberFormatTool.getNumStr(mFullScreenPlayer.fullscreenCollection.getText().toString()));
                                     num++;
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mFullScreenPlayer.item);
                                     mFullScreenPlayer.fullscreenCollection.setText(NumberFormatTool.formatNum(num, false));
                                     mFullScreenPlayer.mCollection.setImageResource(R.drawable.collection);
                                     contentStateModel.setWhetherFavor("true");

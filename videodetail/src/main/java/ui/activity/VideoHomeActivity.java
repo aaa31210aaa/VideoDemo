@@ -105,6 +105,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     public static boolean isPause;
     private List<CategoryModel.DataDTO> categoryModelList = new ArrayList<>();
     private boolean toFirst = true;
+    public String module_source;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +120,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         contentId = getIntent().getStringExtra("contentId");
         toCurrentTab = getIntent().getIntExtra("setCurrentTab", 1);
         categoryName = getIntent().getStringExtra("category_name");
+        module_source = getIntent().getStringExtra("module_source");
+        if (null == module_source) {
+            module_source = "";
+        }
         backLin = findViewById(R.id.back_lin);
         backLin.setOnClickListener(this);
         videoTab = findViewById(R.id.video_tab);
@@ -564,7 +569,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         isRenew = "是";
                     }
                     //Finder 埋点 视频开始播放
-                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO);
+                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
 
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     String isRenew = "";
@@ -587,7 +592,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         isRenew = "是";
                     }
                     //Finder 埋点 视频开始播放
-                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO);
+                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO, module_source);
                 }
             }
         });

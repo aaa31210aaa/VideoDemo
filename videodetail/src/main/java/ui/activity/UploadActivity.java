@@ -154,6 +154,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     private CustomPopWindow showToastPop;
     private View showToastPopView;
     private TextView uploadText;
+    private String module_source;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -166,6 +167,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
 
     private void initView() {
         draftId = getIntent().getStringExtra("draftId");
+        module_source = getIntent().getStringExtra("module_source");
         if (TextUtils.isEmpty(draftId)) {
             draftId = "";
         }
@@ -201,6 +203,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         uploadText = showToastPopView.findViewById(R.id.upload_text);
         uploadVideoBean = new UploadVideoBean();
         getTopicData();
+        FinderBuriedPointManager.setFinderShortVideoStartMake(Constants.SHORT_VIDEO_START_MAKE, module_source);
     }
 
 
@@ -551,7 +554,6 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                 if (isUploadVideo) {
                     chooseVideo(true);
                 } else {
-                    FinderBuriedPointManager.setFinderCommon(Constants.SHORT_VIDEO_START_MAKE, null);
                     showChooseVideoPop();
                 }
             }

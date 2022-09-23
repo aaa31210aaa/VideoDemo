@@ -44,6 +44,12 @@ public class FinderBuriedPointManager {
         VideoInteractiveParam.getInstance().setFinderPoint(eventStr, model);
     }
 
+    public static void setFinderShortVideoStartMake(String eventStr, String module_source) {
+        FinderPointModel model = new FinderPointModel();
+        model.setModule_source(module_source);
+        VideoInteractiveParam.getInstance().setFinderPoint(eventStr, model);
+    }
+
     public static void setFinderLikeFavoriteShare(String eventStr, DataDTO mDataDTO) {
         if (null == mDataDTO) {
             return;
@@ -164,11 +170,12 @@ public class FinderBuriedPointManager {
     /**
      * 开始播放
      */
-    public static void setFinderVideoPlay(String eventStr, String isRenew, DataDTO mDataDTO) {
+    public static void setFinderVideoPlay(String eventStr, String isRenew, DataDTO mDataDTO, String module_source) {
         if (null == mDataDTO) {
             return;
         }
         FinderPointVideoPlay model = new FinderPointVideoPlay();
+        model.setModule_source(module_source);
         model.setIs_renew(isRenew);
         model.setContent_id(mDataDTO.getId() + "");
         model.setContent_name(mDataDTO.getBrief());

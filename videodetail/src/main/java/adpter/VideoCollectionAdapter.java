@@ -272,9 +272,14 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
                 officialCertificationImg.setImageResource(R.drawable.yellow_v);
             }
         }
-
         //观看人数
-        watched.setText(NumberFormatTool.formatNum(item.getViewCountShow(), false));
+        if (null == item.getViewCountShow()) {
+            watched.setText(NumberFormatTool.formatNum(0, false));
+        } else {
+            watched.setText(NumberFormatTool.formatNum(item.getViewCountShow(), false));
+        }
+
+
 
         if (TextUtils.isEmpty(item.getBelongTopicName()) || null == item.getBelongTopicName()) {
             topicNameStr = "";

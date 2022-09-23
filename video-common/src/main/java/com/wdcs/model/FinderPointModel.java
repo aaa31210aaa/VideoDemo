@@ -114,6 +114,11 @@ public class FinderPointModel {
      */
     private String speed_n;
 
+    /**
+     * 模块名称
+     */
+    private String module_title;
+
     public String getContent_id() {
         if (TextUtils.isEmpty(content_id)) {
             return "";
@@ -390,5 +395,16 @@ public class FinderPointModel {
 
     public void setSpeed_n(String speed_n) {
         this.speed_n = speed_n;
+    }
+
+    public String getModule_title() {
+        if (TextUtils.isEmpty(module_title)) {
+            return "";
+        }
+        return module_title;
+    }
+
+    public void setModule_title(String module_title) {
+        this.module_title = module_title;
     }
 }

@@ -749,7 +749,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                 likeIsRequesting = true;
                                 ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
-                                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
                         }
@@ -798,7 +797,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         adapter.setlikeListener(new VideoCollectionAdapter.LikeListener() {
             @Override
             public void likeClick(View view, RecordsDTO item, ImageView likeImage, TextView likeNum) {
-                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -811,7 +809,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         adapter.setCollectionListener(new VideoCollectionAdapter.CollectionListener() {
             @Override
             public void collectionClick(View view, RecordsDTO item, ImageView collectionImage, TextView collectionNum) {
-                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -851,7 +848,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         e.printStackTrace();
                     }
                 } else {
-                    startActivity(new Intent(VideoDetailActivity.this, UploadActivity.class));
+                    Intent intent = new Intent(VideoDetailActivity.this, UploadActivity.class);
+                    intent.putExtra("module_source", "视频详情");
+                    startActivity(intent);
                 }
             }
         });
@@ -874,9 +873,6 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                         toFollow(mDatas.get(position).getCreateBy());
                     }
                 }
-                FinderPointModel model = new FinderPointModel();
-                model.setUser_id(mDatas.get(position).getCreateBy());
-                FinderBuriedPointManager.setFinderCommon(Constants.NOTICE_USER, model);
             }
         });
 
@@ -916,6 +912,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     public void onSuccess(Response<TrackingUploadModel> response) {
                         try {
                             if (200 == response.body().getCode()) {
+                                FinderPointModel model = new FinderPointModel();
+                                model.setUser_id(mDataDTO.getCreateBy());
+                                FinderBuriedPointManager.setFinderCommon(Constants.NOTICE_USER, model);
                                 setFollowView("true");
                                 //行为埋点 关注用户 关注的用户id mDataDTO.getCreateBy()
                             } else {
@@ -1663,6 +1662,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      * 评论
      */
     private void toComment(String content, String contentId) {
+        FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_COMMENT, mDataDTO);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("contentId", contentId);
@@ -2129,6 +2129,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
                                     collectionImage.setImageResource(R.drawable.collection);
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                 } else {
                                     int num;
@@ -2219,7 +2220,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         num++;
                                         likeNum.setText(NumberFormatTool.formatNum(num, false));
                                     }
-
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                     mDataDTO.setWhetherLike(true);
                                     playerView.contentStateModel.setWhetherLike("true");
                                     playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());

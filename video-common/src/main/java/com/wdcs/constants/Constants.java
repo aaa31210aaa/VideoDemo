@@ -29,6 +29,7 @@ public class Constants {
     public static final String CONTENTID = "contentId";
     public static final String TOCURRENTTAB = "toCurrentTab";
     public static final String CATEGORYNAME = "categoryName";
+    public static final String TABNAME = "tabName";
     public static final String VIDEOTAG = "videoTag";
     public static final String TRACKINGUPLOAD = "TrackingUpload";
     public static final String BLUE_V = "blue-v";
@@ -121,4 +122,5 @@ public class Constants {
     public static final String VIDEO_CLICK_SPEED = "video_click_speed"; //短视频播放点击倍速
     public static final String CONTENT_VIDEO_PLAY = "content_video_play";  //视频开始播放
     public static final String CONTENT_VIDEO_DURATION = "content_video_duration"; //视频播放时长
+    public static final String CONTENT_COMMENT = "content_comment"; //评论
 }

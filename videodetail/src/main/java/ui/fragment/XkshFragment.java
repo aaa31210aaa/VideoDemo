@@ -118,6 +118,7 @@ import static com.wdcs.constants.Constants.CATEGORYNAME;
 import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.PANELCODE;
+import static com.wdcs.constants.Constants.TABNAME;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -232,6 +233,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private String mCategoryName = "";
     private long beforeClickTime = 0;
     private int toCurrentTab;
+    private String tabName;
     private View footerView;
     private boolean isFirst = true;
 
@@ -245,6 +247,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         args.putString(CONTENTID, contentId);
         args.putInt(TOCURRENTTAB, toCurrentTab);
+        args.putString(TABNAME, videoChannelModel.getColumnBean().getColumnName());
         if (!TextUtils.isEmpty(categoryName)) {
             args.putString(CATEGORYNAME, categoryName);
         }
@@ -260,6 +263,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             myContentId = getArguments().getString(CONTENTID);
             mCategoryName = getArguments().getString(CATEGORYNAME);
             toCurrentTab = getArguments().getInt(TOCURRENTTAB);
+            tabName = getArguments().getString(TABNAME);
         }
     }
 
@@ -569,7 +573,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 likeIsRequesting = true;
                                 ImageView likeImage = (ImageView) adapter.getViewByPosition(currentIndex, R.id.video_detail_likes_image);
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
-                                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
                         }
@@ -620,7 +623,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         adapter.setlikeListener(new XkshVideoAdapter.LikeListener() {
             @Override
             public void likeClick(View view, DataDTO item, ImageView likeImage, TextView likeNum) {
-                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -633,7 +635,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         adapter.setCollectionListener(new XkshVideoAdapter.CollectionListener() {
             @Override
             public void collectionClick(View view, DataDTO item, ImageView collectionImage, TextView collectionNum) {
-                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
@@ -673,7 +674,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         e.printStackTrace();
                     }
                 } else {
-                    startActivity(new Intent(getActivity(), UploadActivity.class));
+                    Intent intent = new Intent(getActivity(), UploadActivity.class);
+                    intent.putExtra("module_source", "tab_" + tabName);
+                    startActivity(intent);
                 }
             }
         });
@@ -696,9 +699,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         toFollow(mDatas.get(position).getCreateBy());
                     }
                 }
-                FinderPointModel model = new FinderPointModel();
-                model.setUser_id(mDatas.get(position).getCreateBy());
-                FinderBuriedPointManager.setFinderCommon(Constants.NOTICE_USER, model);
             }
         });
 
@@ -1592,6 +1592,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * 评论
      */
     private void toComment(String content, String contentId) {
+        FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_COMMENT, mDataDTO);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("contentId", contentId);
@@ -2050,6 +2051,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     num++;
                                     collectionNum.setText(NumberFormatTool.formatNum(num, false));
                                     collectionImage.setImageResource(R.drawable.collection);
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_FAVORITE, mDataDTO);
                                     playerView.contentStateModel.setWhetherFavor("true");
                                 } else {
                                     int num;
@@ -2134,7 +2136,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     if (null != likeImage) {
                                         likeImage.setImageResource(R.drawable.favourite_select);
                                     }
-
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
                                     if (null != likeNum) {
                                         num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
                                         num++;
@@ -2681,6 +2683,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     public void onSuccess(Response<TrackingUploadModel> response) {
                         try {
                             if (200 == response.body().getCode()) {
+                                FinderPointModel model = new FinderPointModel();
+                                model.setUser_id(mDataDTO.getCreateBy());
+                                FinderBuriedPointManager.setFinderCommon(Constants.NOTICE_USER, model);
                                 setFollowView("true");
                                 //行为埋点 关注用户 关注的用户id mDataDTO.getCreateBy()
                             } else {

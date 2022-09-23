@@ -84,8 +84,6 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     private int mAppId;
     public int demouration;
     public SuperPlayerView superPlayerView;
-    private boolean noFirst;
-    private boolean xkshNoFirst;
 
     public SuperPlayerImpl(Context context, TXCloudVideoView videoView, SuperPlayerView superPlayerView) {
         initialize(context, videoView);
@@ -786,16 +784,8 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             }
         } else {
             //埋点  视频-开始播放  重播
-            if (noFirst) {
-                superPlayerView.buriedPointModel.setIs_renew("true");
-            }
-
-            if (xkshNoFirst) {
-                superPlayerView.buriedPointModel.setXksh_renew("true");
-            }
-
-            noFirst = true;
-            xkshNoFirst = true;
+            superPlayerView.buriedPointModel.setIs_renew("true");
+            superPlayerView.buriedPointModel.setXksh_renew("true");
             playVodURL(mCurrentPlayVideoURL);
         }
     }

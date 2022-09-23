@@ -26,6 +26,7 @@ import com.wdcs.model.ShareInfo;
 import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.ToastUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -89,6 +90,17 @@ public class MainActivity extends AppCompatActivity {
         setCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                VideoInteractiveParam.getInstance().setVideoFinderPointCallBack(new VideoFinderPointCallBack() {
+                    @Override
+                    public void getFinderPoint(String eventStr, JSONObject json) {
+                        try {
+                            Log.e("FinderPoint", json.getString("content_id"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
                 VideoInteractiveParam.getInstance().setCallBack(new VideoParamCallBack() {
                     @Override
                     public void shared(ShareInfo shareInfo) {
@@ -103,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     public String setCode() {
-                        return "ba9d8150-eaed-4edc-82d8-fdb9eb6cf4f4";
+                        return "5105df58-9914-413f-b7a3-0e9e4803932a";
                     }
 
                     @Override
@@ -147,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("panelId", panelCode.getText().toString());
                 intent.putExtra("contentId", contentId.getText().toString());
                 intent.putExtra("category_name", "123456");
+                intent.putExtra("module_source", "测试来源");
                 startActivity(intent);
             }
         });
