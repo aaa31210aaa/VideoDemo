@@ -29,6 +29,7 @@ public class Constants {
     public static final String CONTENTID = "contentId";
     public static final String TOCURRENTTAB = "toCurrentTab";
     public static final String CATEGORYNAME = "categoryName";
+    public static final String MODULE_SOURCE = "module_source";
     public static final String TABNAME = "tabName";
     public static final String VIDEOTAG = "videoTag";
     public static final String TRACKINGUPLOAD = "TrackingUpload";

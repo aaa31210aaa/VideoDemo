@@ -37,6 +37,7 @@ import ui.activity.TgtCodeActivity;
 import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
+import ui.activity.VideoHomeTestActivity;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv;
@@ -76,11 +77,16 @@ public class MainActivity extends AppCompatActivity {
         classList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
-                intent.putExtra("panelId", "mycs.video.video");
-                intent.putExtra("classId", "10299204");
+//                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
+//                intent.putExtra("panelId", "mycs.video.video");
+//                intent.putExtra("classId", "10299204");
+//                intent.putExtra("contentId", contentId.getText().toString());
+//                intent.putExtra("category_name", "123456");
+//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, VideoHomeTestActivity.class);
                 intent.putExtra("contentId", contentId.getText().toString());
                 intent.putExtra("category_name", "123456");
+                intent.putExtra("module_source", "测试来源");
                 startActivity(intent);
             }
         });
@@ -115,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     public String setCode() {
-                        return "5105df58-9914-413f-b7a3-0e9e4803932a";
+                        return "8137aa26-6cfd-444c-8b48-15c2e1d26f84";
                     }
 
                     @Override
@@ -156,10 +162,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, VideoHomeActivity.class);
-                intent.putExtra("panelId", panelCode.getText().toString());
-                intent.putExtra("contentId", contentId.getText().toString());
-                intent.putExtra("category_name", "123456");
-                intent.putExtra("module_source", "测试来源");
+//                intent.putExtra("contentId", contentId.getText().toString());
+//                intent.putExtra("category_name", "123456");
+//                intent.putExtra("module_source", "测试来源");
                 startActivity(intent);
             }
         });

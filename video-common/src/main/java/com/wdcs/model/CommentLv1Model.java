@@ -142,6 +142,8 @@ public class CommentLv1Model {
             private String official;
             private int position;
             private boolean isShow;
+            private Boolean whetherLike; //当前用户是否已经点赞过
+            private Integer likeCount; //当前评论的点赞数量
             private List<ReplyLv2Model.ReplyListDTO> replyLv2CacheList = new ArrayList<>();
             private List<ReplyLv2Model.ReplyListDTO> replyLv2Alllist = new ArrayList<>();
 
@@ -357,6 +359,21 @@ public class CommentLv1Model {
                 isShow = show;
             }
 
+            public Boolean getWhetherLike() {
+                return whetherLike;
+            }
+
+            public void setWhetherLike(Boolean whetherLike) {
+                this.whetherLike = whetherLike;
+            }
+
+            public Integer getLikeCount() {
+                return likeCount;
+            }
+
+            public void setLikeCount(Integer likeCount) {
+                this.likeCount = likeCount;
+            }
 
             public List<ReplyLv2Model.ReplyListDTO> getReplyLv2CacheList() {
                 return replyLv2CacheList;

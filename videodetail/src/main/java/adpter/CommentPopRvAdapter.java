@@ -27,6 +27,7 @@ import com.wdcs.model.ReplyLv2Model;
 import com.wdcs.utils.DateUtils;
 import com.wdcs.utils.GetTimeAgo;
 import com.wdcs.utils.KeyboardUtils;
+import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
 import com.wdcs.videodetail.demo.R;
@@ -97,6 +98,26 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
         void lv1No2Click(String id, String replyName);
     }
 
+    public Lv1CommentLikeListener commentLikeListener;
+
+    public interface Lv1CommentLikeListener {
+        void lv1CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum);
+    }
+
+    public void setLv1CommentLike(Lv1CommentLikeListener commentLikeListener) {
+        this.commentLikeListener = commentLikeListener;
+    }
+
+    public Lv2CommentLikeListener lv2CommentLikeListener;
+
+    public interface Lv2CommentLikeListener {
+        void Lv2CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum);
+    }
+
+    public void setLv2CommentLike(Lv2CommentLikeListener lv2CommentLikeListener) {
+        this.lv2CommentLikeListener = lv2CommentLikeListener;
+    }
+
 
     @Override
     protected void convert(final BaseViewHolder helper, MultiItemEntity item) {
@@ -109,6 +130,9 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                 ImageView commentTopLabel = helper.getView(R.id.comment_top_label);
                 TextView reback1NameContent = helper.getView(R.id.reback1_name_content);
                 TextView reback2NameContent = helper.getView(R.id.reback2_name_content);
+                LinearLayout commentLikeBtn = helper.getView(R.id.comment_like_btn);
+                final ImageView commentLikeIcon = helper.getView(R.id.comment_like_icon);
+                final TextView commentLikeNum = helper.getView(R.id.comment_like_num);
                 final LinearLayout lv1CommentLin = helper.getView(R.id.lv1_comment_lin);
                 //Lv1展开更多
                 final LinearLayout lv1Extend = helper.getView(R.id.lv1_extend);
@@ -258,6 +282,28 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                     }
                 });
 
+                commentLikeBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        commentLikeListener.lv1CommentLikeClick(lv1Model.getId(), commentLikeIcon, commentLikeNum);
+                    }
+                });
+
+                if (lv1Model.getWhetherLike()) {
+                    commentLikeIcon.setImageResource(R.drawable.comment_like);
+                } else {
+                    commentLikeIcon.setImageResource(R.drawable.comment_unlike);
+                }
+
+                if (null == lv1Model.getLikeCount()) {
+                    commentLikeNum.setText("");
+                } else {
+                    if (lv1Model.getLikeCount() == 0) {
+                        commentLikeNum.setText("");
+                    } else {
+                        commentLikeNum.setText(NumberFormatTool.formatNum(lv1Model.getLikeCount(), false));
+                    }
+                }
 
                 break;
             case TYPE_LEVEL_2:
@@ -267,6 +313,9 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                 LinearLayout lv2ExtendCos = helper.getView(R.id.lv2_extend_cos);
                 TextView lv2LoadMoreInfo = helper.getView(R.id.lv2_load_more_info);
                 final TextView lv2LoadMoreExtendTv = helper.getView(R.id.lv2_load_more_extend);
+                LinearLayout lv2CommentLikeBtn = helper.getView(R.id.lv2_comment_like_btn);
+                final ImageView lv2CommentLikeIcon = helper.getView(R.id.lv2_comment_like_icon);
+                final TextView lv2CommentLikeNum = helper.getView(R.id.lv2_comment_like_num);
 
                 //设置lv2评论
                 if (TextUtils.equals(lv2Model.getOfficial(), "true")) {
@@ -348,12 +397,12 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                                     level1Item.setExpanded(true);
                                     collapse(i);
                                     for (int j = level1Item.getSubItems().size() - 1; j >= 2; j--) {
-                                        level1Item.getReplyLv2CacheList().add(0, level1Item.getSubItems().get(j));
+//                                        level1Item.getReplyLv2CacheList().add(0, level1Item.getSubItems().get(j));
                                         level1Item.getSubItems().remove(j);
-                                    }/*你这个地方不要remove 就可以剩下两条*/
+                                    }/*这个地方不要remove 就可以剩下两条*/
                                     level1Item.setShow(true);
                                     notifyItemChanged(helper.getAdapterPosition());
-                                    notifyItemRangeRemoved(helper.getAdapterPosition() + 1, level1Item.getSubItems().size()-3);
+                                    notifyItemRangeRemoved(helper.getAdapterPosition() + 1, level1Item.getSubItems().size() - 3);
                                     break;
                                 }
                             }
@@ -389,6 +438,29 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                         lv2ReplyClick.Lv2ReplyClick(lv2Model.getId(), lv2Model.getNickname());
                     }
                 });
+
+                lv2CommentLikeBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        lv2CommentLikeListener.Lv2CommentLikeClick(lv2Model.getId(), lv2CommentLikeIcon, lv2CommentLikeNum);
+                    }
+                });
+
+                if (lv2Model.getWhetherLike()) {
+                    lv2CommentLikeIcon.setImageResource(R.drawable.comment_like);
+                } else {
+                    lv2CommentLikeIcon.setImageResource(R.drawable.comment_unlike);
+                }
+
+                if (null == lv2Model.getLikeCount()) {
+                    lv2CommentLikeNum.setText("");
+                } else {
+                    if (lv2Model.getLikeCount() == 0) {
+                        lv2CommentLikeNum.setText("");
+                    } else {
+                        lv2CommentLikeNum.setText(NumberFormatTool.formatNum(lv2Model.getLikeCount(), false));
+                    }
+                }
 
                 break;
         }
@@ -463,12 +535,14 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                                 lv2Model.setRcommentId(replayModel.getRcommentId());
                                 lv2Model.setPcommentId(replayModel.getPcommentId());
                                 lv2Model.setRuserId(replayModel.getRuserId());
+                                lv2Model.setWhetherLike(replayModel.getWhetherLike());
+                                lv2Model.setLikeCount(replayModel.getLikeCount());
                                 lv2Model.setPosition(i);
                                 lv2Model.setParentPosition(lv1Model.getPosition());
                                 if (i < 7) {
                                     fiveList.add(lv2Model);
 //                                    lv1Model.getSubItems().add(lv2Model);
-                                }else {
+                                } else {
                                     lv1Model.getReplyLv2CacheList().add(lv2Model);
                                 }
                                 list.add(lv2Model);

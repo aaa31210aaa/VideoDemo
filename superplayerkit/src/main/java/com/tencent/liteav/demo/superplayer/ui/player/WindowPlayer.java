@@ -59,6 +59,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private TextView mTvCurrent;                             // 当前进度文本
     private TextView mTvDuration;                            // 总时长文本
     public PointSeekBar mSeekBarProgress;                       // 播放进度条
+    public PointSeekBar xSeekBarProgress;                       //细的播放进度条
     public ProgressBar mLoadBar;
     public LinearLayout mLayoutReplay;                          // 重播按钮所在布局
     private ProgressBar mPbLiveLoading;                         // 加载圈
@@ -279,9 +280,40 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         zdyIvPause = findViewById(R.id.zdy_iv_pause);
         mTvCurrent = (TextView) findViewById(R.id.superplayer_tv_current);
         mTvDuration = (TextView) findViewById(R.id.superplayer_tv_duration);
-        mSeekBarProgress = (PointSeekBar) findViewById(R.id.superplayer_seekbar_progress);
+        mSeekBarProgress = (PointSeekBar) findViewById(R.id.superplayer_seekbar_progress_crude);
+        xSeekBarProgress = findViewById(R.id.superplayer_seekbar_progress);
         mSeekBarProgress.setProgress(0);
         mSeekBarProgress.setMax(100);
+        mSeekBarProgress.setAlpha(0);
+        xSeekBarProgress.setProgress(0);
+        xSeekBarProgress.setMax(100);
+
+        mSeekBarProgress.setMoveEventListener(new PointSeekBar.MoveEventListener() {
+            @Override
+            public void moveEvent() {
+                mSeekBarProgress.setAlpha(1);
+                xSeekBarProgress.setAlpha(0);
+            }
+        });
+
+        mSeekBarProgress.setUpEventListener(new PointSeekBar.UpEventListener() {
+            @Override
+            public void upEvent() {
+                new Thread(){
+                    @Override
+                    public void run() {
+                        try {
+                            sleep(300);
+                            mSeekBarProgress.setAlpha(0);
+                            xSeekBarProgress.setAlpha(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+            }
+        });
+
         mLoadBar = findViewById(R.id.superplayer_loadbar_progress);
         mLoadBar.setProgress(100);
         mLoadBar.setMax(100);
@@ -627,8 +659,10 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
             if (!mIsChangingSeekBarProgress) {
                 if (mPlayType == SuperPlayerDef.PlayerType.LIVE) {
                     mSeekBarProgress.setProgress(mSeekBarProgress.getMax());
+                    xSeekBarProgress.setProgress(xSeekBarProgress.getMax());
                 } else {
                     mSeekBarProgress.setProgress(progress);
+                    xSeekBarProgress.setProgress(progress);
                 }
             }
             mTvDuration.setText(formattedTime(mDuration));
@@ -647,6 +681,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 mTvBackToLive.setVisibility(View.GONE);
 //                mTvDuration.setVisibility(View.GONE);
                 mSeekBarProgress.setProgress(100);
+                xSeekBarProgress.setProgress(100);
                 break;
             case LIVE_SHIFT:
                 if (mLayoutBottom.getVisibility() == VISIBLE) {
@@ -762,6 +797,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 progress = 0;
             }
             mSeekBarProgress.setProgress(progress);
+            xSeekBarProgress.setProgress(progress);
 
             int seekTime;
             float percentage = progress * 1.0f / mSeekBarProgress.getMax();

@@ -119,7 +119,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
         android:background="@drawable/mask_down"
         android:orientation="horizontal">
 
@@ -130,8 +129,8 @@
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
             android:layout_marginLeft="@dimen/video_dp10"
-            android:layout_marginTop="@dimen/video_dp5"
             android:layout_marginRight="@dimen/video_dp10"
+            android:layout_marginBottom="45dp"
             android:layout_toLeftOf="@+id/user_todo"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -291,6 +290,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_marginBottom="46dp"
             android:layout_gravity="bottom"
             android:orientation="vertical">
 

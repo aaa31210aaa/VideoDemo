@@ -77,7 +77,8 @@
                     </RelativeLayout>
 
                 </LinearLayout>
-                <LinearLayout
+
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp">
@@ -86,6 +87,7 @@
                         android:id="@+id/comment_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
                         android:textColor="@color/video_c9"
                         android:textSize="10sp"
                         tools:text="18分钟前">
@@ -95,13 +97,44 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
                         android:layout_marginLeft="10dp"
+                        android:layout_toRightOf="@+id/comment_date"
                         android:text="回复"
                         android:textColor="@color/colorGray4"
                         android:textSize="10sp">
 
                     </TextView>
-                </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/comment_like_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:padding="@dimen/video_dp5">
+
+                        <ImageView
+                            android:id="@+id/comment_like_icon"
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:layout_marginRight="@dimen/dp_10"
+                            android:layout_toLeftOf="@+id/comment_like_num"
+                            android:src="@drawable/comment_unlike">
+
+                        </ImageView>
+
+                        <TextView
+                            android:id="@+id/comment_like_num"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/video_dp5"
+                            android:text=""
+                            android:textColor="@color/video_c9"
+                            android:textSize="12sp"></TextView>
+                    </LinearLayout>
+                </RelativeLayout>
 
                 <TextView
                     android:id="@+id/comment_content"
@@ -167,15 +200,14 @@
                         android:id="@+id/reback1_name_content"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
                         android:textColor="@color/video_black"
-                        tools:text="小编回复：测试测试测试测试测试测试测试测试测试测试测试测试"
-                        >
+                        android:textSize="13sp"
+                        tools:text="小编回复：测试测试测试测试测试测试测试测试测试测试测试测试">
 
                     </TextView>
                 </LinearLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp">
@@ -184,19 +216,50 @@
                         android:id="@+id/reback1_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="10sp"
-                        tools:text="2021-12-31"
+                        android:layout_centerVertical="true"
                         android:textColor="@color/video_c9"
-                        ></TextView>
+                        android:textSize="10sp"
+                        tools:text="2021-12-31"></TextView>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
                         android:layout_marginLeft="20dp"
+                        android:layout_toRightOf="@+id/reback1_date"
                         android:text="回复"
                         android:textColor="@color/colorGray4"
                         android:textSize="10sp"></TextView>
-                </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/reback1_like_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:padding="@dimen/video_dp5">
+
+                        <ImageView
+                            android:id="@+id/reback1_like_icon"
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:layout_marginRight="@dimen/dp_10"
+                            android:layout_toLeftOf="@+id/comment_like_num"
+                            android:src="@drawable/comment_unlike">
+
+                        </ImageView>
+
+                        <TextView
+                            android:id="@+id/reback1_like_num"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/video_dp5"
+                            android:text=""
+                            android:textColor="@color/video_c9"
+                            android:textSize="12sp"></TextView>
+                    </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
 
@@ -215,16 +278,15 @@
                         android:id="@+id/reback2_name_content"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
                         android:textColor="@color/video_black"
-                        tools:text="小编回复：测试测试测试测试测试测试测试测试测试"
-                        >
+                        android:textSize="13sp"
+                        tools:text="小编回复：测试测试测试测试测试测试测试测试测试">
 
                     </TextView>
 
                 </LinearLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp">
@@ -233,19 +295,50 @@
                         android:id="@+id/reback2_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="10sp"
+                        android:layout_centerVertical="true"
                         android:textColor="@color/video_c9"
-                        tools:text="2021-12-31"
-                        ></TextView>
+                        android:textSize="10sp"
+                        tools:text="2021-12-31"></TextView>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
                         android:layout_marginLeft="20dp"
+                        android:layout_toRightOf="@+id/reback2_date"
                         android:text="回复"
                         android:textColor="@color/colorGray4"
                         android:textSize="10sp"></TextView>
-                </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/reback2_like_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:padding="@dimen/video_dp5">
+
+                        <ImageView
+                            android:id="@+id/reback2_like_icon"
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:layout_marginRight="@dimen/dp_10"
+                            android:layout_toLeftOf="@+id/comment_like_num"
+                            android:src="@drawable/comment_unlike">
+
+                        </ImageView>
+
+                        <TextView
+                            android:id="@+id/reback2_like_num"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/video_dp5"
+                            android:text=""
+                            android:textColor="@color/video_c9"
+                            android:textSize="12sp"></TextView>
+                    </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -268,9 +361,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:paddingTop="10dp"
+                    android:text="展开"
                     android:textColor="@color/bz_red"
-                    android:textSize="13sp"
-                    android:text="展开"></TextView>
+                    android:textSize="13sp"></TextView>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

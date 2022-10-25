@@ -127,9 +127,8 @@
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
             android:layout_marginLeft="@dimen/video_dp10"
-            android:layout_marginTop="@dimen/video_dp5"
             android:layout_marginRight="@dimen/video_dp10"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="45dp"
             android:layout_toLeftOf="@+id/user_todo"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -290,7 +289,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="45dp"
             android:orientation="vertical">
 
             <LinearLayout

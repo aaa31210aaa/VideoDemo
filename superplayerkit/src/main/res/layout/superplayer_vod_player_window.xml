@@ -108,13 +108,12 @@
     <LinearLayout
         android:id="@+id/superplayer_ll_bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="5dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        >
 
         <!--播放/暂停-->
         <ImageView
@@ -147,14 +146,14 @@
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:layout_marginTop="2.5dp"
+                android:layout_centerVertical="true"
                 android:progressDrawable="@drawable/layer_list_progress_drawable" />
 
             <com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar
                 android:id="@+id/superplayer_seekbar_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
                 app:psb_backgroundColor="@color/superplayer_transparent"
                 app:psb_max="100"
                 app:psb_progress="0"
@@ -162,7 +161,19 @@
                 app:psb_progressHeight="2dp"
                 app:psb_thumbBackground="@drawable/superplayer_vod_thumb" />
 
-
+            <com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar
+                android:id="@+id/superplayer_seekbar_progress_crude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                app:psb_backgroundColor="@color/superplayer_transparent"
+                app:psb_max="100"
+                app:psb_progress="0"
+                app:psb_progressColor="@color/superplayer_white"
+                app:psb_progressHeight="10dp"
+                app:psb_thumbBackground="@drawable/superplayer_vod_thumb" />
         </RelativeLayout>
         <!--总时长-->
         <TextView

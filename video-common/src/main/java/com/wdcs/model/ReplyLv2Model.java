@@ -76,6 +76,8 @@ public class ReplyLv2Model {
         private String official;
         private int position;
         private int parentPosition;
+        private Boolean whetherLike; //当前用户是否已经点赞过
+        private Integer likeCount; //当前评论的点赞数量
 
         public String getId() {
             return id;
@@ -283,6 +285,22 @@ public class ReplyLv2Model {
 
         public void setParentPosition(int parentPosition) {
             this.parentPosition = parentPosition;
+        }
+
+        public Boolean getWhetherLike() {
+            return whetherLike;
+        }
+
+        public void setWhetherLike(Boolean whetherLike) {
+            this.whetherLike = whetherLike;
+        }
+
+        public Integer getLikeCount() {
+            return likeCount;
+        }
+
+        public void setLikeCount(Integer likeCount) {
+            this.likeCount = likeCount;
         }
     }
 }

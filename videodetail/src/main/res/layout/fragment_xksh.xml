@@ -51,6 +51,7 @@
         android:layout_below="@+id/video_title_view"
         android:layout_alignParentRight="true"
         android:layout_marginTop="130dp"
+        android:visibility="gone"
         android:layout_marginRight="@dimen/video_dp10"
         android:src="@drawable/ranking_list"></ImageView>
 

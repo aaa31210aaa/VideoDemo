@@ -1,5 +1,6 @@
 package adpter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -105,7 +106,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
-        ((VideoHomeActivity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        ((Activity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
         double widthPixel = outMetrics.widthPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
@@ -116,8 +117,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((Activity) mContext).isFinishing()
+                    && !((Activity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(item.getImagesUrl())
                         .into(coverPicture);
@@ -137,8 +138,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             layoutParams.setMargins(0, 0, 0, 0);
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((Activity) mContext).isFinishing()
+                    && !((Activity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(item.getImagesUrl())
                         .into(coverPicture);
@@ -157,8 +158,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             mHeight = layoutParams.width / percent;
             layoutParams.height = (int) mHeight;
 
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((Activity) mContext).isFinishing()
+                    && !((Activity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(item.getImagesUrl())
                         .into(coverPicture);
@@ -222,10 +223,10 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             }
         });
 
-        if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                && !((VideoHomeActivity) mContext).isDestroyed()) {
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+        if (null != mContext && !((Activity) mContext).isFinishing()
+                && !((Activity) mContext).isDestroyed()) {
+            if (null != mContext && !((Activity) mContext).isFinishing()
+                    && !((Activity) mContext).isDestroyed()) {
                 GlideUtil.displayCircle(publisherHeadimg, item.getIssuerImageUrl(), true, mContext);
 //                Glide.with(mContext)
 //                        .load(item.getIssuerImageUrl())
@@ -428,8 +429,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
             String item = list.get(i).getTitle();
             View view = View.inflate(mContext, R.layout.customer_viewflipper_item, null);
             ImageView viewFlipperIcon = view.findViewById(R.id.view_flipper_icon);
-            if (null != mContext && !((VideoHomeActivity) mContext).isFinishing()
-                    && !((VideoHomeActivity) mContext).isDestroyed()) {
+            if (null != mContext && !((Activity) mContext).isFinishing()
+                    && !((Activity) mContext).isDestroyed()) {
                 Glide.with(mContext)
                         .load(list.get(i).getThumbnailUrl())
                         .into(viewFlipperIcon);

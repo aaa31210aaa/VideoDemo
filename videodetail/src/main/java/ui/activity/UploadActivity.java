@@ -915,14 +915,19 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                                 model.setWorks_size(worksSize + "");
                                 model.setWorks_brief(briefIntroduction.getText().toString());
                                 FinderBuriedPointManager.setFinderCommon(Constants.SHORT_VIDEO_SUBMIT, model);
+
+                                uploadText.setText(tipStr);
+                                showToastPop();
+                                String toDraft = "";
+                                if (TextUtils.equals("0", ugcUploadWay)) {
+                                    toDraft = "?tabsId=2";
+                                }
+                                toPersonelCenter(toDraft);
+                            } else {
+                                if (null != bean.getMessage()) {
+                                    ToastUtils.showShort(bean.getMessage());
+                                }
                             }
-                            uploadText.setText(tipStr);
-                            showToastPop();
-                            String toDraft = "";
-                            if (TextUtils.equals("0", ugcUploadWay)) {
-                                toDraft = "?tabsId=2";
-                            }
-                            toPersonelCenter(toDraft);
                         }
                     }
 

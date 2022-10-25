@@ -68,9 +68,9 @@ dependencies {
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.30'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.github.pinguo-zhouwei:CustomPopwindow:2.1.1'
-    implementation 'com.scwang.smart:refresh-layout-kernel:2.0.3'      //核心必须依赖
-    implementation 'com.scwang.smart:refresh-header-classics:2.0.3'    //经典刷新头
-    implementation 'com.scwang.smart:refresh-footer-classics:2.0.3'    //经典加载
+    implementation 'io.github.scwang90:refresh-layout-kernel:2.0.5'      //核心必须依赖
+    implementation 'io.github.scwang90:refresh-header-classics:2.0.5'    //经典刷新头
+    implementation 'io.github.scwang90:refresh-footer-classics:2.0.5'    //经典加载
     implementation 'com.lzy.net:okgo:3.0.4'
     implementation 'com.alibaba:fastjson:1.2.73'
     implementation 'com.alibaba:fastjson:1.1.72.android'

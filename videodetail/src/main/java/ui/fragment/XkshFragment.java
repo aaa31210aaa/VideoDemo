@@ -1159,6 +1159,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
         }, commentPopRv);
 
+        //评论点赞
+        commentPopRvAdapter.setLv1CommentLike(new CommentPopRvAdapter.Lv1CommentLikeListener() {
+            @Override
+            public void lv1CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(targetId, likeIcon, likeNum);
+            }
+        });
     }
 
 
@@ -2202,6 +2209,113 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     }
                 });
     }
+
+    /**
+     * 评论点赞/取消点赞
+     */
+    private void CommentLikeOrCancel(String targetId, final ImageView likeImage, final TextView likeNum) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("targetId", targetId);
+            jsonObject.put("type", "comment");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(ApiConstants.getInstance().addOrCancelLike())
+                .tag(VIDEOTAG)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        try {
+                            JSONObject json = new JSONObject(response.body());
+                            if (null != json && json.get("code").toString().equals("200")) {
+                                if (!mDatas.isEmpty()) {
+                                    String jsonString = BuriedPointModelManager.getLikeAndFavorBuriedPointData(myContentId, mDatas.get(currentIndex).getTitle(),
+                                            "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
+                                            Constants.CONTENT_TYPE);
+                                    Log.e("埋点", "埋点：点赞---" + jsonString);
+                                }
+
+
+                                if (json.get("data").toString().equals("1")) {
+                                    int num = 0;
+                                    if (null != likeImage) {
+                                        likeImage.setImageResource(R.drawable.comment_like);
+                                    }
+                                    FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_LIKE, mDataDTO);
+                                    if (null != likeNum) {
+                                        num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
+                                        num++;
+                                        likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                    }
+
+//                                    mDataDTO.setWhetherLike(true);
+//                                    playerView.contentStateModel.setWhetherLike("true");
+//                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                } else {
+                                    int num = 0;
+                                    if (null != likeImage) {
+                                        likeImage.setImageResource(R.drawable.comment_unlike);
+                                    }
+                                    if (null != likeNum) {
+                                        num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
+                                        if (num > 0) {
+                                            num--;
+                                        }
+                                        if (num == 0) {
+                                            likeNum.setText("");
+                                        } else {
+                                            likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                        }
+                                    }
+//                                    mDataDTO.setWhetherLike(false);
+//                                    playerView.contentStateModel.setWhetherLike("false");
+//                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
+                                }
+//                                if (null != playerView.contentStateModel) {
+//                                    playerView.setContentStateModel(myContentId, videoType);
+//                                }
+                            } else if (json.get("code").toString().equals(token_error)) {
+                                Log.e("addOrCancelLike", "无token,跳转登录");
+                                try {
+                                    param.toLogin();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (null != json.get("message").toString()) {
+                                    ToastUtils.showShort(json.get("message").toString());
+                                } else {
+                                    ToastUtils.showShort("点赞失败");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showShort("点赞失败");
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        ToastUtils.showShort("点赞失败");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+//                        likeIsRequesting = false;
+                    }
+                });
+    }
+
 
     /**
      * 浏览量+1

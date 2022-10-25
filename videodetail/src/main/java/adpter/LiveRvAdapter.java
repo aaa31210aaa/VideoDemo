@@ -1,5 +1,6 @@
 package adpter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.widget.ImageView;
@@ -37,8 +38,8 @@ public class LiveRvAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> {
             liveState.setImageResource(R.drawable.live_end);
         }
         TextView textView = helper.getView(R.id.live_item_title);
-        if (null != mContext && !((VideoHomeActivity)mContext).isFinishing()
-                && !((VideoHomeActivity)mContext).isDestroyed()) {
+        if (null != mContext && !((Activity)mContext).isFinishing()
+                && !((Activity)mContext).isDestroyed()) {
             Glide.with(mContext)
                     .load(item.getThumbnailUrl())
                     .into(imageView);
