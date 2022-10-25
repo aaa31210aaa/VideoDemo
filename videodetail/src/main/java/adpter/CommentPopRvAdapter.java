@@ -100,18 +100,39 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
 
     public Lv1CommentLikeListener commentLikeListener;
 
-    public interface Lv1CommentLikeListener {
-        void lv1CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum);
+    public interface Lv1CommentLikeListener<T> {
+        void lv1CommentLikeClick(T t, String targetId, ImageView likeIcon, TextView likeNum);
     }
 
     public void setLv1CommentLike(Lv1CommentLikeListener commentLikeListener) {
         this.commentLikeListener = commentLikeListener;
     }
 
+    public Reback1LikeBtnListener reback1LikeBtnListener;
+
+    public interface Reback1LikeBtnListener<T> {
+        void reback1LikeClick(T t, String targetId, ImageView likeIcon, TextView likeNum);
+    }
+
+    public void setReback1Like(Reback1LikeBtnListener reback1LikeBtnListener) {
+        this.reback1LikeBtnListener = reback1LikeBtnListener;
+    }
+
+    public Reback2LikeBtnListener reback2LikeBtnListener;
+
+    public interface Reback2LikeBtnListener<T> {
+        void reback2LikeClick(T t, String targetId, ImageView likeIcon, TextView likeNum);
+    }
+
+    public void setReback2Like(Reback2LikeBtnListener reback2LikeBtnListener) {
+        this.reback2LikeBtnListener = reback2LikeBtnListener;
+    }
+
+
     public Lv2CommentLikeListener lv2CommentLikeListener;
 
-    public interface Lv2CommentLikeListener {
-        void Lv2CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum);
+    public interface Lv2CommentLikeListener<T> {
+        void Lv2CommentLikeClick(T t, String targetId, ImageView likeIcon, TextView likeNum);
     }
 
     public void setLv2CommentLike(Lv2CommentLikeListener lv2CommentLikeListener) {
@@ -137,6 +158,14 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                 //Lv1展开更多
                 final LinearLayout lv1Extend = helper.getView(R.id.lv1_extend);
                 final CommentLv1Model.DataDTO.RecordsDTO lv1Model = (CommentLv1Model.DataDTO.RecordsDTO) item;
+                LinearLayout reback1LikeBtn = helper.getView(R.id.reback1_like_btn);
+                final ImageView reback1LikeIcon = helper.getView(R.id.reback1_like_icon);
+                final TextView reback1LikeNum = helper.getView(R.id.reback1_like_num);
+                LinearLayout reback2LikeBtn = helper.getView(R.id.reback2_like_btn);
+                final ImageView reback2LikeIcon = helper.getView(R.id.reback2_like_icon);
+                final TextView reback2LikeNum = helper.getView(R.id.reback2_like_num);
+
+
                 if (null != mContext && !((Activity) mContext).isFinishing()
                         && !((Activity) mContext).isDestroyed()) {
                     GlideUtil.displayCircle(commentUserHead, lv1Model.getHead(), true, mContext);
@@ -285,14 +314,16 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                 commentLikeBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        commentLikeListener.lv1CommentLikeClick(lv1Model.getId(), commentLikeIcon, commentLikeNum);
+                        commentLikeListener.lv1CommentLikeClick(lv1Model, lv1Model.getId(), commentLikeIcon, commentLikeNum);
                     }
                 });
 
                 if (lv1Model.getWhetherLike()) {
                     commentLikeIcon.setImageResource(R.drawable.comment_like);
+                    commentLikeNum.setTextColor(mContext.getResources().getColor(R.color.bz_red));
                 } else {
                     commentLikeIcon.setImageResource(R.drawable.comment_unlike);
+                    commentLikeNum.setTextColor(mContext.getResources().getColor(R.color.video_c9));
                 }
 
                 if (null == lv1Model.getLikeCount()) {
@@ -304,6 +335,64 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                         commentLikeNum.setText(NumberFormatTool.formatNum(lv1Model.getLikeCount(), false));
                     }
                 }
+
+                //第一个回复的点赞
+                reback1LikeBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        reback1LikeBtnListener.reback1LikeClick(lv1Model.getSubItem(0),lv1Model.getSubItem(0).getId(), reback1LikeIcon, reback1LikeNum);
+                    }
+                });
+
+                if (null != lv1Model.getSubItem(0) && lv1Model.getSubItems().size() > 0) {
+                    if (lv1Model.getSubItem(0).getWhetherLike()) {
+                        reback1LikeIcon.setImageResource(R.drawable.comment_like);
+                        reback1LikeNum.setTextColor(mContext.getResources().getColor(R.color.bz_red));
+                    } else {
+                        reback1LikeIcon.setImageResource(R.drawable.comment_unlike);
+                        reback1LikeNum.setTextColor(mContext.getResources().getColor(R.color.video_c9));
+                    }
+
+                    if (null == lv1Model.getSubItem(0).getLikeCount()) {
+                        reback1LikeNum.setText("");
+                    } else {
+                        if (lv1Model.getSubItem(0).getLikeCount() == 0) {
+                            reback1LikeNum.setText("");
+                        } else {
+                            reback1LikeNum.setText(NumberFormatTool.formatNum(lv1Model.getSubItem(0).getLikeCount(), false));
+                        }
+                    }
+                }
+
+
+                //第二个回复的点赞
+                reback2LikeBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        reback2LikeBtnListener.reback2LikeClick(lv1Model.getSubItem(1),lv1Model.getSubItem(1).getId(), reback2LikeIcon, reback2LikeNum);
+                    }
+                });
+
+                if (null != lv1Model.getSubItem(1) && lv1Model.getSubItems().size() > 0) {
+                    if (lv1Model.getSubItem(1).getWhetherLike()) {
+                        reback2LikeIcon.setImageResource(R.drawable.comment_like);
+                        reback2LikeNum.setTextColor(mContext.getResources().getColor(R.color.bz_red));
+                    } else {
+                        reback2LikeIcon.setImageResource(R.drawable.comment_unlike);
+                        reback2LikeNum.setTextColor(mContext.getResources().getColor(R.color.video_c9));
+                    }
+
+                    if (null == lv1Model.getSubItem(1).getLikeCount()) {
+                        reback2LikeNum.setText("");
+                    } else {
+                        if (lv1Model.getSubItem(1).getLikeCount() == 0) {
+                            reback2LikeNum.setText("");
+                        } else {
+                            reback2LikeNum.setText(NumberFormatTool.formatNum(lv1Model.getSubItem(1).getLikeCount(), false));
+                        }
+                    }
+                }
+
 
                 break;
             case TYPE_LEVEL_2:
@@ -442,14 +531,16 @@ public class CommentPopRvAdapter extends BaseMultiItemQuickAdapter<MultiItemEnti
                 lv2CommentLikeBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        lv2CommentLikeListener.Lv2CommentLikeClick(lv2Model.getId(), lv2CommentLikeIcon, lv2CommentLikeNum);
+                        lv2CommentLikeListener.Lv2CommentLikeClick(lv2Model, lv2Model.getId(), lv2CommentLikeIcon, lv2CommentLikeNum);
                     }
                 });
 
                 if (lv2Model.getWhetherLike()) {
                     lv2CommentLikeIcon.setImageResource(R.drawable.comment_like);
+                    lv2CommentLikeNum.setTextColor(mContext.getResources().getColor(R.color.bz_red));
                 } else {
                     lv2CommentLikeIcon.setImageResource(R.drawable.comment_unlike);
+                    lv2CommentLikeNum.setTextColor(mContext.getResources().getColor(R.color.video_c9));
                 }
 
                 if (null == lv2Model.getLikeCount()) {

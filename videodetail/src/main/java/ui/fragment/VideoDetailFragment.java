@@ -1,9 +1,11 @@
 package ui.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -1196,15 +1198,29 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         //评论点赞
         commentPopRvAdapter.setLv1CommentLike(new CommentPopRvAdapter.Lv1CommentLikeListener() {
             @Override
-            public void lv1CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum) {
-                CommentLikeOrCancel(targetId, likeIcon, likeNum);
+            public void lv1CommentLikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
             }
         });
 
         commentPopRvAdapter.setLv2CommentLike(new CommentPopRvAdapter.Lv2CommentLikeListener() {
             @Override
-            public void Lv2CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum) {
-                CommentLikeOrCancel(targetId, likeIcon, likeNum);
+            public void Lv2CommentLikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
+            }
+        });
+
+        commentPopRvAdapter.setReback1Like(new CommentPopRvAdapter.Reback1LikeBtnListener() {
+            @Override
+            public void reback1LikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
+            }
+        });
+
+        commentPopRvAdapter.setReback2Like(new CommentPopRvAdapter.Reback2LikeBtnListener() {
+            @Override
+            public void reback2LikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
             }
         });
     }
@@ -2227,7 +2243,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     /**
      * 评论点赞/取消点赞
      */
-    private void CommentLikeOrCancel(String targetId, final ImageView likeImage, final TextView likeNum) {
+    private void CommentLikeOrCancel(final Object o, String targetId, final ImageView likeImage, final TextView likeNum) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("targetId", targetId);
@@ -2270,7 +2286,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                         likeNum.setText(NumberFormatTool.formatNum(num, false));
                                         likeNum.setTextColor(getActivity().getResources().getColor(R.color.bz_red));
                                     }
-
+                                    if (o instanceof CommentLv1Model.DataDTO.RecordsDTO) {
+                                        ((CommentLv1Model.DataDTO.RecordsDTO) o).setWhetherLike(true);
+                                        ((CommentLv1Model.DataDTO.RecordsDTO) o).setLikeCount(num);
+                                    } else if (o instanceof ReplyLv2Model.ReplyListDTO) {
+                                        ((ReplyLv2Model.ReplyListDTO) o).setWhetherLike(true);
+                                        ((ReplyLv2Model.ReplyListDTO) o).setLikeCount(num);
+                                    }
 //                                    mDataDTO.setWhetherLike(true);
 //                                    playerView.contentStateModel.setWhetherLike("true");
 //                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
@@ -2290,6 +2312,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                             likeNum.setText(NumberFormatTool.formatNum(num, false));
                                         }
                                         likeNum.setTextColor(getActivity().getResources().getColor(R.color.video_c9));
+
+                                        if (o instanceof CommentLv1Model.DataDTO.RecordsDTO) {
+                                            ((CommentLv1Model.DataDTO.RecordsDTO) o).setWhetherLike(false);
+                                            ((CommentLv1Model.DataDTO.RecordsDTO) o).setLikeCount(num);
+                                        } else if (o instanceof ReplyLv2Model.ReplyListDTO) {
+                                            ((ReplyLv2Model.ReplyListDTO) o).setWhetherLike(false);
+                                            ((ReplyLv2Model.ReplyListDTO) o).setLikeCount(num);
+                                        }
                                     }
 //                                    mDataDTO.setWhetherLike(false);
 //                                    playerView.contentStateModel.setWhetherLike("false");
@@ -2891,4 +2921,34 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
     }
 
+    boolean enable;
+    /**
+     * 监听BackPressed
+     */
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+//        if (playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+//            enable = true;
+//        } else {
+//            enable = false;
+//        }
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, mCallback);
+    }
+
+
+    public OnBackPressedCallback mCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            rebackWindow();
+        }
+    };
+
+    private void rebackWindow() {
+        if (null == mCallback) {
+            return;
+        }
+
+        playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.WINDOW);
+    }
 }

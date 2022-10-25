@@ -77,6 +77,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="@dimen/video_dp5"
                     android:text=""
+                    android:textColor="@color/video_c9"
                     android:textSize="12sp"></TextView>
             </LinearLayout>
 

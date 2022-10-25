@@ -55,7 +55,7 @@ public class TestViewPagerAdapter extends FragmentPagerAdapter {
         fragmentList.clear();
         titleList.addAll(channelBeanList);
         for (int i = 0; i < channelBeanList.size() ; i++) {
-            if (i == 1) {
+            if (i == 2) {
                 VideoHomeFragment videoHomeFragment = new VideoHomeFragment();
                 fragmentList.add(videoHomeFragment.newInstance(contentId, toCurrentTab, category_name, module_source));
             } else {

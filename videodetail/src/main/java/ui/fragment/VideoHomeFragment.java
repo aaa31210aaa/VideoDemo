@@ -479,7 +479,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     videoTab.setVisibility(View.GONE);
                     videoVp.setScroll(false);
                     getActivity().findViewById(R.id.test_tab).setVisibility(View.GONE);
-
+                    videoDetailFragment.mCallback.setEnabled(true);
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                         videoDetailFragment.videoDetailmanager.setCanScoll(true);
@@ -588,6 +588,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     videoTab.setVisibility(View.VISIBLE);
                     videoVp.setScroll(true);
                     getActivity().findViewById(R.id.test_tab).setVisibility(View.VISIBLE);
+                    videoDetailFragment.mCallback.setEnabled(false);
                 }
             }
         };
@@ -687,7 +688,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 
 
     private void initViewPager() {
-        videoVp.setOffscreenPageLimit(3);
+        videoVp.setOffscreenPageLimit(1);
         if (null == videoViewPagerAdapter) {
             videoViewPagerAdapter = new VideoViewPagerAdapter(getActivity().getSupportFragmentManager());
         }

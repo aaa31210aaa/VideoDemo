@@ -1327,8 +1327,29 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         //评论点赞
         commentPopRvAdapter.setLv1CommentLike(new CommentPopRvAdapter.Lv1CommentLikeListener() {
             @Override
-            public void lv1CommentLikeClick(String targetId, ImageView likeIcon, TextView likeNum) {
-                CommentLikeOrCancel(targetId, likeIcon, likeNum);
+            public void lv1CommentLikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
+            }
+        });
+
+        commentPopRvAdapter.setLv2CommentLike(new CommentPopRvAdapter.Lv2CommentLikeListener() {
+            @Override
+            public void Lv2CommentLikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
+            }
+        });
+
+        commentPopRvAdapter.setReback1Like(new CommentPopRvAdapter.Reback1LikeBtnListener() {
+            @Override
+            public void reback1LikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
+            }
+        });
+
+        commentPopRvAdapter.setReback2Like(new CommentPopRvAdapter.Reback2LikeBtnListener() {
+            @Override
+            public void reback2LikeClick(Object o, String targetId, ImageView likeIcon, TextView likeNum) {
+                CommentLikeOrCancel(o, targetId, likeIcon, likeNum);
             }
         });
     }
@@ -2291,7 +2312,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     /**
      * 评论点赞/取消点赞
      */
-    private void CommentLikeOrCancel(String targetId, final ImageView likeImage, final TextView likeNum) {
+    private void CommentLikeOrCancel(final Object o, String targetId, final ImageView likeImage, final TextView likeNum) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("targetId", targetId);
@@ -2332,8 +2353,15 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                         num = Integer.parseInt(NumberFormatTool.getNumStr(likeNum.getText().toString()));
                                         num++;
                                         likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                        likeNum.setTextColor(getResources().getColor(R.color.bz_red));
                                     }
-
+                                    if (o instanceof CommentLv1Model.DataDTO.RecordsDTO) {
+                                        ((CommentLv1Model.DataDTO.RecordsDTO) o).setWhetherLike(true);
+                                        ((CommentLv1Model.DataDTO.RecordsDTO) o).setLikeCount(num);
+                                    } else if (o instanceof ReplyLv2Model.ReplyListDTO) {
+                                        ((ReplyLv2Model.ReplyListDTO) o).setWhetherLike(true);
+                                        ((ReplyLv2Model.ReplyListDTO) o).setLikeCount(num);
+                                    }
 //                                    mDataDTO.setWhetherLike(true);
 //                                    playerView.contentStateModel.setWhetherLike("true");
 //                                    playerView.contentStateModel.setLikeCountShow(NumberFormatTool.formatNum(num, false).toString());
@@ -2351,6 +2379,15 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                                             likeNum.setText("");
                                         } else {
                                             likeNum.setText(NumberFormatTool.formatNum(num, false));
+                                        }
+                                        likeNum.setTextColor(getResources().getColor(R.color.video_c9));
+
+                                        if (o instanceof CommentLv1Model.DataDTO.RecordsDTO) {
+                                            ((CommentLv1Model.DataDTO.RecordsDTO) o).setWhetherLike(false);
+                                            ((CommentLv1Model.DataDTO.RecordsDTO) o).setLikeCount(num);
+                                        } else if (o instanceof ReplyLv2Model.ReplyListDTO) {
+                                            ((ReplyLv2Model.ReplyListDTO) o).setWhetherLike(false);
+                                            ((ReplyLv2Model.ReplyListDTO) o).setLikeCount(num);
                                         }
                                     }
 //                                    mDataDTO.setWhetherLike(false);
