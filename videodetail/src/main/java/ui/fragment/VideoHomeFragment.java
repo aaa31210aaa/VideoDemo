@@ -49,6 +49,7 @@ import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.wdcs.callback.JsonCallback;
+import com.wdcs.callback.VideoFullAndWindowParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.ContentBuriedPointManager;
@@ -110,6 +111,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     public String module_source;
     private static Bundle args;
 //    private TextView test;
+    public int videoHomeFragmentVisible; //0 不显示， 1 显示
 
     public VideoHomeFragment() {
 
@@ -150,6 +152,22 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         return view;
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            videoHomeFragmentVisible = 1;
+        } else {
+            videoHomeFragmentVisible = 0;
+        }
+        if (null != videoDetailFragment) {
+            videoDetailFragment.setVideoDetailFragmentVisible(videoHomeFragmentVisible);
+        }
+
+        if (null != xkshFragment) {
+            xkshFragment.setXkshFragmentVisible(videoHomeFragmentVisible);
+        }
+    }
 
     private void initView() {
         videoTab = view.findViewById(R.id.video_tab);
@@ -480,6 +498,12 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     videoVp.setScroll(false);
                     getActivity().findViewById(R.id.test_tab).setVisibility(View.GONE);
                     videoDetailFragment.mCallback.setEnabled(true);
+//                    getActivity().万达提供的方法隐藏tab
+                    try {
+                        VideoFullAndWindowParam.getInstance().VideoFullAndWindow(1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                         videoDetailFragment.videoDetailmanager.setCanScoll(true);
@@ -589,6 +613,12 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     videoVp.setScroll(true);
                     getActivity().findViewById(R.id.test_tab).setVisibility(View.VISIBLE);
                     videoDetailFragment.mCallback.setEnabled(false);
+//                    getActivity().万达提供的方法显示tab
+                    try {
+                        VideoFullAndWindowParam.getInstance().VideoFullAndWindow(0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };
@@ -754,7 +784,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView, toCurrentTab);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView, toCurrentTab, true);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }
@@ -785,7 +815,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 
         videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
         xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
-
     }
 
     /**

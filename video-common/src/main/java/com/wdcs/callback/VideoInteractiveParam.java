@@ -75,7 +75,7 @@ public class VideoInteractiveParam {
      */
     public void shared(ShareInfo shareInfo) throws Exception {
         if (callBack == null) {
-            throw new Exception("获取失败,请重试");
+            Log.e("shared", "获取失败，请重试");
         } else {
             callBack.shared(shareInfo);
         }
@@ -86,7 +86,7 @@ public class VideoInteractiveParam {
      */
     public void toLogin() throws Exception {
         if (callBack == null) {
-            throw new Exception("请求失败,请重试");
+            Log.e("toLogin", "获取失败，请重试");
         } else {
             callBack.Login();
         }
@@ -100,10 +100,10 @@ public class VideoInteractiveParam {
      */
     public String getCode() throws Exception {
         if (callBack == null) {
-            throw new Exception("获取失败,请重试");
-        } else {
-            return callBack.setCode();
+            Log.e("getCode", "获取失败，请重试");
+            return "";
         }
+        return callBack.setCode();
     }
 
     /**
@@ -111,7 +111,7 @@ public class VideoInteractiveParam {
      */
     public void recommendUrl(String url, ShareInfo shareInfo) throws Exception {
         if (callBack == null) {
-            throw new Exception("获取失败,请重试");
+            Log.e("recommendUrl", "获取失败，请重试");
         } else {
             callBack.recommedUrl(url, shareInfo);
         }
@@ -122,7 +122,7 @@ public class VideoInteractiveParam {
      */
     public void trackingPoint(BuriedPointModel buriedPointModel) throws Exception {
         if (callBack == null) {
-            throw new Exception("获取失败,请重试");
+            Log.e("trackingPoint", "获取失败，请重试");
         } else {
             callBack.trackingPoint(buriedPointModel);
         }
@@ -147,7 +147,7 @@ public class VideoInteractiveParam {
      */
     public void checkLoginStatus() {
         if (gdyTokenCallBack == null) {
-            Log.e("VideoInteractiveParam", "获取失败，请重试");
+            Log.e("checkLoginStatus", "获取失败，请重试");
         } else {
             getUserToken();
         }

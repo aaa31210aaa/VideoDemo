@@ -120,6 +120,7 @@ import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgre
 import static com.wdcs.constants.Constants.CATEGORYNAME;
 import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.CONTENTID;
+import static com.wdcs.constants.Constants.FROMHOMETAB;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
@@ -251,12 +252,16 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private boolean likeIsRequesting;
     private long beforeClickTime = 0;
     private int toCurrentTab;
+    private int mVideoDetailFragmentVisible = 2; //默认值
+    private boolean fromHomeTab;
+    private boolean isInitViewPagerListener;
+    private OnViewPagerListener onViewPagerListener;
 
     public VideoDetailFragment() {
     }
 
     public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName
-            , int toCurrentTab) {
+            , int toCurrentTab, boolean fromHomeTab) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         args.putString(CONTENTID, contentId);
@@ -264,6 +269,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (!TextUtils.isEmpty(categoryName)) {
             args.putString(CATEGORYNAME, categoryName);
         }
+        args.putBoolean(FROMHOMETAB, fromHomeTab);
         fragment.setArguments(args);
         return fragment;
     }
@@ -276,6 +282,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             myContentId = getArguments().getString(CONTENTID);
             mCategoryName = getArguments().getString(CATEGORYNAME);
             toCurrentTab = getArguments().getInt(TOCURRENTTAB);
+            fromHomeTab = getArguments().getBoolean(FROMHOMETAB);
         }
     }
 
@@ -324,196 +331,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //        collectionNum = view.findViewById(R.id.collection_num);
         loveIcon = view.findViewById(R.id.love_icon);
 
-        videoDetailmanager = new ViewPagerLayoutManager(getActivity());
-        videoDetailRv.setLayoutManager(videoDetailmanager);
         footerView = View.inflate(getActivity(), R.layout.footer_view, null);
         commentEmptyView = View.inflate(getActivity(), R.layout.comment_list_empty, null);
         commentListTips = commentEmptyView.findViewById(R.id.comment_list_tips);
         setSoftKeyBoardListener();
-        videoDetailmanager.setOnViewPagerListener(new OnViewPagerListener() {
-
-
-            @Override
-            public void onInitComplete() {
-                if (initialize) {
-                    return;
-                }
-
-                if (null == playerView) {
-                    return;
-                }
-                initialize = true;
-
-                if (mDatas.isEmpty()) {
-                    return;
-                }
-                mDataDTO = mDatas.get(0);
-                if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
-                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
-                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
-                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
-                    }
-                }
-
-                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
-                playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
-                playerView.mWindowPlayer.setIsTurnPages(false);
-                playerView.mWindowPlayer.setManager(videoDetailmanager);
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
-                myContentId = String.valueOf(mDatas.get(0).getId());
-                addPageViews(myContentId);
-                OkGo.getInstance().cancelTag("contentState");
-                getContentState(myContentId);
-
-                SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
-                currentIndex = 0;
-                mPageIndex = 1;
-                if (mDatas.get(0).getDisableComment()) {
-                    commentListTips.setText("当前页面评论功能已关闭");
-                    commentPopRl.setEnabled(false);
-                    commentEdtInput.setHint("当前页面评论功能已关闭");
-                } else {
-                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
-                    commentPopRl.setEnabled(true);
-                    commentEdtInput.setHint("写评论...");
-                }
-                commentPopRvAdapter.setEmptyView(commentEmptyView);
-                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
-                videoType = mDatas.get(0).getType();
-                rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
-                OkGo.getInstance().cancelTag(recommendTag);
-                //获取推荐列表
-                if (videoFragmentIsVisibleToUser) {
-                    getRecommend(myContentId, 0);
-                }
-            }
-
-            @Override
-            public void onPageRelease(boolean isNext, int position) {
-            }
-
-            @Override
-            public void onPageSelected(final int position, boolean isBottom) {
-                if (null == playerView) {
-                    return;
-                }
-
-                if (null != playerView.getTag() && position == (int) playerView.getTag()) {
-                    return;
-                }
-
-                //避免越界
-                if (mDatas.isEmpty()) {
-                    return;
-                }
-
-                if (null == mDatas.get(position)) {
-                    return;
-                }
-                //露出 即上报
-//              ContentBuriedPointManager.setContentBuriedPoint();
-                playerView.mWindowPlayer.hide();
-                String isFinish;
-                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-                    isFinish = "否";
-                } else {
-                    isFinish = "是";
-                }
-
-                if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-                    if (mDuration != 0 && mProgress != 0) {
-                        //上报埋点
-                        long evePlayTime = Math.abs(mProgress - lsDuration);
-                        double currentPercent = (evePlayTime * 1.0 / mDuration);
-                        double uploadPercent = 0;
-                        if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                      //不为重播
-                            if (currentPercent > maxPercent) {
-                                uploadPercent = currentPercent;
-                                maxPercent = currentPercent;
-                            } else {
-                                uploadPercent = maxPercent;
-                            }
-                        } else {
-                            uploadPercent = 1;
-                        }
-                        videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
-                        BigDecimal two = new BigDecimal(uploadPercent);
-                        double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                        String event;
-                        if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
-                            event = Constants.CMS_VIDEO_OVER;
-                        } else {
-                            event = Constants.CMS_VIDEO_OVER_AUTO;
-                        }
-                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-//                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
-                        Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
-                    }
-                }
-                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
-
-                mDataDTO = mDatas.get(position);
-                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
-                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
-                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
-                    }
-                }
-
-//                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
-//                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
-//                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
-
-
-                //滑动下一条或者上一条视频
-                playerView.mWindowPlayer.setRecordDuration(0);
-                lsDuration = 0;
-                maxPercent = 0;
-                SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
-                playUrl = mDatas.get(position).getPlayUrl();
-                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
-                playerView.mWindowPlayer.setIsTurnPages(true);
-                currentIndex = position;
-//                choosePopDatas.clear();
-                reset();
-                myContentId = String.valueOf(mDatas.get(position).getId());
-                //重置重播标识
-                if (null != playerView && null != playerView.buriedPointModel) {
-                    playerView.buriedPointModel.setIs_renew("false");
-                }
-                addPageViews(myContentId);
-                videoType = mDatas.get(position).getType();
-                if (mDatas.get(position).getDisableComment()) {
-                    commentListTips.setText("当前页面评论功能已关闭");
-                    commentPopRl.setEnabled(false);
-                    commentEdtInput.setHint("当前页面评论功能已关闭");
-                } else {
-                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
-                    commentPopRl.setEnabled(true);
-                    commentEdtInput.setHint("写评论...");
-                }
-                commentPopRvAdapter.setEmptyView(commentEmptyView);
-                mPageIndex = 1;
-                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
-                getContentState(myContentId);
-
-                rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(position);
-                OkGo.getInstance().cancelTag(recommendTag);
-                getRecommend(myContentId, position);
-
-                if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
-                    playerView.mFullScreenPlayer.mVodMoreView.mCallback.onSpeedChange(1.0f);
-                    playerView.mFullScreenPlayer.superplayerSpeed.setText("倍速");
-                    playerView.mFullScreenPlayer.mRbSpeed1.setChecked(true);
-                }
-            }
-        });
+        if (!fromHomeTab) {
+            initViewPagerListener();
+        }
 
         initSmartRefresh(view);
 //        commentTotal = view.findViewById(R.id.comment_total);
@@ -754,6 +578,215 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
         videoDetailRv.setAdapter(adapter);
     }
+
+    private void initViewPagerListener() {
+        onViewPagerListener = new OnViewPagerListener() {
+            @Override
+            public void onInitComplete() {
+                if (initialize) {
+                    return;
+                }
+
+                if (null == playerView) {
+                    return;
+                }
+                initialize = true;
+
+                if (mDatas.isEmpty()) {
+                    return;
+                }
+                mDataDTO = mDatas.get(0);
+                if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
+                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
+                playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
+                playerView.mWindowPlayer.setIsTurnPages(false);
+                playerView.mWindowPlayer.setManager(videoDetailmanager);
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                myContentId = String.valueOf(mDatas.get(0).getId());
+                addPageViews(myContentId);
+                OkGo.getInstance().cancelTag("contentState");
+                getContentState(myContentId);
+
+                SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                currentIndex = 0;
+                mPageIndex = 1;
+                if (mDatas.get(0).getDisableComment()) {
+                    commentListTips.setText("当前页面评论功能已关闭");
+                    commentPopRl.setEnabled(false);
+                    commentEdtInput.setHint("当前页面评论功能已关闭");
+                } else {
+                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
+                    commentPopRl.setEnabled(true);
+                    commentEdtInput.setHint("写评论...");
+                }
+                commentPopRvAdapter.setEmptyView(commentEmptyView);
+                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                videoType = mDatas.get(0).getType();
+                rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
+                OkGo.getInstance().cancelTag(recommendTag);
+                //获取推荐列表
+                if (videoFragmentIsVisibleToUser) {
+                    getRecommend(myContentId, 0);
+                }
+            }
+
+            @Override
+            public void onPageRelease(boolean isNext, int position) {
+            }
+
+            @Override
+            public void onPageSelected(final int position, boolean isBottom) {
+                if (null == playerView) {
+                    return;
+                }
+
+                if (null != playerView.getTag() && position == (int) playerView.getTag()) {
+                    return;
+                }
+
+                //避免越界
+                if (mDatas.isEmpty()) {
+                    return;
+                }
+
+                if (null == mDatas.get(position)) {
+                    return;
+                }
+                //露出 即上报
+//              ContentBuriedPointManager.setContentBuriedPoint();
+                playerView.mWindowPlayer.hide();
+                String isFinish;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                    isFinish = "否";
+                } else {
+                    isFinish = "是";
+                }
+
+                if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
+                    if (mDuration != 0 && mProgress != 0) {
+                        //上报埋点
+                        long evePlayTime = Math.abs(mProgress - lsDuration);
+                        double currentPercent = (evePlayTime * 1.0 / mDuration);
+                        double uploadPercent = 0;
+                        if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
+                            if (currentPercent > maxPercent) {
+                                uploadPercent = currentPercent;
+                                maxPercent = currentPercent;
+                            } else {
+                                uploadPercent = maxPercent;
+                            }
+                        } else {
+                            uploadPercent = 1;
+                        }
+                        videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
+                        BigDecimal two = new BigDecimal(uploadPercent);
+                        double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                        String event;
+                        if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
+                            event = Constants.CMS_VIDEO_OVER;
+                        } else {
+                            event = Constants.CMS_VIDEO_OVER_AUTO;
+                        }
+                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+//                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                        Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                    }
+                }
+                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
+
+                mDataDTO = mDatas.get(position);
+                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                    }
+                }
+
+//                DebugLogUtils.DebugLog(mDataDTO.isFullBtnIsShow() + "状态" + "---视频宽：" + mDataDTO.getWidth() + "视频高:" + mDataDTO.getHeight() + "视频类型---" +
+//                        videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getWidth())),
+//                                Integer.parseInt(NumberFormatTool.getNumStr(mDataDTO.getHeight()))));
+
+
+                //滑动下一条或者上一条视频
+                playerView.mWindowPlayer.setRecordDuration(0);
+                lsDuration = 0;
+                maxPercent = 0;
+                SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
+                playUrl = mDatas.get(position).getPlayUrl();
+                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
+                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                playerView.mWindowPlayer.setIsTurnPages(true);
+                currentIndex = position;
+//                choosePopDatas.clear();
+                reset();
+                myContentId = String.valueOf(mDatas.get(position).getId());
+                //重置重播标识
+                if (null != playerView && null != playerView.buriedPointModel) {
+                    playerView.buriedPointModel.setIs_renew("false");
+                }
+                addPageViews(myContentId);
+                videoType = mDatas.get(position).getType();
+                if (mDatas.get(position).getDisableComment()) {
+                    commentListTips.setText("当前页面评论功能已关闭");
+                    commentPopRl.setEnabled(false);
+                    commentEdtInput.setHint("当前页面评论功能已关闭");
+                } else {
+                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
+                    commentPopRl.setEnabled(true);
+                    commentEdtInput.setHint("写评论...");
+                }
+                commentPopRvAdapter.setEmptyView(commentEmptyView);
+                mPageIndex = 1;
+                getCommentList(String.valueOf(mPageIndex), String.valueOf(mPageSize), true);
+                getContentState(myContentId);
+
+                rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(position);
+                OkGo.getInstance().cancelTag(recommendTag);
+                getRecommend(myContentId, position);
+
+                if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
+                    playerView.mFullScreenPlayer.mVodMoreView.mCallback.onSpeedChange(1.0f);
+                    playerView.mFullScreenPlayer.superplayerSpeed.setText("倍速");
+                    playerView.mFullScreenPlayer.mRbSpeed1.setChecked(true);
+                }
+            }
+        };
+        isInitViewPagerListener = true;
+        videoDetailmanager = new ViewPagerLayoutManager(getActivity());
+        videoDetailRv.setLayoutManager(videoDetailmanager);
+        videoDetailmanager.setOnViewPagerListener(onViewPagerListener);
+    }
+
+    public void setVideoDetailFragmentVisible(int videoDetailFragmentVisible) {
+        this.mVideoDetailFragmentVisible = videoDetailFragmentVisible;
+        if (null == playerView) {
+            return;
+        }
+
+        if (fromHomeTab) {
+            if (!isInitViewPagerListener && mVideoDetailFragmentVisible == 1) {
+                initViewPagerListener();
+            }
+
+            if (mVideoDetailFragmentVisible == 1) {
+                playerView.mSuperPlayer.resume();
+            } else if (mVideoDetailFragmentVisible == 0) {
+                playerView.mSuperPlayer.pause();
+            }
+        }
+    }
+
 
     /**
      * 获取单条视频详情
@@ -2574,6 +2607,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mCallback.remove();
     }
 
     @Override
@@ -2922,6 +2956,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     }
 
     boolean enable;
+
     /**
      * 监听BackPressed
      */
@@ -2948,7 +2983,16 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (null == mCallback) {
             return;
         }
-
         playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.WINDOW);
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (hidden) {
+
+        } else {
+
+        }
     }
 }

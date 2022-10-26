@@ -12,27 +12,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tencent.rtmp.TXLiveBase;
 import com.wdcs.callback.ApplicationIsAgreeCallBack;
 import com.wdcs.callback.GetGdyTokenCallBack;
-import com.wdcs.callback.HomePageInteractive;
+import com.wdcs.callback.VideoFullAndWindowCallBack;
+import com.wdcs.callback.VideoFullAndWindowParam;
 import com.wdcs.callback.VideoFinderPointCallBack;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
-import com.wdcs.constants.Constants;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
-import com.wdcs.utils.DebugLogUtils;
-import com.wdcs.utils.ToastUtils;
+import com.wdcs.model.ShowHomeFragmentModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import io.reactivex.functions.Consumer;
 import ui.activity.TgtCodeActivity;
 import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
@@ -121,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     public String setCode() {
-                        return "8137aa26-6cfd-444c-8b48-15c2e1d26f84";
+                        return "b3bfd518-7a64-4ff0-a556-d4fbffb0d71f";
                     }
 
                     @Override
@@ -153,6 +147,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public String setIsAgreePrivacy() {
                         return "1";
+                    }
+                });
+
+                VideoFullAndWindowParam.getInstance().setVideoFullAndWindowCallBack(new VideoFullAndWindowCallBack() {
+                    @Override
+                    public void videoFullAndWindowState(int state) {
+                        //state 0 是窗口， 1 是全屏
+
                     }
                 });
             }

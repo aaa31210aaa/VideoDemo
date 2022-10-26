@@ -39,6 +39,7 @@ public class Constants {
     public static final String UPLOAD_AGREEMENT = "upload_agreement";
     public static final String PORTRAIT_STR = "Portrait";
     public static final String CERTIFICATED = "certificated";
+    public static final String FROMHOMETAB = "fromHomeTab";
 
     /**
      * 1.排行榜https://uat-h5.zhcs.csbtv.com/act/xksh/#/ranking
