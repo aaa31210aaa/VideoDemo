@@ -186,6 +186,9 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
         continuePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (helper.getAdapterPosition() == -1) {
+                    return;
+                }
                 noWifiLl.setVisibility(View.GONE);
                 click.clickNoWifi(helper.getAdapterPosition());
                 if (null != superPlayerView) {
@@ -206,6 +209,9 @@ public class VideoCollectionAdapter extends BaseQuickAdapter<RecordsDTO, BaseVie
         follow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (helper.getAdapterPosition() == -1) {
+                    return;
+                }
                 followViewClick.followClick(helper.getAdapterPosition());
             }
         });

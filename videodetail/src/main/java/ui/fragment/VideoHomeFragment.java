@@ -22,9 +22,15 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -72,6 +78,7 @@ import java.util.List;
 
 import adpter.VideoViewPagerAdapter;
 import ui.activity.VideoHomeActivity;
+import widget.LiveDataParam;
 import widget.NetBroadcastReceiver;
 
 public class VideoHomeFragment extends Fragment implements View.OnClickListener {
@@ -99,7 +106,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private TextView noLoginTipsCancel;
     private TextView noLoginTipsOk;
     public String contentId;
-    private int toCurrentTab;
+    private int toCurrentTab = 1;
     private String lsCotentnId;
     public static double maxPercent = 0; //记录最大百分比
     public static long lsDuration = 0; //每一次上报临时保存的播放时长
@@ -110,8 +117,9 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private boolean toFirst = true;
     public String module_source;
     private static Bundle args;
-//    private TextView test;
-    public int videoHomeFragmentVisible; //0 不显示， 1 显示
+    //    private TextView test;
+//    public int videoHomeFragmentVisible; //0 不显示， 1 显示
+    private Handler mHandler = new Handler();
 
     public VideoHomeFragment() {
 
@@ -152,22 +160,22 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         return view;
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            videoHomeFragmentVisible = 1;
-        } else {
-            videoHomeFragmentVisible = 0;
-        }
-        if (null != videoDetailFragment) {
-            videoDetailFragment.setVideoDetailFragmentVisible(videoHomeFragmentVisible);
-        }
-
-        if (null != xkshFragment) {
-            xkshFragment.setXkshFragmentVisible(videoHomeFragmentVisible);
-        }
-    }
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        super.setUserVisibleHint(isVisibleToUser);
+//        if (isVisibleToUser) {
+//            videoHomeFragmentVisible = 1;
+//        } else {
+//            videoHomeFragmentVisible = 0;
+//        }
+//        if (null != videoDetailFragment && !initSetVisible) {
+//            videoDetailFragment.setVideoDetailFragmentVisible(videoHomeFragmentVisible);
+//        }
+//
+//        if (null != xkshFragment && !initSetVisible) {
+//            xkshFragment.setXkshFragmentVisible(videoHomeFragmentVisible);
+//        }
+//    }
 
     private void initView() {
         videoTab = view.findViewById(R.id.video_tab);
@@ -306,6 +314,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     videoVp.setScroll(false);
                     videoDetailFragment.videoDetailmanager.setCanScoll(false);
                     xkshFragment.xkshManager.setCanScoll(false);
+
                 }
 
                 @Override
@@ -496,7 +505,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
                     videoTab.setVisibility(View.GONE);
                     videoVp.setScroll(false);
-                    getActivity().findViewById(R.id.test_tab).setVisibility(View.GONE);
                     videoDetailFragment.mCallback.setEnabled(true);
 //                    getActivity().万达提供的方法隐藏tab
                     try {
@@ -611,7 +619,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     }
                     videoTab.setVisibility(View.VISIBLE);
                     videoVp.setScroll(true);
-                    getActivity().findViewById(R.id.test_tab).setVisibility(View.VISIBLE);
                     videoDetailFragment.mCallback.setEnabled(false);
 //                    getActivity().万达提供的方法显示tab
                     try {
@@ -619,6 +626,29 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (null != videoDetailFragment && null != xkshFragment) {
+                                if (null != videoDetailFragment.playViewParams) {
+                                    videoDetailFragment.playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                    videoDetailFragment.playViewParams.removeRule(RelativeLayout.CENTER_IN_PARENT);
+                                    videoDetailFragment.playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                    videoDetailFragment.playerView.setLayoutParams(videoDetailFragment.playViewParams);
+                                }
+
+                                if (null != xkshFragment.playViewParams) {
+                                    xkshFragment.playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                    xkshFragment.playViewParams.removeRule(RelativeLayout.CENTER_IN_PARENT);
+                                    xkshFragment.playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                    xkshFragment.playerView.setLayoutParams(xkshFragment.playViewParams);
+                                }
+                            }
+
+                        }
+                    }, 100);
+
                 }
             }
         };
@@ -685,6 +715,8 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             }
         });
         translateAnimation();
+
+
     }
 
     //位移动画
@@ -785,6 +817,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             videoChannelModels.add(model);
         }
         videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView, toCurrentTab, true);
+        colunmList.clear();
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }
@@ -856,6 +889,16 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                             mTitlesArrays[1] = "视频";
                             mTitlesArrays[2] = "直播";
                             initViewPagerData();
+
+                            LiveDataParam.getInstance().homeTabIndex.observe(getActivity(), new Observer<Integer>() {
+                                @Override
+                                public void onChanged(Integer index) {
+                                    if (null != videoDetailFragment && null != xkshFragment) {
+                                        videoDetailFragment.setVideoDetailFragmentVisible(index);
+                                        xkshFragment.setXkshFragmentVisible(index);
+                                    }
+                                }
+                            });
                         }
                     }
 
@@ -875,6 +918,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                         videoTitleView.setVisibility(View.VISIBLE);
                     }
                 });
+
     }
 
 
@@ -958,5 +1002,8 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         getActivity().unregisterReceiver(netWorkStateReceiver);
         FinderBuriedPointManager.setFinderClick("页面关闭");
 //        OkGo.getInstance().cancelTag(VIDEOTAG);
+        mHandler.removeCallbacksAndMessages(null);
     }
+
+
 }

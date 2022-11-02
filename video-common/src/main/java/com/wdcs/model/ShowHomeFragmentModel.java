@@ -11,7 +11,7 @@ public class ShowHomeFragmentModel {
     private Context context; //容器activity
     private int widgetId; //控件id
     private String contentId; //视频id
-    private int toCurrentTab; //跳转到第几个tab
+    private int toCurrentTab = 1; //跳转到第几个tab
     private String categoryName; //类别名称
     private String moduleSource; //模块来源
 

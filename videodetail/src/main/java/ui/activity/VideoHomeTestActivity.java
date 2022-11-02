@@ -6,9 +6,11 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.RelativeLayout;
 
 import com.flyco.tablayout.SlidingTabLayout;
+import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.utils.NoScrollViewPager;
@@ -20,6 +22,7 @@ import java.util.List;
 import adpter.TestViewPagerAdapter;
 import adpter.VideoViewPagerAdapter;
 import ui.fragment.VideoHomeFragment;
+import widget.LiveDataParam;
 
 public class VideoHomeTestActivity extends AppCompatActivity {
     private RelativeLayout videoHomeLayout;
@@ -42,7 +45,7 @@ public class VideoHomeTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_video_home_test);
         videoHomeLayout = findViewById(R.id.video_home_layout);
         contentId = getIntent().getStringExtra("contentId");
-        toCurrentTab = getIntent().getIntExtra("toCurrentTab", 1);
+//        toCurrentTab = getIntent().getIntExtra("toCurrentTab", 1);
         category_name = getIntent().getStringExtra("category_name");
         module_source = getIntent().getStringExtra("module_source");
         initTab();
@@ -51,17 +54,31 @@ public class VideoHomeTestActivity extends AppCompatActivity {
     private void initTab() {
         testTab = findViewById(R.id.test_tab);
         testVp = findViewById(R.id.test_vp);
-        testVp.setOffscreenPageLimit(3);
+        testVp.setOffscreenPageLimit(4);
         if (null == testViewPagerAdapter) {
             testViewPagerAdapter = new TestViewPagerAdapter(getSupportFragmentManager());
         }
         testVp.setAdapter(testViewPagerAdapter);
+        tabModels.clear();
         for (int i = 0; i < 4; i++) {
-            tabModels.add("测试"+i);
+            tabModels.add("测试" + i);
         }
         testViewPagerAdapter.addItems(tabModels, contentId, toCurrentTab, category_name, module_source);
         String[] titles = tabModels.toArray(new String[tabModels.size()]);
         testTab.setViewPager(testVp, titles);
+        testVp.setScroll(false);
+
+        testTab.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelect(int position) {
+                LiveDataParam.getInstance().setHomeTabIndex(position);
+            }
+
+            @Override
+            public void onTabReselect(int position) {
+                Log.e("onTabReselect", position + "");
+            }
+        });
     }
 
 }

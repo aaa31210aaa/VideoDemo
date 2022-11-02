@@ -29,7 +29,6 @@ import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.BuriedPointModelManager;
 import com.wdcs.manager.FinderBuriedPointManager;
-import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.RecommendModel;
@@ -72,18 +71,15 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
     private SuperPlayerView superPlayerView;
     private ToAddPlayerViewClick click;
     private SmartRefreshLayout mRefreshlayout;
-    private ViewPagerLayoutManager mVideoDetailmanager;
     private String topicNameStr;
     private boolean isClick = true;
 
     public VideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
-                              SuperPlayerView playerView, SmartRefreshLayout refreshLayout, ViewPagerLayoutManager videoDetailmanager) {
+                              SuperPlayerView playerView) {
         super(layoutResId, data);
         this.mContext = context;
         this.mDatas = data;
         this.superPlayerView = playerView;
-        this.mRefreshlayout = refreshLayout;
-        this.mVideoDetailmanager = videoDetailmanager;
     }
 
     @Override
@@ -207,8 +203,11 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         continuePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                noWifiLl.setVisibility(View.GONE);
+                if (helper.getAdapterPosition() == -1) {
+                    return;
+                }
                 click.clickNoWifi(helper.getAdapterPosition());
+                noWifiLl.setVisibility(View.GONE);
                 if (null != superPlayerView) {
                     superPlayerView.setOrientation(true);
                 }
@@ -218,6 +217,9 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         follow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (helper.getAdapterPosition() == -1) {
+                    return;
+                }
                 mFollowViewClick.followClick(helper.getAdapterPosition());
             }
         });
