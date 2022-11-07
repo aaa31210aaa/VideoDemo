@@ -820,6 +820,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                        if (null != loadingProgress) {
+                            loadingProgress.setVisibility(View.GONE);
+                        }
                     }
                 });
     }
@@ -1429,6 +1432,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     public void onFinish() {
                         super.onFinish();
                         getActivityRule();
+                        if (null != loadingProgress) {
+                            loadingProgress.setVisibility(View.GONE);
+                        }
                     }
                 });
     }

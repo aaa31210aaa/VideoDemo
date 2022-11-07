@@ -159,4 +159,19 @@ public class PersonInfoManager {
             return false;
         }
     }
+
+    /**
+     * 数智融媒登陆错误码
+     */
+    public void setSzrmLoginErrorCode(String szrmLoginErrorCode) {
+        SPUtils.getInstance().put(Constants.SZRM_LOGIN_ERROR_CODE, szrmLoginErrorCode);
+    }
+
+    public String getSzrmLoginErrorCode() {
+        return SPUtils.getInstance().getString(Constants.SZRM_LOGIN_ERROR_CODE, "");
+    }
+
+    public void clearSzrmLoginErrorCode() {
+        PersonInfoManager.getInstance().setSzrmLoginErrorCode("");
+    }
 }

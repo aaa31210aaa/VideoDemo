@@ -56,7 +56,7 @@ public class FinderBuriedPointManager {
         }
         FinderPointModel model = new FinderPointModel();
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());
 //        List<String> keyWords = Arrays.asList(mDataDTO.getKeywords().split(","));
@@ -87,7 +87,7 @@ public class FinderBuriedPointManager {
         }
         FinderPointModel model = new FinderPointModel();
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());
 //        List<String> keyWords = Arrays.asList(mDataDTO.getKeywords().split(","));
@@ -116,7 +116,7 @@ public class FinderBuriedPointManager {
         FinderPointModel model = new FinderPointModel();
         model.setSpeed_n(speed);
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());
 //        List<String> keyWords = Arrays.asList(mDataDTO.getKeywords().split(","));
@@ -148,7 +148,7 @@ public class FinderBuriedPointManager {
             model.setPlay_duration(duration + "");
         }
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setCreator_id(mDataDTO.getCreateBy());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());
@@ -178,7 +178,7 @@ public class FinderBuriedPointManager {
         model.setModule_source(module_source);
         model.setIs_renew(isRenew);
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setCreator_id(mDataDTO.getCreateBy());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());
@@ -201,7 +201,7 @@ public class FinderBuriedPointManager {
         FinderPointVideoPlay model = new FinderPointVideoPlay();
         model.setIs_renew(isRenew);
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setCreator_id(mDataDTO.getCreateBy());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());
@@ -229,7 +229,7 @@ public class FinderBuriedPointManager {
             model.setPlay_duration(duration + "");
         }
         model.setContent_id(mDataDTO.getId() + "");
-        model.setContent_name(mDataDTO.getBrief());
+        model.setContent_name(mDataDTO.getTitle());
         model.setCreator_id(mDataDTO.getCreateBy());
         model.setContent_source(mDataDTO.getSource());
         model.setThird_ID(mDataDTO.getThirdPartyId());

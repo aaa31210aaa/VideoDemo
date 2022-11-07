@@ -799,7 +799,11 @@ public class FullScreenPlayer extends AbsPlayer implements View.OnClickListener,
         } else if (i == R.id.superplayer_iv_pause) {            //暂停\播放按钮
             togglePlayState();
         } else if (i == R.id.superplayer_fullscreen_share) {    //分享
-            FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, recordsDTO);
+            if (item == null) {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, recordsDTO);
+            } else {
+                FinderBuriedPointManager.setFinderLikeFavoriteShare(Constants.CONTENT_TRANSMIT, item);
+            }
             FinderBuriedPointManager.setFinderClick("分享");
             showSharePop(mContext);
         } else if (i == R.id.fullscreen_share_wx) {

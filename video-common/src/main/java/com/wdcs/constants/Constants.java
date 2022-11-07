@@ -5,6 +5,7 @@ import static com.wdcs.callback.VideoInteractiveParam.param;
 public class Constants {
     public static final String success_code = "200";
     public static final String token_error = "401";
+    public static final String LOGIN_ERROR_CODE = "666666"; //没有绑定手机号
     public static final String USER_ID = "user_id";
     public static final String LOCAL_USER_ID = "local_user_id";
     public static final String TYPE_TOKEN = "token";
@@ -84,6 +85,12 @@ public class Constants {
     public static final String ENTER_FROM = "click_category";
 //    public static final String CATEGORY_NAME = "c2402539";
     public static final String PARAMS_FOR_SPECIAL = "content_manager_system";
+
+    /**
+     * 数智融媒错误码
+     */
+    public static final String SZRM_LOGIN_ERROR_CODE = "szrm_login_error_code";
+
 
     /**
      * 内容上报事件event

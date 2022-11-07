@@ -847,6 +847,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                        if (null != loadingProgress) {
+                            loadingProgress.setVisibility(View.GONE);
+                        }
                     }
                 });
     }
@@ -1278,7 +1281,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     .setOutsideTouchable(false)
                     .setFocusable(true)
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, (int) (Utils.getContext().getResources().getDisplayMetrics().heightPixels * 0.7))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
                     .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
@@ -1466,6 +1469,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     public void onFinish() {
                         super.onFinish();
                         getActivityRule();
+                        if (null != loadingProgress) {
+                            loadingProgress.setVisibility(View.GONE);
+                        }
                     }
                 });
     }
@@ -2669,7 +2675,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCallback.remove();
+//        mCallback.remove();
     }
 
     @Override
@@ -3017,35 +3023,27 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    boolean enable;
-
-    /**
-     * 监听BackPressed
-     */
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-//        if (playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-//            enable = true;
-//        } else {
-//            enable = false;
+//    /**
+//     * 监听BackPressed
+//     */
+//    @Override
+//    public void onAttach(@NonNull Context context) {
+//        super.onAttach(context);
+//        requireActivity().getOnBackPressedDispatcher().addCallback(this, mCallback);
+//    }
+//
+//
+//    public OnBackPressedCallback mCallback = new OnBackPressedCallback(false) {
+//        @Override
+//        public void handleOnBackPressed() {
+//            rebackWindow();
 //        }
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, mCallback);
-    }
-
-
-    public OnBackPressedCallback mCallback = new OnBackPressedCallback(false) {
-        @Override
-        public void handleOnBackPressed() {
-            rebackWindow();
-        }
-    };
-
-    private void rebackWindow() {
-        if (null == mCallback) {
-            return;
-        }
-        playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.WINDOW);
-    }
-
+//    };
+//
+//    private void rebackWindow() {
+//        if (null == mCallback) {
+//            return;
+//        }
+//        playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.WINDOW);
+//    }
 }

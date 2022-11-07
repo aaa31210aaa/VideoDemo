@@ -19,6 +19,7 @@ import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
@@ -34,6 +35,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +97,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private RelativeLayout videoTitleView;
     public VideoDetailFragment videoDetailFragment;
     public XkshFragment xkshFragment;
-    public SuperPlayerView playerView;
+    public static SuperPlayerView playerView;
 
     private ImageView searchIcon;
     private ImageView personalCenter;
@@ -505,7 +507,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     KeyboardUtils.hideKeyboard(getActivity().getWindow().getDecorView());
                     videoTab.setVisibility(View.GONE);
                     videoVp.setScroll(false);
-                    videoDetailFragment.mCallback.setEnabled(true);
+//                    videoDetailFragment.mCallback.setEnabled(true);
 //                    getActivity().万达提供的方法隐藏tab
                     try {
                         VideoFullAndWindowParam.getInstance().VideoFullAndWindow(1);
@@ -619,7 +621,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     }
                     videoTab.setVisibility(View.VISIBLE);
                     videoVp.setScroll(true);
-                    videoDetailFragment.mCallback.setEnabled(false);
+//                    videoDetailFragment.mCallback.setEnabled(false);
 //                    getActivity().万达提供的方法显示tab
                     try {
                         VideoFullAndWindowParam.getInstance().VideoFullAndWindow(0);
@@ -894,6 +896,13 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                                 @Override
                                 public void onChanged(Integer index) {
                                     if (null != videoDetailFragment && null != xkshFragment) {
+                                        if (index != 1) {
+                                            videoDetailFragment.playerView.setOrientation(false);
+                                            xkshFragment.playerView.setOrientation(false);
+                                        } else {
+                                            videoDetailFragment.playerView.setOrientation(true);
+                                            xkshFragment.playerView.setOrientation(true);
+                                        }
                                         videoDetailFragment.setVideoDetailFragmentVisible(index);
                                         xkshFragment.setXkshFragmentVisible(index);
                                     }
@@ -1005,5 +1014,21 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         mHandler.removeCallbacksAndMessages(null);
     }
 
+    public static boolean VideoFullToWindow() {
+        try {
+            if (null == playerView || null == playerView.mWindowPlayer.mControllerCallback) {
+                return false;
+            }
+
+            if (playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                playerView.mWindowPlayer.mControllerCallback.onSwitchPlayMode(SuperPlayerDef.PlayerMode.WINDOW);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

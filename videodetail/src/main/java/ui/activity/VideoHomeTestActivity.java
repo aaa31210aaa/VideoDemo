@@ -1,5 +1,8 @@
 package ui.activity;
 
+
+import static ui.fragment.VideoHomeFragment.VideoFullToWindow;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -7,6 +10,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.RelativeLayout;
 
 import com.flyco.tablayout.SlidingTabLayout;
@@ -37,7 +41,7 @@ public class VideoHomeTestActivity extends AppCompatActivity {
     private NoScrollViewPager testVp;
     private TestViewPagerAdapter testViewPagerAdapter;
     private List<String> tabModels = new ArrayList<>();
-
+    private int mPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,7 @@ public class VideoHomeTestActivity extends AppCompatActivity {
             @Override
             public void onTabSelect(int position) {
                 LiveDataParam.getInstance().setHomeTabIndex(position);
+                mPosition = position;
             }
 
             @Override
@@ -81,4 +86,15 @@ public class VideoHomeTestActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mPosition == 1) {
+                if (!VideoFullToWindow()) {
+                    return super.onKeyDown(keyCode, event);
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

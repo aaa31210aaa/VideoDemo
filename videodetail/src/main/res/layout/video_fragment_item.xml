@@ -166,7 +166,6 @@
                 android:id="@+id/video_flipper"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_marginBottom="@dimen/video_dp5"
                 android:autoStart="false"
                 android:flipInterval="2000"
                 android:inAnimation="@anim/vf_anim_in"
