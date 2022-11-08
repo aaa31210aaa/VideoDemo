@@ -122,6 +122,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     //    private TextView test;
 //    public int videoHomeFragmentVisible; //0 不显示， 1 显示
     private Handler mHandler = new Handler();
+    private RelativeLayout topZzc;
 
     public VideoHomeFragment() {
 
@@ -180,6 +181,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 //    }
 
     private void initView() {
+        topZzc = view.findViewById(R.id.top_zzc);
         videoTab = view.findViewById(R.id.video_tab);
         videoVp = view.findViewById(R.id.video_vp);
         videoTitleView = view.findViewById(R.id.video_title_view);
@@ -850,6 +852,28 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 
         videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
         xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
+
+        videoDetailFragment.setCommentPopIsVisible(new VideoDetailFragment.CommentPopIsVisible() {
+            @Override
+            public void commentPopIsVisible(boolean isVisible) {
+                if (isVisible) {
+                    topZzc.setVisibility(View.GONE);
+                } else {
+                    topZzc.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        xkshFragment.setCommentPopIsVisible(new XkshFragment.CommentPopIsVisible() {
+            @Override
+            public void commentPopIsVisible(boolean isVisible) {
+                if (isVisible) {
+                    topZzc.setVisibility(View.GONE);
+                } else {
+                    topZzc.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
     /**

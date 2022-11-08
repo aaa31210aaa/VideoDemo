@@ -106,6 +106,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private List<CategoryModel.DataDTO> categoryModelList = new ArrayList<>();
     private boolean toFirst = true;
     public String module_source;
+    public RelativeLayout topZzc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +125,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         if (null == module_source) {
             module_source = "";
         }
+        topZzc = findViewById(R.id.top_zzc);
         backLin = findViewById(R.id.back_lin);
         backLin.setOnClickListener(this);
         videoTab = findViewById(R.id.video_tab);
@@ -737,6 +739,28 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
 
         videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
         xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
+
+        videoDetailFragment.setCommentPopIsVisible(new VideoDetailFragment.CommentPopIsVisible() {
+            @Override
+            public void commentPopIsVisible(boolean isVisible) {
+                if (isVisible) {
+                    topZzc.setVisibility(View.GONE);
+                } else {
+                    topZzc.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        xkshFragment.setCommentPopIsVisible(new XkshFragment.CommentPopIsVisible() {
+            @Override
+            public void commentPopIsVisible(boolean isVisible) {
+                if (isVisible) {
+                    topZzc.setVisibility(View.GONE);
+                } else {
+                    topZzc.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
     }
 

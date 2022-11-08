@@ -1,5 +1,6 @@
 package ui.fragment;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -28,6 +29,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,11 +44,13 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
+import com.blankj.utilcode.util.BarUtils;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.StringCallback;
@@ -103,6 +111,7 @@ import model.bean.ActivityRuleBean;
 import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
+import utils.VideoScaleUtils;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
@@ -256,6 +265,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private boolean isInitViewPagerListener;
     private OnViewPagerListener onViewPagerListener;
     private int currentTabIndex;
+    private String videoLx; //当前视频的类型
 
     public VideoDetailFragment() {
     }
@@ -330,7 +340,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //        likesNum = view.findViewById(R.id.likes_num);
 //        collectionNum = view.findViewById(R.id.collection_num);
         loveIcon = view.findViewById(R.id.love_icon);
-
         footerView = View.inflate(getActivity(), R.layout.footer_view, null);
         commentEmptyView = View.inflate(getActivity(), R.layout.comment_list_empty, null);
         commentListTips = commentEmptyView.findViewById(R.id.comment_list_tips);
@@ -432,6 +441,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
+                        }
+                        break;
+                    case 3:
+                        ImageView coverPicture = (ImageView) adapter.getViewByPosition(currentIndex, R.id.cover_picture);
+                        if (null != coverPicture) {
+                            coverPicture.setVisibility(View.VISIBLE);
                         }
                         break;
                 }
@@ -880,44 +895,8 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             }
             getContentState(myContentId);
         } else {
+            playerView.clearAnimation();
             finderPoint();
-//            if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-//                if (mDuration != 0 && mProgress != 0) {
-//                    //上报埋点
-//                    long evePlayTime = Math.abs(mProgress - lsDuration);
-//                    double currentPercent = (evePlayTime * 1.0 / mDuration);
-//                    double uploadPercent = 0;
-//                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-////                      //不为重播
-//                        if (currentPercent > maxPercent) {
-//                            uploadPercent = currentPercent;
-//                            maxPercent = currentPercent;
-//                        } else {
-//                            uploadPercent = maxPercent;
-//                        }
-//                    } else {
-//                        uploadPercent = 1;
-//                    }
-//                    videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
-//                    BigDecimal two = new BigDecimal(uploadPercent);
-//                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-//                    String event;
-//                    if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
-//                        event = Constants.CMS_VIDEO_OVER;
-//                    } else {
-//                        event = Constants.CMS_VIDEO_OVER_AUTO;
-//                    }
-//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-//                    Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
-//                }
-//            }
-//            String isFinish;
-//            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                isFinish = "否";
-//            } else {
-//                isFinish = "是";
-//            }
-//            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
 
             playerView.mSuperPlayer.pause();
             if (null != rlLp) {
@@ -1070,6 +1049,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+        videoLx = videoType;
         if (TextUtils.equals("0", videoType)) {
             double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
             double mHeight;
@@ -1293,9 +1273,117 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             @Override
             public void onDismiss() {
 //                SystemUtils.hideSystemUI(decorView);
+//                videoScale(videoLx, 0, playerView);
+                VideoScaleUtils.getInstance().videoTranslationScale(getActivity(), videoLx, 0, playerView);
+                controlShow();
             }
         });
 
+        VideoScaleUtils.getInstance().videoTranslationScale(getActivity(), videoLx, 1, playerView);
+        controlHide();
+    }
+
+//    /**
+//     * 视频缩放
+//     *
+//     * @param state     0为评论弹窗消失，1为评论弹窗弹出
+//     * @param videoView
+//     */
+//    private void videoTranslationScale(int state, final SuperPlayerView videoView) {
+//        float scale = 0.7f;
+//        float halfScale = 0.5f;
+//        if (state == 1) {
+//            if (TextUtils.equals("2", videoLx)) {
+//                setTranslationAnimation(0, -(ScreenUtils.getScreenHeight(getActivity()) * scale));
+//            } else if (TextUtils.equals("1", videoLx)) {
+//                setScaleAndTranslationAnimation(0, ScreenUtils.getScreenWidth(getActivity()) / 4,
+//                        0, -(ScreenUtils.getScreenHeight(getActivity()) * 0.2f),
+//                        1f, halfScale, 1f, halfScale);
+//            } else {
+//                setScaleAndTranslationAnimation(0, ScreenUtils.getScreenWidth(getActivity()) / 6,
+//                        0, -(ScreenUtils.getScreenHeight(getActivity()) * 0.5f),
+//                        1f, halfScale, 1f, halfScale);
+//            }
+//            BarUtils.setStatusBarVisibility(getActivity(), false);
+//        } else {
+//            if (TextUtils.equals("2", videoLx)) {
+//                setTranslationAnimation(-(ScreenUtils.getScreenHeight(getActivity()) * 0.7f), 0);
+//            } else if (TextUtils.equals("1", videoLx)) {
+//                setScaleAndTranslationAnimation(ScreenUtils.getScreenWidth(getActivity()) / 4, 0, -(ScreenUtils.getScreenHeight(getActivity()) * 0.2f),
+//                        0, halfScale, 1f, halfScale, 1f);
+//            } else {
+//                setScaleAndTranslationAnimation(ScreenUtils.getScreenWidth(getActivity()) / 6, 0, -(ScreenUtils.getScreenHeight(getActivity()) * 0.5f),
+//                        0, halfScale, 1f, halfScale, 1f);
+//            }
+//            BarUtils.setStatusBarVisibility(getActivity(), true);
+//        }
+//    }
+//
+//    private void setTranslationAnimation(float fromYDelta, float toDelta) {
+//        playerView.clearAnimation();
+//        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, fromYDelta, toDelta);
+//        translateAnimation.setFillAfter(true);
+//        translateAnimation.setDuration(400l);
+//        playerView.setAnimation(translateAnimation);
+//    }
+//
+//    private void setScaleAndTranslationAnimation(float translateFromX, float translateToX, float translateFromY, float translateToY,
+//                                                 float scaleFromX, float scaleToX, float scaleFromY, float scaleToY) {
+//        TranslateAnimation translateAnimation = new TranslateAnimation(translateFromX, translateToX, translateFromY, translateToY);
+//        ScaleAnimation scaleAnimation = new ScaleAnimation(scaleFromX, scaleToX, scaleFromY, scaleToY);
+//        AnimationSet animationSet = new AnimationSet(true);
+//        animationSet.addAnimation(scaleAnimation);
+//        animationSet.addAnimation(translateAnimation);
+//        animationSet.setDuration(400l);
+//        animationSet.setFillAfter(true);
+//        playerView.startAnimation(animationSet);
+//    }
+
+    private void controlHide() {
+        ImageView coverPicture = (ImageView) adapter.getViewByPosition(currentIndex, R.id.cover_picture);
+        if (null != coverPicture) {
+            coverPicture.setVisibility(View.GONE);
+        }
+        if (TextUtils.equals(videoLx, "2")) {
+            ImageView horizontalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.horizontal_video_wdcs_logo);
+            if (null != horizontalVideoWdcsLogo) {
+                horizontalVideoWdcsLogo.setVisibility(View.GONE);
+            }
+        } else {
+            ImageView verticalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.vertical_video_wdcs_logo);
+            if (null != verticalVideoWdcsLogo) {
+                verticalVideoWdcsLogo.setVisibility(View.GONE);
+            }
+        }
+        activityRuleImg.setVisibility(View.GONE);
+        commentPopIsVisible.commentPopIsVisible(true);
+    }
+
+    private void controlShow() {
+        if (TextUtils.equals(videoLx, "2")) {
+            ImageView horizontalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.horizontal_video_wdcs_logo);
+            if (null != horizontalVideoWdcsLogo) {
+                horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            }
+        } else {
+            ImageView verticalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.vertical_video_wdcs_logo);
+            if (null != verticalVideoWdcsLogo) {
+                verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            }
+        }
+        activityRuleImg.setVisibility(View.VISIBLE);
+        handler.sendEmptyMessageDelayed(3, 400);
+        commentPopIsVisible.commentPopIsVisible(false);
+    }
+
+    public CommentPopIsVisible commentPopIsVisible;
+
+    public interface CommentPopIsVisible {
+        void commentPopIsVisible(boolean isVisible);
+    }
+
+    public void setCommentPopIsVisible(CommentPopIsVisible commentPopIsVisible) {
+        this.commentPopIsVisible = commentPopIsVisible;
     }
 
     /**

@@ -25,6 +25,9 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,6 +38,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
+import com.blankj.utilcode.util.BarUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
@@ -99,6 +103,8 @@ import adpter.CommentPopRvAdapter;
 import adpter.VideoCollectionAdapter;
 import adpter.VideoDetailAdapter;
 import model.bean.ActivityRuleBean;
+import ui.fragment.VideoDetailFragment;
+import utils.VideoScaleUtils;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
@@ -233,6 +239,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private TextView commentTitle;
     private List<String> collectionStrList;
     private String topicName;
+    private String videoLx; //当前视频的类型
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -753,6 +760,12 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             }
                         }
                         break;
+                    case 3:
+                        ImageView coverPicture = (ImageView) adapter.getViewByPosition(currentIndex, R.id.cover_picture);
+                        if (null != coverPicture) {
+                            coverPicture.setVisibility(View.VISIBLE);
+                        }
+                        break;
                 }
             }
         };
@@ -1161,6 +1174,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+        videoLx = videoType;
         if (TextUtils.equals("0", videoType)) {
             double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
             double mHeight;
@@ -1366,7 +1380,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     .setOutsideTouchable(false)
                     .setFocusable(true)
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, (int) (Utils.getContext().getResources().getDisplayMetrics().heightPixels * 0.7))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
                     .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
@@ -1378,9 +1392,105 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onDismiss() {
 //                SystemUtils.hideSystemUI(decorView);
+                VideoScaleUtils.getInstance().videoTranslationScale(VideoDetailActivity.this, videoLx, 0, playerView);
+                controlShow();
             }
         });
+        VideoScaleUtils.getInstance().videoTranslationScale(VideoDetailActivity.this, videoLx, 1, playerView);
+        controlHide();
+    }
 
+    /**
+     * 视频缩放
+     *
+     * @param state     0为评论弹窗消失，1为评论弹窗弹出
+     * @param videoView
+     */
+    private void videoTranslationScale(int state, final SuperPlayerView videoView) {
+        float scale = 0.7f;
+        float halfScale = 0.5f;
+        if (state == 1) {
+            if (TextUtils.equals("2", videoLx)) {
+                setTranslationAnimation(0, -(ScreenUtils.getScreenHeight(this) * scale));
+            } else if (TextUtils.equals("1", videoLx)) {
+                setScaleAndTranslationAnimation(0, ScreenUtils.getScreenWidth(this) / 4,
+                        0, -(ScreenUtils.getScreenHeight(this) * 0.2f),
+                        1f, halfScale, 1f, halfScale);
+            } else {
+                setScaleAndTranslationAnimation(0, ScreenUtils.getScreenWidth(this) / 6,
+                        0, -(ScreenUtils.getScreenHeight(this) * 0.5f),
+                        1f, halfScale, 1f, halfScale);
+            }
+            BarUtils.setStatusBarVisibility(this, false);
+        } else {
+            if (TextUtils.equals("2", videoLx)) {
+                setTranslationAnimation(-(ScreenUtils.getScreenHeight(this) * 0.7f), 0);
+            } else if (TextUtils.equals("1", videoLx)) {
+                setScaleAndTranslationAnimation(ScreenUtils.getScreenWidth(this) / 4, 0, -(ScreenUtils.getScreenHeight(this) * 0.2f),
+                        0, halfScale, 1f, halfScale, 1f);
+            } else {
+                setScaleAndTranslationAnimation(ScreenUtils.getScreenWidth(this) / 6, 0, -(ScreenUtils.getScreenHeight(this) * 0.5f),
+                        0, halfScale, 1f, halfScale, 1f);
+            }
+            BarUtils.setStatusBarVisibility(this, true);
+        }
+    }
+
+    private void setTranslationAnimation(float fromYDelta, float toDelta) {
+        playerView.clearAnimation();
+        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, fromYDelta, toDelta);
+        translateAnimation.setFillAfter(true);
+        translateAnimation.setDuration(400l);
+        playerView.setAnimation(translateAnimation);
+    }
+
+    private void setScaleAndTranslationAnimation(float translateFromX, float translateToX, float translateFromY, float translateToY,
+                                                 float scaleFromX, float scaleToX, float scaleFromY, float scaleToY) {
+        TranslateAnimation translateAnimation = new TranslateAnimation(translateFromX, translateToX, translateFromY, translateToY);
+        ScaleAnimation scaleAnimation = new ScaleAnimation(scaleFromX, scaleToX, scaleFromY, scaleToY);
+        AnimationSet animationSet = new AnimationSet(true);
+        animationSet.addAnimation(scaleAnimation);
+        animationSet.addAnimation(translateAnimation);
+        animationSet.setDuration(400l);
+        animationSet.setFillAfter(true);
+        playerView.startAnimation(animationSet);
+    }
+
+    private void controlHide() {
+        ImageView coverPicture = (ImageView) adapter.getViewByPosition(currentIndex, R.id.cover_picture);
+        if (null != coverPicture) {
+            coverPicture.setVisibility(View.GONE);
+        }
+        if (TextUtils.equals(videoLx, "2")) {
+            ImageView horizontalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.horizontal_video_wdcs_logo);
+            if (null != horizontalVideoWdcsLogo) {
+                horizontalVideoWdcsLogo.setVisibility(View.GONE);
+            }
+        } else {
+            ImageView verticalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.vertical_video_wdcs_logo);
+            if (null != verticalVideoWdcsLogo) {
+                verticalVideoWdcsLogo.setVisibility(View.GONE);
+            }
+        }
+        activityRuleImg.setVisibility(View.GONE);
+        back.setVisibility(View.GONE);
+    }
+
+    private void controlShow() {
+        if (TextUtils.equals(videoLx, "2")) {
+            ImageView horizontalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.horizontal_video_wdcs_logo);
+            if (null != horizontalVideoWdcsLogo) {
+                horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            }
+        } else {
+            ImageView verticalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.vertical_video_wdcs_logo);
+            if (null != verticalVideoWdcsLogo) {
+                verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            }
+        }
+        activityRuleImg.setVisibility(View.VISIBLE);
+        back.setVisibility(View.VISIBLE);
+        handler.sendEmptyMessageDelayed(3, 400);
     }
 
     /**

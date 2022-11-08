@@ -24,6 +24,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,6 +37,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.alibaba.fastjson.JSON;
+import com.blankj.utilcode.util.BarUtils;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
@@ -102,6 +106,7 @@ import model.bean.ActivityRuleBean;
 import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
+import utils.VideoScaleUtils;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
 import widget.LoadingView;
@@ -242,6 +247,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private View view;
     public static XkshFragment mFragment;
     private int currentTabIndex;
+    private String videoLx; //当前视频的类型
 
     public XkshFragment() {
 
@@ -398,6 +404,12 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                 TextView likeNum = (TextView) adapter.getViewByPosition(currentIndex, R.id.likes_num);
                                 addOrCancelLike(myContentId, videoType, likeImage, likeNum);
                             }
+                        }
+                        break;
+                    case 3:
+                        ImageView coverPicture = (ImageView) adapter.getViewByPosition(currentIndex, R.id.cover_picture);
+                        if (null != coverPicture) {
+                            coverPicture.setVisibility(View.VISIBLE);
                         }
                         break;
                 }
@@ -851,39 +863,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
             getContentState(myContentId);
         } else {
-//            if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-//                if (mDuration != 0 && mProgress != 0) {
-//                    //上报埋点
-//                    long evePlayTime = Math.abs(mProgress - lsDuration);
-//                    float currentPercent = (evePlayTime / mDuration);
-//                    double uploadPercent = 0;
-//                    if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-//                        //不为重播
-//                        if (currentPercent > maxPercent) {
-//                            uploadPercent = currentPercent;
-//                            maxPercent = currentPercent;
-//                        } else {
-//                            uploadPercent = maxPercent;
-//                        }
-//                    } else {
-//                        uploadPercent = 1;
-//                    }
-//                    xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
-//                    BigDecimal two = new BigDecimal(uploadPercent);
-//                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-//                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_VIDEO_OVER_AUTO);
-//                    Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
-//                }
-//            }
-//            String isFinish;
-//            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                isFinish = "否";
-//            } else {
-//                isFinish = "是";
-//            }
-//            FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
+            playerView.clearAnimation();
             finderPoint();
-
             playerView.mSuperPlayer.pause();
             if (null != rlLp) {
                 rlLp.removeView(playerView);
@@ -1041,6 +1022,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
         String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+        videoLx = videoType;
         if (TextUtils.equals("0", videoType)) {
             double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
             double mHeight;
@@ -1086,7 +1068,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         }
         playerView.setLayoutParams(playViewParams);
         playerView.setTag(position);
-
         if (rlLp != null && mIsVisibleToUser) {
             rlLp.addView(playerView, 1);
             //露出即上报
@@ -1245,7 +1226,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     .setOutsideTouchable(false)
                     .setFocusable(true)
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels - ButtonSpan.dip2px(200))
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, (int) (Utils.getContext().getResources().getDisplayMetrics().heightPixels * 0.7))
                     .setAnimationStyle(R.style.take_popwindow_anim)
                     .create()
                     .showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
@@ -1257,10 +1238,62 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDismiss() {
 //                SystemUtils.hideSystemUI(decorView);
+                VideoScaleUtils.getInstance().videoTranslationScale(getActivity(), videoLx, 0, playerView);
+                controlShow();
             }
         });
-
+        VideoScaleUtils.getInstance().videoTranslationScale(getActivity(), videoLx, 1, playerView);
+        controlHide();
     }
+
+
+    private void controlHide() {
+        ImageView coverPicture = (ImageView) adapter.getViewByPosition(currentIndex, R.id.cover_picture);
+        if (null != coverPicture) {
+            coverPicture.setVisibility(View.GONE);
+        }
+        if (TextUtils.equals(videoLx, "2")) {
+            ImageView horizontalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.horizontal_video_wdcs_logo);
+            if (null != horizontalVideoWdcsLogo) {
+                horizontalVideoWdcsLogo.setVisibility(View.GONE);
+            }
+        } else {
+            ImageView verticalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.vertical_video_wdcs_logo);
+            if (null != verticalVideoWdcsLogo) {
+                verticalVideoWdcsLogo.setVisibility(View.GONE);
+            }
+        }
+        activityRuleImg.setVisibility(View.GONE);
+        commentPopIsVisible.commentPopIsVisible(true);
+    }
+
+    private void controlShow() {
+        if (TextUtils.equals(videoLx, "2")) {
+            ImageView horizontalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.horizontal_video_wdcs_logo);
+            if (null != horizontalVideoWdcsLogo) {
+                horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            }
+        } else {
+            ImageView verticalVideoWdcsLogo = (ImageView) adapter.getViewByPosition(currentIndex, R.id.vertical_video_wdcs_logo);
+            if (null != verticalVideoWdcsLogo) {
+                verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+            }
+        }
+        activityRuleImg.setVisibility(View.VISIBLE);
+        handler.sendEmptyMessageDelayed(3, 400);
+        commentPopIsVisible.commentPopIsVisible(false);
+    }
+
+    public CommentPopIsVisible commentPopIsVisible;
+
+    public interface CommentPopIsVisible {
+        void commentPopIsVisible(boolean isVisible);
+    }
+
+    public void setCommentPopIsVisible(CommentPopIsVisible commentPopIsVisible) {
+        this.commentPopIsVisible = commentPopIsVisible;
+    }
+
 
     /**
      * 选集弹窗
