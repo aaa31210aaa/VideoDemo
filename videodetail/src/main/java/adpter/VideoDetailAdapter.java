@@ -73,6 +73,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
     private SmartRefreshLayout mRefreshlayout;
     private String topicNameStr;
     private boolean isClick = true;
+    private boolean isWifiBord;
 
     public VideoDetailAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
                               SuperPlayerView playerView) {
@@ -127,12 +128,15 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
-            if (null != mContext && !((Activity) mContext).isFinishing()
-                    && !((Activity) mContext).isDestroyed()) {
-                Glide.with(mContext)
-                        .load(item.getImagesUrl())
-                        .into(coverPicture);
+            if (!isWifiBord) {
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getImagesUrl())
+                            .into(coverPicture);
+                }
             }
+
         } else if (TextUtils.equals("1", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //竖版视频
@@ -148,11 +152,13 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             }
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
-            if (null != mContext && !((Activity) mContext).isFinishing()
-                    && !((Activity) mContext).isDestroyed()) {
-                Glide.with(mContext)
-                        .load(item.getImagesUrl())
-                        .into(coverPicture);
+            if (!isWifiBord) {
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getImagesUrl())
+                            .into(coverPicture);
+                }
             }
         } else {
             //非标准视频
@@ -167,12 +173,13 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             double mHeight;
             mHeight = layoutParams.width / percent;
             layoutParams.height = (int) mHeight;
-
-            if (null != mContext && !((Activity) mContext).isFinishing()
-                    && !((Activity) mContext).isDestroyed()) {
-                Glide.with(mContext)
-                        .load(item.getImagesUrl())
-                        .into(coverPicture);
+            if (!isWifiBord) {
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getImagesUrl())
+                            .into(coverPicture);
+                }
             }
         }
 
@@ -269,7 +276,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                         model.setIs_notice("是");
                     }
                     model.setModule_source("视频播放");
-                    FinderBuriedPointManager.setFinderCommon(Constants.CLICK_USER,model);
+                    FinderBuriedPointManager.setFinderCommon(Constants.CLICK_USER, model);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -372,6 +379,8 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
                 mPublishWorksListener.publishWorksClick(v, item);
             }
         });
+
+        isWifiBord = false;
     }
 
 
@@ -513,4 +522,11 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
         }
     }
 
+    public void setWifiBord(Boolean isWifiBord) {
+        this.isWifiBord = isWifiBord;
+    }
+
+    public Boolean getWifiBord() {
+        return isWifiBord;
+    }
 }

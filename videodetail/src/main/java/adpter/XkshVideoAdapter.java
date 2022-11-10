@@ -64,6 +64,7 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
     private String spaceStr = "";
     //    private String topicNameStr;
     private boolean isClick = true;
+    private boolean isWifiBord;
 
     public XkshVideoAdapter(int layoutResId, @Nullable List<DataDTO> data, Context context,
                             SuperPlayerView playerView, SmartRefreshLayout refreshLayout, ViewPagerLayoutManager videoDetailmanager) {
@@ -110,62 +111,74 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         double widthPixel = outMetrics.widthPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
-            //横板标准视频
-            verticalVideoWdcsLogo.setVisibility(View.GONE);
-            horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
-            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            layoutParams.width = (int) widthPixel - 1;
-            layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
-            if (null != mContext && !((Activity) mContext).isFinishing()
-                    && !((Activity) mContext).isDestroyed()) {
-                Glide.with(mContext)
-                        .load(item.getImagesUrl())
-                        .into(coverPicture);
+            if (!isWifiBord) {
+                //横板标准视频
+                verticalVideoWdcsLogo.setVisibility(View.GONE);
+                horizontalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                layoutParams.width = (int) widthPixel - 1;
+                layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
+
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getImagesUrl())
+                            .into(coverPicture);
+                }
             }
+
         } else if (TextUtils.equals("1", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),
                 Integer.parseInt(NumberFormatTool.getNumStr(item.getHeight()))))) {
             //竖版视频
-            if (phoneIsNormal()) {
+            if (!isWifiBord) {
+                if (phoneIsNormal()) {
+                    layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                } else {
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                }
+                verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                horizontalVideoWdcsLogo.setVisibility(View.GONE);
+
+                layoutParams.setMargins(0, 0, 0, 0);
+                layoutParams.width = (int) widthPixel - 1;
+                layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
+
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getImagesUrl())
+                            .into(coverPicture);
+                }
+            }
+
+        } else {
+            if (!isWifiBord) {
+                //非标准视频
+                verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
+                horizontalVideoWdcsLogo.setVisibility(View.GONE);
+                layoutParams.width = (int) widthPixel - 1;
                 layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            } else {
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            }
-            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
-            horizontalVideoWdcsLogo.setVisibility(View.GONE);
+                layoutParams.setMargins(0, 0, 0, 0);
 
-            layoutParams.setMargins(0, 0, 0, 0);
-            layoutParams.width = (int) widthPixel - 1;
-            layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
-            if (null != mContext && !((Activity) mContext).isFinishing()
-                    && !((Activity) mContext).isDestroyed()) {
-                Glide.with(mContext)
-                        .load(item.getImagesUrl())
-                        .into(coverPicture);
-            }
-        } else {
-            //非标准视频
-            verticalVideoWdcsLogo.setVisibility(View.VISIBLE);
-            horizontalVideoWdcsLogo.setVisibility(View.GONE);
-            layoutParams.width = (int) widthPixel - 1;
-            layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            layoutParams.setMargins(0, 0, 0, 0);
+                double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
+                double mHeight;
+                mHeight = layoutParams.width / percent;
+                layoutParams.height = (int) mHeight;
 
-            double percent = Double.parseDouble(item.getWidth()) / Double.parseDouble(item.getHeight());
-            double mHeight;
-            mHeight = layoutParams.width / percent;
-            layoutParams.height = (int) mHeight;
-
-            if (null != mContext && !((Activity) mContext).isFinishing()
-                    && !((Activity) mContext).isDestroyed()) {
-                Glide.with(mContext)
-                        .load(item.getImagesUrl())
-                        .into(coverPicture);
+                if (null != mContext && !((Activity) mContext).isFinishing()
+                        && !((Activity) mContext).isDestroyed()) {
+                    Glide.with(mContext)
+                            .load(item.getImagesUrl())
+                            .into(coverPicture);
+                }
             }
         }
-        coverPicture.setLayoutParams(layoutParams);
+        if (!isWifiBord) {
+            coverPicture.setLayoutParams(layoutParams);
+        }
 
         if (item.isWifi()) {
             noWifiLl.setVisibility(View.INVISIBLE);
@@ -369,6 +382,8 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
                 mPublishWorksListener.publishWorksClick(v, item);
             }
         });
+
+        isWifiBord = false;
     }
 
     public void setTopicClick(boolean isClick) {
@@ -517,5 +532,13 @@ public class XkshVideoAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder> 
         } else {
             return false;
         }
+    }
+
+    public void setWifiBord(Boolean isWifiBord) {
+        this.isWifiBord = isWifiBord;
+    }
+
+    public Boolean getWifiBord() {
+        return isWifiBord;
     }
 }

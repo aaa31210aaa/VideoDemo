@@ -285,6 +285,9 @@ public class VideoCollectionModel {
             }
 
             public Integer getViewCountShow() {
+                if (null == viewCountShow) {
+                    return 0;
+                }
                 return viewCountShow;
             }
 

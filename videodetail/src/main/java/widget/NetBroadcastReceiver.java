@@ -1,5 +1,6 @@
 package widget;
 
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,10 +9,31 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.widget.Toast;
 
+import androidx.lifecycle.MutableLiveData;
+
+import com.wdcs.callback.VideoInteractiveParam;
+import com.wdcs.constants.Constants;
 import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.SPUtils;
 
 public class NetBroadcastReceiver extends BroadcastReceiver {
+
+    public static NetBroadcastReceiver netBroadcastReceiver;
+
+    public NetBroadcastReceiver() {
+    }
+
+    public static NetBroadcastReceiver getInstance() {
+        if (netBroadcastReceiver == null) {
+            synchronized (VideoInteractiveParam.class) {
+                if (netBroadcastReceiver == null) {
+                    netBroadcastReceiver = new NetBroadcastReceiver();
+                }
+            }
+        }
+        return netBroadcastReceiver;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -64,6 +86,8 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
 
             if (oleNetState.equals("1") && netState.equals(oleNetState)) {
                 Toast.makeText(context, "当前为非WIFI状态，请注意流量消耗", Toast.LENGTH_SHORT).show();
+            } else {
+                LiveDataParam.getInstance().wifiState.setValue(true);
             }
 
         }

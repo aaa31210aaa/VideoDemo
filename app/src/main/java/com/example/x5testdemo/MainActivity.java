@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
                 VideoInteractiveParam.getInstance().setCallBack(new VideoParamCallBack() {
                     @Override
                     public void shared(ShareInfo shareInfo) {
@@ -117,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     //b3bfd518-7a64-4ff0-a556-d4fbffb0d71f
                     public String setCode() {
-                        return "36211043-5525-41c3-af83-784b538acce6";
+                        return "ad36db10-0a71-40b5-94f4-b223db4a4c01";
                     }
 
                     @Override

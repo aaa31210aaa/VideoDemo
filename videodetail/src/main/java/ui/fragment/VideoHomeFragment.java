@@ -754,7 +754,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 
 
     private void initViewPager() {
-        videoVp.setOffscreenPageLimit(1);
+        videoVp.setOffscreenPageLimit(3);
         if (null == videoViewPagerAdapter) {
             videoViewPagerAdapter = new VideoViewPagerAdapter(getActivity().getSupportFragmentManager());
         }
@@ -864,6 +864,18 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             }
         });
 
+        videoDetailFragment.setNoWifiClickListener(new VideoDetailFragment.NoWifiListener() {
+            @Override
+            public void noWifiClickListener() {
+                for (int i = 0; i < xkshFragment.mDatas.size(); i++) {
+                    if (null != xkshFragment.mDatas.get(i)) {
+                        xkshFragment.mDatas.get(i).setWifi(true);
+                    }
+                }
+                xkshFragment.adapter.notifyDataSetChanged();
+            }
+        });
+
         xkshFragment.setCommentPopIsVisible(new XkshFragment.CommentPopIsVisible() {
             @Override
             public void commentPopIsVisible(boolean isVisible) {
@@ -872,6 +884,18 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                 } else {
                     topZzc.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+        xkshFragment.setNoWifiClickListener(new XkshFragment.NoWifiListener() {
+            @Override
+            public void noWifiClickListener() {
+                for (int i = 0; i < videoDetailFragment.mDatas.size(); i++) {
+                    if (null != videoDetailFragment.mDatas.get(i)) {
+                        videoDetailFragment.mDatas.get(i).setWifi(true);
+                    }
+                }
+                videoDetailFragment.adapter.notifyDataSetChanged();
             }
         });
     }

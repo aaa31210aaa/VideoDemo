@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -109,7 +110,9 @@ import ui.activity.VideoHomeActivity;
 import utils.VideoScaleUtils;
 import widget.CollectionClickble;
 import widget.CustomLoadMoreView;
+import widget.LiveDataParam;
 import widget.LoadingView;
+import widget.NetBroadcastReceiver;
 
 import com.wdcs.manager.OnViewPagerListener;
 import com.wdcs.manager.ViewPagerLayoutManager;
@@ -351,6 +354,31 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         shareQqBtn = sharePopView.findViewById(R.id.share_qq_btn);
         shareQqBtn.setOnClickListener(this);
 
+        LiveDataParam.getInstance().wifiState.observe(getActivity(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                try {
+                    for (int i = 0; i < mDatas.size(); i++) {
+                        mDatas.get(i).setWifi(true);
+                    }
+                    if (null != adapter) {
+                        adapter.setWifiBord(true);
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    if (null != playerView) {
+                        if (mIsVisibleToUser) {
+                            addPlayView(currentIndex);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
         /**
          * 发送评论
          */
@@ -436,21 +464,32 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         adapter.setToAddPlayerViewClick(new XkshVideoAdapter.ToAddPlayerViewClick() {
             @Override
             public void clickNoWifi(int position) {
-                SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
-                for (int i = 0; i < mDatas.size(); i++) {
-                    if (null != mDatas.get(i)) {
-                        mDatas.get(i).setWifi(true);
-                    }
-                }
+                try {
+                    if (mDatas.size() > position) {
+                        SPUtils.getInstance().put(Constants.AGREE_NETWORK, "1");
+                        for (int i = 0; i < mDatas.size(); i++) {
+                            if (null != mDatas.get(i)) {
+                                mDatas.get(i).setWifi(true);
+                            }
+                        }
 
-                for (int i = 0; i < ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.size(); i++) {
-                    if (null != ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i)) {
-                        ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i).setWifi(true);
+                        if (getActivity() instanceof VideoHomeActivity) {
+                            for (int i = 0; i < ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.size(); i++) {
+                                if (null != ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i)) {
+                                    ((VideoHomeActivity) getActivity()).videoDetailFragment.mDatas.get(i).setWifi(true);
+                                }
+                            }
+                            ((VideoHomeActivity) getActivity()).videoDetailFragment.adapter.notifyDataSetChanged();
+                        } else {
+                            noWifiListener.noWifiClickListener();
+                        }
+
+                        addPlayView(position);
+                        adapter.notifyDataSetChanged();
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                addPlayView(position);
-                adapter.notifyDataSetChanged();
-                ((VideoHomeActivity) getActivity()).videoDetailFragment.adapter.notifyDataSetChanged();
             }
         });
 
@@ -526,12 +565,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
-                    if (isFollow) {
-                        //调用取消关注接口
-                        cancelFollow(mDatas.get(position).getCreateBy());
-                    } else {
-                        //调用关注接口
-                        toFollow(mDatas.get(position).getCreateBy());
+                    if (mDatas.size() > position) {
+                        if (isFollow) {
+                            //调用取消关注接口
+                            cancelFollow(mDatas.get(position).getCreateBy());
+                        } else {
+                            //调用关注接口
+                            toFollow(mDatas.get(position).getCreateBy());
+                        }
                     }
                 }
             }
@@ -565,61 +606,65 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onInitComplete() {
-                if (initialize) {
-                    return;
-                }
-                initialize = true;
-
-                if (mDatas.isEmpty()) {
-                    return;
-                }
-                mDataDTO = mDatas.get(0);
-
-                if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
-                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
-                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
-                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                try {
+                    if (initialize) {
+                        return;
                     }
-                }
+                    initialize = true;
+
+                    if (mDatas.isEmpty()) {
+                        return;
+                    }
+                    mDataDTO = mDatas.get(0);
+
+                    if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
+                        if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
+                                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getHeight()))))) {
+                            adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                        } else {
+                            adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                        }
+                    }
 
 //                playerView = SuperPlayerView.getInstance(getActivity(), decorView);
-                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
-                playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
-                playerView.mWindowPlayer.setIsTurnPages(false);
-                playerView.mWindowPlayer.setManager(xkshManager);
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
-                myContentId = String.valueOf(mDatas.get(0).getId());
-                addPageViews(myContentId);
-                OkGo.getInstance().cancelTag("contentState");
-                getContentState(myContentId);
+                    playerView.mWindowPlayer.setDataDTO(mDataDTO, mDataDTO);
+                    playerView.mWindowPlayer.setViewpager((NoScrollViewPager) getActivity().findViewById(R.id.video_vp));
+                    playerView.mWindowPlayer.setIsTurnPages(false);
+                    playerView.mWindowPlayer.setManager(xkshManager);
+                    playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                    myContentId = String.valueOf(mDatas.get(0).getId());
+                    addPageViews(myContentId);
+                    OkGo.getInstance().cancelTag("contentState");
+                    getContentState(myContentId);
 
-                mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
-                if (isVisibleNoWifiView(getActivity())) {
-                    playerView.setOrientation(false);
-                } else {
-                    playerView.setOrientation(true);
-                }
-                currentIndex = 0;
-                mPageIndex = 1;
-                if (mDatas.get(0).getDisableComment()) {
-                    commentListTips.setText("当前页面评论功能已关闭");
-                    commentPopRl.setEnabled(false);
-                    commentEdtInput.setHint("当前页面评论功能已关闭");
-                } else {
-                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
-                    commentPopRl.setEnabled(true);
-                    commentEdtInput.setHint("写评论...");
-                }
-                commentPopRvAdapter.setEmptyView(commentEmptyView);
-                getCommentList("1", String.valueOf(mPageSize), true);
-                videoType = mDatas.get(0).getType();
-                rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
-                OkGo.getInstance().cancelTag(recommendTag);
-                //获取推荐列表
-                getRecommend(myContentId, 0);
+                    mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                    if (isVisibleNoWifiView(getActivity())) {
+                        playerView.setOrientation(false);
+                    } else {
+                        playerView.setOrientation(true);
+                    }
+                    currentIndex = 0;
+                    mPageIndex = 1;
+                    if (mDatas.get(0).getDisableComment()) {
+                        commentListTips.setText("当前页面评论功能已关闭");
+                        commentPopRl.setEnabled(false);
+                        commentEdtInput.setHint("当前页面评论功能已关闭");
+                    } else {
+                        commentListTips.setText("暂无任何评论，快来抢沙发吧！");
+                        commentPopRl.setEnabled(true);
+                        commentEdtInput.setHint("写评论...");
+                    }
+                    commentPopRvAdapter.setEmptyView(commentEmptyView);
+                    getCommentList("1", String.valueOf(mPageSize), true);
+                    videoType = mDatas.get(0).getType();
+                    rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
+                    OkGo.getInstance().cancelTag(recommendTag);
+                    //获取推荐列表
+                    getRecommend(myContentId, 0);
 //                initChoosePop();
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -628,22 +673,27 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onPageSelected(final int position, boolean isBottom) {
-                if (null == playerView) {
-                    return;
-                }
+                try {
+                    if (null == playerView) {
+                        return;
+                    }
 
-                if (null != playerView.getTag() && position == (int) playerView.getTag()) {
-                    return;
-                }
-                //避免越界addOrCancelLike
-                if (mDatas.isEmpty()) {
-                    return;
-                }
-                if (null == mDatas.get(position)) {
-                    return;
-                }
+                    if (null != playerView.getTag() && position == (int) playerView.getTag()) {
+                        return;
+                    }
+                    //避免越界addOrCancelLike
+                    if (mDatas.isEmpty()) {
+                        return;
+                    }
+                    if (null == mDatas.get(position)) {
+                        return;
+                    }
 
-                playerView.mWindowPlayer.hide();
+                    if (mDatas.size() <= position) {
+                        return;
+                    }
+
+                    playerView.mWindowPlayer.hide();
 
 //                if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
 //                    if (mDuration != 0 && mProgress != 0) {
@@ -676,75 +726,78 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 //                    isFinish = "是";
 //                }
 //                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
-                finderPoint();
+                    finderPoint();
 
-                mDataDTO = mDatas.get(position);
+                    mDataDTO = mDatas.get(position);
 
-                if (isVisibleNoWifiView(getActivity())) {
-                    playerView.setOrientation(false);
-                } else {
-                    playerView.setOrientation(true);
-                }
-
-                if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
-                    if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
-                            Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                    if (isVisibleNoWifiView(getActivity())) {
+                        playerView.setOrientation(false);
                     } else {
-                        adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                        playerView.setOrientation(true);
                     }
-                }
+
+                    if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
+                        if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
+                            adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.VISIBLE);
+                        } else {
+                            adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen).setVisibility(View.GONE);
+                        }
+                    }
 
 
-                //重置重播标识
-                if (null != playerView && null != playerView.buriedPointModel) {
-                    playerView.buriedPointModel.setXksh_renew("false");
-                }
-                //滑动下一条或者上一条视频
-                playerView.mWindowPlayer.setRecordDuration(0);
-                lsDuration = 0;
-                maxPercent = 0;
-                mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
-                playUrl = mDatas.get(position).getPlayUrl();
-                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
-                playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
-                playerView.mWindowPlayer.setIsTurnPages(true);
-                playerView.mFullScreenPlayer.setIsTurnPages(true);
-                currentIndex = position;
-                reset();
-                myContentId = String.valueOf(mDatas.get(position).getId());
+                    //重置重播标识
+                    if (null != playerView && null != playerView.buriedPointModel) {
+                        playerView.buriedPointModel.setXksh_renew("false");
+                    }
+                    //滑动下一条或者上一条视频
+                    playerView.mWindowPlayer.setRecordDuration(0);
+                    lsDuration = 0;
+                    maxPercent = 0;
+                    mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
+                    playUrl = mDatas.get(position).getPlayUrl();
+                    playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
+                    playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
+                    playerView.mWindowPlayer.setIsTurnPages(true);
+                    playerView.mFullScreenPlayer.setIsTurnPages(true);
+                    currentIndex = position;
+                    reset();
+                    myContentId = String.valueOf(mDatas.get(position).getId());
 
-                addPageViews(myContentId);
-                videoType = mDatas.get(position).getType();
-                mPageIndex = 1;
-                if (mDatas.get(position).getDisableComment()) {
-                    commentListTips.setText("当前页面评论功能已关闭");
-                    commentPopRl.setEnabled(false);
-                    commentEdtInput.setHint("当前页面评论功能已关闭");
-                } else {
-                    commentListTips.setText("暂无任何评论，快来抢沙发吧！");
-                    commentPopRl.setEnabled(true);
-                    commentEdtInput.setHint("写评论...");
-                }
-                commentPopRvAdapter.setEmptyView(commentEmptyView);
-                getCommentList("1", String.valueOf(mPageSize), true);
-                getContentState(myContentId);
-                String localUserId = PersonInfoManager.getInstance().getUserId();
-                String userId = mDataDTO.getCreateBy();
-                if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
-                    adapter.getViewByPosition(position, R.id.follow).setVisibility(View.GONE);
-                } else {
-                    adapter.getViewByPosition(position, R.id.follow).setVisibility(View.VISIBLE);
-                }
+                    addPageViews(myContentId);
+                    videoType = mDatas.get(position).getType();
+                    mPageIndex = 1;
+                    if (mDatas.get(position).getDisableComment()) {
+                        commentListTips.setText("当前页面评论功能已关闭");
+                        commentPopRl.setEnabled(false);
+                        commentEdtInput.setHint("当前页面评论功能已关闭");
+                    } else {
+                        commentListTips.setText("暂无任何评论，快来抢沙发吧！");
+                        commentPopRl.setEnabled(true);
+                        commentEdtInput.setHint("写评论...");
+                    }
+                    commentPopRvAdapter.setEmptyView(commentEmptyView);
+                    getCommentList("1", String.valueOf(mPageSize), true);
+                    getContentState(myContentId);
+                    String localUserId = PersonInfoManager.getInstance().getUserId();
+                    String userId = mDataDTO.getCreateBy();
+                    if (TextUtils.isEmpty(mDataDTO.getIssuerId()) || TextUtils.equals(localUserId, userId)) {
+                        adapter.getViewByPosition(position, R.id.follow).setVisibility(View.GONE);
+                    } else {
+                        adapter.getViewByPosition(position, R.id.follow).setVisibility(View.VISIBLE);
+                    }
 
-                rlLp = (ViewGroup) xkshManager.findViewByPosition(position);
-                OkGo.getInstance().cancelTag(recommendTag);
-                getRecommend(myContentId, position);
+                    rlLp = (ViewGroup) xkshManager.findViewByPosition(position);
+                    OkGo.getInstance().cancelTag(recommendTag);
+                    getRecommend(myContentId, position);
 
-                if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
-                    playerView.mFullScreenPlayer.mVodMoreView.mCallback.onSpeedChange(1.0f);
-                    playerView.mFullScreenPlayer.superplayerSpeed.setText("倍速");
-                    playerView.mFullScreenPlayer.mRbSpeed1.setChecked(true);
+                    if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
+                        playerView.mFullScreenPlayer.mVodMoreView.mCallback.onSpeedChange(1.0f);
+                        playerView.mFullScreenPlayer.superplayerSpeed.setText("倍速");
+                        playerView.mFullScreenPlayer.mRbSpeed1.setChecked(true);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -1001,80 +1054,88 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * @param position
      */
     public void addPlayView(final int position) {
-        if (!mIsVisibleToUser) {
-            return;
-        }
-
-        if (isVisibleNoWifiView(getActivity())) {
-            return;
-        }
-
-        if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
-            ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
-        }
-
-        if (null != playerView && null != playerView.getParent()) {
-            ((ViewGroup) playerView.getParent()).removeView(playerView);
-        }
-        LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
-//        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
-
-        String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
-                Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
-        videoLx = videoType;
-        if (TextUtils.equals("0", videoType)) {
-            double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
-            double mHeight;
-            mHeight = getResources().getDisplayMetrics().widthPixels / percent;
-            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) mHeight);
-            playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            playViewParams.setMargins(0, 0, 0, 0);
-            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
-
-//            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
-
-
-            playerView.setOrientation(false);
-            if (null != itemRelativelayout) {
-                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
+        try {
+            if (!mIsVisibleToUser) {
+                return;
             }
-        } else if (TextUtils.equals("1", videoType)) {
-            int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
-            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-            if (phoneIsNormal()) {
+
+            if (isVisibleNoWifiView(getActivity())) {
+                return;
+            }
+
+            if (mDatas.size() <= position) {
+                return;
+            }
+
+            if (null != playerView.mWindowPlayer && null != playerView.mWindowPlayer.mLayoutBottom && null != playerView.mWindowPlayer.mLayoutBottom.getParent()) {
+                ((ViewGroup) playerView.mWindowPlayer.mLayoutBottom.getParent()).removeView(playerView.mWindowPlayer.mLayoutBottom);
+            }
+
+            if (null != playerView && null != playerView.getParent()) {
+                ((ViewGroup) playerView.getParent()).removeView(playerView);
+            }
+            LinearLayout linearLayout = (LinearLayout) adapter.getViewByPosition(currentIndex, R.id.introduce_lin);
+//        RelativeLayout.LayoutParams mLayoutBottomParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
+
+            String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
+                    Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
+            videoLx = videoType;
+            if (TextUtils.equals("0", videoType)) {
+                double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
+                double mHeight;
+                mHeight = getResources().getDisplayMetrics().widthPixels / percent;
+                playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) mHeight);
                 playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-                playerView.setOrientation(false);
-            } else {
-                playViewParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                playViewParams.setMargins(0, 0, 0, 0);
                 playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
+
+                //            int height = (int) (Integer.parseInt(mDatas.get(position).getWidth()) / Constants.Portrait_Proportion);
+
+
                 playerView.setOrientation(false);
+                if (null != itemRelativelayout) {
+                    itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
+                }
+            } else if (TextUtils.equals("1", videoType)) {
+                int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
+                playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+                if (phoneIsNormal()) {
+                    playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                    playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+                    playerView.setOrientation(false);
+                } else {
+                    playViewParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
+                    playerView.setOrientation(false);
+                }
+                if (null != itemRelativelayout) {
+                    itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
+                }
+            } else {
+                int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Horizontal_Proportion);
+                playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
+                playerView.setOrientation(true);
+                if (null != itemRelativelayout) {
+                    itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
+                }
             }
-            if (null != itemRelativelayout) {
-                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
+            playerView.setLayoutParams(playViewParams);
+            playerView.setTag(position);
+            if (rlLp != null && mIsVisibleToUser) {
+                rlLp.addView(playerView, 1);
+                //露出即上报
+                if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
+                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_CLIENT_SHOW);
+                }
+                play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
             }
-        } else {
-            int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Horizontal_Proportion);
-            playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-            playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            playerView.mSuperPlayer.setRenderMode(TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION);
-            playerView.setOrientation(true);
-            if (null != itemRelativelayout) {
-                itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
-            }
-        }
-        playerView.setLayoutParams(playViewParams);
-        playerView.setTag(position);
-        if (rlLp != null && mIsVisibleToUser) {
-            rlLp.addView(playerView, 1);
-            //露出即上报
-            if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), "", "", Constants.CMS_CLIENT_SHOW, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_CLIENT_SHOW);
-            }
-            play(mDatas.get(position).getPlayUrl(), mDatas.get(position).getTitle());
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
     }
 
@@ -1726,7 +1787,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             String code = mJsonObject.get("code").toString();
 
                             if (code.equals(success_code)) {
-                                if (!mDatas.isEmpty()) {
+                                if (!mDatas.isEmpty() && mDatas.size() > currentIndex) {
                                     String jsonString = BuriedPointModelManager.getVideoComment(myContentId, mDatas.get(currentIndex).getTitle(), "", "",
                                             "", "", mDatas.get(currentIndex).getIssueTimeStamp(), Constants.CONTENT_TYPE);
                                     Log.e("埋点", "埋点：评论---" + jsonString);
@@ -2146,7 +2207,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (json.get("code").toString().equals(success_code)) {
-                                if (!mDatas.isEmpty()) {
+                                if (!mDatas.isEmpty() && mDatas.size() > currentIndex) {
                                     String jsonString = BuriedPointModelManager.getLikeAndFavorBuriedPointData(myContentId, mDatas.get(currentIndex).getTitle(),
                                             "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
                                             Constants.CONTENT_TYPE);
@@ -2232,7 +2293,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (null != json && json.get("code").toString().equals("200")) {
-                                if (!mDatas.isEmpty()) {
+                                if (!mDatas.isEmpty() && mDatas.size() > currentIndex) {
                                     String jsonString = BuriedPointModelManager.getLikeAndFavorBuriedPointData(myContentId, mDatas.get(currentIndex).getTitle(),
                                             "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
                                             Constants.CONTENT_TYPE);
@@ -2337,7 +2398,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         try {
                             JSONObject json = new JSONObject(response.body());
                             if (null != json && json.get("code").toString().equals("200")) {
-                                if (!mDatas.isEmpty()) {
+                                if (!mDatas.isEmpty() && mDatas.size() > currentIndex) {
                                     String jsonString = BuriedPointModelManager.getLikeAndFavorBuriedPointData(myContentId, mDatas.get(currentIndex).getTitle(),
                                             "", "", "", "", mDatas.get(currentIndex).getIssueTimeStamp(),
                                             Constants.CONTENT_TYPE);
@@ -2608,7 +2669,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     /**
      * 上报播放时长
      */
-    public void finderPoint(){
+    public void finderPoint() {
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
                 if (mDuration != 0 && mProgress != 0) {
@@ -2640,6 +2701,8 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     Log.e("xksh_md", "埋点事件：" + event + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
                 }
             }
+        } else {
+            xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
         }
 
         String isFinish;
@@ -2851,6 +2914,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                                     return;
                                 }
 
+                                if (mDatas.size() <= position) {
+                                    return;
+                                }
+
                                 if (recommondList.size() > 1) {
                                     viewFlipper.setVisibility(View.VISIBLE);
                                     viewFlipper.startFlipping();
@@ -2896,6 +2963,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         getThematicCollection(myContentId);
                         if (!isVisibleNoWifiView(getActivity())) {
                             addPlayView(position);
+                        } else {
+                            for (int i = 0; i < mDatas.size(); i++) {
+                                mDatas.get(i).setWifi(false);
+                            }
+                            if (null != adapter) {
+                                adapter.notifyDataSetChanged();
+                            }
                         }
                     }
                 });
@@ -2988,5 +3062,15 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         super.onFinish();
                     }
                 });
+    }
+
+    public NoWifiListener noWifiListener;
+
+    public interface NoWifiListener {
+        void noWifiClickListener();
+    }
+
+    public void setNoWifiClickListener(NoWifiListener noWifiListener){
+        this.noWifiListener = noWifiListener;
     }
 }

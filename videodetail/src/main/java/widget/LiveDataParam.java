@@ -8,6 +8,8 @@ import com.wdcs.callback.VideoInteractiveParam;
 public class LiveDataParam {
     public static LiveDataParam param;
     public MutableLiveData<Integer> homeTabIndex = new MutableLiveData<>();
+    public MutableLiveData<Boolean> wifiState = new MutableLiveData<>();
+
 
     private LiveDataParam() {
     }
@@ -25,5 +27,9 @@ public class LiveDataParam {
 
     public void setHomeTabIndex(Integer index){
         homeTabIndex.setValue(index);
+    }
+
+    public void setWifiState(Boolean state){
+        wifiState.setValue(state);
     }
 }
