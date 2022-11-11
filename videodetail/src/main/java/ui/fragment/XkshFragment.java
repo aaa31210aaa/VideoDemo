@@ -615,6 +615,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     if (mDatas.isEmpty()) {
                         return;
                     }
+                    isInitViewPagerListener = true;
                     mDataDTO = mDatas.get(0);
 
                     if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
@@ -801,7 +802,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
             }
         };
-        isInitViewPagerListener = true;
         xkshManager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(xkshManager);
         xkshManager.setOnViewPagerListener(onViewPagerListener);
@@ -820,7 +820,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
 
             if (index == 1) {
-                playerView.mSuperPlayer.resume();
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                    playerView.mSuperPlayer.reStart();
+                } else {
+                    playerView.mSuperPlayer.resume();
+                }
             } else {
                 playerView.mSuperPlayer.pause();
                 if (mIsVisibleToUser) {

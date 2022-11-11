@@ -652,6 +652,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     if (mDatas.isEmpty()) {
                         return;
                     }
+                    isInitViewPagerListener = true;
                     mDataDTO = mDatas.get(0);
                     if (null != adapter.getViewByPosition(0, R.id.superplayer_iv_fullscreen)) {
                         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(0).getWidth())),
@@ -831,12 +832,15 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
             }
         };
-        isInitViewPagerListener = true;
         videoDetailmanager = new ViewPagerLayoutManager(getActivity());
         videoDetailRv.setLayoutManager(videoDetailmanager);
         videoDetailmanager.setOnViewPagerListener(onViewPagerListener);
     }
 
+    /**
+     * 首页tab切换
+     * @param index
+     */
     public void setVideoDetailFragmentVisible(int index) {
         if (null == playerView) {
             return;
@@ -847,9 +851,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             if (!isInitViewPagerListener && index == 1) {
                 initViewPagerListener();
             }
-
+            Log.e("播放状态：", playerView.mSuperPlayer.getPlayerState() +"");
             if (index == 1) {
-                playerView.mSuperPlayer.resume();
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                    playerView.mSuperPlayer.reStart();
+                } else {
+                    playerView.mSuperPlayer.resume();
+                }
+
             } else {
                 playerView.mSuperPlayer.pause();
                 if (videoFragmentIsVisibleToUser) {
@@ -1157,6 +1166,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             playerView.setLayoutParams(playViewParams);
             playerView.setTag(position);
             if (rlLp != null && videoFragmentIsVisibleToUser) {
+                Log.e("测试调用","调用了addPlayView");
                 rlLp.addView(playerView, 1);
                 //露出即上报
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
@@ -2998,6 +3008,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         }
                         try {
                             if (response.body().getCode().equals("200")) {
+                                Log.e("测试调用----", "调用了getRecommend");
                                 recommondList.clear();
                                 recommondList.addAll(response.body().getData().getRecords());
 

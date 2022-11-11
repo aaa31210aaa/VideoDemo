@@ -123,6 +123,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 //    public int videoHomeFragmentVisible; //0 不显示， 1 显示
     private Handler mHandler = new Handler();
     private RelativeLayout topZzc;
+    private int wdcsTabIndex;
 
     public VideoHomeFragment() {
 
@@ -661,7 +662,11 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
+                Log.e("测试调用","调用开始播放");
                 if (xkshFragment.mIsVisibleToUser) {
+                    if (wdcsTabIndex != 1) {
+                        xkshFragment.playerView.mSuperPlayer.pause();
+                    }
                     String isRenew = "";
                     if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
 //                    //不为重播
@@ -683,6 +688,9 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
 
                 } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                    if (wdcsTabIndex != 1) {
+                        videoDetailFragment.playerView.mSuperPlayer.pause();
+                    }
                     String isRenew = "";
                     if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
 //                    //不为重播
@@ -943,6 +951,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                             LiveDataParam.getInstance().homeTabIndex.observe(getActivity(), new Observer<Integer>() {
                                 @Override
                                 public void onChanged(Integer index) {
+                                    wdcsTabIndex = index;
                                     if (null != videoDetailFragment && null != xkshFragment) {
                                         if (index != 1) {
                                             videoDetailFragment.playerView.setOrientation(false);
