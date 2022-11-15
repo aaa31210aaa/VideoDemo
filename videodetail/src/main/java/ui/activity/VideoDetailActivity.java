@@ -114,6 +114,8 @@ import com.wdcs.widget.YALikeAnimationView;
 
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.detailAutoPlayOverCallBack;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
@@ -240,6 +242,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private List<String> collectionStrList;
     private String topicName;
     private String videoLx; //当前视频的类型
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -386,7 +389,21 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     }
 
                     backRl.setVisibility(View.VISIBLE);
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (null != playViewParams) {
+                                playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                playViewParams.removeRule(RelativeLayout.CENTER_IN_PARENT);
+                                playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                playerView.setLayoutParams(playViewParams);
+                            }
+                        }
+                    }, 100);
                 }
+
+
             }
         };
 
@@ -482,7 +499,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         SuperPlayerImpl.setDetailAutoPlayOverCallBack(new SuperPlayerImpl.DetailAutoPlayOverCallBack() {
             @Override
             public void DetailAutoPlayOverCallBack() {
-                if (isShow) {
+                if (isShow && null != playerView) {
                     playerView.mSuperPlayer.reStart();
                 }
             }
@@ -586,7 +603,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             double currentPercent = (evePlayTime * 1.0 / mDuration);
                             double uploadPercent = 0;
                             if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-    //                      //不为重播
+                                //                      //不为重播
                                 if (currentPercent > maxPercent) {
                                     uploadPercent = currentPercent;
                                     maxPercent = currentPercent;
@@ -602,7 +619,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                             String event;
                             event = Constants.CMS_VIDEO_OVER;
                             uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-    //                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                            //                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                             Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
                         }
                     } else {
@@ -2697,6 +2714,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
         }
         videoOldSystemTime = DateUtils.getTimeCurrent();
+        if (!mDatas.isEmpty()) {
+            mCurrentPlayVideoURL = mDatas.get(currentIndex).getPlayUrl();
+        }
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
         }
@@ -2778,6 +2798,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView.release();
             playerView.mSuperPlayer.destroy();
         }
+        mHandler.removeCallbacksAndMessages(null);
+        detailAutoPlayOverCallBack = null;
+        SuperPlayerImpl.setDetailAutoPlayOverCallBack(detailAutoPlayOverCallBack);
     }
 
     @Override

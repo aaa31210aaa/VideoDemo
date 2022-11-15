@@ -137,6 +137,7 @@ import static ui.activity.VideoHomeActivity.isPause;
 import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
+import static ui.fragment.VideoHomeFragment.TabHomeIsPause;
 import static utils.NetworkUtil.setDataWifiState;
 
 
@@ -187,7 +188,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private VideoInteractiveParam param;
     public String playUrl;
     private String videoTag = "videoTag";
-    private String recommendTag = "recommend";
+    private String recommendTag;
     private boolean isLoadComplate = false;
     private BaseQuickAdapter.RequestLoadMoreListener requestLoadMoreListener;
     public View decorView;
@@ -329,7 +330,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         setSoftKeyBoardListener();
 
         if (!fromHomeTab) {
+            recommendTag = "recommend";
             initViewPagerListener();
+        } else {
+            recommendTag = "tabRecommend";
         }
 
         initSmartRefresh(view);
@@ -353,30 +357,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         shareCircleBtn.setOnClickListener(this);
         shareQqBtn = sharePopView.findViewById(R.id.share_qq_btn);
         shareQqBtn.setOnClickListener(this);
-
-        LiveDataParam.getInstance().wifiState.observe(getActivity(), new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                try {
-                    for (int i = 0; i < mDatas.size(); i++) {
-                        mDatas.get(i).setWifi(true);
-                    }
-                    if (null != adapter) {
-                        adapter.setWifiBord(true);
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    if (null != playerView) {
-                        if (mIsVisibleToUser) {
-                            addPlayView(currentIndex);
-                        }
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
 
         /**
@@ -659,7 +639,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     getCommentList("1", String.valueOf(mPageSize), true);
                     videoType = mDatas.get(0).getType();
                     rlLp = (ViewGroup) xkshManager.findViewByPosition(0);
-                    OkGo.getInstance().cancelTag(recommendTag);
+//                    OkGo.getInstance().cancelTag(recommendTag);
                     //获取推荐列表
                     getRecommend(myContentId, 0);
 //                initChoosePop();
@@ -679,9 +659,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         return;
                     }
 
-                    if (null != playerView.getTag() && position == (int) playerView.getTag()) {
-                        return;
-                    }
+//                    if (null != playerView.getTag() && position == (Integer) playerView.getTag()) {
+//                        return;
+//                    }
                     //避免越界addOrCancelLike
                     if (mDatas.isEmpty()) {
                         return;
@@ -789,7 +769,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     }
 
                     rlLp = (ViewGroup) xkshManager.findViewByPosition(position);
-                    OkGo.getInstance().cancelTag(recommendTag);
+//                    OkGo.getInstance().cancelTag(recommendTag);
                     getRecommend(myContentId, position);
 
                     if (!"1".equals(playerView.mFullScreenPlayer.strSpeed)) {
@@ -2550,6 +2530,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
+        if (!mDatas.isEmpty()) {
+            mCurrentPlayVideoURL = mDatas.get(currentIndex).getPlayUrl();
+        }
+
         if (playerView != null && null != mDataDTO && !SPUtils.isVisibleNoWifiView(getActivity())) {
             SuperPlayerImpl.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
             if (playerView.homeVideoIsLoad) {
@@ -2567,6 +2551,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
             }
         }
+
         isPause = false;
         xkshOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
@@ -2982,7 +2967,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mCurrentPlayVideoURL = null;
         if (playerView != null) {
             playerView.stopPlay();
             playerView.release();
@@ -3074,7 +3058,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         void noWifiClickListener();
     }
 
-    public void setNoWifiClickListener(NoWifiListener noWifiListener){
+    public void setNoWifiClickListener(NoWifiListener noWifiListener) {
         this.noWifiListener = noWifiListener;
     }
 }

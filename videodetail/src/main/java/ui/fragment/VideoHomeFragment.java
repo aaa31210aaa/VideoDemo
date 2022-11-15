@@ -1,41 +1,31 @@
 package ui.fragment;
 
-import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.tabAutoPlayOverCallBack;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.MODULE_SOURCE;
-import static com.wdcs.constants.Constants.PANELCODE;
-import static com.wdcs.constants.Constants.TABNAME;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 
-import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,7 +69,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.VideoViewPagerAdapter;
-import ui.activity.VideoHomeActivity;
 import widget.LiveDataParam;
 import widget.NetBroadcastReceiver;
 
@@ -114,7 +103,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     public static long lsDuration = 0; //每一次上报临时保存的播放时长
     private NetBroadcastReceiver netWorkStateReceiver;
     private String categoryName;
-    public static boolean isPause;
+    public static boolean TabHomeIsPause;
     private List<CategoryModel.DataDTO> categoryModelList = new ArrayList<>();
     private boolean toFirst = true;
     public String module_source;
@@ -164,6 +153,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         return view;
     }
 
+
 //    @Override
 //    public void setUserVisibleHint(boolean isVisibleToUser) {
 //        super.setUserVisibleHint(isVisibleToUser);
@@ -195,7 +185,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         noLoginTipsOk = noLoginTipsView.findViewById(R.id.no_login_tips_ok);
         noLoginTipsCancel.setOnClickListener(this);
         noLoginTipsOk.setOnClickListener(this);
-        playerView = SuperPlayerView.getInstance(getActivity(), getActivity().getWindow().getDecorView(), true);
+        playerView = new SuperPlayerView(getActivity(), getActivity().getWindow().getDecorView(), true);
 //        test = view.findViewById(R.id.test);
 //        test.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -223,9 +213,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             SPUtils.getInstance().put("net_state", "1");
         }
 
-        if (netWorkStateReceiver == null) {
-            netWorkStateReceiver = new NetBroadcastReceiver();
-        }
+        netWorkStateReceiver = NetBroadcastReceiver.getInstance();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         getActivity().registerReceiver(netWorkStateReceiver, filter);
@@ -662,7 +650,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
-                Log.e("测试调用","调用开始播放");
+                Log.e("测试调用", "调用开始播放");
                 if (xkshFragment.mIsVisibleToUser) {
                     if (wdcsTabIndex != 1) {
                         xkshFragment.playerView.mSuperPlayer.pause();
@@ -717,10 +705,10 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         });
 
         //自动播放/拖动进度条 播放结束回调
-        SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
+        SuperPlayerImpl.setTabAutoPlayOverCallBack(new SuperPlayerImpl.TabAutoPlayOverCallBack() {
             @Override
-            public void AutoPlayOverCallBack() {
-                if (!isPause) {
+            public void TabAutoPlayOverCallBack() {
+                if (!TabHomeIsPause && null != playerView) {
                     Log.e("yqh_yqh", "重播地址：" + SuperPlayerImpl.mCurrentPlayVideoURL);
                     playerView.mSuperPlayer.reStart();
                 }
@@ -1057,10 +1045,10 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (instance != null) {
-            instance.release();
-            instance.mSuperPlayer.destroy();
-            instance = null;
+        if (playerView != null) {
+            playerView.release();
+            playerView.mSuperPlayer.destroy();
+            playerView = null;
         }
         OkGo.getInstance().cancelAll();
         maxPercent = 0;
@@ -1069,6 +1057,8 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         FinderBuriedPointManager.setFinderClick("页面关闭");
 //        OkGo.getInstance().cancelTag(VIDEOTAG);
         mHandler.removeCallbacksAndMessages(null);
+        tabAutoPlayOverCallBack = null;
+        SuperPlayerImpl.setTabAutoPlayOverCallBack(tabAutoPlayOverCallBack);
     }
 
     public static boolean VideoFullToWindow() {
@@ -1088,4 +1078,15 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        TabHomeIsPause = false;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        TabHomeIsPause = true;
+    }
 }

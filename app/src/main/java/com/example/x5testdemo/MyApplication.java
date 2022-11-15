@@ -11,7 +11,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Utils.init(this,true);
+        Utils.init(this,false);
         OkGoUtils.initOkGo(this);
     }
 }

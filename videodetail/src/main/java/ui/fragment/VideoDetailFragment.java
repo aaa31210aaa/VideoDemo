@@ -127,6 +127,7 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.utils.NoScrollViewPager;
 
 import static android.widget.RelativeLayout.BELOW;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
@@ -269,6 +270,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private OnViewPagerListener onViewPagerListener;
     private int currentTabIndex;
     private String videoLx; //当前视频的类型
+    private String requestTag;
 
     public VideoDetailFragment() {
     }
@@ -348,8 +350,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         commentListTips = commentEmptyView.findViewById(R.id.comment_list_tips);
         setSoftKeyBoardListener();
         if (!fromHomeTab) {
+            recommendTag = "recommendfragment";
             initViewPagerListener();
+            requestTag = "requestTag";
+        } else {
+            recommendTag = "tabRecommendfragment";
+            requestTag = "fromTabRequestTag";
         }
+
 
         initSmartRefresh(view);
 //        commentTotal = view.findViewById(R.id.comment_total);
@@ -384,29 +392,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         activityToAbbreviation.setOnClickListener(this);
         activityRuleAbbreviation = view.findViewById(R.id.activity_rule_abbreviation);
         activityRuleAbbreviation.setOnClickListener(this);
-
-        LiveDataParam.getInstance().wifiState.observe(getActivity(), new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                try {
-                    for (int i = 0; i < mDatas.size(); i++) {
-                        mDatas.get(i).setWifi(true);
-                    }
-                    if (null != adapter) {
-                        adapter.setWifiBord(true);
-                        adapter.notifyDataSetChanged();
-                    }
-                    if (null != playerView) {
-                        if (videoFragmentIsVisibleToUser) {
-                            addPlayView(currentIndex);
-                        }
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
 
         /**
@@ -691,9 +676,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
                     OkGo.getInstance().cancelTag(recommendTag);
                     //获取推荐列表
-                    if (videoFragmentIsVisibleToUser) {
+//                    if (videoFragmentIsVisibleToUser) {
                         getRecommend(myContentId, 0);
-                    }
+//                    }
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -710,9 +695,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         return;
                     }
 
-                    if (null != playerView.getTag() && position == (int) playerView.getTag()) {
-                        return;
-                    }
+//                    if (null != playerView.getTag() && position == (int) playerView.getTag()) {
+//                        return;
+//                    }
 
                     //避免越界
                     if (mDatas.isEmpty()) {
@@ -839,6 +824,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
     /**
      * 首页tab切换
+     *
      * @param index
      */
     public void setVideoDetailFragmentVisible(int index) {
@@ -851,7 +837,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             if (!isInitViewPagerListener && index == 1) {
                 initViewPagerListener();
             }
-            Log.e("播放状态：", playerView.mSuperPlayer.getPlayerState() +"");
+            Log.e("播放状态：", playerView.mSuperPlayer.getPlayerState() + "");
             if (index == 1) {
                 if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
                     playerView.mSuperPlayer.reStart();
@@ -874,7 +860,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     private void getOneVideo(final String contentId) {
         OkGo.<String>get(ApiConstants.getInstance().getVideoDetailUrl() + contentId)
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -978,7 +964,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     private void getActivityRule() {
         OkGo.<ActivityRuleBean>get(ApiConstants.getInstance().getActivityRule())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .params("panelCode", "activity.video.link")
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<ActivityRuleBean>() {
@@ -1166,7 +1152,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             playerView.setLayoutParams(playViewParams);
             playerView.setTag(position);
             if (rlLp != null && videoFragmentIsVisibleToUser) {
-                Log.e("测试调用","调用了addPlayView");
                 rlLp.addView(playerView, 1);
                 //露出即上报
                 if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
@@ -1567,7 +1552,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<VideoDetailModel>get(ApiConstants.getInstance().getVideoDetailListUrl())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .params("pageSize", pageSize)
                 .params("panelCode", panelCode)
                 .params("removeFirst", removeFirst)
@@ -1646,7 +1631,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<VideoDetailModel>get(url)
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .params("contentId", contentId)
                 .params("pageSize", pageSize)
                 .params("panelCode", panelCode)
@@ -1728,7 +1713,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
 
         OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentWithReply())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1870,7 +1855,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addComment())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1945,7 +1930,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addUserReply())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -2057,7 +2042,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
 
         OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId + "/" + belongTopicId)
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<CollectionLabelModel>(CollectionLabelModel.class) {
@@ -2258,7 +2243,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelFavor())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -2348,7 +2333,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelLike())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .execute(new StringCallback() {
@@ -2458,7 +2443,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelLike())
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .execute(new StringCallback() {
@@ -2574,7 +2559,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     private void addPageViews(String contentId) {
         OkGo.<String>post(ApiConstants.getInstance().addViews() + contentId)
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new StringCallback() {
 
@@ -2688,6 +2673,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (!videoFragmentIsVisibleToUser) {
             return;
         }
+        if (!mDatas.isEmpty()) {
+            mCurrentPlayVideoURL = mDatas.get(currentIndex).getPlayUrl();
+        }
 
         if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
             if (playerView.homeVideoIsLoad) {
@@ -2709,7 +2697,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
 
         isPause = false;
-
         if (PersonInfoManager.getInstance().isRequestToken()) {
             try {
                 getUserToken(VideoInteractiveParam.getInstance().getCode());
@@ -3082,7 +3069,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     private void toFollow(String targetUserId) {
         OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow() + targetUserId)
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
@@ -3125,7 +3112,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     private void cancelFollow(String targetUserId) {
         OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().cancelFollow() + targetUserId)
-                .tag(VIDEOTAG)
+                .tag(requestTag)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
@@ -3184,7 +3171,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        SuperPlayerImpl.mCurrentPlayVideoURL = null;
         if (playerView != null) {
             playerView.stopPlay();
             playerView.release();

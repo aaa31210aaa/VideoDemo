@@ -6,6 +6,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -67,6 +68,7 @@ import org.json.JSONObject;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.autoPlayOverCallBack;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
@@ -107,6 +109,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private boolean toFirst = true;
     public String module_source;
     public RelativeLayout topZzc;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,9 +152,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             SPUtils.getInstance().put("net_state", "1");
         }
 
-        if (netWorkStateReceiver == null) {
-            netWorkStateReceiver = new NetBroadcastReceiver();
-        }
+        netWorkStateReceiver = NetBroadcastReceiver.getInstance();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(netWorkStateReceiver, filter);
@@ -544,6 +545,28 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     }
                     videoTab.setVisibility(View.VISIBLE);
                     videoVp.setScroll(true);
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (null != videoDetailFragment && null != xkshFragment) {
+                                if (null != videoDetailFragment.playViewParams) {
+                                    videoDetailFragment.playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                    videoDetailFragment.playViewParams.removeRule(RelativeLayout.CENTER_IN_PARENT);
+                                    videoDetailFragment.playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                    videoDetailFragment.playerView.setLayoutParams(videoDetailFragment.playViewParams);
+                                }
+
+                                if (null != xkshFragment.playViewParams) {
+                                    xkshFragment.playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                                    xkshFragment.playViewParams.removeRule(RelativeLayout.CENTER_IN_PARENT);
+                                    xkshFragment.playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                                    xkshFragment.playerView.setLayoutParams(xkshFragment.playViewParams);
+                                }
+                            }
+
+                        }
+                    }, 100);
                 }
             }
         };
@@ -603,7 +626,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
             @Override
             public void AutoPlayOverCallBack() {
-                if (!isPause) {
+                if (!isPause && null != playerView) {
                     Log.e("yqh_yqh", "重播地址：" + SuperPlayerImpl.mCurrentPlayVideoURL);
                     playerView.mSuperPlayer.reStart();
                 }
@@ -827,11 +850,14 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             instance.mSuperPlayer.destroy();
             instance = null;
         }
-        OkGo.getInstance().cancelAll();
+        OkGo.getInstance().cancelTag("requestTag");
         maxPercent = 0;
         lsDuration = 0;
         unregisterReceiver(netWorkStateReceiver);
         FinderBuriedPointManager.setFinderClick("页面关闭");
+        mHandler.removeCallbacksAndMessages(null);
+        autoPlayOverCallBack = null;
+        SuperPlayerImpl.setAutoPlayOverCallBack(autoPlayOverCallBack);
 //        OkGo.getInstance().cancelTag(VIDEOTAG);
     }
 

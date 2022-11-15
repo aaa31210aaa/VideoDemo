@@ -186,6 +186,16 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         detailAutoPlayOverCallBack = callBack;
     }
 
+    public static TabAutoPlayOverCallBack tabAutoPlayOverCallBack;
+
+    public interface TabAutoPlayOverCallBack {
+        void TabAutoPlayOverCallBack();
+    }
+
+    public static void setTabAutoPlayOverCallBack(TabAutoPlayOverCallBack callBack) {
+        tabAutoPlayOverCallBack = callBack;
+    }
+
     /**
      * 点播播放器事件回调
      *
@@ -268,6 +278,10 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
 
                 if (null != detailAutoPlayOverCallBack) {
                     detailAutoPlayOverCallBack.DetailAutoPlayOverCallBack();
+                }
+
+                if (null != tabAutoPlayOverCallBack) {
+                    tabAutoPlayOverCallBack.TabAutoPlayOverCallBack();
                 }
                 updatePlayerState(SuperPlayerDef.PlayerState.END);
                 break;

@@ -59,6 +59,9 @@
         <entry key="videodetail/src/main/res/layout/customer_viewflipper_item.xml" value="0.1523224043715847" />
         <entry key="videodetail/src/main/res/layout/footer_view.xml" value="0.13319672131147542" />
         <entry key="videodetail/src/main/res/layout/fragment_live.xml" value="0.13319672131147542" />
+        <entry key="videodetail/src/main/res/layout/fragment_tab_live.xml" value="0.15572916666666667" />
+        <entry key="videodetail/src/main/res/layout/fragment_tab_video_detail.xml" value="0.16979166666666667" />
+        <entry key="videodetail/src/main/res/layout/fragment_tab_xksh.xml" value="0.16979166666666667" />
         <entry key="videodetail/src/main/res/layout/fragment_test.xml" value="0.1634963768115942" />
         <entry key="videodetail/src/main/res/layout/fragment_video_comment_pop.xml" value="0.1" />
         <entry key="videodetail/src/main/res/layout/fragment_video_detail.xml" value="0.25" />
