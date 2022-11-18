@@ -22,6 +22,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ImageSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -127,7 +128,6 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.utils.NoScrollViewPager;
 
 import static android.widget.RelativeLayout.BELOW;
-import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
@@ -269,7 +269,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private boolean isInitViewPagerListener;
     private OnViewPagerListener onViewPagerListener;
     private int currentTabIndex;
-    private String videoLx; //当前视频的类型
+    public String videoLx; //当前视频的类型
     private String requestTag;
 
     public VideoDetailFragment() {
@@ -658,7 +658,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     OkGo.getInstance().cancelTag("contentState");
                     getContentState(myContentId);
 
-                    SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                    playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                     currentIndex = 0;
                     mPageIndex = 1;
                     if (mDatas.get(0).getDisableComment()) {
@@ -677,7 +677,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     OkGo.getInstance().cancelTag(recommendTag);
                     //获取推荐列表
 //                    if (videoFragmentIsVisibleToUser) {
-                        getRecommend(myContentId, 0);
+                    getRecommend(myContentId, 0);
 //                    }
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
@@ -774,7 +774,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     playerView.mWindowPlayer.setRecordDuration(0);
                     lsDuration = 0;
                     maxPercent = 0;
-                    SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
+                    playerView.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                     playUrl = mDatas.get(position).getPlayUrl();
                     playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
                     playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
@@ -834,9 +834,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
         if (fromHomeTab) {
             currentTabIndex = index;
+            if (null != mDataDTO && videoFragmentIsVisibleToUser) {
+                playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
+            }
             if (!isInitViewPagerListener && index == 1) {
                 initViewPagerListener();
             }
+
             Log.e("播放状态：", playerView.mSuperPlayer.getPlayerState() + "");
             if (index == 1) {
                 if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
@@ -1083,6 +1087,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
      */
     public void addPlayView(final int position) {
         try {
+            if (!videoFragmentIsVisibleToUser) {
+                return;
+            }
+
             if (isVisibleNoWifiView(getActivity())) {
                 return;
             }
@@ -1099,7 +1107,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 ((ViewGroup) playerView.getParent()).removeView(playerView);
             }
             RelativeLayout itemRelativelayout = (RelativeLayout) adapter.getViewByPosition(position, R.id.item_relativelayout);
-
+            DisplayMetrics outMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+            int widthPixel = outMetrics.widthPixels;
+            int heightPixel = outMetrics.heightPixels;
             String videoType = videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                     Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight())));
             videoLx = videoType;
@@ -1121,8 +1132,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     itemRelativelayout.addView(playerView.mWindowPlayer.mLayoutBottom);
                 }
             } else if (TextUtils.equals("1", videoType)) {
-                int height = (int) (ScreenUtils.getPhoneWidth(getActivity()) / Constants.Portrait_Proportion);
-                playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+                int height = (int) (widthPixel / Constants.Portrait_Proportion);
+                playViewParams = new RelativeLayout.LayoutParams(widthPixel, height);
+                Log.e("打印一下视频容器宽高",playViewParams.width + "-----"+ playViewParams.height);
                 if (phoneIsNormal()) {
                     playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                     playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -2673,21 +2685,27 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (!videoFragmentIsVisibleToUser) {
             return;
         }
-        if (!mDatas.isEmpty()) {
-            mCurrentPlayVideoURL = mDatas.get(currentIndex).getPlayUrl();
+        if (null != mDataDTO) {
+            playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
+//            Log.e("测试一下播放地址", playerView.mCurrentPlayVideoURL);
+                        Log.e("测试一下顺序", "sss");
         }
 
         if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
-            if (playerView.homeVideoIsLoad) {
-                if (fromHomeTab) {
-                    if (currentTabIndex == 1) {
+            if (fromHomeTab) {
+                if (currentTabIndex == 1) {
+                    if (playerView.homeVideoIsLoad) {
                         playerView.mSuperPlayer.resume();
+                    } else {
+                        playerView.mSuperPlayer.reStart();
                     }
-                } else {
-                    playerView.mSuperPlayer.resume();
                 }
             } else {
-                playerView.mSuperPlayer.reStart();
+                if (playerView.homeVideoIsLoad) {
+                    playerView.mSuperPlayer.resume();
+                } else {
+                    playerView.mSuperPlayer.reStart();
+                }
             }
         }
 
@@ -2697,6 +2715,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
 
         isPause = false;
+        playerView.mOrientationHelper.enable();
         if (PersonInfoManager.getInstance().isRequestToken()) {
             try {
                 getUserToken(VideoInteractiveParam.getInstance().getCode());
@@ -2721,6 +2740,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
         playerView.mSuperPlayer.pause();
         isPause = true;
+        playerView.mOrientationHelper.disable();
         if (null == mDataDTO) {
             return;
         }

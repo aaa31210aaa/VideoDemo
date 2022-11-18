@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.wdcs.videodetail.demo.R;
 
+import ui.activity.TgtCodeActivity;
 import ui.activity.VideoHomeActivity;
 
 /**
@@ -30,6 +31,7 @@ public class TestFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private TextView tv;
+    private TextView cscs;
     private View view;
 
 
@@ -79,6 +81,14 @@ public class TestFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), VideoHomeActivity.class);
+                startActivity(intent);
+            }
+        });
+        cscs = view.findViewById(R.id.cscs);
+        cscs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TgtCodeActivity.class);
                 startActivity(intent);
             }
         });

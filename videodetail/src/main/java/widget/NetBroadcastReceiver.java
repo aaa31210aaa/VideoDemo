@@ -68,9 +68,13 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
                 //通过循环将网络信息逐个取出来
                 for (int i = 0; i < networks.length; i++) {
                     //获取ConnectivityManager对象对应的NetworkInfo对象
-                    NetworkInfo networkInfo = connMgr.getNetworkInfo(networks[i]);
-                    if (null != networkInfo && null != networkInfo.getTypeName()) {
-                        sb.append(networkInfo.getTypeName() + " connect is " + networkInfo.isConnected());
+                    try {
+                        NetworkInfo networkInfo = connMgr.getNetworkInfo(networks[i]);
+                        if (null != networkInfo && null != networkInfo.getTypeName()) {
+                            sb.append(networkInfo.getTypeName() + " connect is " + networkInfo.isConnected());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
 

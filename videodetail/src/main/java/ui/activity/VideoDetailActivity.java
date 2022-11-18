@@ -115,12 +115,11 @@ import com.wdcs.widget.YALikeAnimationView;
 import static android.widget.RelativeLayout.BELOW;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.detailAutoPlayOverCallBack;
-import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
-import static com.wdcs.constants.Constants.VIDEOTAG;
+import static com.wdcs.constants.Constants.VIDEODETAILTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static ui.activity.VideoHomeActivity.maxPercent;
@@ -542,7 +541,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
 //                getThematicCollection(myContentId);
 //                setCollection();
 
-                    SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                    playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                     currentIndex = 0;
                     mPageIndex = 1;
                     if (mDatas.get(0).getDisableComment()) {
@@ -654,7 +653,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
                     playerView.mWindowPlayer.setRecordDuration(0);
                     lsDuration = 0;
                     maxPercent = 0;
-                    SuperPlayerImpl.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
+                    playerView.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                     playUrl = mDatas.get(position).getPlayUrl();
 //                playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
                     playerView.mFullScreenPlayer.setRecordsDTO(mDataDTO);
@@ -958,7 +957,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      */
     private void toFollow(String targetUserId) {
         OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().toFollow() + targetUserId)
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
@@ -1029,7 +1028,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      */
     private void cancelFollow(String targetUserId) {
         OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().cancelFollow() + targetUserId)
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
@@ -1064,7 +1063,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private void getOneVideo(final String contentId) {
         mDatas.clear();
         OkGo.<String>get(ApiConstants.getInstance().getVideoDetailUrl() + contentId)
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -1131,7 +1130,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
         mDatas.clear();
         OkGo.<VideoCollectionModel>get(ApiConstants.getInstance().getSpecList())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .params("classId", collectionId)
                 .params("pageIndex", mPageIndex)
                 .params("pageSize", mPageSize)
@@ -1632,7 +1631,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      */
     private void loadMoreData(String collectionId, String mPageIndex, String mPageSize) {
         OkGo.<VideoCollectionModel>get(ApiConstants.getInstance().getSpecList())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .params("classId", collectionId)
                 .params("pageIndex", mPageIndex)
                 .params("pageSize", mPageSize)
@@ -1716,7 +1715,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
 
         OkGo.<CommentLv1Model>post(ApiConstants.getInstance().getCommentWithReply())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .upJson(jsonObject)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1859,7 +1858,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addComment())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -1934,7 +1933,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addUserReply())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -2045,7 +2044,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             belongTopicId = "0";
         }
         OkGo.<CollectionLabelModel>get(ApiConstants.getInstance().getCollectToVideo() + contentId + "/" + belongTopicId)
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new JsonCallback<CollectionLabelModel>(CollectionLabelModel.class) {
@@ -2284,7 +2283,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelFavor())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .cacheMode(CacheMode.NO_CACHE)
@@ -2371,7 +2370,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelLike())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .execute(new StringCallback() {
@@ -2479,7 +2478,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
         OkGo.<String>post(ApiConstants.getInstance().addOrCancelLike())
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
                 .upJson(jsonObject)
                 .execute(new StringCallback() {
@@ -2595,7 +2594,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
      */
     private void addPageViews(String contentId) {
         OkGo.<String>post(ApiConstants.getInstance().addViews() + contentId)
-                .tag(VIDEOTAG)
+                .tag(VIDEODETAILTAG)
                 .cacheMode(CacheMode.NO_CACHE)
                 .execute(new StringCallback() {
 
@@ -2650,7 +2649,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
 
         OkGo.<TokenModel>post(ApiConstants.getInstance().mycsToken())
-                .tag("userToken")
+                .tag(VIDEODETAILTAG)
                 .upJson(jsonObject)
                 .execute(new JsonCallback<TokenModel>(TokenModel.class) {
                     @Override
@@ -2714,8 +2713,8 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             }
         }
         videoOldSystemTime = DateUtils.getTimeCurrent();
-        if (!mDatas.isEmpty()) {
-            mCurrentPlayVideoURL = mDatas.get(currentIndex).getPlayUrl();
+        if (null != mDataDTO) {
+            playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
         }
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
@@ -2731,6 +2730,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         if (null != playerView && playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
             SystemUtils.hideSystemUI(decorView);
         }
+        playerView.mOrientationHelper.enable();
     }
 
     @Override
@@ -2741,6 +2741,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         }
 
         playerView.mSuperPlayer.pause();
+        playerView.mOrientationHelper.disable();
         if (null == mDataDTO) {
             return;
         }
@@ -2798,6 +2799,9 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             playerView.release();
             playerView.mSuperPlayer.destroy();
         }
+        OkGo.getInstance().cancelTag("contentState");
+        OkGo.getInstance().cancelTag(recommendTag);
+        OkGo.getInstance().cancelTag(VIDEODETAILTAG);
         mHandler.removeCallbacksAndMessages(null);
         detailAutoPlayOverCallBack = null;
         SuperPlayerImpl.setDetailAutoPlayOverCallBack(detailAutoPlayOverCallBack);
@@ -2946,7 +2950,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
         OkGo.<RecommendModel>post(ApiConstants.getInstance().recommendList())
-                .tag(recommendTag)
+                .tag(VIDEODETAILTAG)
                 .upJson(jsonObject)
                 .execute(new JsonCallback<RecommendModel>() {
                     @Override

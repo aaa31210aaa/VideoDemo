@@ -119,7 +119,6 @@ import com.wdcs.manager.ViewPagerLayoutManager;
 import com.wdcs.widget.YALikeAnimationView;
 
 import static android.widget.RelativeLayout.BELOW;
-import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.mCurrentPlayVideoURL;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
@@ -251,7 +250,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     private View view;
     public static XkshFragment mFragment;
     private int currentTabIndex;
-    private String videoLx; //当前视频的类型
+    public String videoLx; //当前视频的类型
 
     public XkshFragment() {
 
@@ -618,7 +617,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     OkGo.getInstance().cancelTag("contentState");
                     getContentState(myContentId);
 
-                    mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                    playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                     if (isVisibleNoWifiView(getActivity())) {
                         playerView.setOrientation(false);
                     } else {
@@ -735,7 +734,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     playerView.mWindowPlayer.setRecordDuration(0);
                     lsDuration = 0;
                     maxPercent = 0;
-                    mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
+                    playerView.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                     playUrl = mDatas.get(position).getPlayUrl();
                     playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
                     playerView.mFullScreenPlayer.setDataDTO(mDataDTO);
@@ -795,6 +794,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
         if (fromHomeTab) {
             currentTabIndex = index;
+            if (null != mDataDTO && mIsVisibleToUser) {
+                playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
+            }
             if (!isInitViewPagerListener && index == 1) {
                 initViewPagerListener();
             }
@@ -2530,29 +2532,49 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
-        if (!mDatas.isEmpty()) {
-            mCurrentPlayVideoURL = mDatas.get(currentIndex).getPlayUrl();
+        if (null != mDataDTO) {
+            playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
         }
 
         if (playerView != null && null != mDataDTO && !SPUtils.isVisibleNoWifiView(getActivity())) {
-            SuperPlayerImpl.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
-            if (playerView.homeVideoIsLoad) {
-                if (fromHomeTab) {
-                    if (currentTabIndex == 1) {
+            if (fromHomeTab) {
+                if (currentTabIndex == 1) {
+                    if (playerView.homeVideoIsLoad) {
                         playerView.mSuperPlayer.resume();
+                    } else {
+                        if (!isFirst) {
+                            playerView.mSuperPlayer.reStart();
+                        }
                     }
-                } else {
-                    playerView.mSuperPlayer.resume();
                 }
-                isFirst = true;
             } else {
-                if (!isFirst) {
-                    playerView.mSuperPlayer.reStart();
+                if (playerView.homeVideoIsLoad) {
+                    playerView.mSuperPlayer.resume();
+                } else {
+                    if (!isFirst) {
+                        playerView.mSuperPlayer.reStart();
+                    }
                 }
             }
+
+//            if (playerView.homeVideoIsLoad) {
+//                if (fromHomeTab) {
+//                    if (currentTabIndex == 1) {
+//                        playerView.mSuperPlayer.resume();
+//                    }
+//                } else {
+//                    playerView.mSuperPlayer.resume();
+//                }
+//                isFirst = true;
+//            } else {
+//                if (!isFirst) {
+//                    playerView.mSuperPlayer.reStart();
+//                }
+//            }
         }
 
         isPause = false;
+        playerView.mOrientationHelper.enable();
         xkshOldSystemTime = DateUtils.getTimeCurrent();
         if (!TextUtils.isEmpty(myContentId)) {
             getContentState(myContentId);
@@ -2649,6 +2671,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
         playerView.mSuperPlayer.pause();
         isPause = true;
+        playerView.mOrientationHelper.disable();
         if (null == mDataDTO) {
             return;
         }

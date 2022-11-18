@@ -49,7 +49,7 @@ public class VideoHomeTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_video_home_test);
         videoHomeLayout = findViewById(R.id.video_home_layout);
         contentId = getIntent().getStringExtra("contentId");
-//        toCurrentTab = getIntent().getIntExtra("toCurrentTab", 1);
+        toCurrentTab = getIntent().getIntExtra("toCurrentTab", 1);
         category_name = getIntent().getStringExtra("category_name");
         module_source = getIntent().getStringExtra("module_source");
         initTab();

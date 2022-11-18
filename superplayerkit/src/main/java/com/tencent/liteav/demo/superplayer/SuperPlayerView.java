@@ -154,6 +154,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public boolean homeVideoIsLoad;
     public BuriedPointModel buriedPointModel;
     public static SuperPlayerView instance;
+    public String mCurrentPlayVideoURL;    // 当前播放的URL
 
     public static SuperPlayerView getInstance(Context context, View decorView, Boolean isMain) {
         if (instance == null) {

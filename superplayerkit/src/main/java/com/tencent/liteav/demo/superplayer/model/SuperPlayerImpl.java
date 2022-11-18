@@ -68,7 +68,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     private SuperPlayerDef.PlayerMode mCurrentPlayMode = SuperPlayerDef.PlayerMode.WINDOW;    // 当前播放模式
     private SuperPlayerDef.PlayerState mCurrentPlayState = SuperPlayerDef.PlayerState.END;  // 当前播放状态
 
-    public static String mCurrentPlayVideoURL;    // 当前播放的URL
+
 
     private int mSeekPos;                   // 记录切换硬解时的播放时间
 
@@ -485,7 +485,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
      * 播放直播URL
      */
     private void playLiveURL(String url, int playType) {
-        mCurrentPlayVideoURL = url;
+        superPlayerView.mCurrentPlayVideoURL = url;
         if (mLivePlayer != null) {
             mLivePlayer.setPlayListener(this);
             int result = mLivePlayer.startPlay(url, playType); // result返回值：0 success;  -1 empty url; -2 invalid url; -3 invalid playType;
@@ -502,10 +502,11 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
      */
     private void playVodURL(String url) {
         if (url == null || "".equals(url)) {
-            mCurrentPlayVideoURL = url;
+            superPlayerView.mCurrentPlayVideoURL = url;
             return;
         }
-        mCurrentPlayVideoURL = url;
+        superPlayerView.mCurrentPlayVideoURL = url;
+        Log.e("测试一下播放地址5", superPlayerView.mCurrentPlayVideoURL);
         if (url.contains(".m3u8")) {
             mIsMultiBitrateStream = true;
         }
@@ -788,19 +789,19 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     @Override
     public void reStart() {
         if (mCurrentPlayType == SuperPlayerDef.PlayerType.LIVE || mCurrentPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
-            if (isRTMPPlay(mCurrentPlayVideoURL)) {
-                playLiveURL(mCurrentPlayVideoURL, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
-            } else if (isFLVPlay(mCurrentPlayVideoURL)) {
-                playTimeShiftLiveURL(mCurrentModel.appId, mCurrentPlayVideoURL);
+            if (isRTMPPlay(superPlayerView.mCurrentPlayVideoURL)) {
+                playLiveURL(superPlayerView.mCurrentPlayVideoURL, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
+            } else if (isFLVPlay(superPlayerView.mCurrentPlayVideoURL)) {
+                playTimeShiftLiveURL(mCurrentModel.appId, superPlayerView.mCurrentPlayVideoURL);
                 if (mCurrentModel.multiURLs != null && !mCurrentModel.multiURLs.isEmpty()) {
-                    startMultiStreamLiveURL(mCurrentPlayVideoURL);
+                    startMultiStreamLiveURL(superPlayerView.mCurrentPlayVideoURL);
                 }
             }
         } else {
             //埋点  视频-开始播放  重播
             superPlayerView.buriedPointModel.setIs_renew("true");
             superPlayerView.buriedPointModel.setXksh_renew("true");
-            playVodURL(mCurrentPlayVideoURL);
+            playVodURL(superPlayerView.mCurrentPlayVideoURL);
         }
     }
 
@@ -989,7 +990,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
 
     @Override
     public String getPlayURL() {
-        return mCurrentPlayVideoURL;
+        return superPlayerView.mCurrentPlayVideoURL;
     }
 
     @Override

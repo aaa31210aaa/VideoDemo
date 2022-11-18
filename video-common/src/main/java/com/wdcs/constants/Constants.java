@@ -33,6 +33,7 @@ public class Constants {
     public static final String MODULE_SOURCE = "module_source";
     public static final String TABNAME = "tabName";
     public static final String VIDEOTAG = "videoTag";
+    public static final String VIDEODETAILTAG = "videoDetailTag";
     public static final String TRACKINGUPLOAD = "TrackingUpload";
     public static final String BLUE_V = "blue-v";
     public static final String YELLOW_V = "yellow-v";

@@ -128,6 +128,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
             layoutParams.width = (int) widthPixel - 1;
             layoutParams.height = (int) (widthPixel / Constants.Horizontal_Proportion);
+            coverPicture.setLayoutParams(layoutParams);
             if (!isWifiBord) {
                 if (null != mContext && !((Activity) mContext).isFinishing()
                         && !((Activity) mContext).isDestroyed()) {
@@ -150,8 +151,10 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             } else {
                 layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             }
-            layoutParams.width = (int) widthPixel - 1;
+            layoutParams.width = (int) widthPixel;
             layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
+            coverPicture.setLayoutParams(layoutParams);
+            Log.e("打印一下视频封面容器的宽高", layoutParams.width + "---" + layoutParams.height);
             if (!isWifiBord) {
                 if (null != mContext && !((Activity) mContext).isFinishing()
                         && !((Activity) mContext).isDestroyed()) {
@@ -173,6 +176,7 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             double mHeight;
             mHeight = layoutParams.width / percent;
             layoutParams.height = (int) mHeight;
+            coverPicture.setLayoutParams(layoutParams);
             if (!isWifiBord) {
                 if (null != mContext && !((Activity) mContext).isFinishing()
                         && !((Activity) mContext).isDestroyed()) {

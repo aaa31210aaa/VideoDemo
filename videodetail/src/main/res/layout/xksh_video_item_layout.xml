@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_centerInParent="true"
-        android:scaleType="centerCrop"></ImageView>
+        android:scaleType="fitXY"></ImageView>
 
     <ImageView
         android:id="@+id/vertical_video_wdcs_logo"
@@ -175,8 +175,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/introduce_lin"
-                android:layout_marginTop="@dimen/video_dp10"
-                android:layout_marginBottom="@dimen/video_dp10">
+                android:layout_marginTop="@dimen/video_dp5"
+                android:layout_marginBottom="@dimen/video_dp5">
 
                 <RelativeLayout
                     android:layout_width="wrap_content"

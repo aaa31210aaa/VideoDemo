@@ -12,4 +12,13 @@
         android:layout_centerInParent="true"
         android:text="视频首页"></TextView>
 
+    <TextView
+        android:id="@+id/cscs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_10"
+        android:layout_marginTop="20dp"
+        android:text="测试测试"
+        android:layout_centerInParent="true"
+        android:layout_below="@+id/tv"></TextView>
 </RelativeLayout>

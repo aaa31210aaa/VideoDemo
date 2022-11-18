@@ -627,7 +627,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void AutoPlayOverCallBack() {
                 if (!isPause && null != playerView) {
-                    Log.e("yqh_yqh", "重播地址：" + SuperPlayerImpl.mCurrentPlayVideoURL);
+                    Log.e("yqh_yqh", "重播地址：" + playerView.mCurrentPlayVideoURL);
                     playerView.mSuperPlayer.reStart();
                 }
             }

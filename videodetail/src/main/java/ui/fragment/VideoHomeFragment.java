@@ -709,7 +709,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             @Override
             public void TabAutoPlayOverCallBack() {
                 if (!TabHomeIsPause && null != playerView) {
-                    Log.e("yqh_yqh", "重播地址：" + SuperPlayerImpl.mCurrentPlayVideoURL);
+                    Log.e("yqh_yqh", "重播地址：" + playerView.mCurrentPlayVideoURL);
                     playerView.mSuperPlayer.reStart();
                 }
             }
@@ -945,8 +945,17 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                                             videoDetailFragment.playerView.setOrientation(false);
                                             xkshFragment.playerView.setOrientation(false);
                                         } else {
-                                            videoDetailFragment.playerView.setOrientation(true);
-                                            xkshFragment.playerView.setOrientation(true);
+                                            if (TextUtils.equals(videoDetailFragment.videoLx, "2")) {
+                                                videoDetailFragment.playerView.setOrientation(true);
+                                            } else {
+                                                videoDetailFragment.playerView.setOrientation(false);
+                                            }
+
+                                            if (TextUtils.equals(xkshFragment.videoLx, "2")) {
+                                                xkshFragment.playerView.setOrientation(true);
+                                            } else {
+                                                xkshFragment.playerView.setOrientation(false);
+                                            }
                                         }
                                         videoDetailFragment.setVideoDetailFragmentVisible(index);
                                         xkshFragment.setXkshFragmentVisible(index);
