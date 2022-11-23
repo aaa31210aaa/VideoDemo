@@ -616,8 +616,10 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     addPageViews(myContentId);
                     OkGo.getInstance().cancelTag("contentState");
                     getContentState(myContentId);
+                    if (mIsVisibleToUser) {
+                        playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                    }
 
-                    playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                     if (isVisibleNoWifiView(getActivity())) {
                         playerView.setOrientation(false);
                     } else {
@@ -714,6 +716,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         playerView.setOrientation(false);
                     } else {
                         playerView.setOrientation(true);
+                        setWifiVisible(true);
                     }
 
                     if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
@@ -802,10 +805,19 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
 
             if (index == 1) {
-                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
-                    playerView.mSuperPlayer.reStart();
+                if (!isVisibleNoWifiView(getActivity())) {
+                    if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                        setWifiVisible(true);
+                        addPlayView(currentIndex);
+                    } else {
+                        playerView.mSuperPlayer.resume();
+                    }
                 } else {
-                    playerView.mSuperPlayer.resume();
+                    if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                        addPlayView(currentIndex);
+                    } else {
+                        playerView.mSuperPlayer.resume();
+                    }
                 }
             } else {
                 playerView.mSuperPlayer.pause();
@@ -899,6 +911,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     ((ViewGroup) playerView.getParent()).removeView(playerView);
                 }
                 addPlayView(currentIndex);
+                setWifiVisible(true);
+            } else {
+                setWifiVisible(false);
             }
             getContentState(myContentId);
         } else {
@@ -916,6 +931,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             playerView.buriedPointModel.setXksh_renew("false");
         }
     }
+
+    /**
+     * WIFi按钮是否显示
+     *
+     * @param isVisible
+     */
+    private void setWifiVisible(boolean isVisible) {
+        for (int i = 0; i < mDatas.size(); i++) {
+            mDatas.get(i).setWifi(isVisible);
+        }
+        if (null != adapter) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
 
     /**
      * 获取活动规则
@@ -2976,12 +3006,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         if (!isVisibleNoWifiView(getActivity())) {
                             addPlayView(position);
                         } else {
-                            for (int i = 0; i < mDatas.size(); i++) {
-                                mDatas.get(i).setWifi(false);
-                            }
-                            if (null != adapter) {
-                                adapter.notifyDataSetChanged();
-                            }
+                            setWifiVisible(false);
                         }
                     }
                 });

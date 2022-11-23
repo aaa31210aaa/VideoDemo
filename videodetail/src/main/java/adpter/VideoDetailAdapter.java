@@ -154,7 +154,6 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
             layoutParams.width = (int) widthPixel;
             layoutParams.height = (int) (widthPixel / Constants.Portrait_Proportion);
             coverPicture.setLayoutParams(layoutParams);
-            Log.e("打印一下视频封面容器的宽高", layoutParams.width + "---" + layoutParams.height);
             if (!isWifiBord) {
                 if (null != mContext && !((Activity) mContext).isFinishing()
                         && !((Activity) mContext).isDestroyed()) {

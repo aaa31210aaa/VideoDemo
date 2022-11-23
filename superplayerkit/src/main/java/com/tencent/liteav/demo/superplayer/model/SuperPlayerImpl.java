@@ -506,7 +506,6 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             return;
         }
         superPlayerView.mCurrentPlayVideoURL = url;
-        Log.e("测试一下播放地址5", superPlayerView.mCurrentPlayVideoURL);
         if (url.contains(".m3u8")) {
             mIsMultiBitrateStream = true;
         }

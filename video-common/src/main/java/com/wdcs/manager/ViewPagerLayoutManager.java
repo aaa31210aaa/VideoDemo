@@ -1,6 +1,7 @@
 package com.wdcs.manager;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,6 +15,9 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
     private OnViewPagerListener mOnViewPagerListener;
     private int mDrift;//位移，用来判断移动方向
     private boolean isScoll = true; //是否可以垂直滑动
+    private int currentPageIndex;
+    public int firstDy = 0;
+    public boolean isToDown = true;
 
     public ViewPagerLayoutManager(Context context) {
         super(context);
@@ -33,6 +37,10 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
     private void init() {
         mPagerSnapHelper = new PagerSnapHelper();
 
+    }
+
+    public void setCurrentPageIndex(int currentPageIndex) {
+        this.currentPageIndex = currentPageIndex;
     }
 
 
@@ -62,6 +70,7 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
      * 缓慢拖拽-> SCROLL_STATE_DRAGGING
      * 快速滚动-> SCROLL_STATE_SETTLING
      * 空闲状态-> SCROLL_STATE_IDLE
+     *
      * @param state
      */
     @Override
@@ -73,9 +82,14 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
                     return;
                 }
                 int positionIdle = getPosition(viewIdle);
+                if (currentPageIndex == positionIdle) {
+                    return;
+                } else {
+                    currentPageIndex = positionIdle;
+                }
                 if (getItemCount() > 0) {
                     if (mOnViewPagerListener != null && getChildCount() == 1) {
-                        mOnViewPagerListener.onPageSelected(positionIdle,positionIdle == getItemCount() - 1);
+                        mOnViewPagerListener.onPageSelected(positionIdle, positionIdle == getItemCount() - 1);
                     }
                 }
                 break;
@@ -93,14 +107,13 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
                 }
                 int positionSettling = getPosition(viewSettling);
                 break;
-
         }
     }
 
 
-
     /**
      * 监听竖直方向的相对偏移量
+     *
      * @param dy
      * @param recycler
      * @param state
@@ -109,12 +122,22 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         this.mDrift = dy;
+        if (firstDy == 0) {
+            if (dy >= 0) {
+                isToDown = true;
+                firstDy++;
+            } else {
+                isToDown = false;
+                firstDy++;
+            }
+        }
         return super.scrollVerticallyBy(dy, recycler, state);
     }
 
 
     /**
      * 监听水平方向的相对偏移量
+     *
      * @param dx
      * @param recycler
      * @param state
@@ -128,9 +151,10 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
 
     /**
      * 设置监听
+     *
      * @param listener
      */
-    public void setOnViewPagerListener(OnViewPagerListener listener){
+    public void setOnViewPagerListener(OnViewPagerListener listener) {
         this.mOnViewPagerListener = listener;
     }
 
@@ -144,10 +168,12 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
 
         @Override
         public void onChildViewDetachedFromWindow(View view) {
-            if (mDrift >= 0){
-                if (mOnViewPagerListener != null) mOnViewPagerListener.onPageRelease(true,getPosition(view));
+            if (mDrift >= 0) {
+                if (mOnViewPagerListener != null)
+                    mOnViewPagerListener.onPageRelease(true, getPosition(view));
             } else {
-                if (mOnViewPagerListener != null) mOnViewPagerListener.onPageRelease(false,getPosition(view));
+                if (mOnViewPagerListener != null)
+                    mOnViewPagerListener.onPageRelease(false, getPosition(view));
             }
 
         }
@@ -155,6 +181,7 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
 
     /**
      * 设置是否可以竖直滑动
+     *
      * @param isScoll
      */
     public void setCanScoll(boolean isScoll) {

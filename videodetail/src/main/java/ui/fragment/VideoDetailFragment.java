@@ -657,8 +657,10 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     addPageViews(myContentId);
                     OkGo.getInstance().cancelTag("contentState");
                     getContentState(myContentId);
+                    if (videoFragmentIsVisibleToUser) {
+                        playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
+                    }
 
-                    playerView.mCurrentPlayVideoURL = mDatas.get(0).getPlayUrl();
                     currentIndex = 0;
                     mPageIndex = 1;
                     if (mDatas.get(0).getDisableComment()) {
@@ -676,9 +678,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     rlLp = (ViewGroup) videoDetailmanager.findViewByPosition(0);
                     OkGo.getInstance().cancelTag(recommendTag);
                     //获取推荐列表
-//                    if (videoFragmentIsVisibleToUser) {
-                    getRecommend(myContentId, 0);
-//                    }
+                    if (videoFragmentIsVisibleToUser) {
+                        getRecommend(myContentId, 0);
+                    }
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -756,6 +758,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
 
                     mDataDTO = mDatas.get(position);
+
+                    if (isVisibleNoWifiView(getActivity())) {
+                        playerView.setOrientation(false);
+                    } else {
+                        playerView.setOrientation(true);
+                        setWifiVisible(true);
+                    }
                     if (null != adapter.getViewByPosition(position, R.id.superplayer_iv_fullscreen)) {
                         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getWidth())),
                                 Integer.parseInt(NumberFormatTool.getNumStr(mDatas.get(position).getHeight()))))) {
@@ -843,18 +852,41 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
             Log.e("播放状态：", playerView.mSuperPlayer.getPlayerState() + "");
             if (index == 1) {
-                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
-                    playerView.mSuperPlayer.reStart();
+                if (!isVisibleNoWifiView(getActivity())) {
+                    if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                        setWifiVisible(true);
+                        addPlayView(currentIndex);
+                    } else {
+                        playerView.mSuperPlayer.resume();
+                    }
                 } else {
-                    playerView.mSuperPlayer.resume();
+                    if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                        addPlayView(currentIndex);
+                    } else {
+                        playerView.mSuperPlayer.resume();
+                    }
+                    setWifiVisible(false);
                 }
-
             } else {
                 playerView.mSuperPlayer.pause();
                 if (videoFragmentIsVisibleToUser) {
                     finderPoint();
                 }
             }
+        }
+    }
+
+    /**
+     * WIFi按钮是否显示
+     *
+     * @param isVisible
+     */
+    private void setWifiVisible(boolean isVisible) {
+        for (int i = 0; i < mDatas.size(); i++) {
+            mDatas.get(i).setWifi(isVisible);
+        }
+        if (null != adapter) {
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -944,6 +976,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     ((ViewGroup) playerView.getParent()).removeView(playerView);
                 }
                 addPlayView(currentIndex);
+                setWifiVisible(true);
+            } else {
+                setWifiVisible(false);
             }
             getContentState(myContentId);
         } else {
@@ -1134,7 +1169,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             } else if (TextUtils.equals("1", videoType)) {
                 int height = (int) (widthPixel / Constants.Portrait_Proportion);
                 playViewParams = new RelativeLayout.LayoutParams(widthPixel, height);
-                Log.e("打印一下视频容器宽高",playViewParams.width + "-----"+ playViewParams.height);
                 if (phoneIsNormal()) {
                     playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                     playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -2687,8 +2721,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         }
         if (null != mDataDTO) {
             playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
-//            Log.e("测试一下播放地址", playerView.mCurrentPlayVideoURL);
-                        Log.e("测试一下顺序", "sss");
         }
 
         if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
@@ -3070,12 +3102,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         if (!isVisibleNoWifiView(getActivity())) {
                             addPlayView(position);
                         } else {
-                            for (int i = 0; i < mDatas.size(); i++) {
-                                mDatas.get(i).setWifi(false);
-                            }
-                            if (null != adapter) {
-                                adapter.notifyDataSetChanged();
-                            }
+                            setWifiVisible(false);
                         }
                     }
                 });
