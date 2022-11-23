@@ -1,5 +1,6 @@
 package ui.activity;
 
+import adpter.VideoViewPagerAdapter;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
@@ -9,11 +10,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
@@ -24,7 +22,6 @@ import android.widget.TextView;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.OnTabSelectListener;
-import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
@@ -33,16 +30,13 @@ import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
 import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
-import com.wdcs.callback.HomePageInteractive;
 import com.wdcs.callback.JsonCallback;
-import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.ContentBuriedPointManager;
 import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.CategoryModel;
 import com.wdcs.model.ColumnModel;
-import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoChannelModel;
 import com.wdcs.utils.DateUtils;
@@ -57,7 +51,6 @@ import com.wdcs.videodetail.demo.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import adpter.VideoViewPagerAdapter;
 import ui.fragment.VideoDetailFragment;
 import ui.fragment.XkshFragment;
 import widget.NetBroadcastReceiver;
@@ -69,6 +62,7 @@ import org.json.JSONObject;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.autoPlayOverCallBack;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.readPlayCallBack;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
@@ -110,6 +104,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     public String module_source;
     public RelativeLayout topZzc;
     private Handler mHandler = new Handler();
+    private boolean isDestroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -843,22 +838,18 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing()) {
+            destroy();
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        if (instance != null) {
-            instance.release();
-            instance.mSuperPlayer.destroy();
-            instance = null;
-        }
-        OkGo.getInstance().cancelTag("requestTag");
-        maxPercent = 0;
-        lsDuration = 0;
-        unregisterReceiver(netWorkStateReceiver);
-        FinderBuriedPointManager.setFinderClick("页面关闭");
-        mHandler.removeCallbacksAndMessages(null);
-        autoPlayOverCallBack = null;
-        SuperPlayerImpl.setAutoPlayOverCallBack(autoPlayOverCallBack);
-//        OkGo.getInstance().cancelTag(VIDEOTAG);
+        destroy();
+
     }
 
     /**
@@ -974,6 +965,29 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         videoTitleView.setVisibility(View.VISIBLE);
                     }
                 });
+    }
+
+    private void destroy()  {
+        if (isDestroyed) {
+            return;
+        }
+        // 回收资源
+        if (instance != null) {
+            instance.release();
+            instance.mSuperPlayer.destroy();
+            instance = null;
+        }
+        OkGo.getInstance().cancelTag(VIDEOTAG);
+        maxPercent = 0;
+        lsDuration = 0;
+        unregisterReceiver(netWorkStateReceiver);
+        FinderBuriedPointManager.setFinderClick("页面关闭");
+        mHandler.removeCallbacksAndMessages(null);
+        autoPlayOverCallBack = null;
+        SuperPlayerImpl.setAutoPlayOverCallBack(autoPlayOverCallBack);
+        readPlayCallBack = null;
+        SuperPlayerImpl.setReadPlayCallBack(readPlayCallBack);
+        isDestroyed = true;
     }
 
 }

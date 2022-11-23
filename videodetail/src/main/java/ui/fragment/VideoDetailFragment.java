@@ -3047,7 +3047,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         }
                         try {
                             if (response.body().getCode().equals("200")) {
-                                Log.e("测试调用----", "调用了getRecommend");
                                 recommondList.clear();
                                 recommondList.addAll(response.body().getData().getRecords());
 

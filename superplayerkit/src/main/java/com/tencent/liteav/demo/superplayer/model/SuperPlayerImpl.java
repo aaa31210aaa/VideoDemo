@@ -196,6 +196,16 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         tabAutoPlayOverCallBack = callBack;
     }
 
+    public static TabReadCallBack tabReadCallBack;
+
+    public interface TabReadCallBack {
+        void TabReadCallBack();
+    }
+
+    public static void setTabReadCallBack(TabReadCallBack callBack) {
+        tabReadCallBack = callBack;
+    }
+
     /**
      * 点播播放器事件回调
      *
@@ -259,7 +269,14 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 break;
             case TXLiveConstants.PLAY_EVT_RCV_FIRST_I_FRAME:
                 //视频自动播放埋点上报 在内流中滑动播放视频时上报
-                readPlayCallBack.ReadPlayCallback();
+                if (null != readPlayCallBack) {
+                    readPlayCallBack.ReadPlayCallback();
+                }
+
+                if (null != tabReadCallBack) {
+                    tabReadCallBack.TabReadCallBack();
+                }
+
                 if (null != superPlayerView) {
                     superPlayerView.detailIsLoad = true;
                     superPlayerView.homeVideoIsLoad = true;

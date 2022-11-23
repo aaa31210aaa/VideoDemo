@@ -1025,9 +1025,10 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public void onOrientationChanged(int orientation) {
 
         if (!isOrientation) {
+            Log.e("是否能旋转：","不能");
             return;
         }
-
+        Log.e("是否能旋转：","可以");
         if (mFullScreenPlayer == null) {
             return;
         }

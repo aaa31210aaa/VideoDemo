@@ -113,13 +113,17 @@ import com.wdcs.utils.NoScrollViewPager;
 import com.wdcs.widget.YALikeAnimationView;
 
 import static android.widget.RelativeLayout.BELOW;
+import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.autoPlayOverCallBack;
 import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.detailAutoPlayOverCallBack;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.readPlayCallBack;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mProgress;
 import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.VIDEODETAILTAG;
+import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static ui.activity.VideoHomeActivity.maxPercent;
@@ -242,6 +246,7 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
     private String topicName;
     private String videoLx; //当前视频的类型
     private Handler mHandler = new Handler();
+    private boolean isDestroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -2788,11 +2793,17 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
             isFinish = "是";
         }
         FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
+
+        if (isFinishing()) {
+            destroy();
+        }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private void destroy()  {
+        if (isDestroyed) {
+            return;
+        }
+        // 回收资源
         isShow = false;
         if (playerView != null) {
             playerView.mSuperPlayer.stop();
@@ -2805,6 +2816,13 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         mHandler.removeCallbacksAndMessages(null);
         detailAutoPlayOverCallBack = null;
         SuperPlayerImpl.setDetailAutoPlayOverCallBack(detailAutoPlayOverCallBack);
+        isDestroyed = true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        destroy();
     }
 
     @Override

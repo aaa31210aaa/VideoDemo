@@ -2,6 +2,7 @@ package ui.fragment;
 
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.mTargetPlayerMode;
 import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.tabAutoPlayOverCallBack;
+import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.tabReadCallBack;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
@@ -152,24 +153,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         initView();
         return view;
     }
-
-
-//    @Override
-//    public void setUserVisibleHint(boolean isVisibleToUser) {
-//        super.setUserVisibleHint(isVisibleToUser);
-//        if (isVisibleToUser) {
-//            videoHomeFragmentVisible = 1;
-//        } else {
-//            videoHomeFragmentVisible = 0;
-//        }
-//        if (null != videoDetailFragment && !initSetVisible) {
-//            videoDetailFragment.setVideoDetailFragmentVisible(videoHomeFragmentVisible);
-//        }
-//
-//        if (null != xkshFragment && !initSetVisible) {
-//            xkshFragment.setXkshFragmentVisible(videoHomeFragmentVisible);
-//        }
-//    }
 
     private void initView() {
         topZzc = view.findViewById(R.id.top_zzc);
@@ -647,10 +630,9 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         };
 
         //开始播放回调
-        SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
+        SuperPlayerImpl.setTabReadCallBack(new SuperPlayerImpl.TabReadCallBack() {
             @Override
-            public void ReadPlayCallback() {
-                Log.e("测试调用", "调用开始播放");
+            public void TabReadCallBack() {
                 if (xkshFragment.mIsVisibleToUser) {
                     if (wdcsTabIndex != 1) {
                         xkshFragment.playerView.mSuperPlayer.pause();
@@ -945,16 +927,18 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                                             videoDetailFragment.playerView.setOrientation(false);
                                             xkshFragment.playerView.setOrientation(false);
                                         } else {
-                                            if (TextUtils.equals(videoDetailFragment.videoLx, "2")) {
-                                                videoDetailFragment.playerView.setOrientation(true);
-                                            } else {
-                                                videoDetailFragment.playerView.setOrientation(false);
-                                            }
-
-                                            if (TextUtils.equals(xkshFragment.videoLx, "2")) {
-                                                xkshFragment.playerView.setOrientation(true);
-                                            } else {
-                                                xkshFragment.playerView.setOrientation(false);
+                                            if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                                                if (TextUtils.equals(videoDetailFragment.videoLx, "2")) {
+                                                    videoDetailFragment.playerView.setOrientation(true);
+                                                } else {
+                                                    videoDetailFragment.playerView.setOrientation(false);
+                                                }
+                                            } else if (xkshFragment.mIsVisibleToUser){
+                                                if (TextUtils.equals(xkshFragment.videoLx, "2")) {
+                                                    xkshFragment.playerView.setOrientation(true);
+                                                } else {
+                                                    xkshFragment.playerView.setOrientation(false);
+                                                }
                                             }
                                         }
                                         videoDetailFragment.setVideoDetailFragmentVisible(index);
@@ -1068,6 +1052,8 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         mHandler.removeCallbacksAndMessages(null);
         tabAutoPlayOverCallBack = null;
         SuperPlayerImpl.setTabAutoPlayOverCallBack(tabAutoPlayOverCallBack);
+        tabReadCallBack = null;
+        SuperPlayerImpl.setTabReadCallBack(tabReadCallBack);
     }
 
     public static boolean VideoFullToWindow() {

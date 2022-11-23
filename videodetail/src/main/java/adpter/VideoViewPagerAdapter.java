@@ -1,17 +1,13 @@
 package adpter;
 
 import android.text.TextUtils;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.flyco.tablayout.SlidingTabLayout;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
-import com.tencent.liteav.demo.superplayer.model.SuperPlayer;
 import com.wdcs.model.VideoChannelModel;
 
 import java.util.ArrayList;
