@@ -81,9 +81,9 @@ public class ContentBuriedPointManager {
             paramsModel.setPercent(percent);
             paramsModel.setParams_for_special(Constants.PARAMS_FOR_SPECIAL);
             if (TextUtils.isEmpty(requestId)) {
-                paramsModel.setRequestId("");
+                paramsModel.setReq_id("");
             } else {
-                paramsModel.setRequestId(requestId);
+                paramsModel.setReq_id(requestId);
             }
 
             //视频内容 id

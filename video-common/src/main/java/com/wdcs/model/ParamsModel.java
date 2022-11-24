@@ -15,7 +15,7 @@ public class ParamsModel {
     private String percent;
     private String params_for_special;
     private String duration;
-    private String requestId;
+    private String req_id;
 
     public String getEnter_from() {
         return enter_from;
@@ -81,12 +81,12 @@ public class ParamsModel {
         this.duration = duration;
     }
 
-    public String getRequestId() {
-        return requestId;
+    public String getReq_id() {
+        return req_id;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setReq_id(String requestId) {
+        this.req_id = requestId;
     }
 
     @Keep

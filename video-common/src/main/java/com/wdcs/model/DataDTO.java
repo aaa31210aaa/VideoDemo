@@ -1027,7 +1027,7 @@ public  class DataDTO {
 
     public String getRequestId() {
         if (null == requestId) {
-            return "false";
+            return "";
         }
         return requestId;
     }
