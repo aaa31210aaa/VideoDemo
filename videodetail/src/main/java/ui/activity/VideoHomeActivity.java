@@ -98,6 +98,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     public static long lsDuration = 0; //每一次上报临时保存的播放时长
     private NetBroadcastReceiver netWorkStateReceiver;
     private String categoryName;
+    private String requestId;
     public static boolean isPause;
     private List<CategoryModel.DataDTO> categoryModelList = new ArrayList<>();
     private boolean toFirst = true;
@@ -119,6 +120,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         contentId = getIntent().getStringExtra("contentId");
         toCurrentTab = getIntent().getIntExtra("setCurrentTab", 1);
         categoryName = getIntent().getStringExtra("category_name");
+        requestId = getIntent().getStringExtra("requestId");
         module_source = getIntent().getStringExtra("module_source");
         if (null == module_source) {
             module_source = "";
@@ -726,7 +728,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView, toCurrentTab, false);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, requestId, playerView, toCurrentTab, false);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }

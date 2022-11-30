@@ -798,7 +798,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, playerView, toCurrentTab, true);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName,"", playerView, toCurrentTab, true);
         colunmList.clear();
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());

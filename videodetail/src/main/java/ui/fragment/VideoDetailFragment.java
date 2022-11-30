@@ -135,6 +135,7 @@ import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.FROMHOMETAB;
 import static com.wdcs.constants.Constants.PANELCODE;
+import static com.wdcs.constants.Constants.REQUESTID;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -271,18 +272,22 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private int currentTabIndex;
     public String videoLx; //当前视频的类型
     private String requestTag;
+    private String requestId;
 
     public VideoDetailFragment() {
     }
 
-    public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName
-            , int toCurrentTab, boolean fromHomeTab) {
+    public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName,
+            String requestId, int toCurrentTab, boolean fromHomeTab) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         args.putString(CONTENTID, contentId);
         args.putInt(TOCURRENTTAB, toCurrentTab);
         if (!TextUtils.isEmpty(categoryName)) {
             args.putString(CATEGORYNAME, categoryName);
+        }
+        if (!TextUtils.isEmpty(requestId)) {
+            args.putString(REQUESTID, requestId);
         }
         args.putBoolean(FROMHOMETAB, fromHomeTab);
         fragment.setArguments(args);
@@ -296,6 +301,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             panelCode = getArguments().getString(PANELCODE);
             myContentId = getArguments().getString(CONTENTID);
             mCategoryName = getArguments().getString(CATEGORYNAME);
+            requestId = getArguments().getString(REQUESTID);
             toCurrentTab = getArguments().getInt(TOCURRENTTAB);
             fromHomeTab = getArguments().getBoolean(FROMHOMETAB);
         }
@@ -1589,6 +1595,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         //从负一屏 拿到的视频  添加到集合里
         if (null != negativeScreenDto) {
             negativeScreenDto.setVolcCategory(mCategoryName);
+            negativeScreenDto.setRequestId(requestId);
             negativeScreenDto.setIsAutoReportEvent("1");
             mDatas.add(negativeScreenDto);
         }
@@ -2827,38 +2834,36 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
 
-                if (mProgress != 0 && mDuration != 0) {
-                    /**
-                     * 上报内容埋点 视频播放时长
-                     */
-                    long evePlayTime = Math.abs(mProgress - lsDuration);
-                    double currentPercent = (evePlayTime * 1.0 / mDuration);
-                    double uploadPercent = 0;
-                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                /**
+                 * 上报内容埋点 视频播放时长
+                 */
+                long evePlayTime = Math.abs(mProgress - lsDuration);
+                double currentPercent = (evePlayTime * 1.0 / mDuration);
+                double uploadPercent = 0;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
 //                      //不为重播
-                        if (currentPercent > maxPercent) {
-                            uploadPercent = currentPercent;
-                            maxPercent = currentPercent;
-                        } else {
-                            uploadPercent = maxPercent;
-                        }
+                    if (currentPercent > maxPercent) {
+                        uploadPercent = currentPercent;
+                        maxPercent = currentPercent;
                     } else {
-                        uploadPercent = 1;
+                        uploadPercent = maxPercent;
                     }
-                    videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
-                    BigDecimal two = new BigDecimal(uploadPercent);
-                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-                    lsDuration = mProgress;
-                    String event;
-                    if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
-                        event = Constants.CMS_VIDEO_OVER;
-                    } else {
-                        event = Constants.CMS_VIDEO_OVER_AUTO;
-                    }
-                    //上报埋点
-                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-                    Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                } else {
+                    uploadPercent = 1;
                 }
+                videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
+                BigDecimal two = new BigDecimal(uploadPercent);
+                double pointPercentTwo = two.setScale(8, BigDecimal.ROUND_DOWN).doubleValue();
+                lsDuration = mProgress;
+                String event;
+                if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
+                    event = Constants.CMS_VIDEO_OVER;
+                } else {
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                }
+                //上报埋点
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
             }
         } else {
             videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;

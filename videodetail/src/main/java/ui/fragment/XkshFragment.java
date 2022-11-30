@@ -126,6 +126,7 @@ import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.FROMXKSHTAB;
 import static com.wdcs.constants.Constants.PANELCODE;
+import static com.wdcs.constants.Constants.REQUESTID;
 import static com.wdcs.constants.Constants.TABNAME;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
@@ -251,13 +252,14 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public static XkshFragment mFragment;
     private int currentTabIndex;
     public String videoLx; //当前视频的类型
+    private String requestId;
 
     public XkshFragment() {
 
     }
 
     public XkshFragment newInstance(XkshFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName,
-                                    int toCurrentTab, boolean fromHomeTab) {
+                                    String requestId, int toCurrentTab, boolean fromHomeTab) {
         this.mFragment = fragment;
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
@@ -266,6 +268,9 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         args.putString(TABNAME, videoChannelModel.getColumnBean().getColumnName());
         if (!TextUtils.isEmpty(categoryName)) {
             args.putString(CATEGORYNAME, categoryName);
+        }
+        if (!TextUtils.isEmpty(requestId)) {
+            args.putString(REQUESTID, requestId);
         }
         args.putBoolean(FROMXKSHTAB, fromHomeTab);
         fragment.setArguments(args);
@@ -279,6 +284,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             panelCode = getArguments().getString(PANELCODE);
             myContentId = getArguments().getString(CONTENTID);
             mCategoryName = getArguments().getString(CATEGORYNAME);
+            requestId = getArguments().getString(REQUESTID);
             toCurrentTab = getArguments().getInt(TOCURRENTTAB);
             tabName = getArguments().getString(TABNAME);
             fromHomeTab = getArguments().getBoolean(FROMXKSHTAB);
@@ -1477,6 +1483,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         //从负一屏 拿到的视频  添加到集合里
         if (null != negativeScreenDto) {
             negativeScreenDto.setVolcCategory(mCategoryName);
+            negativeScreenDto.setRequestId(requestId);
             negativeScreenDto.setIsAutoReportEvent("1");
             mDatas.add(negativeScreenDto);
         }
@@ -2714,7 +2721,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public void finderPoint() {
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
-                if (mDuration != 0 && mProgress != 0) {
                     /**
                      * 上报内容埋点 视频播放时长
                      */
@@ -2736,12 +2742,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                     xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                     BigDecimal two = new BigDecimal(uploadPercent);
-                    double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
+                    double pointPercentTwo = two.setScale(8, BigDecimal.ROUND_DOWN).doubleValue();
                     lsDuration = mProgress;
                     //上报埋点
                     uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
                     Log.e("xksh_md", "埋点事件：" + event + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
-                }
             }
         } else {
             xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;

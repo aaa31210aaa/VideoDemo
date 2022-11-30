@@ -164,9 +164,10 @@ public class MainActivity extends AppCompatActivity {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, VideoHomeActivity.class);
-//                intent.putExtra("contentId", contentId.getText().toString());
-//                intent.putExtra("category_name", "123456");
+                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
+                intent.putExtra("contentId", contentId.getText().toString());
+                intent.putExtra("category_name", "123456");
+                intent.putExtra("requestId", "34567");
 //                intent.putExtra("module_source", "测试来源");
                 startActivity(intent);
             }
