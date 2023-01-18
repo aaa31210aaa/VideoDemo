@@ -572,49 +572,55 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
-                if (xkshFragment.mIsVisibleToUser) {
-                    String isRenew = "";
-                    if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-//                    //不为重播
-                        xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
-                        String event;
-                        if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
-                            event = Constants.CMS_VIDEO_PLAY;
-                        } else {
-                            event = Constants.CMS_VIDEO_PLAY_AUTO;
+                try {
+                    if (null != xkshFragment && null != videoDetailFragment) {
+                        if (xkshFragment.mIsVisibleToUser) {
+                            String isRenew = "";
+                            if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
+    //                    //不为重播
+                                xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
+                                String event;
+                                if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                                    event = Constants.CMS_VIDEO_PLAY;
+                                } else {
+                                    event = Constants.CMS_VIDEO_PLAY_AUTO;
+                                }
+                                if (null != xkshFragment.mDataDTO && !TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
+                                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory(), xkshFragment.mDataDTO.getRequestId()), event);
+                                }
+                                isRenew = "否";
+                            } else {
+                                isRenew = "是";
+                            }
+                            //Finder 埋点 视频开始播放
+                            FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
+
+                        } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                            String isRenew = "";
+                            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+    //                    //不为重播
+                                videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
+
+                                String event;
+                                if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                                    event = Constants.CMS_VIDEO_PLAY;
+                                } else {
+                                    event = Constants.CMS_VIDEO_PLAY_AUTO;
+                                }
+                                if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
+                                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
+                                }
+
+                                isRenew = "否";
+                            } else {
+                                isRenew = "是";
+                            }
+                            //Finder 埋点 视频开始播放
+                            FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO, module_source);
                         }
-                        if (null != xkshFragment.mDataDTO && !TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
-                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory(), xkshFragment.mDataDTO.getRequestId()), event);
-                        }
-                        isRenew = "否";
-                    } else {
-                        isRenew = "是";
                     }
-                    //Finder 埋点 视频开始播放
-                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
-
-                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    String isRenew = "";
-                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                    //不为重播
-                        videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
-
-                        String event;
-                        if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
-                            event = Constants.CMS_VIDEO_PLAY;
-                        } else {
-                            event = Constants.CMS_VIDEO_PLAY_AUTO;
-                        }
-                        if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
-                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
-                        }
-
-                        isRenew = "否";
-                    } else {
-                        isRenew = "是";
-                    }
-                    //Finder 埋点 视频开始播放
-                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO, module_source);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });

@@ -484,21 +484,25 @@ public class VideoDetailActivity extends AppCompatActivity implements View.OnCli
         SuperPlayerImpl.setReadPlayCallBack(new SuperPlayerImpl.ReadPlayCallBack() {
             @Override
             public void ReadPlayCallback() {
-                String isRenew = "";
-                if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-//                      //不为重播
-                    isRenew = "否";
-                    videoOldSystemTime = DateUtils.getTimeCurrent();
-                    String event;
-                    event = Constants.CMS_VIDEO_PLAY;
-                    if (null != mDataDTO && !TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDataDTO.getThirdPartyId(), "", "", event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                try {
+                    String isRenew = "";
+                    if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
+    //                      //不为重播
+                        isRenew = "否";
+                        videoOldSystemTime = DateUtils.getTimeCurrent();
+                        String event;
+                        event = Constants.CMS_VIDEO_PLAY;
+                        if (null != mDataDTO && !TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
+                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoDetailActivity.this, mDataDTO.getThirdPartyId(), "", "", event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                        }
+                    } else {
+                        isRenew = "是";
                     }
-                } else {
-                    isRenew = "是";
-                }
 
-                FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, mDataDTO);
+                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, mDataDTO);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 

@@ -116,7 +116,10 @@ public class VideoDetailAdapter extends BaseQuickAdapter<DataDTO, BaseViewHolder
 
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) coverPicture.getLayoutParams();
         DisplayMetrics outMetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        if (null != mContext) {
+            ((Activity) mContext).getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        }
+
         double widthPixel = outMetrics.widthPixels;
         double heightPixel = outMetrics.heightPixels;
         if (TextUtils.equals("2", videoIsNormal(Integer.parseInt(NumberFormatTool.getNumStr(item.getWidth())),

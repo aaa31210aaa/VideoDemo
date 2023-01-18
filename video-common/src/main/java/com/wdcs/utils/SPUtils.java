@@ -292,11 +292,13 @@ public final class SPUtils {
     }
 
     public static boolean isVisibleNoWifiView (Context context){
-        if (SPUtils.getInstance().getString(Constants.AGREE_NETWORK).equals("1")) {
-            return false;
-        } else {
-            if (NetworkUtil.isWifi(context)) {
+        if (null != context) {
+            if (SPUtils.getInstance().getString(Constants.AGREE_NETWORK).equals("1")) {
                 return false;
+            } else {
+                if (NetworkUtil.isWifi(context)) {
+                    return false;
+                }
             }
         }
         return true;

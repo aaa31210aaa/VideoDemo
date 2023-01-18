@@ -5,6 +5,11 @@
       <map>
         <entry key="..\:/AndroidStudioProjects/VideoDemo/superplayerkit/src/main/res/layout/superplayer_vod_view.xml" value="0.4765625" />
         <entry key="..\:/AndroidStudioProjects/VideoDemo/videodetail/src/main/res/layout/fragment_in_live.xml" value="0.534375" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.21603260869565216" />
+        <entry key="video-common/src/main/res/drawable/publisher_bg.xml" value="0.1135" />
+        <entry key="videodetail/src/main/res/layout/activity_video_main.xml" value="0.1703125" />
+        <entry key="videodetail/src/main/res/layout/fragment_video_home.xml" value="0.1703125" />
+        <entry key="videodetail/src/main/res/layout/video_fragment_item.xml" value="0.25" />
       </map>
     </option>
   </component>

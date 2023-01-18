@@ -278,7 +278,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     }
 
     public VideoDetailFragment newInstance(VideoDetailFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName,
-            String requestId, int toCurrentTab, boolean fromHomeTab) {
+                                           String requestId, int toCurrentTab, boolean fromHomeTab) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         args.putString(CONTENTID, contentId);
@@ -314,11 +314,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_video_detail, container, false);
         decorView = getActivity().getWindow().getDecorView();
         initView(view);
-        if (!TextUtils.isEmpty(myContentId) && 1 == toCurrentTab) {
-            getOneVideo(myContentId);
-        } else {
-            getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
+        if (!fromHomeTab) {
+            if (!TextUtils.isEmpty(myContentId) && 1 == toCurrentTab) {
+                getOneVideo(myContentId);
+            } else {
+                getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
+            }
         }
+
         return view;
     }
 
@@ -853,6 +856,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
             }
             if (!isInitViewPagerListener && index == 1) {
+                if (!TextUtils.isEmpty(myContentId) && 1 == toCurrentTab) {
+                    getOneVideo(myContentId);
+                } else {
+                    getPullDownData(mVideoSize, panelCode, "false", Constants.REFRESH_TYPE);
+                }
                 initViewPagerListener();
             }
 
@@ -1023,7 +1031,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         try {
                             if (response.body().getCode().equals(success_code)) {
                                 activityRuleBean = response.body();
-                                if (null == activityRuleBean || null == activityRuleBean.getData()) {
+                                if (null == activityRuleBean || null == activityRuleBean.getData() || null == getActivity()) {
                                     return;
                                 }
 
@@ -2723,47 +2731,52 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        if (!videoFragmentIsVisibleToUser) {
-            return;
-        }
-        if (null != mDataDTO) {
-            playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
-        }
+        try {
+            if (!videoFragmentIsVisibleToUser) {
+                return;
+            }
 
-        if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
-            if (fromHomeTab) {
-                if (currentTabIndex == 1) {
+            if (null == playerView) {
+                return;
+            }
+
+            if (null != mDataDTO) {
+                playerView.mCurrentPlayVideoURL = mDataDTO.getPlayUrl();
+            }
+
+            if (playerView != null && !SPUtils.isVisibleNoWifiView(getActivity())) {
+                if (fromHomeTab) {
+                    if (currentTabIndex == 1) {
+                        if (playerView.homeVideoIsLoad) {
+                            playerView.mSuperPlayer.resume();
+                        } else {
+                            playerView.mSuperPlayer.reStart();
+                        }
+                    }
+                } else {
                     if (playerView.homeVideoIsLoad) {
                         playerView.mSuperPlayer.resume();
                     } else {
                         playerView.mSuperPlayer.reStart();
                     }
                 }
-            } else {
-                if (playerView.homeVideoIsLoad) {
-                    playerView.mSuperPlayer.resume();
-                } else {
-                    playerView.mSuperPlayer.reStart();
-                }
             }
-        }
 
-        videoOldSystemTime = DateUtils.getTimeCurrent();
-        if (!TextUtils.isEmpty(myContentId)) {
-            getContentState(myContentId);
-        }
+            videoOldSystemTime = DateUtils.getTimeCurrent();
+            if (!TextUtils.isEmpty(myContentId)) {
+                getContentState(myContentId);
+            }
 
-        isPause = false;
-        playerView.mOrientationHelper.enable();
-        if (PersonInfoManager.getInstance().isRequestToken()) {
-            try {
+            isPause = false;
+            playerView.mOrientationHelper.enable();
+            if (PersonInfoManager.getInstance().isRequestToken()) {
                 getUserToken(VideoInteractiveParam.getInstance().getCode());
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        }
-        if (null != playerView && playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
-            SystemUtils.hideSystemUI(decorView);
+            if (null != playerView && playerView.mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.FULLSCREEN) {
+                SystemUtils.hideSystemUI(decorView);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -2881,6 +2894,9 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     public void onDestroy() {
         super.onDestroy();
 //        mCallback.remove();
+        OkGo.getInstance().cancelTag(requestTag);
+        OkGo.getInstance().cancelTag(recommendTag);
+        OkGo.getInstance().cancelTag("userToken");
     }
 
     @Override

@@ -53,6 +53,7 @@ import widget.CustomLoadMoreView;
 import widget.LoadingView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
+import static com.wdcs.constants.Constants.FROMHOMETAB;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -75,6 +76,8 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     private View footview;
     public boolean mIsVisibleToUser;
     private LoadingView videoLoadingProgress;
+    private boolean first = true;
+    private boolean fromHomeTab;
 
     public LiveFragment() {
 
@@ -88,9 +91,10 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    public LiveFragment newInstance(LiveFragment fragment, VideoChannelModel videoChannelModel) {
+    public LiveFragment newInstance(LiveFragment fragment, VideoChannelModel videoChannelModel, boolean fromHomeTab) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
+        args.putBoolean(FROMHOMETAB, fromHomeTab);
         fragment.setArguments(args);
         return fragment;
     }
@@ -100,6 +104,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             panelCode = getArguments().getString(PANELCODE);
+            fromHomeTab = getArguments().getBoolean(FROMHOMETAB);
         }
     }
 
@@ -147,7 +152,9 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getPullDownData(mPageSize, panelCode, "false", Constants.REFRESH_TYPE);
+        if (!fromHomeTab) {
+            getPullDownData(mPageSize, panelCode, "false", Constants.REFRESH_TYPE);
+        }
     }
 
     private void initSmartRefresh(View view) {
@@ -189,6 +196,13 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
 //                }
 //            }
 //        };
+    }
+
+    public void setLiveFragmentVisible(int index) {
+        if (1 == index && first) {
+            getPullDownData(mPageSize, panelCode, "false", Constants.REFRESH_TYPE);
+            first = false;
+        }
     }
 
     /**
@@ -477,5 +491,12 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        OkGo.getInstance().cancelTag(VIDEOTAG);
+        OkGo.getInstance().cancelTag("getGdyToken");
     }
 }

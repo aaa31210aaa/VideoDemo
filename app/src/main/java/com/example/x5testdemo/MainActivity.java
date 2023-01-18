@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     //b3bfd518-7a64-4ff0-a556-d4fbffb0d71f
                     public String setCode() {
-                        return "ad36db10-0a71-40b5-94f4-b223db4a4c01";
+                        return "191dffe3-2bda-46ac-87af-8383541eb282";
                     }
 
                     @Override
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, VideoDetailActivity.class);
+                Intent intent = new Intent(MainActivity.this, VideoHomeActivity.class);
                 intent.putExtra("contentId", contentId.getText().toString());
                 intent.putExtra("category_name", "123456");
                 intent.putExtra("requestId", "34567");

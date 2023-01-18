@@ -1,14 +1,18 @@
 package com.wdcs.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
@@ -18,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 
 /**
  * Created by goldze on 2017/5/14.
@@ -27,12 +32,12 @@ public final class ToastUtils {
 
     private static final int DEFAULT_COLOR = 0x12000000;
     private static Toast sToast;
-    private static int gravity         = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-    private static int xOffset         = 0;
-    private static int yOffset         = (int) (64 * Utils.getContext().getResources().getDisplayMetrics().density + 0.5);
+    private static int gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+    private static int xOffset = 0;
+    private static int yOffset = (int) (64 * Utils.getContext().getResources().getDisplayMetrics().density + 0.5);
     private static int backgroundColor = DEFAULT_COLOR;
-    private static int bgResource      = -1;
-    private static int messageColor    = DEFAULT_COLOR;
+    private static int bgResource = -1;
+    private static int messageColor = DEFAULT_COLOR;
     private static WeakReference<View> sViewWeakReference;
     private static Handler sHandler = new Handler(Looper.getMainLooper());
 
@@ -414,6 +419,7 @@ public final class ToastUtils {
             view.setBackgroundColor(backgroundColor);
         }
         sToast.setGravity(gravity, xOffset, yOffset);
+        hookToast(sToast);
         sToast.show();
     }
 
@@ -426,4 +432,48 @@ public final class ToastUtils {
             sToast = null;
         }
     }
+
+    public static class HandlerProxy extends Handler {
+        private Handler mHandler;
+
+        public HandlerProxy(Handler handler) {
+            this.mHandler = handler;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            try {
+                mHandler.handleMessage(msg);
+            } catch (WindowManager.BadTokenException e) {
+                Log.e("ToastHandlerProxy", e.getMessage());
+            }
+        }
+    }
+
+    public static void hookToast(Toast toast) {
+        Class<Toast> cToast = Toast.class;
+        try {
+            //TN是private的
+            @SuppressLint("SoonBlockedPrivateApi")
+            Field fTn = cToast.getDeclaredField("mTN");
+            fTn.setAccessible(true);
+
+            //获取tn对象
+            Object oTn = fTn.get(toast);
+            //获取TN的class，也可以直接通过Field.getType()获取。
+            Class<?> cTn = oTn.getClass();
+            Field fHandle = cTn.getDeclaredField("mHandler");
+
+            //重新set->mHandler
+            fHandle.setAccessible(true);
+            fHandle.set(oTn, new HandlerProxy((Handler) fHandle.get(oTn)));
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 }

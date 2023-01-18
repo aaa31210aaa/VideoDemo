@@ -87,6 +87,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private RelativeLayout videoTitleView;
     public VideoDetailFragment videoDetailFragment;
     public XkshFragment xkshFragment;
+    public LiveFragment liveFragment;
     public static SuperPlayerView playerView;
 
     private ImageView searchIcon;
@@ -114,6 +115,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private Handler mHandler = new Handler();
     private RelativeLayout topZzc;
     private int wdcsTabIndex;
+    private boolean isFrist = true;
 
     public VideoHomeFragment() {
 
@@ -189,7 +191,28 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 //        });
 
         initViewPager();
-        getCategoryData();
+//        getCategoryData();
+
+        if (null != getActivity()) {
+            LiveDataParam.getInstance().homeTabIndex.observe(getActivity(), new Observer<Integer>() {
+                @Override
+                public void onChanged(Integer index) {
+                    wdcsTabIndex = index;
+                    if (wdcsTabIndex == 1) {
+                        if (isFrist) {
+                            getCategoryData();
+                            isFrist = false;
+                        } else {
+                            tabSelect();
+                        }
+                    } else {
+                        tabSelect();
+                    }
+                }
+            });
+        }
+
+
         if (NetworkUtil.isWifi(getActivity())) {
             SPUtils.getInstance().put("net_state", "0");
         } else {
@@ -633,55 +656,61 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
         SuperPlayerImpl.setTabReadCallBack(new SuperPlayerImpl.TabReadCallBack() {
             @Override
             public void TabReadCallBack() {
-                if (xkshFragment.mIsVisibleToUser) {
-                    if (wdcsTabIndex != 1) {
-                        xkshFragment.playerView.mSuperPlayer.pause();
-                    }
-                    String isRenew = "";
-                    if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-//                    //不为重播
-                        xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
-                        String event;
-                        if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
-                            event = Constants.CMS_VIDEO_PLAY;
-                        } else {
-                            event = Constants.CMS_VIDEO_PLAY_AUTO;
-                        }
-                        if (null != xkshFragment.mDataDTO && !TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
-                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory(), xkshFragment.mDataDTO.getRequestId()), event);
-                        }
-                        isRenew = "否";
-                    } else {
-                        isRenew = "是";
-                    }
-                    //Finder 埋点 视频开始播放
-                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
+                try {
+                    if (null != xkshFragment && null != videoDetailFragment) {
+                        if (xkshFragment.mIsVisibleToUser) {
+                            if (wdcsTabIndex != 1) {
+                                xkshFragment.playerView.mSuperPlayer.pause();
+                            }
+                            String isRenew = "";
+                            if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
+                                //                    //不为重播
+                                xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
+                                String event;
+                                if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                                    event = Constants.CMS_VIDEO_PLAY;
+                                } else {
+                                    event = Constants.CMS_VIDEO_PLAY_AUTO;
+                                }
+                                if (null != xkshFragment.mDataDTO && !TextUtils.isEmpty(xkshFragment.mDataDTO.getVolcCategory())) {
+                                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), xkshFragment.mDataDTO.getThirdPartyId(), "", "", event, xkshFragment.mDataDTO.getVolcCategory(), xkshFragment.mDataDTO.getRequestId()), event);
+                                }
+                                isRenew = "否";
+                            } else {
+                                isRenew = "是";
+                            }
+                            //Finder 埋点 视频开始播放
+                            FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
 
-                } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                    if (wdcsTabIndex != 1) {
-                        videoDetailFragment.playerView.mSuperPlayer.pause();
-                    }
-                    String isRenew = "";
-                    if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                    //不为重播
-                        videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
+                        } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                            if (wdcsTabIndex != 1) {
+                                videoDetailFragment.playerView.mSuperPlayer.pause();
+                            }
+                            String isRenew = "";
+                            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+                                //                    //不为重播
+                                videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
 
-                        String event;
-                        if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
-                            event = Constants.CMS_VIDEO_PLAY;
-                        } else {
-                            event = Constants.CMS_VIDEO_PLAY_AUTO;
-                        }
-                        if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
-                            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
-                        }
+                                String event;
+                                if (TextUtils.equals(videoDetailFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
+                                    event = Constants.CMS_VIDEO_PLAY;
+                                } else {
+                                    event = Constants.CMS_VIDEO_PLAY_AUTO;
+                                }
+                                if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
+                                    uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
+                                }
 
-                        isRenew = "否";
-                    } else {
-                        isRenew = "是";
+                                isRenew = "否";
+                            } else {
+                                isRenew = "是";
+                            }
+                            //Finder 埋点 视频开始播放
+                            FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO, module_source);
+                        }
                     }
-                    //Finder 埋点 视频开始播放
-                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, videoDetailFragment.mDataDTO, module_source);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -774,7 +803,9 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                playerView.mOrientationHelper.enable();
+                if (null != playerView && null != playerView.mOrientationHelper) {
+                    playerView.mOrientationHelper.enable();
+                }
             }
         });
     }
@@ -798,7 +829,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName,"", playerView, toCurrentTab, true);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, "", playerView, toCurrentTab, true);
         colunmList.clear();
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
@@ -828,8 +859,9 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             }
         });
 
-        videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
         xkshFragment = (XkshFragment) videoViewPagerAdapter.getItem(0);
+        videoDetailFragment = (VideoDetailFragment) videoViewPagerAdapter.getItem(1);
+        liveFragment = (LiveFragment) videoViewPagerAdapter.getItem(2);
 
         videoDetailFragment.setCommentPopIsVisible(new VideoDetailFragment.CommentPopIsVisible() {
             @Override
@@ -890,62 +922,38 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
 
                     @Override
                     public void onSuccess(Response<CategoryModel> response) {
-                        if (null == response.body()) {
-                            ToastUtils.showShort(R.string.data_err);
-                            return;
-                        }
-
-                        if (success_code.equals(response.body().getCode())) {
-                            if (null == response.body().getData()) {
+                        try {
+                            if (null == response.body()) {
                                 ToastUtils.showShort(R.string.data_err);
                                 return;
                             }
 
-                            categoryModelList.addAll(response.body().getData());
-                            if (categoryModelList.isEmpty()) {
-                                return;
-                            }
-
-                            mTitlesArrays = new String[3];
-
-                            for (int i = 0; i < categoryModelList.size(); i++) {
-                                if (TextUtils.equals(categoryModelList.get(i).getCode(), "mycs.xksh")) {
-                                    mTitlesArrays[0] = categoryModelList.get(i).getName();
-//                                    mTitlesArrays[0] = "我的小康生活";
+                            if (success_code.equals(response.body().getCode())) {
+                                if (null == response.body().getData()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
                                 }
-                            }
-                            mTitlesArrays[1] = "视频";
-                            mTitlesArrays[2] = "直播";
-                            initViewPagerData();
 
-                            LiveDataParam.getInstance().homeTabIndex.observe(getActivity(), new Observer<Integer>() {
-                                @Override
-                                public void onChanged(Integer index) {
-                                    wdcsTabIndex = index;
-                                    if (null != videoDetailFragment && null != xkshFragment) {
-                                        if (index != 1) {
-                                            videoDetailFragment.playerView.setOrientation(false);
-                                            xkshFragment.playerView.setOrientation(false);
-                                        } else {
-                                            if (videoDetailFragment.videoFragmentIsVisibleToUser) {
-                                                if (TextUtils.equals(videoDetailFragment.videoLx, "2")) {
-                                                    videoDetailFragment.playerView.setOrientation(true);
-                                                } else {
-                                                    videoDetailFragment.playerView.setOrientation(false);
-                                                }
-                                            } else if (xkshFragment.mIsVisibleToUser){
-                                                if (TextUtils.equals(xkshFragment.videoLx, "2")) {
-                                                    xkshFragment.playerView.setOrientation(true);
-                                                } else {
-                                                    xkshFragment.playerView.setOrientation(false);
-                                                }
-                                            }
-                                        }
-                                        videoDetailFragment.setVideoDetailFragmentVisible(index);
-                                        xkshFragment.setXkshFragmentVisible(index);
+                                categoryModelList.addAll(response.body().getData());
+                                if (categoryModelList.isEmpty()) {
+                                    return;
+                                }
+
+                                mTitlesArrays = new String[3];
+
+                                for (int i = 0; i < categoryModelList.size(); i++) {
+                                    if (TextUtils.equals(categoryModelList.get(i).getCode(), "mycs.xksh")) {
+                                        mTitlesArrays[0] = categoryModelList.get(i).getName();
+                                        //                                    mTitlesArrays[0] = "我的小康生活";
                                     }
                                 }
-                            });
+                                mTitlesArrays[1] = "视频";
+                                mTitlesArrays[2] = "直播";
+                                initViewPagerData();
+                                tabSelect();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -966,6 +974,35 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     }
                 });
 
+    }
+
+    /**
+     * 操作tab切换到视频
+     */
+    private void tabSelect() {
+        if (null != videoDetailFragment && null != xkshFragment && null != liveFragment) {
+            if (wdcsTabIndex != 1) {
+                videoDetailFragment.playerView.setOrientation(false);
+                xkshFragment.playerView.setOrientation(false);
+            } else {
+                if (videoDetailFragment.videoFragmentIsVisibleToUser) {
+                    if (TextUtils.equals(videoDetailFragment.videoLx, "2")) {
+                        videoDetailFragment.playerView.setOrientation(true);
+                    } else {
+                        videoDetailFragment.playerView.setOrientation(false);
+                    }
+                } else if (xkshFragment.mIsVisibleToUser) {
+                    if (TextUtils.equals(xkshFragment.videoLx, "2")) {
+                        xkshFragment.playerView.setOrientation(true);
+                    } else {
+                        xkshFragment.playerView.setOrientation(false);
+                    }
+                }
+            }
+            videoDetailFragment.setVideoDetailFragmentVisible(wdcsTabIndex);
+            xkshFragment.setXkshFragmentVisible(wdcsTabIndex);
+            liveFragment.setLiveFragmentVisible(wdcsTabIndex);
+        }
     }
 
 
@@ -1038,22 +1075,26 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (playerView != null) {
-            playerView.release();
-            playerView.mSuperPlayer.destroy();
-            playerView = null;
+        try {
+            if (playerView != null) {
+                playerView.release();
+                playerView.mSuperPlayer.destroy();
+                playerView = null;
+            }
+            OkGo.getInstance().cancelAll();
+            maxPercent = 0;
+            lsDuration = 0;
+            getActivity().unregisterReceiver(netWorkStateReceiver);
+            FinderBuriedPointManager.setFinderClick("页面关闭");
+            OkGo.getInstance().cancelTag(VIDEOTAG);
+            mHandler.removeCallbacksAndMessages(null);
+            tabAutoPlayOverCallBack = null;
+            SuperPlayerImpl.setTabAutoPlayOverCallBack(tabAutoPlayOverCallBack);
+            tabReadCallBack = null;
+            SuperPlayerImpl.setTabReadCallBack(tabReadCallBack);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        OkGo.getInstance().cancelAll();
-        maxPercent = 0;
-        lsDuration = 0;
-        getActivity().unregisterReceiver(netWorkStateReceiver);
-        FinderBuriedPointManager.setFinderClick("页面关闭");
-//        OkGo.getInstance().cancelTag(VIDEOTAG);
-        mHandler.removeCallbacksAndMessages(null);
-        tabAutoPlayOverCallBack = null;
-        SuperPlayerImpl.setTabAutoPlayOverCallBack(tabAutoPlayOverCallBack);
-        tabReadCallBack = null;
-        SuperPlayerImpl.setTabReadCallBack(tabReadCallBack);
     }
 
     public static boolean VideoFullToWindow() {

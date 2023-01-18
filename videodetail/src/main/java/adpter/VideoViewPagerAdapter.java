@@ -56,7 +56,7 @@ public class VideoViewPagerAdapter extends FragmentPagerAdapter {
         for (VideoChannelModel videoChannelModel : channelBeanList) {
             if (TextUtils.equals("2", videoChannelModel.getColumnBean().getColumnId())) {
                 LiveFragment fragment = new LiveFragment();
-                fragmentList.add(fragment.newInstance(fragment, videoChannelModel));
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, fromHomeTab));
             } else if (TextUtils.equals("1", videoChannelModel.getColumnBean().getColumnId())) {
                 VideoDetailFragment fragment = new VideoDetailFragment();
                 fragment.setPlayView(playerView);
