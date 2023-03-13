@@ -116,6 +116,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private RelativeLayout topZzc;
     private int wdcsTabIndex;
     private boolean isFrist = true;
+    public static boolean tabOneFrist = true;
 
     public VideoHomeFragment() {
 
@@ -721,7 +722,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             public void TabAutoPlayOverCallBack() {
                 if (!TabHomeIsPause && null != playerView) {
                     Log.e("yqh_yqh", "重播地址：" + playerView.mCurrentPlayVideoURL);
-                    playerView.mSuperPlayer.reStart();
+                    playerView.mSuperPlayer.reStart(tabOneFrist);
                 }
             }
         });

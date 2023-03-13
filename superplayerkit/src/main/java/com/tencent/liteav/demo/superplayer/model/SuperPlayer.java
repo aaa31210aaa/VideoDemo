@@ -46,6 +46,11 @@ public interface SuperPlayer {
     void reStart();
 
     /**
+     * 重播
+     */
+    void reStart(boolean isFirst);
+
+    /**
      * 暂停播放
      */
     void pause();

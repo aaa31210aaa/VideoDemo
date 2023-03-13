@@ -137,7 +137,9 @@ import static ui.activity.VideoHomeActivity.isPause;
 import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
+import static ui.fragment.VideoDetailFragment.wdcsHomeTabIndex;
 import static ui.fragment.VideoHomeFragment.TabHomeIsPause;
+import static ui.fragment.VideoHomeFragment.tabOneFrist;
 import static utils.NetworkUtil.setDataWifiState;
 
 
@@ -818,13 +820,23 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 initViewPagerListener();
             }
 
+            if (!mIsVisibleToUser) {
+                return;
+            }
             if (index == 1) {
+                if (playerView.detailIsLoad) {
+                    tabOneFrist = false;
+                }
                 if (!isVisibleNoWifiView(getActivity())) {
                     if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
                         setWifiVisible(true);
                         addPlayView(currentIndex);
                     } else {
-                        playerView.mSuperPlayer.resume();
+                        if (tabOneFrist) {
+                            playerView.mSuperPlayer.reStart(tabOneFrist);
+                        } else {
+                            playerView.mSuperPlayer.resume();
+                        }
                     }
                 } else {
                     if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
@@ -832,12 +844,21 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     } else {
                         playerView.mSuperPlayer.resume();
                     }
+                    setWifiVisible(false);
                 }
+                wdcsHomeTabIndex = index;
             } else {
-                playerView.mSuperPlayer.pause();
-                if (mIsVisibleToUser) {
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.LOADING
+                        || playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                    reset();
+                } else {
+                    playerView.mSuperPlayer.pause();
+                }
+
+                if (wdcsHomeTabIndex == 1) {
                     finderPoint();
                 }
+                wdcsHomeTabIndex = index;
             }
         }
     }
@@ -2594,7 +2615,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             playerView.mSuperPlayer.resume();
                         } else {
                             if (!isFirst) {
-                                playerView.mSuperPlayer.reStart();
+                                playerView.mSuperPlayer.reStart(tabOneFrist);
                             }
                         }
                     }
@@ -2603,7 +2624,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         playerView.mSuperPlayer.resume();
                     } else {
                         if (!isFirst) {
-                            playerView.mSuperPlayer.reStart();
+                            playerView.mSuperPlayer.reStart(tabOneFrist);
                         }
                     }
                 }
@@ -2703,14 +2724,18 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
-
-        playerView.mSuperPlayer.pause();
-        isPause = true;
-        playerView.mOrientationHelper.disable();
-        if (null == mDataDTO) {
-            return;
+        if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
+            playerView.mSuperPlayer.pause();
+            isPause = true;
+            playerView.mOrientationHelper.disable();
+            if (null == mDataDTO) {
+                return;
+            }
+            if (wdcsHomeTabIndex == 1) {
+                finderPoint();
+            }
         }
-        finderPoint();
+
     }
 
     /**

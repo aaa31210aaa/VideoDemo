@@ -498,6 +498,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
 //                        "", "", "", "", Constants.CONTENT_TYPE, mWindowPlayer.getDataDTO().getIssueTimeStamp());
 //                Log.e("埋点", "埋点：视频开始播放---" + jsonString);
 //            }
+            Log.e("playWithModel", "视频playWithModel走进来了");
             mSuperPlayer.play(model);
         }
     }

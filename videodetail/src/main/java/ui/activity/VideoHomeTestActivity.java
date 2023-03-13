@@ -58,7 +58,7 @@ public class VideoHomeTestActivity extends AppCompatActivity {
     private void initTab() {
         testTab = findViewById(R.id.test_tab);
         testVp = findViewById(R.id.test_vp);
-        testVp.setOffscreenPageLimit(1);
+        testVp.setOffscreenPageLimit(3);
         if (null == testViewPagerAdapter) {
             testViewPagerAdapter = new TestViewPagerAdapter(getSupportFragmentManager());
         }

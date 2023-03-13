@@ -561,8 +561,6 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             } else {
                 ret = mVodPlayer.startPlay(url); //开始播放视频
             }
-            superPlayerView.detailIsLoad = false;
-            superPlayerView.homeVideoIsLoad = false;
             if (ret == 0) {
                 updatePlayerState(SuperPlayerDef.PlayerState.LOADING);
             }
@@ -819,6 +817,16 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
             superPlayerView.buriedPointModel.setXksh_renew("true");
             playVodURL(superPlayerView.mCurrentPlayVideoURL);
         }
+    }
+
+    @Override
+    public void reStart(boolean isFirst) {
+        //埋点  视频-开始播放  重播
+        if (!isFirst) {
+            superPlayerView.buriedPointModel.setIs_renew("true");
+            superPlayerView.buriedPointModel.setXksh_renew("true");
+        }
+        playVodURL(superPlayerView.mCurrentPlayVideoURL);
     }
 
     @Override

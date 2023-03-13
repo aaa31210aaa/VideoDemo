@@ -144,6 +144,7 @@ import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.activity.VideoHomeActivity.isPause;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
+import static ui.fragment.VideoHomeFragment.tabOneFrist;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailFragment extends Fragment implements View.OnClickListener {
@@ -273,6 +274,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     public String videoLx; //当前视频的类型
     private String requestTag;
     private String requestId;
+    public static int wdcsHomeTabIndex = 0;
 
     public VideoDetailFragment() {
     }
@@ -864,14 +866,23 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 initViewPagerListener();
             }
 
-            Log.e("播放状态：", playerView.mSuperPlayer.getPlayerState() + "");
+            if (!videoFragmentIsVisibleToUser) {
+                return;
+            }
             if (index == 1) {
+                if (playerView.detailIsLoad) {
+                    tabOneFrist = false;
+                }
                 if (!isVisibleNoWifiView(getActivity())) {
                     if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
                         setWifiVisible(true);
                         addPlayView(currentIndex);
                     } else {
-                        playerView.mSuperPlayer.resume();
+                        if (tabOneFrist) {
+                            playerView.mSuperPlayer.reStart(tabOneFrist);
+                        } else {
+                            playerView.mSuperPlayer.resume();
+                        }
                     }
                 } else {
                     if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
@@ -881,11 +892,20 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     }
                     setWifiVisible(false);
                 }
+                wdcsHomeTabIndex = index;
             } else {
-                playerView.mSuperPlayer.pause();
-                if (videoFragmentIsVisibleToUser) {
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.LOADING
+                        || playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
+                    Log.e("setVideoDetail", "走了reset");
+                } else {
+                    Log.e("setVideoDetail", "走了pause");
+                    playerView.mSuperPlayer.pause();
+                }
+
+                if (wdcsHomeTabIndex == 1) {
                     finderPoint();
                 }
+                wdcsHomeTabIndex = index;
             }
         }
     }
@@ -2750,14 +2770,14 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                         if (playerView.homeVideoIsLoad) {
                             playerView.mSuperPlayer.resume();
                         } else {
-                            playerView.mSuperPlayer.reStart();
+                            playerView.mSuperPlayer.reStart(tabOneFrist);
                         }
                     }
                 } else {
                     if (playerView.homeVideoIsLoad) {
                         playerView.mSuperPlayer.resume();
                     } else {
-                        playerView.mSuperPlayer.reStart();
+                        playerView.mSuperPlayer.reStart(tabOneFrist);
                     }
                 }
             }
@@ -2790,13 +2810,22 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         if (!videoFragmentIsVisibleToUser) {
             return;
         }
-        playerView.mSuperPlayer.pause();
-        isPause = true;
-        playerView.mOrientationHelper.disable();
-        if (null == mDataDTO) {
-            return;
+        if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
+            playerView.mSuperPlayer.pause();
+            isPause = true;
+            playerView.mOrientationHelper.disable();
+
+            if (null == mDataDTO) {
+                return;
+            }
+            if (wdcsHomeTabIndex == 1) {
+                finderPoint();
+                Log.e("videoFra_onPause","进行了埋点");
+            }
         }
-        finderPoint();
+
+
+
 //        if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
 //            if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
 //
