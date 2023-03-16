@@ -848,10 +848,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
                 wdcsHomeTabIndex = index;
             } else {
-                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.LOADING
-                        || playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
-                    reset();
-                } else {
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
                     playerView.mSuperPlayer.pause();
                 }
 

@@ -894,11 +894,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
                 wdcsHomeTabIndex = index;
             } else {
-                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.LOADING
-                        || playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
-                    Log.e("setVideoDetail", "走了reset");
-                } else {
-                    Log.e("setVideoDetail", "走了pause");
+                if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
                     playerView.mSuperPlayer.pause();
                 }
 
