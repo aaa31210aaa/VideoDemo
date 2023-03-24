@@ -135,4 +135,7 @@ public class Constants {
     public static final String CONTENT_VIDEO_PLAY = "content_video_play";  //视频开始播放
     public static final String CONTENT_VIDEO_DURATION = "content_video_duration"; //视频播放时长
     public static final String CONTENT_COMMENT = "content_comment"; //评论
+
+    public static boolean TABONEFRIST = true;
+    public static boolean ISPAUSE;
 }

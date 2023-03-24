@@ -9,6 +9,7 @@ import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.MODULE_SOURCE;
+import static com.wdcs.constants.Constants.TABONEFRIST;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -116,7 +117,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private RelativeLayout topZzc;
     private int wdcsTabIndex;
     private boolean isFrist = true;
-    public static boolean tabOneFrist = true;
+//    public static boolean tabOneFrist = true;
 
     public VideoHomeFragment() {
 
@@ -698,7 +699,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                                 } else {
                                     event = Constants.CMS_VIDEO_PLAY_AUTO;
                                 }
-                                if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
+                                if (null != videoDetailFragment.mDataDTO && !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
                                     uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
                                 }
 
@@ -722,7 +723,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             public void TabAutoPlayOverCallBack() {
                 if (!TabHomeIsPause && null != playerView) {
                     Log.e("yqh_yqh", "重播地址：" + playerView.mCurrentPlayVideoURL);
-                    playerView.mSuperPlayer.reStart(tabOneFrist);
+                    playerView.mSuperPlayer.reStart(TABONEFRIST);
                 }
             }
         });

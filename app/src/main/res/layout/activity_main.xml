@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:background="@color/video_c9"
         android:padding="50dp"
-        android:text="视频详情页面" />
+        android:text="跳转视频主页" />
 
     <TextView
         android:id="@+id/set_code"
@@ -56,7 +56,7 @@
         android:layout_marginTop="20dp"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
-        android:text="分享四要素"
+        android:text="跳转视频详情页"
         android:textColor="@color/video_white"
         android:textColorHint="@color/video_white">
 

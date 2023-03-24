@@ -75,38 +75,43 @@ public class ViewPagerLayoutManager extends LinearLayoutManager {
      */
     @Override
     public void onScrollStateChanged(int state) {
-        switch (state) {
-            case RecyclerView.SCROLL_STATE_IDLE:
-                View viewIdle = mPagerSnapHelper.findSnapView(this);
-                if (null == viewIdle) {
-                    return;
-                }
-                int positionIdle = getPosition(viewIdle);
-                if (currentPageIndex == positionIdle) {
-                    return;
-                } else {
-                    currentPageIndex = positionIdle;
-                }
-                if (getItemCount() > 0) {
-                    if (mOnViewPagerListener != null && getChildCount() == 1) {
-                        mOnViewPagerListener.onPageSelected(positionIdle, positionIdle == getItemCount() - 1);
+        try {
+            switch (state) {
+                case RecyclerView.SCROLL_STATE_IDLE:
+                    View viewIdle = mPagerSnapHelper.findSnapView(this);
+                    if (null == viewIdle) {
+                        return;
                     }
-                }
-                break;
-            case RecyclerView.SCROLL_STATE_DRAGGING:
-                View viewDrag = mPagerSnapHelper.findSnapView(this);
-                if (null == viewDrag) {
-                    return;
-                }
-                int positionDrag = getPosition(viewDrag);
-                break;
-            case RecyclerView.SCROLL_STATE_SETTLING:
-                View viewSettling = mPagerSnapHelper.findSnapView(this);
-                if (null == viewSettling) {
-                    return;
-                }
-                int positionSettling = getPosition(viewSettling);
-                break;
+                    int positionIdle = getPosition(viewIdle);
+                    if (currentPageIndex == positionIdle) {
+                        return;
+                    } else {
+                        currentPageIndex = positionIdle;
+                    }
+                    if (getItemCount() > 0) {
+                        Log.e("ViewPagerLayoutManager", "getChildCount：" + getChildCount());
+                        if (mOnViewPagerListener != null) {
+                            mOnViewPagerListener.onPageSelected(positionIdle, positionIdle == getItemCount() - 1);
+                        }
+                    }
+                    break;
+                case RecyclerView.SCROLL_STATE_DRAGGING:
+                    View viewDrag = mPagerSnapHelper.findSnapView(this);
+                    if (null == viewDrag) {
+                        return;
+                    }
+                    int positionDrag = getPosition(viewDrag);
+                    break;
+                case RecyclerView.SCROLL_STATE_SETTLING:
+                    View viewSettling = mPagerSnapHelper.findSnapView(this);
+                    if (null == viewSettling) {
+                        return;
+                    }
+                    int positionSettling = getPosition(viewSettling);
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

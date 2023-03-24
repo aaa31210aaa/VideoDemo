@@ -125,21 +125,24 @@ import static com.wdcs.constants.Constants.CATEGORYNAME;
 import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
 import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.FROMXKSHTAB;
+import static com.wdcs.constants.Constants.ISPAUSE;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.REQUESTID;
 import static com.wdcs.constants.Constants.TABNAME;
+import static com.wdcs.constants.Constants.TABONEFRIST;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
-import static ui.activity.VideoHomeActivity.isPause;
+//import static ui.activity.VideoHomeActivity.isPause;
+//import static ui.activity.VideoHomeActivity.isPause;
 import static ui.activity.VideoHomeActivity.lsDuration;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static ui.fragment.VideoDetailFragment.wdcsHomeTabIndex;
 import static ui.fragment.VideoHomeFragment.TabHomeIsPause;
-import static ui.fragment.VideoHomeFragment.tabOneFrist;
+//import static ui.fragment.VideoHomeFragment.tabOneFrist;
 import static utils.NetworkUtil.setDataWifiState;
 
 
@@ -824,16 +827,16 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 return;
             }
             if (index == 1) {
-                if (playerView.detailIsLoad) {
-                    tabOneFrist = false;
-                }
+//                if (playerView.detailIsLoad) {
+//                    tabOneFrist = false;
+//                }
                 if (!isVisibleNoWifiView(getActivity())) {
                     if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.END) {
                         setWifiVisible(true);
                         addPlayView(currentIndex);
                     } else {
-                        if (tabOneFrist) {
-                            playerView.mSuperPlayer.reStart(tabOneFrist);
+                        if (TABONEFRIST) {
+                            playerView.mSuperPlayer.reStart(TABONEFRIST);
                         } else {
                             playerView.mSuperPlayer.resume();
                         }
@@ -847,6 +850,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     setWifiVisible(false);
                 }
                 wdcsHomeTabIndex = index;
+                xkshOldSystemTime = DateUtils.getTimeCurrent();
             } else {
                 if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
                     playerView.mSuperPlayer.pause();
@@ -1131,8 +1135,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             videoLx = videoType;
             if (TextUtils.equals("0", videoType)) {
                 double percent = Double.parseDouble(mDatas.get(position).getWidth()) / Double.parseDouble(mDatas.get(position).getHeight());
-                double mHeight;
-                mHeight = getResources().getDisplayMetrics().widthPixels / percent;
+                double mHeight = getResources().getDisplayMetrics().widthPixels / percent;
                 playViewParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) mHeight);
                 playViewParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
                 playViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -1231,7 +1234,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
      * 2 ：  横板视频
      */
     private String videoIsNormal(int videoWidth, int videoHeight) {
-        if (videoWidth == 0 && videoHeight == 0) {
+        if (videoWidth == 0 || videoHeight == 0) {
             return "2";
         }
         if (videoWidth > videoHeight) {
@@ -2612,7 +2615,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                             playerView.mSuperPlayer.resume();
                         } else {
                             if (!isFirst) {
-                                playerView.mSuperPlayer.reStart(tabOneFrist);
+                                playerView.mSuperPlayer.reStart(TABONEFRIST);
                             }
                         }
                     }
@@ -2621,13 +2624,13 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                         playerView.mSuperPlayer.resume();
                     } else {
                         if (!isFirst) {
-                            playerView.mSuperPlayer.reStart(tabOneFrist);
+                            playerView.mSuperPlayer.reStart(TABONEFRIST);
                         }
                     }
                 }
             }
 
-            isPause = false;
+            ISPAUSE = false;
             playerView.mOrientationHelper.enable();
             xkshOldSystemTime = DateUtils.getTimeCurrent();
             if (!TextUtils.isEmpty(myContentId)) {
@@ -2721,17 +2724,22 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         if (!mIsVisibleToUser) {
             return;
         }
+
         if (playerView.mSuperPlayer.getPlayerState() == SuperPlayerDef.PlayerState.PLAYING) {
-            playerView.mSuperPlayer.pause();
-            isPause = true;
-            playerView.mOrientationHelper.disable();
-            if (null == mDataDTO) {
-                return;
-            }
-            if (wdcsHomeTabIndex == 1) {
+            if (fromHomeTab && wdcsHomeTabIndex == 1) {
                 finderPoint();
+                Log.e("videoFra_onPause", "在首页视频tab页，进行了埋点");
+            } else if (fromHomeTab && wdcsHomeTabIndex != 1) {
+                Log.e("videoFra_onPause", "在首页其他tab页，不进行埋点");
+            } else if (!fromHomeTab) {
+                finderPoint();
+                Log.e("videoFra_onPause", "在非首页视频页，进行了埋点");
             }
         }
+
+        playerView.mSuperPlayer.pause();
+        ISPAUSE = true;
+        playerView.mOrientationHelper.disable();
 
     }
 
@@ -2746,7 +2754,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                  */
                 String event = Constants.CMS_VIDEO_OVER_AUTO;
                 long evePlayTime = Math.abs(mProgress - lsDuration);
-                float currentPercent = (evePlayTime / mDuration);
+                double currentPercent = 0;
+                if (mDuration != 0) {
+                    //这里算拖动到哪里  算最高的播放百分比，用来看完播率
+                    currentPercent = (mProgress * 1.0 / mDuration);
+                }
                 double uploadPercent = 0;
                 if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
                     //不为重播
@@ -2765,7 +2777,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 double pointPercentTwo = two.setScale(8, BigDecimal.ROUND_DOWN).doubleValue();
                 lsDuration = mProgress;
                 //上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(pointPercentTwo), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
                 Log.e("xksh_md", "埋点事件：" + event + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
             }
         } else {
@@ -2778,6 +2790,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
         } else {
             isFinish = "是";
         }
+        Log.e("xksh_md",  "播放时长:" + xkshReportTime);
         FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
     }
 

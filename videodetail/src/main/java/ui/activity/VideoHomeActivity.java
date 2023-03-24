@@ -1,6 +1,7 @@
 package ui.activity;
 
 import adpter.VideoViewPagerAdapter;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
@@ -66,6 +67,7 @@ import static com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl.readPlay
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
+import static com.wdcs.constants.Constants.ISPAUSE;
 import static com.wdcs.constants.Constants.TRACKINGUPLOAD;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -99,7 +101,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
     private NetBroadcastReceiver netWorkStateReceiver;
     private String categoryName;
     private String requestId;
-    public static boolean isPause;
+    //    public static boolean isPause;
     private List<CategoryModel.DataDTO> categoryModelList = new ArrayList<>();
     private boolean toFirst = true;
     public String module_source;
@@ -577,7 +579,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                         if (xkshFragment.mIsVisibleToUser) {
                             String isRenew = "";
                             if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-    //                    //不为重播
+                                //                    //不为重播
                                 xkshFragment.xkshOldSystemTime = DateUtils.getTimeCurrent();
                                 String event;
                                 if (TextUtils.equals(xkshFragment.mDataDTO.getIsAutoReportEvent(), "1")) {
@@ -594,11 +596,10 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                             }
                             //Finder 埋点 视频开始播放
                             FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_VIDEO_PLAY, isRenew, xkshFragment.mDataDTO, module_source);
-
                         } else if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                             String isRenew = "";
                             if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-    //                    //不为重播
+                                //                    //不为重播
                                 videoDetailFragment.videoOldSystemTime = DateUtils.getTimeCurrent();
 
                                 String event;
@@ -607,7 +608,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                                 } else {
                                     event = Constants.CMS_VIDEO_PLAY_AUTO;
                                 }
-                                if (null != videoDetailFragment.mDataDTO || !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
+                                if (null != videoDetailFragment.mDataDTO && !TextUtils.isEmpty(videoDetailFragment.mDataDTO.getVolcCategory())) {
                                     uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(VideoHomeActivity.this, videoDetailFragment.mDataDTO.getThirdPartyId(), "", "", event, videoDetailFragment.mDataDTO.getVolcCategory(), videoDetailFragment.mDataDTO.getRequestId()), event);
                                 }
 
@@ -629,7 +630,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
         SuperPlayerImpl.setAutoPlayOverCallBack(new SuperPlayerImpl.AutoPlayOverCallBack() {
             @Override
             public void AutoPlayOverCallBack() {
-                if (!isPause && null != playerView) {
+                if (!ISPAUSE && null != playerView) {
                     Log.e("yqh_yqh", "重播地址：" + playerView.mCurrentPlayVideoURL);
                     playerView.mSuperPlayer.reStart();
                 }
@@ -865,10 +866,11 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
      *
      * @param jsonObject
      */
-    public static void uploadBuriedPoint(JSONObject jsonObject, final String trackingType) {
+    public static void uploadBuriedPoint(final JSONObject jsonObject, final String trackingType) {
         if (null == jsonObject) {
             return;
         }
+        Log.e("上报埋点", "上报事件" + trackingType + "--上报内容" + jsonObject);
         OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().trackingUpload())
                 .tag(TRACKINGUPLOAD)
                 .headers("token", PersonInfoManager.getInstance().getTransformationToken())
@@ -876,7 +878,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 .execute(new JsonCallback<TrackingUploadModel>() {
                     @Override
                     public void onSuccess(Response<TrackingUploadModel> response) {
-                        Log.e("上报埋点", "上报事件" + trackingType);
+//                        Log.e("上报埋点", "上报事件" + trackingType + "--上报内容" + jsonObject);
                     }
 
                     @Override
@@ -975,7 +977,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                 });
     }
 
-    private void destroy()  {
+    private void destroy() {
         if (isDestroyed) {
             return;
         }

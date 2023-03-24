@@ -43,6 +43,8 @@ import java.util.List;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerDef.PlayerState.PLAYING;
 import static com.tencent.liteav.demo.superplayer.SuperPlayerView.instance;
 import static com.tencent.rtmp.TXLiveConstants.PLAY_EVT_PLAY_PROGRESS;
+import static com.wdcs.constants.Constants.ISPAUSE;
+import static com.wdcs.constants.Constants.TABONEFRIST;
 
 public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLivePlayListener {
 
@@ -240,6 +242,9 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         }
         switch (event) {
             case TXLiveConstants.PLAY_EVT_VOD_PLAY_PREPARED://视频播放开始
+                if (ISPAUSE) {
+                    pause();
+                }
                 updatePlayerState(PLAYING);
                 if (mIsMultiBitrateStream) {
                     List<TXBitrateItem> bitrateItems = mVodPlayer.getSupportedBitrates();
@@ -280,6 +285,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 if (null != superPlayerView) {
                     superPlayerView.detailIsLoad = true;
                     superPlayerView.homeVideoIsLoad = true;
+                    TABONEFRIST = false;
                 }
 
                 if (mChangeHWAcceleration) { //切换软硬解码器后，重新seek位置
