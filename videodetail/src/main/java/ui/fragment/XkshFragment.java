@@ -143,6 +143,7 @@ import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 import static ui.fragment.VideoDetailFragment.wdcsHomeTabIndex;
 import static ui.fragment.VideoHomeFragment.TabHomeIsPause;
 //import static ui.fragment.VideoHomeFragment.tabOneFrist;
+import static ui.fragment.VideoHomeFragment.homeTabMaxPercent;
 import static utils.NetworkUtil.setDataWifiState;
 
 
@@ -691,37 +692,6 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
 
                     playerView.mWindowPlayer.hide();
 
-//                if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-//                    if (mDuration != 0 && mProgress != 0) {
-//                        //上报埋点
-//                        long evePlayTime = Math.abs(mProgress - lsDuration);
-//                        double currentPercent = (evePlayTime * 1.0 / mDuration);
-//                        double uploadPercent = 0;
-//                        if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-//                            //不为重播
-//                            if (currentPercent > maxPercent) {
-//                                uploadPercent = currentPercent;
-//                                maxPercent = currentPercent;
-//                            } else {
-//                                uploadPercent = maxPercent;
-//                            }
-//                        } else {
-//                            uploadPercent = 1;
-//                        }
-//                        xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
-//                        BigDecimal two = new BigDecimal(uploadPercent);
-//                        double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-//                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), Constants.CMS_VIDEO_OVER_AUTO, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), Constants.CMS_VIDEO_OVER_AUTO);
-//                        Log.e("xksh_md", "埋点事件：" + Constants.CMS_VIDEO_OVER_AUTO + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
-//                    }
-//                }
-//                String isFinish;
-//                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                    isFinish = "否";
-//                } else {
-//                    isFinish = "是";
-//                }
-//                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, xkshReportTime, isFinish);
                     finderPoint();
 
                     mDataDTO = mDatas.get(position);
@@ -750,7 +720,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     //滑动下一条或者上一条视频
                     playerView.mWindowPlayer.setRecordDuration(0);
                     lsDuration = 0;
-                    maxPercent = 0;
+                    if (fromHomeTab) {
+                        homeTabMaxPercent = 0;
+                    } else {
+                        maxPercent = 0;
+                    }
                     playerView.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                     playUrl = mDatas.get(position).getPlayUrl();
                     playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
@@ -961,7 +935,11 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
             }
         }
         lsDuration = 0;
-        maxPercent = 0;
+        if (fromHomeTab) {
+            homeTabMaxPercent = 0;
+        } else {
+            maxPercent = 0;
+        }
         //重置重播标识
         if (null != playerView && null != playerView.buriedPointModel) {
             playerView.buriedPointModel.setXksh_renew("false");
@@ -2749,36 +2727,56 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
     public void finderPoint() {
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
             if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
+
                 /**
                  * 上报内容埋点 视频播放时长
                  */
-                String event = Constants.CMS_VIDEO_OVER_AUTO;
-                long evePlayTime = Math.abs(mProgress - lsDuration);
+//                long evePlayTime = Math.abs(mProgress - lsDuration);
                 double currentPercent = 0;
+                xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
                 if (mDuration != 0) {
                     //这里算拖动到哪里  算最高的播放百分比，用来看完播率
-                    currentPercent = (mProgress * 1.0 / mDuration);
+                    if (mProgress == 0) {
+                        currentPercent = (xkshReportTime * 1.0 / (mDuration * 1000.0));
+                    } else {
+                        currentPercent = playerView.mSuperPlayer.getVodPlay().getCurrentPlaybackTime() * 1.0 / mDuration;
+                    }
+
                 }
                 double uploadPercent = 0;
-                if (null == playerView.buriedPointModel.getXksh_renew() || TextUtils.equals("false", playerView.buriedPointModel.getXksh_renew())) {
-                    //不为重播
-                    if (currentPercent > maxPercent) {
-                        uploadPercent = currentPercent;
-                        maxPercent = currentPercent;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
+                    if (fromHomeTab) {
+                        if (currentPercent > homeTabMaxPercent) {
+                            uploadPercent = currentPercent;
+                            homeTabMaxPercent = currentPercent;
+                        } else {
+                            uploadPercent = homeTabMaxPercent;
+                        }
                     } else {
-                        uploadPercent = maxPercent;
+                        if (currentPercent > maxPercent) {
+                            uploadPercent = currentPercent;
+                            maxPercent = currentPercent;
+                        } else {
+                            uploadPercent = maxPercent;
+                        }
                     }
+
                 } else {
                     uploadPercent = 1;
                 }
 
-                xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;
-                BigDecimal two = new BigDecimal(uploadPercent);
-                double pointPercentTwo = two.setScale(8, BigDecimal.ROUND_DOWN).doubleValue();
+                String pointPercentTwo = NumberFormatTool.division(uploadPercent);
                 lsDuration = mProgress;
+                String event;
+                if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
+                    event = Constants.CMS_VIDEO_OVER;
+                } else {
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                }
                 //上报埋点
-                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), String.valueOf(pointPercentTwo), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-                Log.e("xksh_md", "埋点事件：" + event + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(xkshReportTime), pointPercentTwo, event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                Log.e("video_md", "埋点事件：" + event + "播放时长:" + xkshReportTime + "---" + "播放百分比:" + pointPercentTwo);
             }
         } else {
             xkshReportTime = DateUtils.getTimeCurrent() - xkshOldSystemTime;

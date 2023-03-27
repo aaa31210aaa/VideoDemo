@@ -147,6 +147,7 @@ import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
 import static ui.activity.VideoHomeActivity.maxPercent;
 import static ui.activity.VideoHomeActivity.uploadBuriedPoint;
 //import static ui.fragment.VideoHomeFragment.tabOneFrist;
+import static ui.fragment.VideoHomeFragment.homeTabMaxPercent;
 import static utils.NetworkUtil.setDataWifiState;
 
 public class VideoDetailFragment extends Fragment implements View.OnClickListener {
@@ -730,45 +731,6 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //              ContentBuriedPointManager.setContentBuriedPoint();
                     playerView.mWindowPlayer.hide();
                     finderPoint();
-//                String isFinish;
-//                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                    isFinish = "否";
-//                } else {
-//                    isFinish = "是";
-//                }
-//
-//                if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-//                    if (mDuration != 0 && mProgress != 0) {
-//                        //上报埋点
-//                        long evePlayTime = Math.abs(mProgress - lsDuration);
-//                        double currentPercent = (evePlayTime * 1.0 / mDuration);
-//                        double uploadPercent = 0;
-//                        if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-////                      //不为重播
-//                            if (currentPercent > maxPercent) {
-//                                uploadPercent = currentPercent;
-//                                maxPercent = currentPercent;
-//                            } else {
-//                                uploadPercent = maxPercent;
-//                            }
-//                        } else {
-//                            uploadPercent = 1;
-//                        }
-//                        videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
-//                        BigDecimal two = new BigDecimal(uploadPercent);
-//                        double pointPercentTwo = two.setScale(2, BigDecimal.ROUND_DOWN).doubleValue();
-//                        String event;
-//                        if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
-//                            event = Constants.CMS_VIDEO_OVER;
-//                        } else {
-//                            event = Constants.CMS_VIDEO_OVER_AUTO;
-//                        }
-//                        uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(Math.floor(pointPercentTwo * 100)), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-////                        DebugLogUtils.DebugLog("埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
-//                        Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
-//                    }
-//                }
-//                FinderBuriedPointManager.setFinderVideo(Constants.CONTENT_VIDEO_DURATION, "", mDataDTO, videoReportTime, isFinish);
 
                     mDataDTO = mDatas.get(position);
 
@@ -795,7 +757,12 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                     //滑动下一条或者上一条视频
                     playerView.mWindowPlayer.setRecordDuration(0);
                     lsDuration = 0;
-                    maxPercent = 0;
+                    if (fromHomeTab) {
+                        homeTabMaxPercent = 0;
+                    } else {
+                        maxPercent = 0;
+                    }
+
                     playerView.mCurrentPlayVideoURL = mDatas.get(position).getPlayUrl();
                     playUrl = mDatas.get(position).getPlayUrl();
                     playerView.mWindowPlayer.setDataDTO(mDataDTO, mDatas.get(currentIndex));
@@ -1024,7 +991,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
             }
         }
         lsDuration = 0;
-        maxPercent = 0;
+        if (fromHomeTab) {
+            homeTabMaxPercent = 0;
+        } else {
+            maxPercent = 0;
+        }
         //重置重播标识
         if (null != playerView && null != playerView.buriedPointModel) {
             playerView.buriedPointModel.setIs_renew("false");
@@ -2829,44 +2800,59 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     }
 
     public void finderPoint() {
+        playerView.mSuperPlayer.pause();
         if (!TextUtils.isEmpty(mDataDTO.getVolcCategory())) {
-        if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
+            if (playerView.mWindowPlayer.mCurrentPlayState != SuperPlayerDef.PlayerState.END) {
 
-            /**
-             * 上报内容埋点 视频播放时长
-             */
-            long evePlayTime = Math.abs(mProgress - lsDuration);
-            double currentPercent = 0;
-            if (mDuration != 0) {
-                //这里算拖动到哪里  算最高的播放百分比，用来看完播率
-                currentPercent = (mProgress * 1.0 / mDuration);
-            }
-            double uploadPercent = 0;
-            if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
-//                      //不为重播
-                if (currentPercent > maxPercent) {
-                    uploadPercent = currentPercent;
-                    maxPercent = currentPercent;
-                } else {
-                    uploadPercent = maxPercent;
+                /**
+                 * 上报内容埋点 视频播放时长
+                 */
+                double currentPercent = 0;
+                videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
+                if (mDuration != 0) {
+                    //这里算拖动到哪里  算最高的播放百分比，用来看完播率
+                    if (mProgress == 0) {
+                        currentPercent = (videoReportTime * 1.0 / (mDuration * 1000.0));
+                    } else {
+                        currentPercent = playerView.mSuperPlayer.getVodPlay().getCurrentPlaybackTime() * 1.0 / mDuration;
+                    }
+
                 }
-            } else {
-                uploadPercent = 1;
+                double uploadPercent = 0;
+                if (null == playerView.buriedPointModel.getIs_renew() || TextUtils.equals("false", playerView.buriedPointModel.getIs_renew())) {
+//                      //不为重播
+                    if (fromHomeTab) {
+                        if (currentPercent > homeTabMaxPercent) {
+                            uploadPercent = currentPercent;
+                            homeTabMaxPercent = currentPercent;
+                        } else {
+                            uploadPercent = homeTabMaxPercent;
+                        }
+                    } else {
+                        if (currentPercent > maxPercent) {
+                            uploadPercent = currentPercent;
+                            maxPercent = currentPercent;
+                        } else {
+                            uploadPercent = maxPercent;
+                        }
+                    }
+
+                } else {
+                    uploadPercent = 1;
+                }
+
+                String pointPercentTwo = NumberFormatTool.division(uploadPercent);
+                lsDuration = mProgress;
+                String event;
+                if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
+                    event = Constants.CMS_VIDEO_OVER;
+                } else {
+                    event = Constants.CMS_VIDEO_OVER_AUTO;
+                }
+                //上报埋点
+                uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), pointPercentTwo, event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
+                Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
             }
-            videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
-            BigDecimal two = new BigDecimal(uploadPercent);
-            double pointPercentTwo = two.setScale(8, BigDecimal.ROUND_DOWN).doubleValue();
-            lsDuration = mProgress;
-            String event;
-            if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
-                event = Constants.CMS_VIDEO_OVER;
-            } else {
-                event = Constants.CMS_VIDEO_OVER_AUTO;
-            }
-            //上报埋点
-            uploadBuriedPoint(ContentBuriedPointManager.setContentBuriedPoint(getActivity(), mDataDTO.getThirdPartyId(), String.valueOf(videoReportTime), String.valueOf(pointPercentTwo), event, mDataDTO.getVolcCategory(), mDataDTO.getRequestId()), event);
-            Log.e("video_md", "埋点事件：" + event + "播放时长:" + videoReportTime + "---" + "播放百分比:" + pointPercentTwo);
-        }
         } else {
             videoReportTime = DateUtils.getTimeCurrent() - videoOldSystemTime;
         }

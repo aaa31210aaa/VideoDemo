@@ -118,6 +118,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     private int wdcsTabIndex;
     private boolean isFrist = true;
 //    public static boolean tabOneFrist = true;
+    public static double homeTabMaxPercent = 0;
 
     public VideoHomeFragment() {
 
@@ -1084,7 +1085,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                 playerView = null;
             }
             OkGo.getInstance().cancelAll();
-            maxPercent = 0;
+            homeTabMaxPercent = 0;
             lsDuration = 0;
             getActivity().unregisterReceiver(netWorkStateReceiver);
             FinderBuriedPointManager.setFinderClick("页面关闭");
