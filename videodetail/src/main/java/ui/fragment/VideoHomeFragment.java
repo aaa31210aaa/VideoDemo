@@ -102,8 +102,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
     public String contentId;
     private int toCurrentTab = 1;
     private String lsCotentnId;
-    public static double maxPercent = 0; //记录最大百分比
-    public static long lsDuration = 0; //每一次上报临时保存的播放时长
     private NetBroadcastReceiver netWorkStateReceiver;
     private String categoryName;
     public static boolean TabHomeIsPause;
@@ -265,9 +263,8 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                                 playerView.mFullScreenPlayer.toggleView(playerView.mFullScreenPlayer.mLayoutReplay, false);
                                 float percentage = ((float) curProgress) / maxProgress;
                                 long duration = (long) (percentage * mDuration);
-                                lsDuration = duration;
-                                if (percentage > maxPercent) {
-                                    maxPercent = percentage;
+                                if (percentage > homeTabMaxPercent) {
+                                    homeTabMaxPercent = percentage;
                                 }
 
                                 int position = (int) (mDuration * percentage);
@@ -340,9 +337,8 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                                 playerView.mWindowPlayer.toggleView(playerView.mWindowPlayer.mLayoutReplay, false);
                                 float percentage = ((float) curProgress) / maxProgress;
                                 long duration = (long) (percentage * mDuration);
-                                lsDuration = duration;
-                                if (percentage > maxPercent) {
-                                    maxPercent = percentage;
+                                if (percentage > homeTabMaxPercent) {
+                                    homeTabMaxPercent = percentage;
                                 }
                                 int position = (int) (mDuration * percentage);
 
@@ -1086,7 +1082,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             }
             OkGo.getInstance().cancelAll();
             homeTabMaxPercent = 0;
-            lsDuration = 0;
             getActivity().unregisterReceiver(netWorkStateReceiver);
             FinderBuriedPointManager.setFinderClick("页面关闭");
             OkGo.getInstance().cancelTag(VIDEOTAG);

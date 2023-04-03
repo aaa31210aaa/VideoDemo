@@ -719,7 +719,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                     }
                     //滑动下一条或者上一条视频
                     playerView.mWindowPlayer.setRecordDuration(0);
-                    lsDuration = 0;
+//                    lsDuration = 0;
                     if (fromHomeTab) {
                         homeTabMaxPercent = 0;
                     } else {
@@ -934,7 +934,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 rlLp.removeView(playerView);
             }
         }
-        lsDuration = 0;
+//        lsDuration = 0;
         if (fromHomeTab) {
             homeTabMaxPercent = 0;
         } else {
@@ -2767,7 +2767,7 @@ public class XkshFragment extends Fragment implements View.OnClickListener {
                 }
 
                 String pointPercentTwo = NumberFormatTool.division(uploadPercent);
-                lsDuration = mProgress;
+//                lsDuration = mProgress;
                 String event;
                 if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
                     event = Constants.CMS_VIDEO_OVER;

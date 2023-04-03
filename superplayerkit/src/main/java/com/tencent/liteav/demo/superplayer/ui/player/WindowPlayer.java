@@ -1,10 +1,15 @@
 package com.tencent.liteav.demo.superplayer.ui.player;
 
+import static java.lang.Thread.sleep;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -15,6 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
@@ -99,6 +106,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private NoScrollViewPager mViewpager;
     private boolean mIsFragmentShow;
     private RelativeLayout windowPlayerRoot;
+    private Handler handler;
 
     public WindowPlayer(Context context) {
         super(context);
@@ -296,21 +304,27 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
             }
         });
 
+        handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void dispatchMessage(@NonNull Message msg) {
+                super.dispatchMessage(msg);
+                switch (msg.what) {
+                    case 1:
+                        try {
+                            mSeekBarProgress.setAlpha(0);
+                            xSeekBarProgress.setAlpha(1);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                }
+            }
+        };
+
         mSeekBarProgress.setUpEventListener(new PointSeekBar.UpEventListener() {
             @Override
             public void upEvent() {
-                new Thread(){
-                    @Override
-                    public void run() {
-                        try {
-                            sleep(300);
-                            mSeekBarProgress.setAlpha(0);
-                            xSeekBarProgress.setAlpha(1);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }.start();
+                handler.sendEmptyMessageDelayed(1, 300);
             }
         });
 

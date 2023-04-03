@@ -240,7 +240,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
     private boolean isFollow; //是否关注
     public double pointPercent;// 每一次记录的节点播放百分比
     //    private long everyOneDuration; //每一次记录需要上报的播放时长 用来分段上报埋点
-    private long lsDuration = 0; //每一次上报临时保存的播放时长
+//    private long lsDuration = 0; //每一次上报临时保存的播放时长
     private boolean isCheckState; //是否请求了检查点赞收藏状态的接口
     private TextView zxpl;
     private DataDTO negativeScreenDto;
@@ -756,7 +756,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
                     //滑动下一条或者上一条视频
                     playerView.mWindowPlayer.setRecordDuration(0);
-                    lsDuration = 0;
+//                    lsDuration = 0;
                     if (fromHomeTab) {
                         homeTabMaxPercent = 0;
                     } else {
@@ -990,7 +990,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 rlLp.removeView(playerView);
             }
         }
-        lsDuration = 0;
+//        lsDuration = 0;
         if (fromHomeTab) {
             homeTabMaxPercent = 0;
         } else {
@@ -2842,7 +2842,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
                 }
 
                 String pointPercentTwo = NumberFormatTool.division(uploadPercent);
-                lsDuration = mProgress;
+//                lsDuration = mProgress;
                 String event;
                 if (TextUtils.equals(mDataDTO.getIsAutoReportEvent(), "1")) {
                     event = Constants.CMS_VIDEO_OVER;
