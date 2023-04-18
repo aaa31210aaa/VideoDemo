@@ -56,15 +56,15 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
 
     // UI控件
     private LinearLayout mLayoutTop;                             // 顶部标题栏布局
-    public LinearLayout mLayoutBottom;                          // 底部进度条所在布局
+    public RelativeLayout mLayoutBottom;                          // 底部进度条所在布局
     public ImageView mIvPause;                               // 暂停播放按钮
     public ImageView mIvFullScreen;                          // 全屏按钮
     private TextView mTvTitle;                               // 视频名称文本
     private TextView mTvBackToLive;                          // 返回直播文本
     private ImageView mBackground;                            // 背景
     private ImageView mIvWatermark;                           // 水印
-    private TextView mTvCurrent;                             // 当前进度文本
-    private TextView mTvDuration;                            // 总时长文本
+    public TextView mTvCurrent;                             // 当前进度文本
+    public TextView mTvDuration;                            // 总时长文本
     public PointSeekBar mSeekBarProgress;                       // 播放进度条
     public PointSeekBar xSeekBarProgress;                       //细的播放进度条
     public ProgressBar mLoadBar;
@@ -101,12 +101,14 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private DataDTO mPreviousDTO;
     private RecordsDTO mPreviousRecordsDTO;
     private boolean isShowSelfProgress;
-    private ImageView zdyIvPause;
+    public ImageView zdyIvPause;
     private ViewPagerLayoutManager myManager;
     private NoScrollViewPager mViewpager;
     private boolean mIsFragmentShow;
     private RelativeLayout windowPlayerRoot;
     private Handler handler;
+    public LinearLayout windowLeftIcon;
+    public LinearLayout windowRightIcon;
 
     public WindowPlayer(Context context) {
         super(context);
@@ -280,7 +282,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         LayoutInflater.from(context).inflate(R.layout.superplayer_vod_player_window, this);
         mLayoutTop = (LinearLayout) findViewById(R.id.superplayer_rl_top);
         mLayoutTop.setOnClickListener(this);
-        mLayoutBottom = (LinearLayout) findViewById(R.id.superplayer_ll_bottom);
+        mLayoutBottom =  findViewById(R.id.superplayer_ll_bottom);
         mLayoutBottom.setOnClickListener(this);
         mLayoutReplay = (LinearLayout) findViewById(R.id.superplayer_ll_replay);
         mTvTitle = (TextView) findViewById(R.id.superplayer_tv_title);
@@ -288,6 +290,8 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         zdyIvPause = findViewById(R.id.zdy_iv_pause);
         mTvCurrent = (TextView) findViewById(R.id.superplayer_tv_current);
         mTvDuration = (TextView) findViewById(R.id.superplayer_tv_duration);
+        windowLeftIcon = findViewById(R.id.window_left_icon);
+        windowRightIcon = findViewById(R.id.window_right_icon);
         mSeekBarProgress = (PointSeekBar) findViewById(R.id.superplayer_seekbar_progress_crude);
         xSeekBarProgress = findViewById(R.id.superplayer_seekbar_progress);
         mSeekBarProgress.setProgress(0);

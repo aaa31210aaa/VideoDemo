@@ -44,6 +44,7 @@
         <enum name="TOP" value="48"/>
         <enum name="BOTTOM" value="80"/>
     </attr>
+    <attr name="tl_underline_drawable" format="reference"></attr>
 
     <!-- divider -->
     <!-- 设置分割线颜色 -->
@@ -96,6 +97,7 @@
         <attr name="tl_underline_color"/>
         <attr name="tl_underline_height"/>
         <attr name="tl_underline_gravity"/>
+        <attr name="tl_underline_drawable"/>
 
         <!-- divider -->
         <attr name="tl_divider_color"/>
@@ -137,6 +139,7 @@
         <attr name="tl_underline_color"/>
         <attr name="tl_underline_height"/>
         <attr name="tl_underline_gravity"/>
+        <attr name="tl_underline_drawable"/>
 
         <!-- divider -->
         <attr name="tl_divider_color"/>

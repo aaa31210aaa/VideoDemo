@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/special_5g_share_bg"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/video_dp15"
+            android:text="分享到"
+            android:textColor="@color/video_black"></TextView>
+
+        <RelativeLayout
+            android:id="@+id/share_pop_dismiss"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="@dimen/video_dp15">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/pop_dismiss"></ImageView>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/video_dp20">
+
+        <RelativeLayout
+            android:id="@+id/share_wx_btn_rl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/share_wx_btn"
+                android:layout_width="@dimen/video_dp50"
+                android:layout_height="@dimen/video_dp50"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/share_wx_icon_white"></ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/share_wx_btn"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/video_dp5"
+                android:text="微信"
+                android:textColor="@color/video_black"></TextView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/share_circle_btn_rl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/share_circle_btn"
+                android:layout_width="@dimen/video_dp50"
+                android:layout_height="@dimen/video_dp50"
+                android:layout_centerHorizontal="true"
+                android:layout_weight="1"
+                android:src="@drawable/share_circle_icon_white"></ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/share_circle_btn"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/video_dp5"
+                android:text="微信"
+                android:textColor="@color/video_black"></TextView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/share_qq_btn_rl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/share_qq_btn"
+                android:layout_width="@dimen/video_dp50"
+                android:layout_height="@dimen/video_dp50"
+                android:layout_centerHorizontal="true"
+                android:layout_weight="1"
+                android:src="@drawable/share_qq_icon_white"></ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/share_qq_btn"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/video_dp5"
+                android:text="微信"
+                android:textColor="@color/video_black"></TextView>
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -6,7 +6,15 @@
     <dimen name="icon_height">40dp</dimen>
     <dimen name="layout_margin_left">10dp</dimen>
     <dimen name="chooseimage_heigt">160dp</dimen>
+    <dimen name="video_dp1">1dp</dimen>
+    <dimen name="video_dp2">2dp</dimen>
+    <dimen name="video_dp3">3dp</dimen>
+    <dimen name="video_dp4">4dp</dimen>
     <dimen name="video_dp5">5dp</dimen>
+    <dimen name="video_dp6">6dp</dimen>
+    <dimen name="video_dp7">7dp</dimen>
+    <dimen name="video_dp8">8dp</dimen>
+    <dimen name="video_dp9">9dp</dimen>
     <dimen name="video_dp10">10dp</dimen>
     <dimen name="video_dp15">15dp</dimen>
     <dimen name="video_dp20">20dp</dimen>

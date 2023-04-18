@@ -110,6 +110,7 @@ import adpter.CommentPopRvAdapter;
 import adpter.VideoDetailAdapter;
 import adpter.XkshVideoAdapter;
 import model.bean.ActivityRuleBean;
+import ui.activity.SpecialArea5GActivity;
 import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
@@ -544,11 +545,13 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         adapter.setCollectionListener(new VideoDetailAdapter.CollectionListener() {
             @Override
             public void collectionClick(View view, DataDTO item, ImageView collectionImage, TextView collectionNum) {
-                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                    noLoginTipsPop();
-                } else {
-                    addOrCancelFavor(myContentId, videoType, collectionImage, collectionNum);
-                }
+//                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                    noLoginTipsPop();
+//                } else {
+//                    addOrCancelFavor(myContentId, videoType, collectionImage, collectionNum);
+//                }
+                //测试
+                startActivity(new Intent(getActivity(), SpecialArea5GActivity.class));
             }
         });
 

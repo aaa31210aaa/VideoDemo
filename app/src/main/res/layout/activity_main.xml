@@ -1,33 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/video_c9"
-        android:padding="50dp"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="@drawable/shape_input_bg"
+        android:gravity="center"
+        android:textColor="@color/video_white"
+        android:textColorHint="@color/video_white"
         android:text="跳转视频主页" />
 
     <TextView
         android:id="@+id/set_code"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_toRightOf="@+id/tv"
         android:background="@drawable/shape_input_bg"
-        android:padding="30dp"
-        android:text="获取token值"></TextView>
+        android:gravity="center"
+        android:text="获取token值"
+        android:textColor="@color/video_white"
+        android:textColorHint="@color/video_white"></TextView>
 
     <EditText
         android:id="@+id/panelid"
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:layout_marginTop="20dp"
+        android:layout_below="@+id/tv"
+        android:layout_marginTop="10dp"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
         android:hint="panelid"
@@ -40,7 +46,9 @@
         android:id="@+id/contentid"
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:layout_marginTop="20dp"
+        android:layout_below="@+id/tv"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@+id/panelid"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
         android:hint="contentid"
@@ -53,6 +61,7 @@
         android:id="@+id/fxsys"
         android:layout_width="200dp"
         android:layout_height="50dp"
+        android:layout_below="@+id/panelid"
         android:layout_marginTop="20dp"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
@@ -70,6 +79,8 @@
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
         android:text="合集列表"
+        android:layout_toRightOf="@+id/fxsys"
+        android:layout_below="@+id/panelid"
         android:textColor="@color/video_white"
         android:textColorHint="@color/video_white">
 
@@ -79,6 +90,7 @@
         android:id="@+id/leaderboard_list"
         android:layout_width="200dp"
         android:layout_height="50dp"
+        android:layout_below="@+id/upload_video_page"
         android:layout_marginTop="20dp"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
@@ -92,6 +104,7 @@
         android:id="@+id/upload_video_page"
         android:layout_width="200dp"
         android:layout_height="50dp"
+        android:layout_below="@+id/fxsys"
         android:layout_marginTop="20dp"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
@@ -105,7 +118,9 @@
         android:id="@+id/tgt_page"
         android:layout_width="200dp"
         android:layout_height="50dp"
+        android:layout_below="@+id/fxsys"
         android:layout_marginTop="20dp"
+        android:layout_toRightOf="@+id/upload_video_page"
         android:background="@drawable/shape_input_bg"
         android:gravity="center"
         android:text="测试页面"
@@ -114,4 +129,4 @@
 
     </TextView>
 
-</LinearLayout>
+</RelativeLayout>

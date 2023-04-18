@@ -3,6 +3,8 @@ package com.example.x5testdemo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.content.Intent;
@@ -22,12 +24,11 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
-import com.wdcs.model.ShowHomeFragmentModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ui.activity.TgtCodeActivity;
+import ui.activity.SpecialArea5GActivity;
 import ui.activity.UploadActivity;
 import ui.activity.VideoDetailActivity;
 import ui.activity.VideoHomeActivity;
@@ -134,6 +135,11 @@ public class MainActivity extends AppCompatActivity {
                         return "998877665544332212";
                     }
 
+                    @Override
+                    public Fragment getWebViewFragment(Bundle bundle) {
+                        VideoWebViewTestFragment fragment = VideoWebViewTestFragment.newInstance(bundle.getString("webUrl"));
+                        return fragment;
+                    }
 
                 });
 
@@ -186,7 +192,8 @@ public class MainActivity extends AppCompatActivity {
         tgt_page.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, TgtCodeActivity.class));
+//                startActivity(new Intent(MainActivity.this, TgtCodeActivity.class));
+                startActivity(new Intent(MainActivity.this, SpecialArea5GActivity.class));
             }
         });
 

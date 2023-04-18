@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/video_collection_item_rl"
+    android:layout_width="match_parent"
+    android:minHeight="50dp"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="@dimen/video_dp10"
+    android:layout_marginBottom="@dimen/video_dp10"
+    android:background="@drawable/news_collection_item_bg"
+    >
+
+    <TextView
+        android:id="@+id/video_collection_item_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/video_dp10"
+        android:layout_centerInParent="true"
+        android:text=""
+        android:textColor="@color/video_black"
+        android:textSize="12sp"
+        tools:text="长沙新闻20230328"></TextView>
+
+</RelativeLayout>

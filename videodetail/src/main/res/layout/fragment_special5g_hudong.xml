@@ -1,0 +1,38 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ui.fragment.Special5gHudongFragment"
+    tools:ignore="MissingDefaultResource">
+
+    <com.wdcs.utils.NoScrollViewPager
+        android:id="@+id/special_5g_hudong_vp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/special_5g_hudongtab">
+
+    </com.wdcs.utils.NoScrollViewPager>
+
+    <com.flyco.tablayout.SlidingTabLayout
+        android:id="@+id/special_5g_hudongtab"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginLeft="@dimen/video_dp10"
+        android:layout_marginRight="@dimen/video_dp10"
+        android:background="@drawable/special_5g_hudong_tab_bg"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        app:tl_indicator_color="@color/white"
+        app:tl_indicator_margin_top="2dp"
+        app:tl_indicator_margin_bottom="2dp"
+        app:tl_indicator_corner_radius="4dp"
+        app:tl_indicator_margin_left="2dp"
+        app:tl_indicator_margin_right="2dp"
+        app:tl_indicator_style="BLOCK"
+        app:tl_tab_space_equal="true"
+        app:tl_textSelectColor="@color/video_black"
+        app:tl_textUnselectColor="@color/hudong_tab_text_unselect" />
+
+
+</RelativeLayout>

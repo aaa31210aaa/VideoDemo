@@ -3,22 +3,63 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../.gradle/caches/transforms-2/files-2.1/596b40b0ab846efe12094cf291cb6fb8/jetified-appcompat-resources-1.1.0/res/drawable/abc_vector_test.xml" value="0.187" />
         <entry key="..\:/AndroidStudioProjects/VideoDemo/superplayerkit/src/main/res/layout/superplayer_vod_view.xml" value="0.4765625" />
         <entry key="..\:/AndroidStudioProjects/VideoDemo/videodetail/src/main/res/layout/fragment_in_live.xml" value="0.534375" />
+        <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_top.xml" value="0.18568840579710144" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21603260869565216" />
+        <entry key="app/src/main/res/layout/fragment_video_web_view_test.xml" value="0.18704710144927536" />
         <entry key="superplayerkit/src/main/res/layout/superplayer_vod_player_window.xml" value="0.17552083333333332" />
+        <entry key="superplayerkit/src/main/res/layout/superplayer_vod_view.xml" value="0.18704710144927536" />
         <entry key="video-common/src/main/res/drawable/publisher_bg.xml" value="0.1135" />
+        <entry key="videodetail/src/main/res/drawable/anthology_bg.xml" value="0.187" />
+        <entry key="videodetail/src/main/res/drawable/choose_pop_bg.xml" value="0.187" />
+        <entry key="videodetail/src/main/res/drawable/choose_pop_rv_item_check.xml" value="0.187" />
+        <entry key="videodetail/src/main/res/drawable/comment_bg.xml" value="0.187" />
+        <entry key="videodetail/src/main/res/drawable/news_collection_item_bg.xml" value="0.182" />
+        <entry key="videodetail/src/main/res/drawable/radio_station_bg.xml" value="0.1395" />
+        <entry key="videodetail/src/main/res/drawable/shape_input_bg.xml" value="0.1395" />
+        <entry key="videodetail/src/main/res/drawable/special_5g_hudong_tab_bg.xml" value="0.1745" />
+        <entry key="videodetail/src/main/res/drawable/special_5g_news_detail_bg.xml" value="0.194" />
+        <entry key="videodetail/src/main/res/drawable/special_5g_news_detail_bottombg.xml" value="0.194" />
+        <entry key="videodetail/src/main/res/drawable/special_5g_news_detail_topbg.xml" value="0.182" />
+        <entry key="videodetail/src/main/res/drawable/special_5g_share_bg.xml" value="0.1745" />
+        <entry key="videodetail/src/main/res/drawable/special_area5g_search_bg.xml" value="0.187" />
+        <entry key="videodetail/src/main/res/drawable/tag_selector_bg.xml" value="0.1745" />
+        <entry key="videodetail/src/main/res/drawable/tagflow_select_bg.xml" value="0.1745" />
+        <entry key="videodetail/src/main/res/drawable/whitebg_special_area5g_search_bg.xml" value="0.1395" />
+        <entry key="videodetail/src/main/res/layout/activity_special5_gnews_detail.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/activity_special5g_news_detail.xml" value="0.25" />
+        <entry key="videodetail/src/main/res/layout/activity_special_area5_g.xml" value="0.18020833333333333" />
+        <entry key="videodetail/src/main/res/layout/activity_special_area5g.xml" value="0.25" />
         <entry key="videodetail/src/main/res/layout/activity_video_detail.xml" value="0.14628623188405798" />
         <entry key="videodetail/src/main/res/layout/activity_video_main.xml" value="0.1703125" />
         <entry key="videodetail/src/main/res/layout/comment_list_empty.xml" value="0.17552083333333332" />
         <entry key="videodetail/src/main/res/layout/comment_pop_rv_item.xml" value="0.17552083333333332" />
+        <entry key="videodetail/src/main/res/layout/fragment_live.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/fragment_special5g_five.xml" value="0.165625" />
+        <entry key="videodetail/src/main/res/layout/fragment_special5g_four.xml" value="0.165" />
+        <entry key="videodetail/src/main/res/layout/fragment_special5g_hudong.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/fragment_special5g_one.xml" value="0.18568840579710144" />
+        <entry key="videodetail/src/main/res/layout/fragment_special5g_six.xml" value="0.18568840579710144" />
         <entry key="videodetail/src/main/res/layout/fragment_video_comment_pop.xml" value="0.17552083333333332" />
-        <entry key="videodetail/src/main/res/layout/fragment_video_detail.xml" value="0.14628623188405798" />
+        <entry key="videodetail/src/main/res/layout/fragment_video_detail.xml" value="0.25" />
         <entry key="videodetail/src/main/res/layout/fragment_video_home.xml" value="0.1703125" />
         <entry key="videodetail/src/main/res/layout/fragment_xksh.xml" value="0.17552083333333332" />
+        <entry key="videodetail/src/main/res/layout/live_net_rv_item.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/live_rv_item_layout.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/news_collection_item.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/radio_station_rv_item.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/share_pop_view.xml" value="0.1381340579710145" />
+        <entry key="videodetail/src/main/res/layout/special_5g_header.xml" value="0.25" />
+        <entry key="videodetail/src/main/res/layout/special_5g_share_pop_view.xml" value="0.18704710144927536" />
+        <entry key="videodetail/src/main/res/layout/tv_live_rv_item.xml" value="0.335" />
+        <entry key="videodetail/src/main/res/layout/video_collection_header.xml" value="0.25" />
+        <entry key="videodetail/src/main/res/layout/video_collection_item.xml" value="0.18704710144927536" />
         <entry key="videodetail/src/main/res/layout/video_detail_comment_pop.xml" value="0.17552083333333332" />
         <entry key="videodetail/src/main/res/layout/video_detail_item.xml" value="0.23278985507246377" />
-        <entry key="videodetail/src/main/res/layout/video_fragment_item.xml" value="0.25" />
+        <entry key="videodetail/src/main/res/layout/video_fragment_item.xml" value="0.335" />
+        <entry key="videodetail/src/main/res/layout/video_news_collection_item.xml" value="0.18704710144927536" />
         <entry key="videodetail/src/main/res/layout/xksh_video_item_layout.xml" value="0.335" />
       </map>
     </option>

@@ -205,6 +205,14 @@ public class ApiConstants {
     }
 
     /**
+     * 获取专题新闻详情
+     */
+    public String getSpec() {
+        return getBaseUrl() + "api/cms/client/content/spec/";
+    }
+
+
+    /**
      * 首页栏目获取
      */
     public String getCategoryData() {

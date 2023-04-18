@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:id="@+id/title_tv_live"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/video_dp5"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/video_dp5"
+            android:layout_height="@dimen/video_dp15"
+            android:background="@drawable/live_5g_red_label"></ImageView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/video_dp8"
+            android:text="电视直播"
+            android:textColor="@color/video_black"
+            android:textSize="@dimen/sp_16"></TextView>
+    </LinearLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tv_live_rv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title_tv_live"
+        android:layout_marginTop="8dp">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:id="@+id/title_radio_station"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_live_rv"
+        android:layout_marginTop="@dimen/video_dp25"
+        android:layout_marginLeft="@dimen/video_dp5"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/video_dp5"
+            android:layout_height="@dimen/video_dp15"
+            android:background="@drawable/live_5g_red_label"></ImageView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/video_dp8"
+            android:text="电台直播"
+            android:textColor="@color/video_black"
+            android:textSize="@dimen/sp_16"></TextView>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/radio_station_rv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title_radio_station"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/video_dp10">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:id="@+id/live_net"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/radio_station_rv"
+        android:layout_marginTop="@dimen/video_dp25"
+        android:layout_marginLeft="@dimen/video_dp5"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+
+        >
+
+        <ImageView
+            android:layout_width="@dimen/video_dp5"
+            android:layout_height="@dimen/video_dp15"
+            android:background="@drawable/live_5g_red_label"></ImageView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/video_dp8"
+            android:text="网络直播"
+            android:textColor="@color/video_black"
+            android:textSize="@dimen/sp_16"></TextView>
+    </LinearLayout>
+</RelativeLayout>

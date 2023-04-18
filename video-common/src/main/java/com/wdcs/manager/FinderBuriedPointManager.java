@@ -1,16 +1,25 @@
 package com.wdcs.manager;
 
+import static com.wdcs.constants.Constants.TRACKINGUPLOAD;
+
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.model.Response;
+import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
+import com.wdcs.http.ApiConstants;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.FinderPointModel;
 import com.wdcs.model.FinderPointVideoPlay;
+import com.wdcs.model.TrackingUploadModel;
 import com.wdcs.model.VideoCollectionModel;
 import com.wdcs.utils.DateUtils;
+import com.wdcs.utils.PersonInfoManager;
+import com.wdcs.utils.ToastUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -247,4 +256,39 @@ public class FinderBuriedPointManager {
         VideoInteractiveParam.getInstance().setFinderPoint(eventStr, model);
     }
 
+    /**
+     * 上报埋点
+     *
+     * @param jsonObject
+     */
+    public static void uploadBuriedPoint(final JSONObject jsonObject, final String trackingType) {
+        if (null == jsonObject) {
+            return;
+        }
+        Log.e("上报埋点", "上报事件" + trackingType + "--上报内容" + jsonObject);
+        OkGo.<TrackingUploadModel>post(ApiConstants.getInstance().trackingUpload())
+                .tag(TRACKINGUPLOAD)
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .upJson(jsonObject)
+                .execute(new JsonCallback<TrackingUploadModel>() {
+                    @Override
+                    public void onSuccess(Response<TrackingUploadModel> response) {
+                    }
+
+                    @Override
+                    public void onError(Response<TrackingUploadModel> response) {
+                        super.onError(response);
+                        if (null == response.body()) {
+                            ToastUtils.showShort("系统数据错误，请重试");
+                            return;
+                        }
+                        ToastUtils.showShort(response.body().getMessage());
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
+                });
+    }
 }

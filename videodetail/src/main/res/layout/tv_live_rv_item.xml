@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    tools:ignore="MissingDefaultResource">
+
+    <ImageView
+        android:id="@+id/tv_live_rv_item_img"
+        android:layout_width="92dp"
+        android:layout_height="64dp"
+        android:layout_marginRight="@dimen/video_dp10"
+        android:layout_centerInParent="true"
+        android:scaleType="fitXY">
+
+    </ImageView>
+</RelativeLayout>

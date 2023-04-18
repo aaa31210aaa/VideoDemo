@@ -1,16 +1,26 @@
 package com.flyco.tablayout;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -88,6 +98,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     private int mUnderlineColor;
     private float mUnderlineHeight;
     private int mUnderlineGravity;
+    private Drawable mUnderlineDrawable;
 
     /**
      * divider
@@ -167,6 +178,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         mUnderlineColor = ta.getColor(R.styleable.SlidingTabLayout_tl_underline_color, Color.parseColor("#ffffff"));
         mUnderlineHeight = ta.getDimension(R.styleable.SlidingTabLayout_tl_underline_height, dp2px(0));
         mUnderlineGravity = ta.getInt(R.styleable.SlidingTabLayout_tl_underline_gravity, Gravity.BOTTOM);
+        mUnderlineDrawable = ta.getDrawable(R.styleable.SlidingTabLayout_tl_underline_drawable);
 
         mDividerColor = ta.getColor(R.styleable.SlidingTabLayout_tl_divider_color, Color.parseColor("#ffffff"));
         mDividerWidth = ta.getDimension(R.styleable.SlidingTabLayout_tl_divider_width, dp2px(0));
@@ -206,15 +218,18 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
      */
     public void setViewPager(ViewPager vp, String[] titles) {
         if (vp == null || vp.getAdapter() == null) {
-            throw new IllegalStateException("ViewPager or ViewPager adapter can not be NULL !");
+            Log.e("setViewPager", "ViewPager or ViewPager adapter can not be NULL !");
+//            throw new IllegalStateException("ViewPager or ViewPager adapter can not be NULL !");
         }
 
         if (titles == null || titles.length == 0) {
-            throw new IllegalStateException("Titles can not be EMPTY !");
+            Log.e("setViewPager", "Titles can not be EMPTY !");
+//            throw new IllegalStateException("Titles can not be EMPTY !");
         }
 
         if (titles.length != vp.getAdapter().getCount()) {
-            throw new IllegalStateException("Titles length must be the same as the page count !");
+            Log.e("setViewPager", "Titles length must be the same as the page count !");
+//            throw new IllegalStateException("Titles length must be the same as the page count !");
         }
 
         this.mViewPager = vp;
@@ -317,9 +332,9 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
             } else {
                 if (title.length() >= 6) {
                     lp_tab = new LinearLayout.LayoutParams(dp2px(130), LayoutParams.MATCH_PARENT);
-                } else if (title.length() <= 5 && title.length() > 2){
+                } else if (title.length() <= 5 && title.length() > 2) {
                     lp_tab = new LinearLayout.LayoutParams(dp2px(115), LayoutParams.MATCH_PARENT);
-                } else if (title.length() <= 2){
+                } else if (title.length() <= 2) {
                     lp_tab = new LinearLayout.LayoutParams(dp2px(75), LayoutParams.MATCH_PARENT);
                 }
             }
@@ -552,6 +567,11 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
                         (int) (mIndicatorMarginTop + mIndicatorHeight));
                 mIndicatorDrawable.setCornerRadius(mIndicatorCornerRadius);
                 mIndicatorDrawable.draw(canvas);
+//                Resources resources = mContext.getResources();
+//                @SuppressLint("DrawAllocation")
+//                Bitmap bmp2 = BitmapFactory.decodeResource(resources, R.drawable.collection_icon);
+//                canvas.drawBitmap(bmp2, null, mIndicatorRect, mRectPaint);
+//                mIndicatorDrawable.draw(canvas);
             }
         } else {
                /* mRectPaint.setColor(mIndicatorColor);
@@ -573,8 +593,10 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
                             paddingLeft + mIndicatorRect.right - (int) mIndicatorMarginRight,
                             (int) mIndicatorHeight + (int) mIndicatorMarginTop);
                 }
+
                 mIndicatorDrawable.setCornerRadius(mIndicatorCornerRadius);
                 mIndicatorDrawable.draw(canvas);
+
             }
         }
     }
@@ -650,6 +672,12 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         this.mIndicatorWidthEqualTitle = indicatorWidthEqualTitle;
         invalidate();
     }
+
+    public void setUnderlineDrawable(Drawable drawable) {
+        mUnderlineDrawable = drawable;
+        invalidate();
+    }
+
 
     public void setUnderlineColor(int underlineColor) {
         this.mUnderlineColor = underlineColor;

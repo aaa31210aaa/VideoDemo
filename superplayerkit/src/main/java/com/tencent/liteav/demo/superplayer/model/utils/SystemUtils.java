@@ -18,6 +18,7 @@ import com.example.zhouwei.library.CustomPopWindow;
 public class SystemUtils {
     public static final int FULLSCREEN_FLAGS = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
     public static void hideSystemUI(View decorView) {
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -26,35 +27,33 @@ public class SystemUtils {
     }
 
 
-    public static void hideHome(View decorView) {
+    public static void showNavigationBar(View decorView) {
         decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         );
     }
 
 
     /**
      * 修改NavigationBar按键颜色 两色可选【黑，白】
-     * */
-    public  void setLightNavigationBar (Activity activity, boolean light) {
+     */
+    public void setLightNavigationBar(Activity activity, boolean light) {
         int vis = activity.getWindow().getDecorView().getSystemUiVisibility();
         if (light) {
             vis |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;     // 黑色
         } else {
             //白色
-            vis &= ~ View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
         }
         activity.getWindow().getDecorView().setSystemUiVisibility(vis);
     }
 
 
-
     /***
      * 修改NavigationBar背景颜色 可自定义颜色
      * */
-    public static void setNavbarColor(Activity activity,int color){
+    public static void setNavbarColor(Activity activity, int color) {
         Window window = activity.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -74,7 +73,7 @@ public class SystemUtils {
         } else if (Build.VERSION.SDK_INT >= 19) {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             View decorView = activity.getWindow().getDecorView();
-             int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
                     View.SYSTEM_UI_FLAG_FULLSCREEN;
             decorView.setVisibility(uiOptions);
         }

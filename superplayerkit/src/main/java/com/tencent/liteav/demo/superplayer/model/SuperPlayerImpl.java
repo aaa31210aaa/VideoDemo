@@ -168,6 +168,17 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         readPlayCallBack = callBack;
     }
 
+    public static ReadPlay5GCallBack readPlay5GCallBack;
+
+    public interface ReadPlay5GCallBack {
+        void ReadPlay5GCallBack();
+    }
+
+    public static void setReadPlay5GCallBack(ReadPlay5GCallBack callBack) {
+        readPlay5GCallBack = callBack;
+    }
+
+
     public static AutoPlayOverCallBack autoPlayOverCallBack;
 
     public interface AutoPlayOverCallBack {
@@ -208,6 +219,16 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         tabReadCallBack = callBack;
     }
 
+    public static AutoPlayOver5GCallBack autoPlayOver5gCallBack;
+
+    public interface AutoPlayOver5GCallBack {
+        void AutoPlayOver5GCallBack();
+    }
+
+    public static void setAutoPlayOver5GCallBack(AutoPlayOver5GCallBack callBack) {
+        autoPlayOver5gCallBack = callBack;
+    }
+
     /**
      * 点播播放器事件回调
      *
@@ -242,9 +263,6 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
         }
         switch (event) {
             case TXLiveConstants.PLAY_EVT_VOD_PLAY_PREPARED://视频播放开始
-                if (ISPAUSE) {
-                    pause();
-                }
                 updatePlayerState(PLAYING);
                 if (mIsMultiBitrateStream) {
                     List<TXBitrateItem> bitrateItems = mVodPlayer.getSupportedBitrates();
@@ -282,6 +300,10 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                     tabReadCallBack.TabReadCallBack();
                 }
 
+                if (null != readPlay5GCallBack) {
+                    readPlay5GCallBack.ReadPlay5GCallBack();
+                }
+
                 if (null != superPlayerView) {
                     superPlayerView.detailIsLoad = true;
                     superPlayerView.homeVideoIsLoad = true;
@@ -306,6 +328,11 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
                 if (null != tabAutoPlayOverCallBack) {
                     tabAutoPlayOverCallBack.TabAutoPlayOverCallBack();
                 }
+
+                if (null != autoPlayOver5gCallBack) {
+                    autoPlayOver5gCallBack.AutoPlayOver5GCallBack();
+                }
+
                 updatePlayerState(SuperPlayerDef.PlayerState.END);
                 break;
             case PLAY_EVT_PLAY_PROGRESS:

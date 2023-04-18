@@ -3,9 +3,11 @@ package com.wdcs.callback;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
@@ -211,6 +213,18 @@ public class VideoInteractiveParam {
         return "";
     }
 
+    /**
+     * 获取fragment实例
+     */
+    public Fragment getWebViewFragment(Bundle bundle) {
+        if (null == callBack) {
+            Log.e("getWebViewFragment", "获取失败,请重试");
+        } else {
+            return callBack.getWebViewFragment(bundle);
+        }
+        return new Fragment();
+    }
+
 
     /**
      * 使用获取的code去换token
@@ -254,14 +268,14 @@ public class VideoInteractiveParam {
                                 PersonInfoManager.getInstance().setTransformationToken(transformationToken);
                                 getGdyToken(PersonInfoManager.getInstance().getTransformationToken());
                             } else {
-                                Log.e("getUserToken",response.body().getMessage());
+                                Log.e("getUserToken", response.body().getMessage());
                             }
                         }
 
                         @Override
                         public void onError(Response<TokenModel> response) {
                             if (null != response.body()) {
-                                Log.e("getUserToken",response.body().getMessage());
+                                Log.e("getUserToken", response.body().getMessage());
                                 return;
                             }
                         }
@@ -309,7 +323,7 @@ public class VideoInteractiveParam {
                     @Override
                     public void onError(Response<GdyTokenModel> response) {
                         if (null != response.body()) {
-                            Log.e("getGdyToken",response.body().getMessage());
+                            Log.e("getGdyToken", response.body().getMessage());
                             return;
                         }
                     }

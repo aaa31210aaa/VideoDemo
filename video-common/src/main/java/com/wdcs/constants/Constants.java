@@ -138,4 +138,7 @@ public class Constants {
 
     public static boolean TABONEFRIST = true;
     public static boolean ISPAUSE;
+    public static boolean SPECIAL5G_ISPAUSE;
+    public static String VIDEO_COM = "video_com";
+    public static String NEWS_VIDEO_SPECIAL = "special";
 }

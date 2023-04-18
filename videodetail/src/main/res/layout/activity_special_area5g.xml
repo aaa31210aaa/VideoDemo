@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:resizeableActivity="true"
+    tools:context="ui.activity.SpecialArea5GActivity">
+
+    <com.wdcs.utils.NoScrollViewPager
+        android:id="@+id/special_5g_vp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </com.wdcs.utils.NoScrollViewPager>
+
+    <RelativeLayout
+        android:id="@+id/top_zzc"
+        android:layout_width="match_parent"
+        android:layout_height="370dp"
+        android:background="@drawable/video_home_title_bg"
+        android:visibility="gone">
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/video_dp30"
+        android:layout_marginTop="@dimen/video_dp50"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/special_5g_back"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2">
+
+            <ImageView
+                android:id="@+id/special_5g_back_img"
+                android:layout_width="8dp"
+                android:layout_height="14dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/video_back">
+
+            </ImageView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/special_5g_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/special_5g_back"
+            android:layout_weight="10">
+
+            <ImageView
+                android:id="@+id/area5g_search"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/blackbg_special_area5g_search_bg">
+
+            </ImageView>
+
+
+            <ImageView
+                android:id="@+id/special_5g_search_img"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/video_dp10"
+                android:src="@drawable/video_search">
+
+            </ImageView>
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/special_5g_personal_center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/special_5g_search"
+            android:layout_weight="2">
+
+            <ImageView
+                android:id="@+id/personal_center_img"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/video_user">
+
+            </ImageView>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/special_5g_tab_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/search_bar">
+
+        <com.flyco.tablayout.SlidingTabLayout
+            android:id="@+id/special_5g_tab"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:background="@color/transparent"
+            app:tl_indicator_color="@color/bz_red"
+            app:tl_indicator_corner_radius="@dimen/video_dp2"
+            app:tl_indicator_height="@dimen/video_dp2"
+            app:tl_indicator_margin_bottom="@dimen/video_dp10"
+            app:tl_indicator_width="@dimen/video_dp20"
+            app:tl_tab_space_equal="true"
+            app:tl_textSelectColor="@color/video_black"
+            app:tl_textSelsize="15sp"
+            app:tl_textUnselectColor="@color/p60_opacity_white"
+            app:tl_textsize="13sp" />
+    </RelativeLayout>
+
+</RelativeLayout>

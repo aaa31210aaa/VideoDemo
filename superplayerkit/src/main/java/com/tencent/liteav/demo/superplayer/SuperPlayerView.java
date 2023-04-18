@@ -155,6 +155,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public BuriedPointModel buriedPointModel;
     public static SuperPlayerView instance;
     public String mCurrentPlayVideoURL;    // 当前播放的URL
+    private boolean isDark;
 
     public static SuperPlayerView getInstance(Context context, View decorView, Boolean isMain) {
         if (instance == null) {
@@ -199,6 +200,14 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         if (isMainbool) {
             mWindowPlayer.mIvPause.setVisibility(GONE);
             mWindowPlayer.mIvFullScreen.setVisibility(GONE);
+            mWindowPlayer.windowLeftIcon.setVisibility(GONE);
+            mWindowPlayer.windowRightIcon.setVisibility(GONE);
+            mWindowPlayer.zdyIvPause.setImageResource(R.drawable.play_icon);
+        } else {
+            mWindowPlayer.mIvPause.setVisibility(GONE);
+            mWindowPlayer.mTvCurrent.setVisibility(VISIBLE);
+            mWindowPlayer.mTvDuration.setVisibility(VISIBLE);
+            mWindowPlayer.zdyIvPause.setImageResource(R.drawable.play_icon_5g);
         }
 
         mVodControllerWindowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -313,6 +322,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         return contentStateModel;
     }
 
+    public void setStatuDark(boolean isDark) {
+        this.isDark = isDark;
+    }
 
     /**
      * 点赞/取消点赞
@@ -605,7 +617,12 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                 if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
                     decorView.setSystemUiVisibility(View.VISIBLE);
                 } else if (Build.VERSION.SDK_INT >= 19) {
-                    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    if (isDark) {
+                        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                    } else {
+                        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    }
+
                 }
 //                ((Activity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             }
@@ -669,7 +686,7 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                     // 全屏到窗口
                     sensorEnable = true;
                     mTargetPlayerMode = SuperPlayerDef.PlayerMode.WINDOW;
-                    showBottomUIMenu();
+//                    showBottomUIMenu();
                 } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW && playerMode == SuperPlayerDef.PlayerMode.FULLSCREEN) {
                     // 窗口到全屏
                     sensorEnable = false;
@@ -1026,10 +1043,10 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public void onOrientationChanged(int orientation) {
 
         if (!isOrientation) {
-            Log.e("是否能旋转：","不能");
+            Log.e("是否能旋转：", "不能");
             return;
         }
-        Log.e("是否能旋转：","可以");
+        Log.e("是否能旋转：", "可以");
         if (mFullScreenPlayer == null) {
             return;
         }

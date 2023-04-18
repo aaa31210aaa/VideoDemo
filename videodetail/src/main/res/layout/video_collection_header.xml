@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/introduction_rl"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#F5F5F5">
+
+    <RelativeLayout
+        android:id="@+id/video_collection_header_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/special_5g_news_detail_topbg"
+        android:padding="@dimen/video_dp10">
+
+        <TextView
+            android:id="@+id/news_detail_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/video_black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="长沙新闻"></TextView>
+
+        <TextView
+            android:id="@+id/introduction_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/news_detail_title"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="@color/video_c6"
+            tools:text=""></TextView>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/video_collection_header_top"
+        android:layout_marginTop="@dimen/video_dp10"
+        android:background="@drawable/special_5g_news_detail_bottombg"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/video_dp10"
+        android:paddingTop="@dimen/video_dp20"
+        android:paddingBottom="@dimen/video_dp20">
+
+        <ImageView
+            android:id="@+id/text_label"
+            android:layout_width="@dimen/video_dp5"
+            android:layout_height="@dimen/video_dp15"
+            android:background="@drawable/live_5g_red_label">
+
+        </ImageView>
+
+        <TextView
+            android:id="@+id/text_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@+id/text_label"
+            android:textColor="@color/video_black"
+            android:textSize="@dimen/sp_16"
+            tools:text="新闻正片"></TextView>
+    </LinearLayout>
+</RelativeLayout>
