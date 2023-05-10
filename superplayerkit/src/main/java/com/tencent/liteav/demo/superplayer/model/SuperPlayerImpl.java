@@ -865,14 +865,7 @@ public class SuperPlayerImpl implements SuperPlayer, ITXVodPlayListener, ITXLive
     @Override
     public void pause() {
         if (mCurrentPlayType == SuperPlayerDef.PlayerType.VOD) {
-            if (superPlayerView.detailIsLoad) {
-                mVodPlayer.pause();
-            } else {
-                superPlayerView.release();
-                superPlayerView.mSuperPlayer.stop();
-                superPlayerView.mSuperPlayer.destroy();
-                return;
-            }
+            mVodPlayer.pause();
         } else {
             mLivePlayer.pause();
         }

@@ -48,23 +48,23 @@ public class VideoViewPagerAdapter extends FragmentPagerAdapter {
         notifyDataSetChanged();
     }
 
-    public void addItems(@Nullable List<VideoChannelModel> channelBeanList, String contentId, String categoryName,String requestId, SuperPlayerView playerView
-            , int toCurrentTab, boolean fromHomeTab) {
+    public void addItems(@Nullable List<VideoChannelModel> channelBeanList, String contentId, String categoryName, String requestId, SuperPlayerView playerView
+            , int toCurrentTab, boolean fromHomeTab, String module_source) {
         titleList.clear();
         fragmentList.clear();
         titleList.addAll(channelBeanList);
         for (VideoChannelModel videoChannelModel : channelBeanList) {
             if (TextUtils.equals("2", videoChannelModel.getColumnBean().getColumnId())) {
                 LiveFragment fragment = new LiveFragment();
-                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, fromHomeTab));
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, fromHomeTab, module_source));
             } else if (TextUtils.equals("1", videoChannelModel.getColumnBean().getColumnId())) {
                 VideoDetailFragment fragment = new VideoDetailFragment();
                 fragment.setPlayView(playerView);
-                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, contentId, categoryName, requestId,toCurrentTab, fromHomeTab));
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, contentId, categoryName, requestId, toCurrentTab, fromHomeTab));
             } else {
                 XkshFragment fragment = new XkshFragment();
                 fragment.setPlayView(playerView);
-                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, contentId, categoryName, requestId,toCurrentTab, fromHomeTab));
+                fragmentList.add(fragment.newInstance(fragment, videoChannelModel, contentId, categoryName, requestId, toCurrentTab, fromHomeTab));
             }
         }
         notifyDataSetChanged();

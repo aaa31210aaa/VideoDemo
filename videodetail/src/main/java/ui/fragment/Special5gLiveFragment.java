@@ -60,6 +60,7 @@ import adpter.TVLiveRvAdapter;
 public class Special5gLiveFragment extends Fragment implements View.OnClickListener {
     private View view;
     private String panelCode;
+    private String netPanelCode;
     private RecyclerView tvLiveRv;
     private RecyclerView radioStationRv;
     private RecyclerView liveNetRv;
@@ -130,23 +131,19 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
         tvLiveRvAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                    noLoginTipsPop();
-                } else {
-                    if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                        noLoginTipsPop();
+//                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                    noLoginTipsPop();
+//                } else {
+                    ShareInfo shareInfo = ShareInfo.getInstance(tvLiveDatas.get(position).getShareUrl(), tvLiveDatas.get(position).getShareImageUrl(),
+                            tvLiveDatas.get(position).getShareBrief(), tvLiveDatas.get(position).getShareTitle(), "");
+                    String url;
+                    if (TextUtils.isEmpty(tvLiveDatas.get(position).getExternalUrl())) {
+                        url = tvLiveDatas.get(position).getDetailUrl();
                     } else {
-                        ShareInfo shareInfo = ShareInfo.getInstance(tvLiveDatas.get(position).getShareUrl(), tvLiveDatas.get(position).getShareImageUrl(),
-                                tvLiveDatas.get(position).getShareBrief(), tvLiveDatas.get(position).getShareTitle(), "");
-                        String url;
-                        if (TextUtils.isEmpty(tvLiveDatas.get(position).getExternalUrl())) {
-                            url = tvLiveDatas.get(position).getDetailUrl();
-                        } else {
-                            url = tvLiveDatas.get(position).getExternalUrl();
-                        }
-                        getGdyToken(PersonInfoManager.getInstance().getTransformationToken(), url, shareInfo);
+                        url = tvLiveDatas.get(position).getExternalUrl();
                     }
-                }
+                    getGdyToken(PersonInfoManager.getInstance().getTransformationToken(), url, shareInfo);
+//                }
             }
         });
 
@@ -154,9 +151,9 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
         radioStationRvAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
-                    noLoginTipsPop();
-                } else {
+//                if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
+//                    noLoginTipsPop();
+//                } else {
                     ShareInfo shareInfo = ShareInfo.getInstance(radioStationDatas.get(position).getShareUrl(), radioStationDatas.get(position).getShareImageUrl(),
                             radioStationDatas.get(position).getShareBrief(), radioStationDatas.get(position).getShareTitle(), "");
                     String url;
@@ -166,7 +163,7 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
                         url = radioStationDatas.get(position).getExternalUrl();
                     }
                     getGdyToken(PersonInfoManager.getInstance().getTransformationToken(), url, shareInfo);
-                }
+//                }
             }
         });
 
@@ -197,7 +194,7 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
                 isLoadComplate = false;
-                getPullDownData(mPageSize, panelCode, "false", Constants.REFRESH_TYPE);
+                getPullDownData(mPageSize, netPanelCode, "false", Constants.REFRESH_TYPE);
             }
         });
 
@@ -205,7 +202,7 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
             @Override
             public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
                 if (liveNetDatas.size() > 0) {
-                    loadMoreData(liveNetDatas.get(liveNetDatas.size() - 1).getId() + "", panelCode, "true", Constants.LOADMORE_TYPE);
+                    loadMoreData(liveNetDatas.get(liveNetDatas.size() - 1).getId() + "", netPanelCode, "true", Constants.LOADMORE_TYPE);
                 }
             }
         });
@@ -253,6 +250,9 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
                             radioStationRvAdapter.setNewData(radioStationDatas);
                             radioStationRv.setAdapter(radioStationRvAdapter);
                         }
+                        if (null != special5gHeaderView && null != special5gHeaderView.getParent()) {
+                            ((ViewGroup) special5gHeaderView.getParent()).removeView(special5gHeaderView);
+                        }
                         liveNetRvAdapter.addHeaderView(special5gHeaderView);
                         liveNetRv.setAdapter(liveNetRvAdapter);
 
@@ -276,7 +276,8 @@ public class Special5gLiveFragment extends Fragment implements View.OnClickListe
                             }
                         });
                         if (response.body().getData().size() == 3 && null != response.body().getData().get(2).getCode()) {
-                            getPullDownData(mPageSize, response.body().getData().get(2).getCode(), "false", Constants.REFRESH_TYPE);
+                            netPanelCode = response.body().getData().get(2).getCode();
+                            getPullDownData(mPageSize, netPanelCode, "false", Constants.REFRESH_TYPE);
                         }
 
                     }

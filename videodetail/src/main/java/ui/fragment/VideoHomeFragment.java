@@ -8,6 +8,7 @@ import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDurati
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.CATEGORYNAME;
 import static com.wdcs.constants.Constants.CONTENTID;
+import static com.wdcs.constants.Constants.ISPAUSE;
 import static com.wdcs.constants.Constants.MODULE_SOURCE;
 import static com.wdcs.constants.Constants.TABONEFRIST;
 import static com.wdcs.constants.Constants.TOCURRENTTAB;
@@ -63,6 +64,7 @@ import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NoScrollViewPager;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
+import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
@@ -230,7 +232,6 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             playerView.mFullScreenPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
-
                     if (playerView.mFullScreenPlayer.mGestureVideoProgressLayout != null && fromUser) {
                         playerView.mFullScreenPlayer.mGestureVideoProgressLayout.show();
                         float percentage = ((float) progress) / seekBar.getMax();
@@ -292,6 +293,10 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                     if (null == playerView.mWindowPlayer) {
                         return;
                     }
+                    if (TabHomeIsPause) {
+                        playerView.mSuperPlayer.pause();
+                    }
+
                     if (playerView.mWindowPlayer.mGestureVideoProgressLayout != null && fromUser) {
                         playerView.mWindowPlayer.mGestureVideoProgressLayout.show();
                         float percentage = ((float) progress) / seekBar.getMax();
@@ -828,7 +833,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, "", playerView, toCurrentTab, true);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, "", playerView, toCurrentTab, true, module_source);
         colunmList.clear();
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
@@ -983,6 +988,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
             if (wdcsTabIndex != 1) {
                 videoDetailFragment.playerView.setOrientation(false);
                 xkshFragment.playerView.setOrientation(false);
+                ScreenUtils.StatusBarLightMode(getActivity(),true);
             } else {
                 if (videoDetailFragment.videoFragmentIsVisibleToUser) {
                     if (TextUtils.equals(videoDetailFragment.videoLx, "2")) {
@@ -997,6 +1003,7 @@ public class VideoHomeFragment extends Fragment implements View.OnClickListener 
                         xkshFragment.playerView.setOrientation(false);
                     }
                 }
+                ScreenUtils.StatusBarLightMode(getActivity(),false);
             }
             videoDetailFragment.setVideoDetailFragmentVisible(wdcsTabIndex);
             xkshFragment.setXkshFragmentVisible(wdcsTabIndex);

@@ -109,6 +109,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     private Handler handler;
     public LinearLayout windowLeftIcon;
     public LinearLayout windowRightIcon;
+    public boolean windowIsMain;
 
     public WindowPlayer(Context context) {
         super(context);
@@ -155,6 +156,9 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         this.mDoubleClickDetail = doubleClick;
     }
 
+    public void setIsMain(boolean isMain) {
+        this.windowIsMain = isMain;
+    }
 
     /**
      * 初始化控件、手势检测监听器、亮度/音量/播放进度的回调
@@ -452,7 +456,12 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
                 mLayoutReplay.setVisibility(View.GONE);
                 break;
         }
-        show();
+        if (windowIsMain) {
+            show();
+        } else {
+            toggle();
+        }
+
     }
 
     /**
@@ -463,9 +472,11 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
             hide();
         } else {
             show();
-            if (mHideViewRunnable != null) {
-                removeCallbacks(mHideViewRunnable);
-                postDelayed(mHideViewRunnable, Contants.delayMillis);
+            if (!windowIsMain) {
+                if (mHideViewRunnable != null) {
+                    removeCallbacks(mHideViewRunnable);
+                    postDelayed(mHideViewRunnable, Contants.delayMillis);
+                }
             }
         }
     }
@@ -518,7 +529,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public void show() {
         isShowing = true;
 //        mLayoutTop.setVisibility(View.VISIBLE);
-//        mLayoutBottom.setVisibility(View.VISIBLE);
+        mLayoutBottom.setVisibility(View.VISIBLE);
 
         if (mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
             mTvBackToLive.setVisibility(View.VISIBLE);
@@ -532,7 +543,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public void hide() {
         isShowing = false;
 //        mLayoutTop.setVisibility(View.GONE);
-//        mLayoutBottom.setVisibility(View.GONE);
+        mLayoutBottom.setVisibility(View.GONE);
 
         if (mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
             mTvBackToLive.setVisibility(View.GONE);

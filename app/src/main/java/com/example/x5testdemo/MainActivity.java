@@ -5,12 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.MutableLiveData;
 
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -24,6 +26,7 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.callback.VideoParamCallBack;
 import com.wdcs.model.BuriedPointModel;
 import com.wdcs.model.ShareInfo;
+import com.wdcs.utils.ScreenUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ScreenUtils.transparencyBar(this);
+        ScreenUtils.StatusBarLightMode(this, true);
         setContentView(R.layout.activity_main);
         tv = findViewById(R.id.tv);
         panelCode = findViewById(R.id.panelid);
@@ -110,14 +115,13 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void Login() {
-
                     }
 
                     //https://testmycs.csbtv.com/accountapi/getUserInfoByTgt
                     @Override //e76ea51c-9dc2-4312-a2b5-9bc85ec79198
                     //b3bfd518-7a64-4ff0-a556-d4fbffb0d71f
                     public String setCode() {
-                        return "191dffe3-2bda-46ac-87af-8383541eb282";
+                        return "2ac0204a-faa5-4599-95f4-6b10484a44cf";
                     }
 
                     @Override
@@ -136,10 +140,12 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public Fragment getWebViewFragment(Bundle bundle) {
+                    public Fragment getWebViewFragment(Bundle bundle, MutableLiveData<WebView> liveData) {
                         VideoWebViewTestFragment fragment = VideoWebViewTestFragment.newInstance(bundle.getString("webUrl"));
+                        fragment.setLiveData(liveData);
                         return fragment;
                     }
+
 
                 });
 

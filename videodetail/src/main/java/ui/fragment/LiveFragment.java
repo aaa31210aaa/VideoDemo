@@ -31,6 +31,7 @@ import com.wdcs.callback.JsonCallback;
 import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
+import com.wdcs.manager.FinderBuriedPointManager;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.GdyTokenModel;
 import com.wdcs.model.ShareInfo;
@@ -54,6 +55,7 @@ import widget.LoadingView;
 
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.FROMHOMETAB;
+import static com.wdcs.constants.Constants.MODULE_SOURCE;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -78,6 +80,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
     private LoadingView videoLoadingProgress;
     private boolean first = true;
     private boolean fromHomeTab;
+    private String moduleSource;
 
     public LiveFragment() {
 
@@ -91,10 +94,11 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    public LiveFragment newInstance(LiveFragment fragment, VideoChannelModel videoChannelModel, boolean fromHomeTab) {
+    public LiveFragment newInstance(LiveFragment fragment, VideoChannelModel videoChannelModel, boolean fromHomeTab, String module_source) {
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
         args.putBoolean(FROMHOMETAB, fromHomeTab);
+        args.putString(MODULE_SOURCE, module_source);
         fragment.setArguments(args);
         return fragment;
     }
@@ -105,6 +109,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
         if (getArguments() != null) {
             panelCode = getArguments().getString(PANELCODE);
             fromHomeTab = getArguments().getBoolean(FROMHOMETAB);
+            moduleSource = getArguments().getString(MODULE_SOURCE);
         }
     }
 
@@ -131,6 +136,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                 if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                     noLoginTipsPop();
                 } else {
+                    FinderBuriedPointManager.setFinderVideoPlay(Constants.CONTENT_LIVE_ENTER_PAGE, "", mDatas.get(position), moduleSource);
                     videoLoadingProgress.setVisibility(View.VISIBLE);
                     getGdyToken(PersonInfoManager.getInstance().getTransformationToken(), position);
                 }
@@ -417,6 +423,7 @@ public class LiveFragment extends Fragment implements View.OnClickListener {
                                 if (mDatas.size() == 0) {
                                     return;
                                 }
+
                                 ShareInfo shareInfo = ShareInfo.getInstance(mDatas.get(position).getShareUrl(), mDatas.get(position).getShareImageUrl(),
                                         mDatas.get(position).getShareBrief(), mDatas.get(position).getShareTitle(), "");
 

@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/testbg"
     tools:context="ui.fragment.TestFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -21,4 +22,5 @@
         android:text="测试测试"
         android:layout_centerInParent="true"
         android:layout_below="@+id/tv"></TextView>
+
 </RelativeLayout>

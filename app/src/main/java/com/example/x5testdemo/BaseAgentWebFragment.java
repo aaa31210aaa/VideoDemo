@@ -1,5 +1,6 @@
 package com.example.x5testdemo;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +11,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 
 import com.just.agentweb.AgentWeb;
 import com.just.agentweb.AgentWebSettingsImpl;
@@ -35,6 +37,7 @@ public abstract class BaseAgentWebFragment extends Fragment {
     private MiddlewareWebClientBase mMiddleWareWebClient;
     private ErrorLayoutEntity mErrorLayoutEntity;
     private AgentWebUIControllerImplBase mAgentWebUIController;
+    public MutableLiveData<WebView> mLiveData;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -59,6 +62,10 @@ public abstract class BaseAgentWebFragment extends Fragment {
                 .createAgentWeb()//
                 .ready()//
                 .go(getUrl());
+        if (null != mAgentWeb && null != mLiveData) {
+            WebView webView = mAgentWeb.getWebCreator().getWebView();
+            mLiveData.setValue(webView);
+        }
     }
 
 
@@ -193,4 +200,5 @@ public abstract class BaseAgentWebFragment extends Fragment {
         return this.mMiddleWareWebClient = new MiddlewareWebClientBase() {
         };
     }
+
 }

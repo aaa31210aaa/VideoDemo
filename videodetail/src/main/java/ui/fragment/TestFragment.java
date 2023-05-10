@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.wdcs.videodetail.demo.R;
 
+import ui.activity.SpecialArea5GActivity;
 import ui.activity.TgtCodeActivity;
 import ui.activity.VideoHomeActivity;
 
@@ -88,8 +89,9 @@ public class TestFragment extends Fragment {
         cscs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), TgtCodeActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getActivity(), TgtCodeActivity.class);
+//                startActivity(intent);
+                startActivity(new Intent(getActivity(), SpecialArea5GActivity.class));
             }
         });
     }

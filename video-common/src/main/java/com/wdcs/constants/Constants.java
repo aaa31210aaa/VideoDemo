@@ -114,6 +114,7 @@ public class Constants {
     public static final String CONTENT_LIVE_LIST_PAGE = "content_live_list_page"; //浏览直播专区
     public static final String CONTENT_LIVE_CLICK_LIST = "content_live_click_list"; //点击直播列表页
     public static final String CONTENT_LIVE_ENTER_PAGE = "content_live_enter_page"; //进入直播页
+    public static String CONTENT_LIVE_ENTER_PAGER = "content_live_enter_pager";
 
 
     public static final double Horizontal_Proportion = 1.7777;
@@ -141,4 +142,5 @@ public class Constants {
     public static boolean SPECIAL5G_ISPAUSE;
     public static String VIDEO_COM = "video_com";
     public static String NEWS_VIDEO_SPECIAL = "special";
+
 }

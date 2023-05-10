@@ -9,6 +9,7 @@
         <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_top.xml" value="0.18568840579710144" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21603260869565216" />
         <entry key="app/src/main/res/layout/fragment_video_web_view_test.xml" value="0.18704710144927536" />
+        <entry key="superplayerkit/src/main/res/layout/superplayer_vod_player_fullscreen.xml" value="0.19157608695652173" />
         <entry key="superplayerkit/src/main/res/layout/superplayer_vod_player_window.xml" value="0.17552083333333332" />
         <entry key="superplayerkit/src/main/res/layout/superplayer_vod_view.xml" value="0.18704710144927536" />
         <entry key="video-common/src/main/res/drawable/publisher_bg.xml" value="0.1135" />
@@ -32,6 +33,7 @@
         <entry key="videodetail/src/main/res/layout/activity_special5g_news_detail.xml" value="0.25" />
         <entry key="videodetail/src/main/res/layout/activity_special_area5_g.xml" value="0.18020833333333333" />
         <entry key="videodetail/src/main/res/layout/activity_special_area5g.xml" value="0.25" />
+        <entry key="videodetail/src/main/res/layout/activity_upload.xml" value="0.19157608695652173" />
         <entry key="videodetail/src/main/res/layout/activity_video_detail.xml" value="0.14628623188405798" />
         <entry key="videodetail/src/main/res/layout/activity_video_main.xml" value="0.1703125" />
         <entry key="videodetail/src/main/res/layout/comment_list_empty.xml" value="0.17552083333333332" />
@@ -42,6 +44,7 @@
         <entry key="videodetail/src/main/res/layout/fragment_special5g_hudong.xml" value="0.18704710144927536" />
         <entry key="videodetail/src/main/res/layout/fragment_special5g_one.xml" value="0.18568840579710144" />
         <entry key="videodetail/src/main/res/layout/fragment_special5g_six.xml" value="0.18568840579710144" />
+        <entry key="videodetail/src/main/res/layout/fragment_test.xml" value="0.19157608695652173" />
         <entry key="videodetail/src/main/res/layout/fragment_video_comment_pop.xml" value="0.17552083333333332" />
         <entry key="videodetail/src/main/res/layout/fragment_video_detail.xml" value="0.25" />
         <entry key="videodetail/src/main/res/layout/fragment_video_home.xml" value="0.1703125" />

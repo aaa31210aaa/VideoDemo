@@ -1,11 +1,15 @@
 package adpter;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.webkit.WebView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.callback.VideoInteractiveParam;
@@ -13,6 +17,7 @@ import com.wdcs.model.VideoChannelModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import ui.fragment.Special5gHudongFragment;
 import ui.fragment.Special5gLiveFragment;
@@ -64,12 +69,7 @@ public class Special5gPagerAdapter extends FragmentPagerAdapter {
                 case "5G.house.yinshi":
                 case "5G.house.jishi":
                 case "5G.house.xinweng":
-                    Bundle bundle = new Bundle();
-                    bundle.putString("webUrl", webUrl);
-                    Fragment fragment = VideoInteractiveParam.getInstance().getWebViewFragment(bundle);
-                    if (null != fragment) {
-                        fragmentList.add(fragment);
-                    }
+                    addItemClickListener.addItemClick(videoChannelModel.getColumnBean().getSkipUrl(), fragmentList);
                     break;
                 case "5G.house.zhibo":
                     Special5gLiveFragment fragment4 = new Special5gLiveFragment();
@@ -103,5 +103,15 @@ public class Special5gPagerAdapter extends FragmentPagerAdapter {
     @Override
     public int getItemPosition(Object object) {
         return POSITION_NONE;
+    }
+
+    public AddItemClickListener addItemClickListener;
+
+    public interface AddItemClickListener {
+        void addItemClick(String url, List<Fragment> fragmentList);
+    }
+
+    public void setAddItemClickListener(AddItemClickListener listener) {
+        addItemClickListener = listener;
     }
 }

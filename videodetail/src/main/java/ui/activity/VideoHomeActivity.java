@@ -6,13 +6,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
@@ -23,6 +27,7 @@ import android.widget.TextView;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.OnTabSelectListener;
+import com.gyf.immersionbar.ImmersionBar;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
@@ -45,6 +50,7 @@ import com.wdcs.utils.KeyboardUtils;
 import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.SPUtils;
+import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
@@ -68,6 +74,7 @@ import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedT
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.ISPAUSE;
+import static com.wdcs.constants.Constants.SPECIAL5G_ISPAUSE;
 import static com.wdcs.constants.Constants.TRACKINGUPLOAD;
 import static com.wdcs.constants.Constants.VIDEOTAG;
 import static com.wdcs.constants.Constants.success_code;
@@ -161,7 +168,6 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             playerView.mFullScreenPlayer.mSeekBarProgress.setOnSeekBarChangeListener(new PointSeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {
-
                     if (playerView.mFullScreenPlayer.mGestureVideoProgressLayout != null && fromUser) {
                         playerView.mFullScreenPlayer.mGestureVideoProgressLayout.show();
                         float percentage = ((float) progress) / seekBar.getMax();
@@ -224,6 +230,11 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     if (null == playerView.mWindowPlayer) {
                         return;
                     }
+
+                    if (ISPAUSE) {
+                        playerView.mSuperPlayer.pause();
+                    }
+
                     if (playerView.mWindowPlayer.mGestureVideoProgressLayout != null && fromUser) {
                         playerView.mWindowPlayer.mGestureVideoProgressLayout.show();
                         float percentage = ((float) progress) / seekBar.getMax();
@@ -707,6 +718,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
                     //属性名：button_name
                     FinderBuriedPointManager.setFinderClick("tab_" + mTitlesArrays[position]);
                 }
+                ScreenUtils.transparencyBar(VideoHomeActivity.this);
             }
 
             @Override
@@ -735,7 +747,7 @@ public class VideoHomeActivity extends AppCompatActivity implements View.OnClick
             model.setColumnBean(columnModel);
             videoChannelModels.add(model);
         }
-        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, requestId, playerView, toCurrentTab, false);
+        videoViewPagerAdapter.addItems(videoChannelModels, contentId, categoryName, requestId, playerView, toCurrentTab, false, module_source);
         for (VideoChannelModel channelBean : videoChannelModels) {
             colunmList.add(channelBean.getColumnBean().getColumnName());
         }

@@ -41,10 +41,11 @@
         android:largeHeap="true">
         <activity
             android:name="ui.activity.Special5GNewsDetailActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name="ui.activity.SpecialArea5GActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

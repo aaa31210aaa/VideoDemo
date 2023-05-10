@@ -1,11 +1,13 @@
 package adpter;
 
 import android.os.Bundle;
+import android.webkit.WebView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.MutableLiveData;
 
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.wdcs.callback.VideoInteractiveParam;
@@ -53,13 +55,7 @@ public class Special5gHudongPagerAdapter extends FragmentPagerAdapter {
         fragmentList.clear();
         titleList.addAll(channelBeanList);
         for (Special5GTabModel.DataDTO dataDTO : channelBeanList) {
-            String jumpUrl = dataDTO.getJumpUrl();
-            Bundle bundle = new Bundle();
-            bundle.putString("webUrl", jumpUrl);
-            Fragment fragment = VideoInteractiveParam.getInstance().getWebViewFragment(bundle);
-            if (null != fragment) {
-                fragmentList.add(fragment);
-            }
+            addItemClickListener.addItemClick(dataDTO.getJumpUrl(),fragmentList);
         }
         notifyDataSetChanged();
 
@@ -82,5 +78,15 @@ public class Special5gHudongPagerAdapter extends FragmentPagerAdapter {
     @Override
     public int getItemPosition(Object object) {
         return POSITION_NONE;
+    }
+
+    public AddItemClickListener addItemClickListener;
+
+    public interface AddItemClickListener {
+        void addItemClick(String url,List<Fragment> fragmentList);
+    }
+
+    public void setAddItemClickListener(AddItemClickListener listener){
+        addItemClickListener = listener;
     }
 }

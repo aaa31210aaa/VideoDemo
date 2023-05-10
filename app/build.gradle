@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':videodetail')
     implementation project(':video-common')
     implementation "com.tencent.liteav:LiteAVSDK_Player:9.5.29006"

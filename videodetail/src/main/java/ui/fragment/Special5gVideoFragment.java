@@ -256,6 +256,7 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
     }
 
     private void initView(View view) {
+        ScreenUtils.transparencyBar(getActivity());
         param = VideoInteractiveParam.getInstance();
         loadingProgress = view.findViewById(R.id.video_loading_progress);
         loadingProgress.setVisibility(View.VISIBLE);
@@ -2320,7 +2321,6 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
     public void onPause() {
         super.onPause();
         SPECIAL5G_ISPAUSE = true;
-        Log.e("ssss", "测试onPause生命周期----" + videoFragmentIsVisibleToUser);
         if (playerView == null) {
             return;
         }
@@ -2334,7 +2334,16 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
         }
         playerView.mSuperPlayer.pause();
         playerView.mOrientationHelper.disable();
+    }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (playerView != null) {
+            playerView.stopPlay();
+            playerView.release();
+            playerView.mSuperPlayer.destroy();
+        }
     }
 
     @Override

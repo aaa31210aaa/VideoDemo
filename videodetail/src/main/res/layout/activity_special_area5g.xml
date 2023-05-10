@@ -5,13 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:resizeableActivity="true"
     tools:context="ui.activity.SpecialArea5GActivity">
 
     <com.wdcs.utils.NoScrollViewPager
         android:id="@+id/special_5g_vp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
     </com.wdcs.utils.NoScrollViewPager>
 

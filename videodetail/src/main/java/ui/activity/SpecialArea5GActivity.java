@@ -10,6 +10,9 @@ import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.SPECIAL5G_ISPAUSE;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
@@ -21,9 +24,12 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -38,13 +44,14 @@ import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.SuperPlayerView;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
 import com.tencent.liteav.demo.superplayer.model.SuperPlayerImpl;
+import com.tencent.liteav.demo.superplayer.model.utils.SystemUtils;
 import com.tencent.liteav.demo.superplayer.ui.view.PointSeekBar;
 import com.wdcs.callback.JsonCallback;
+import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.manager.ContentBuriedPointManager;
 import com.wdcs.manager.FinderBuriedPointManager;
-import com.wdcs.model.CategoryCompositeModel;
 import com.wdcs.model.ColumnModel;
 import com.wdcs.model.Special5GTabModel;
 import com.wdcs.model.VideoChannelModel;
@@ -60,9 +67,12 @@ import com.wdcs.utils.Utils;
 import com.wdcs.videodetail.demo.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import adpter.Special5gPagerAdapter;
+import ui.fragment.Special5gHudongFragment;
 import ui.fragment.Special5gVideoFragment;
 import widget.NetBroadcastReceiver;
 
@@ -100,6 +110,10 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
     private int toCurrentTab;
     private RelativeLayout.LayoutParams layoutParams;
     private List<Special5GTabModel.DataDTO> tabLists = new ArrayList<>();
+    public static List<WebView> webViewList = new ArrayList<>();
+    private int tabPosition;
+    public static Map<Fragment, WebView> fragmentWebViewMap = new HashMap<>();
+    public static WebView currentWebView;
 
 
     @Override
@@ -127,7 +141,6 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
 
 
     private void initView() {
-        ScreenUtils.setStatusBarColor(this, R.color.white);
         searchBar = findViewById(R.id.search_bar);
         special5gTab = findViewById(R.id.special_5g_tab);
 
@@ -146,7 +159,7 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
         noLoginTipsCancel.setOnClickListener(this);
         noLoginTipsOk.setOnClickListener(this);
         playerView = new SuperPlayerView(this, getWindow().getDecorView(), true);
-
+        playerView.setStatuDark(false);
         area5gSearch.setOnClickListener(this);
         special5gBack.setOnClickListener(this);
         special5gPersonalCenter.setOnClickListener(this);
@@ -160,7 +173,8 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
             module_source = "";
         }
         layoutParams = (RelativeLayout.LayoutParams) findViewById(R.id.special_5g_vp).getLayoutParams();
-        setStatuBar(true);
+//        setStatuBar(false);
+
     }
 
     private void initViewPager() {
@@ -170,6 +184,27 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
         }
         special5gVp.setAdapter(special5gPagerAdapter);
 
+        special5gPagerAdapter.setAddItemClickListener(new Special5gPagerAdapter.AddItemClickListener() {
+            @Override
+            public void addItemClick(String url, List<Fragment> fragmentList) {
+                Bundle bundle = new Bundle();
+                bundle.putString("webUrl", url);
+                MutableLiveData<WebView> webLiveData = new MutableLiveData<>();
+                final Fragment fragment = VideoInteractiveParam.getInstance().getWebViewFragment(bundle, webLiveData);
+
+                webLiveData.observe(SpecialArea5GActivity.this, new Observer<WebView>() {
+                    @Override
+                    public void onChanged(final WebView webView) {
+                        fragmentWebViewMap.put(fragment, webView);
+                    }
+                });
+
+                if (null != fragment) {
+                    fragmentList.add(fragment);
+                }
+            }
+        });
+
         special5gVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -178,7 +213,6 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
             @SuppressLint("ResourceAsColor")
             @Override
             public void onPageSelected(int position) {
-
                 switch (position) {
                     case 0:
                     case 1:
@@ -187,14 +221,30 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
                     case 4:
                         //白背景
                         setStatuBar(true);
-
+                        playerView.setOrientation(false);
+                        tabPosition = position;
                         break;
                     case 5:
                         //黑背景
-
                         setStatuBar(false);
+                        playerView.setOrientation(true);
+                        tabPosition = position;
                         break;
                 }
+
+                Fragment fragment = special5gPagerAdapter.fragmentList.get(position);
+                if (null != fragment) {
+                    currentWebView = fragmentWebViewMap.get(fragment);
+                }
+
+                if (fragment instanceof Special5gHudongFragment) {
+                    String columnId = fragment.getArguments().getString("columnId");
+                    if (columnId.equals("5G.house.hudong")) {
+                        ((Special5gHudongFragment) fragment).getCurrentWebView();
+                    }
+                }
+
+
             }
 
             @Override
@@ -205,10 +255,6 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
 
         getTabData();
     }
-
-
-
-
 
     private void getTabData() {
         String deviceId = "";
@@ -273,8 +319,9 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
             special5gBackImg.setImageResource(R.drawable.black_back);
             special5gSearchImg.setImageResource(R.drawable.black_search);
             personalCenterImg.setImageResource(R.drawable.black_personal_center);
-            ScreenUtils.setStatusBarColor(SpecialArea5GActivity.this, R.color.white);
+            ScreenUtils.setStatusBarColor(this, getResources().getColor(R.color.white), true);
             ScreenUtils.StatusBarLightMode(SpecialArea5GActivity.this, true);
+            SystemUtils.setNavbarColor(this, R.color.white);
         } else {
             topZzc.setVisibility(View.VISIBLE);
             layoutParams.removeRule(BELOW);
@@ -287,8 +334,8 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
             special5gBackImg.setImageResource(R.drawable.video_back);
             special5gSearchImg.setImageResource(R.drawable.video_search);
             personalCenterImg.setImageResource(R.drawable.video_user);
-            ScreenUtils.setStatusBarColor(SpecialArea5GActivity.this, R.color.transparent);
-            ScreenUtils.StatusBarLightMode(SpecialArea5GActivity.this, false);
+            ScreenUtils.fullScreen(this, getResources().getColor(R.color.transparent));
+            SystemUtils.setNavbarColor(this, R.color.video_black);
         }
 
     }
@@ -301,6 +348,7 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
                 columnModel.setColumnId(models.get(i).getCode());
                 columnModel.setColumnName(models.get(i).getName());
                 columnModel.setPanelCode(models.get(i).getCode());
+                columnModel.setSkipUrl(models.get(i).getJumpUrl());
                 model.setColumnBean(columnModel);
                 videoChannelModels.add(model);
             }
@@ -418,12 +466,8 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
                         return;
                     }
 
-                    if (special5gTab.getCurrentTab() != 5) {
-                        if (SPECIAL5G_ISPAUSE) {
-                            playerView.mSuperPlayer.pause();
-                        } else {
-                            playerView.mSuperPlayer.resume();
-                        }
+                    if (special5gTab.getCurrentTab() != 5 && SPECIAL5G_ISPAUSE) {
+                        playerView.mSuperPlayer.pause();
                     }
 
                     if (playerView.mWindowPlayer.mGestureVideoProgressLayout != null && fromUser) {
@@ -758,7 +802,12 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
                 e.printStackTrace();
             }
         } else if (id == R.id.special_5g_back) {
-            finish();
+            if (null != currentWebView && currentWebView.canGoBack()) {
+                currentWebView.goBack();
+            } else {
+                finish();
+            }
+
         } else if (id == R.id.special_5g_personal_center) {
             if (TextUtils.isEmpty(PersonInfoManager.getInstance().getTransformationToken())) {
                 noLoginTipsPop();
@@ -789,6 +838,19 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (null != currentWebView && currentWebView.canGoBack()) {
+                currentWebView.goBack();
+                return false;
+            } else {
+                finish();
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -825,5 +887,8 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
         readPlay5GCallBack = null;
         SuperPlayerImpl.setReadPlay5GCallBack(readPlay5GCallBack);
         isDestroyed = true;
+        webViewList.clear();
+        fragmentWebViewMap.clear();
+        currentWebView = null;
     }
 }

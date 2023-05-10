@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
@@ -216,11 +218,11 @@ public class VideoInteractiveParam {
     /**
      * 获取fragment实例
      */
-    public Fragment getWebViewFragment(Bundle bundle) {
+    public Fragment getWebViewFragment(Bundle bundle, MutableLiveData<WebView> liveData) {
         if (null == callBack) {
             Log.e("getWebViewFragment", "获取失败,请重试");
         } else {
-            return callBack.getWebViewFragment(bundle);
+            return callBack.getWebViewFragment(bundle, liveData);
         }
         return new Fragment();
     }

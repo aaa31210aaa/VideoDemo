@@ -11,7 +11,7 @@
     <color name="colorPrimaryDark">#21a3f5</color>
     <color name="colorAccent">#0accac</color>
     <color name="transparent">#00000000</color>
-
+    <color name="translucent" tools:ignore="MissingDefaultResource">#22050505</color>
     <color name="colorTransparentBlack">#44777777</color>
 
     <color name="background_gray1">#EBEBEB</color>

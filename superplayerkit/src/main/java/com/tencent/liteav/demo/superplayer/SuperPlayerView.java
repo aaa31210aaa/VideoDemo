@@ -243,7 +243,14 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
             mFullScreenPlayer.hide();
         } else if (mSuperPlayer.getPlayerMode() == SuperPlayerDef.PlayerMode.WINDOW) {
             addView(mWindowPlayer);
-            mWindowPlayer.hide();
+            mWindowPlayer.setIsMain(isMainbool);
+            if (!isMainbool) {
+                mWindowPlayer.show();
+                if (mWindowPlayer.mHideViewRunnable != null) {
+                    removeCallbacks(mWindowPlayer.mHideViewRunnable);
+                    postDelayed(mWindowPlayer.mHideViewRunnable, Contants.delayMillis);
+                }
+            }
         }
 
         post(new Runnable() {
@@ -620,7 +627,9 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
                     if (isDark) {
                         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                     } else {
-                        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
                     }
 
                 }

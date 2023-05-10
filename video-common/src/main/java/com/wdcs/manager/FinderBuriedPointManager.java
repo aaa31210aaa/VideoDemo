@@ -177,7 +177,7 @@ public class FinderBuriedPointManager {
     }
 
     /**
-     * 开始播放
+     * 开始播放 / 进入直播页面
      */
     public static void setFinderVideoPlay(String eventStr, String isRenew, DataDTO mDataDTO, String module_source) {
         if (null == mDataDTO) {

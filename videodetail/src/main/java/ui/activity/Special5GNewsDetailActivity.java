@@ -3,6 +3,7 @@ package ui.activity;
 import static com.tencent.liteav.demo.superplayer.ui.player.AbsPlayer.formattedTime;
 import static com.tencent.liteav.demo.superplayer.ui.player.WindowPlayer.mDuration;
 import static com.wdcs.constants.Constants.CLICK_INTERVAL_TIME;
+import static com.wdcs.constants.Constants.success_code;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,8 +22,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.BarUtils;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.lzy.okgo.OkGo;
+import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.model.Response;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
@@ -41,10 +44,12 @@ import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.CollectionTypeModel;
+import com.wdcs.model.ContentStateModel;
 import com.wdcs.model.DataDTO;
 import com.wdcs.model.ShareInfo;
 import com.wdcs.model.VideoDetailCollectionModel;
 import com.wdcs.utils.ButtonSpan;
+import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ScreenUtils;
 import com.wdcs.utils.ToastUtils;
 import com.wdcs.utils.Utils;
@@ -89,6 +94,8 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
     private VideoDetailCollectionModel.DataDTO.RecordsDTO recordsDTO;
     private CollectionTypeModel.DataDTO.ChildrenDTO childrenDTO;
     private RelativeLayout rootView;
+    private String currentContentId;
+    private String videoType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +126,7 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
             public void getPlayMode(SuperPlayerDef.PlayerMode playerMode) {
                 if (playerMode.equals(SuperPlayerDef.PlayerMode.FULLSCREEN)) {
                     titleBar.setVisibility(View.GONE);
+
                 } else if (playerMode.equals(SuperPlayerDef.PlayerMode.WINDOW)) {
                     titleBar.setVisibility(View.VISIBLE);
                 }
@@ -285,13 +293,11 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
 
         collectionRv.setHasFixedSize(true);
         collectionRv.setNestedScrollingEnabled(false);
-        initRefreshLayout();
         getVideoCollectionData(contentId);
 
     }
 
     private void initRefreshLayout() {
-        refreshLayout.setEnableRefresh(false);
         refreshLayout.setEnableScrollContentWhenLoaded(true);
         refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
@@ -329,11 +335,11 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
     }
 
     /**
-     * 获取合集详情
-     */
-    private void getVideoCollectionData(final String contentId) {
-        OkGo.<CollectionTypeModel>get(ApiConstants.getInstance().getVideoCollectionUrl() + contentId)
-                .execute(new JsonCallback<CollectionTypeModel>() {
+                 * 获取合集详情
+                 */
+        private void getVideoCollectionData(final String contentId) {
+            OkGo.<CollectionTypeModel>get(ApiConstants.getInstance().getVideoCollectionUrl() + contentId)
+                    .execute(new JsonCallback<CollectionTypeModel>() {
                     @Override
                     public void onSuccess(Response<CollectionTypeModel> response) {
                         if (null == response.body()) {
@@ -363,6 +369,8 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
                                     if (i == 0) {
                                         response.body().getData().getChildren().get(i).setCheck(true);
                                         childrenDTO = response.body().getData().getChildren().get(i);
+                                        currentContentId = childrenDTO.getId();
+                                        videoType = childrenDTO.getType();
                                     } else {
                                         response.body().getData().getChildren().get(i).setCheck(false);
                                     }
@@ -371,8 +379,12 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
                                 }
                                 adapter.setNewData(videoComDatas);
                                 collectionRv.setAdapter(adapter);
-                                String url = response.body().getData().getChildren().get(0).getPlayUrl();
-                                play(url);
+                                if (!response.body().getData().getChildren().isEmpty()) {
+                                    String url = response.body().getData().getChildren().get(0).getPlayUrl();
+                                    play(url);
+                                }
+                                getContentState(currentContentId);
+
                                 //选集
                                 adapter.setItemClickListener(new VideoCollectionRvAdapter.ItemClickListener() {
                                     @Override
@@ -385,6 +397,9 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
                                             }
                                         }
                                         childrenDTO = videoComDatas.get(position);
+                                        currentContentId = childrenDTO.getId();
+                                        videoType = childrenDTO.getType();
+                                        getContentState(currentContentId);
                                         adapter.notifyDataSetChanged();
                                         playerView.resetPlayer();
                                         play(videoComDatas.get(position).getPlayUrl());
@@ -415,6 +430,52 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
                         }
 
                         ToastUtils.showShort(response.body().getMessage());
+                    }
+                });
+    }
+
+    /**
+     * 获取收藏点赞状态
+     */
+    public void getContentState(final String contentId) {
+        OkGo.<ContentStateModel>get(ApiConstants.getInstance().queryStatsData())
+                .tag("contentState")
+                .headers("token", PersonInfoManager.getInstance().getTransformationToken())
+                .params("contentId", contentId)
+                .cacheMode(CacheMode.NO_CACHE)
+                .execute(new JsonCallback<ContentStateModel>(ContentStateModel.class) {
+                    @Override
+                    public void onSuccess(Response<ContentStateModel> response) {
+                        if (null == response.body()) {
+                            ToastUtils.showShort(R.string.data_err);
+                            return;
+                        }
+
+                        try {
+                            if (response.body().getCode().equals(success_code)) {
+                                if (null == response.body().getData()) {
+                                    ToastUtils.showShort(R.string.data_err);
+                                    return;
+                                }
+                                playerView.contentStateModel = response.body().getData();
+                                if (null != playerView.contentStateModel) {
+                                    playerView.setContentStateModel(contentId, videoType);
+                                }
+                            } else {
+                                ToastUtils.showShort(response.body().getMessage());
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<ContentStateModel> response) {
+                        if (null != response.body()) {
+                            ToastUtils.showShort(response.body().getMessage());
+                            return;
+                        }
+                        ToastUtils.showShort(R.string.net_err);
                     }
                 });
     }
@@ -453,6 +514,8 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
                                         if (i == 0) {
                                             response.body().getData().getRecords().get(i).setCheck(true);
                                             recordsDTO = response.body().getData().getRecords().get(i);
+                                            currentContentId = recordsDTO.getId();
+                                            videoType = recordsDTO.getType();
                                         } else {
                                             response.body().getData().getRecords().get(i).setCheck(false);
                                         }
@@ -462,12 +525,15 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
 
                                     response.body().getData().getRecords().get(i).setIndex(i + 1);
                                     newsVideoDatas.add(response.body().getData().getRecords().get(i));
+
+                                    initRefreshLayout();
                                 }
                                 if (isRefresh) {
                                     play(url);
                                 }
                                 newsVideoAdapter.setNewData(newsVideoDatas);
                                 collectionRv.setAdapter(newsVideoAdapter);
+                                getContentState(currentContentId);
                             }
 
 
@@ -483,6 +549,9 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
                                         }
                                     }
                                     recordsDTO = newsVideoDatas.get(position);
+                                    currentContentId = recordsDTO.getId();
+                                    videoType = recordsDTO.getType();
+                                    getContentState(currentContentId);
                                     newsVideoAdapter.notifyDataSetChanged();
                                     playerView.resetPlayer();
                                     play(newsVideoDatas.get(position).getPlayUrl());
@@ -554,18 +623,26 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
             } else {
                 toShare(recordsDTO, Constants.SHARE_WX);
             }
-
+            if (null != sharePop) {
+                sharePop.dissmiss();
+            }
         } else if (id == R.id.share_circle_btn_rl) {
             if (TextUtils.equals(Constants.VIDEO_COM, type)) {
                 toShare(childrenDTO, Constants.SHARE_CIRCLE);
             } else {
                 toShare(recordsDTO, Constants.SHARE_CIRCLE);
             }
+            if (null != sharePop) {
+                sharePop.dissmiss();
+            }
         } else if (id == R.id.share_qq_btn_rl) {
             if (TextUtils.equals(Constants.VIDEO_COM, type)) {
                 toShare(childrenDTO, Constants.SHARE_QQ);
             } else {
                 toShare(recordsDTO, Constants.SHARE_QQ);
+            }
+            if (null != sharePop) {
+                sharePop.dissmiss();
             }
         }
     }

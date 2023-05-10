@@ -3,19 +3,32 @@ package ui.fragment;
 import static com.wdcs.callback.VideoInteractiveParam.param;
 import static com.wdcs.constants.Constants.PANELCODE;
 
+import static ui.activity.SpecialArea5GActivity.currentWebView;
+import static ui.activity.SpecialArea5GActivity.fragmentWebViewMap;
+import static ui.activity.SpecialArea5GActivity.webViewList;
+
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.viewpager.widget.ViewPager;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 
 import com.flyco.tablayout.SlidingTabLayout;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.wdcs.callback.JsonCallback;
+import com.wdcs.callback.VideoInteractiveParam;
 import com.wdcs.constants.Constants;
 import com.wdcs.http.ApiConstants;
 import com.wdcs.model.ColumnModel;
@@ -29,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.Special5gHudongPagerAdapter;
+import ui.activity.SpecialArea5GActivity;
 
 public class Special5gHudongFragment extends Fragment {
     private View view;
@@ -38,7 +52,8 @@ public class Special5gHudongFragment extends Fragment {
     public Special5gHudongPagerAdapter special5gHudongPagerAdapter;
     private String columnId;
     private List<Special5GTabModel.DataDTO> tabLists = new ArrayList<>();
-
+    public MutableLiveData<WebView> hudongLiveData;
+    private int hudongTabPosition = 0;
 
     public Special5gHudongFragment() {
         // Required empty public constructor
@@ -47,7 +62,7 @@ public class Special5gHudongFragment extends Fragment {
     public static Special5gHudongFragment newInstance(Special5gHudongFragment fragment, VideoChannelModel videoChannelModel) {
         Bundle args = new Bundle();
         fragment.setArguments(args);
-        args.putString("columnId",videoChannelModel.getColumnBean().getColumnId());
+        args.putString("columnId", videoChannelModel.getColumnBean().getColumnId());
         return fragment;
     }
 
@@ -70,8 +85,14 @@ public class Special5gHudongFragment extends Fragment {
     private void initView() {
         special5gHudongtab = view.findViewById(R.id.special_5g_hudongtab);
         special5gHudongVp = view.findViewById(R.id.special_5g_hudong_vp);
-
         initHudongViewPager();
+    }
+
+    public void getCurrentWebView() {
+        Fragment fragment = special5gHudongPagerAdapter.fragmentList.get(hudongTabPosition);
+        if (null != fragment) {
+            currentWebView = fragmentWebViewMap.get(fragment);
+        }
     }
 
     private void initHudongViewPager() {
@@ -79,7 +100,48 @@ public class Special5gHudongFragment extends Fragment {
         if (null == special5gHudongPagerAdapter) {
             special5gHudongPagerAdapter = new Special5gHudongPagerAdapter(getActivity().getSupportFragmentManager());
         }
+        special5gHudongPagerAdapter.setAddItemClickListener(new Special5gHudongPagerAdapter.AddItemClickListener() {
+            @Override
+            public void addItemClick(String url, List<Fragment> fragmentList) {
+                Bundle bundle = new Bundle();
+                bundle.putString("webUrl", url);
+                hudongLiveData = new MutableLiveData<>();
+                final Fragment fragment = VideoInteractiveParam.getInstance().getWebViewFragment(bundle, hudongLiveData);
+                hudongLiveData.observe(getActivity(), new Observer<WebView>() {
+                    @Override
+                    public void onChanged(WebView webView) {
+                        fragmentWebViewMap.put(fragment, webView);
+                    }
+                });
+
+                if (null != fragment) {
+                    fragmentList.add(fragment);
+                }
+            }
+        });
+
         special5gHudongVp.setAdapter(special5gHudongPagerAdapter);
+
+        special5gHudongVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                hudongTabPosition = position;
+                Fragment fragment = special5gHudongPagerAdapter.fragmentList.get(position);
+                if (null != fragment) {
+                    currentWebView = fragmentWebViewMap.get(fragment);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         getHudongTabData();
     }
 
@@ -137,5 +199,10 @@ public class Special5gHudongFragment extends Fragment {
         //tab和ViewPager进行关联
         special5gHudongtab.setViewPager(special5gHudongVp, titles);
         special5gHudongtab.setCurrentTab(0);
+
+        Fragment fragment = special5gHudongPagerAdapter.fragmentList.get(hudongTabPosition);
+        if (null != fragment) {
+            currentWebView = fragmentWebViewMap.get(fragment);
+        }
     }
 }

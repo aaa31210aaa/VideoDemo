@@ -76,8 +76,7 @@
                     android:layout_toRightOf="@+id/fullscreen_like"
                     android:textColor="@color/superplayer_white"
                     android:textSize="8sp"
-                    tool:text="100W+"
-                    >
+                    tool:text="100W+">
 
                 </TextView>
 

@@ -345,7 +345,7 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 //                startActivity(intent);
 //            }
 //        });
-
+        ScreenUtils.transparencyBar(getActivity());
         param = VideoInteractiveParam.getInstance();
 //        share = view.findViewById(R.id.share);
 //        share.setOnClickListener(this);
