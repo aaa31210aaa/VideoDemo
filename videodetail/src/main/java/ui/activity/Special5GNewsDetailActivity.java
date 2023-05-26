@@ -93,7 +93,7 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
     private RelativeLayout shareQqBtnRl;
     private VideoDetailCollectionModel.DataDTO.RecordsDTO recordsDTO;
     private CollectionTypeModel.DataDTO.ChildrenDTO childrenDTO;
-    private RelativeLayout rootView;
+    private LinearLayout rootView;
     private String currentContentId;
     private String videoType;
 
@@ -106,7 +106,7 @@ public class Special5GNewsDetailActivity extends AppCompatActivity implements Vi
 
     private void initView() {
         ScreenUtils.setStatusBarColor(this, R.color.white);
-        ScreenUtils.StatusBarLightMode(this, true, false);
+        ScreenUtils.StatusBarLightMode(this, true, true);
         contentId = getIntent().getStringExtra("contentId");
         titleBar = findViewById(R.id.title_bar);
         newsDetailBack = findViewById(R.id.news_detail_back);

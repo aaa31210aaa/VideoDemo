@@ -101,22 +101,39 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/search_bar">
 
-        <com.flyco.tablayout.SlidingTabLayout
+        <!--        <com.flyco.tablayout.SlidingTabLayout-->
+        <!--            android:id="@+id/special_5g_tab"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="50dp"-->
+        <!--            android:layout_centerInParent="true"-->
+        <!--            android:background="@color/transparent"-->
+        <!--            app:tl_indicator_color="@color/bz_red"-->
+        <!--            app:tl_indicator_corner_radius="@dimen/video_dp2"-->
+        <!--            app:tl_indicator_height="@dimen/video_dp2"-->
+        <!--            app:tl_indicator_margin_bottom="@dimen/video_dp10"-->
+        <!--            app:tl_indicator_width="@dimen/video_dp20"-->
+        <!--            app:tl_tab_space_equal="true"-->
+        <!--            app:tl_textSelectColor="@color/video_black"-->
+        <!--            app:tl_textSelsize="15sp"-->
+        <!--            app:tl_textUnselectColor="@color/p60_opacity_white"-->
+        <!--            app:tl_textsize="13sp" />-->
+
+        <com.flyco.tablayout.CommonTabLayout
             android:id="@+id/special_5g_tab"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_centerInParent="true"
             android:background="@color/transparent"
-            app:tl_indicator_color="@color/bz_red"
-            app:tl_indicator_corner_radius="@dimen/video_dp2"
-            app:tl_indicator_height="@dimen/video_dp2"
-            app:tl_indicator_margin_bottom="@dimen/video_dp10"
-            app:tl_indicator_width="@dimen/video_dp20"
+            app:tl_iconGravity="BOTTOM"
+            app:tl_iconHeight="5dp"
+            app:tl_iconWidth="25dp"
+            app:tl_indicator_height="0dp"
             app:tl_tab_space_equal="true"
             app:tl_textSelectColor="@color/video_black"
-            app:tl_textSelsize="15sp"
+            app:tl_textSelsize="18sp"
             app:tl_textUnselectColor="@color/p60_opacity_white"
-            app:tl_textsize="13sp" />
+            app:tl_textsize="13sp"
+            app:tl_unselect_icon_visible="false" />
     </RelativeLayout>
 
 </RelativeLayout>

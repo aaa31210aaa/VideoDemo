@@ -1,9 +1,19 @@
 package com.wdcs.utils;
 
+import static android.content.Context.WIFI_SERVICE;
+
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -12,6 +22,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 
 public class NetworkUtil {
     public static String url = "http://www.baidu.com";
@@ -21,9 +32,16 @@ public class NetworkUtil {
     public static int NET_ERROR = 4; //net error
     private static int TIMEOUT = 3000; // TIMEOUT
 
+    public static final int NETWORK_WIFI = 10;    // wifi network
+    public static final int NETWORK_4G = 40;    // "4G" networks
+    public static final int NETWORK_3G = 30;    // "3G" networks
+    public static final int NETWORK_2G = 20;    // "2G" networks
+    public static final int NETWORK_UNKNOWN = 50;    // unknown network
+    public static final int NETWORK_NO = -1;   // no network
 
     /**
      * check NetworkAvailable
+     *
      * @param context
      * @return
      */
@@ -42,14 +60,15 @@ public class NetworkUtil {
 
     /**
      * getLocalIpAddress
+     *
      * @return
      */
     public static String getLocalIpAddress() {
         String ret = "";
         try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                 NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
                     InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress()) {
                         ret = inetAddress.getHostAddress().toString();
@@ -93,7 +112,8 @@ public class NetworkUtil {
     }
 
     /**
-     *ping "http://www.baidu.com"
+     * ping "http://www.baidu.com"
+     *
      * @return
      */
     static private boolean connectionNetwork() {
@@ -117,6 +137,7 @@ public class NetworkUtil {
 
     /**
      * check is3G
+     *
      * @param context
      * @return boolean
      */
@@ -133,6 +154,7 @@ public class NetworkUtil {
 
     /**
      * isWifi
+     *
      * @param context
      * @return boolean
      */
@@ -155,6 +177,7 @@ public class NetworkUtil {
 
     /**
      * is2G
+     *
      * @param context
      * @return boolean
      */
@@ -172,7 +195,7 @@ public class NetworkUtil {
     }
 
     /**
-     *  is wifi on
+     * is wifi on
      */
     public static boolean isWifiEnabled(Context context) {
         ConnectivityManager mgrConn = (ConnectivityManager) context

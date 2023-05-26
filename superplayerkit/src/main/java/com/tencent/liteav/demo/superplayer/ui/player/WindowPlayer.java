@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.example.zhouwei.library.CustomPopWindow;
 import com.tencent.liteav.demo.superplayer.R;
 import com.tencent.liteav.demo.superplayer.SuperPlayerDef;
 import com.tencent.liteav.demo.superplayer.contants.Contants;
@@ -110,6 +111,8 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public LinearLayout windowLeftIcon;
     public LinearLayout windowRightIcon;
     public boolean windowIsMain;
+//    public ImageView windowCastScreen;
+    private CustomPopWindow devicePopWindow; //投屏设备列表弹窗
 
     public WindowPlayer(Context context) {
         super(context);
@@ -286,7 +289,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         LayoutInflater.from(context).inflate(R.layout.superplayer_vod_player_window, this);
         mLayoutTop = (LinearLayout) findViewById(R.id.superplayer_rl_top);
         mLayoutTop.setOnClickListener(this);
-        mLayoutBottom =  findViewById(R.id.superplayer_ll_bottom);
+        mLayoutBottom = findViewById(R.id.superplayer_ll_bottom);
         mLayoutBottom.setOnClickListener(this);
         mLayoutReplay = (LinearLayout) findViewById(R.id.superplayer_ll_replay);
         mTvTitle = (TextView) findViewById(R.id.superplayer_tv_title);
@@ -303,6 +306,10 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
         mSeekBarProgress.setAlpha(0);
         xSeekBarProgress.setProgress(0);
         xSeekBarProgress.setMax(100);
+//        windowCastScreen = findViewById(R.id.window_cast_screen);
+//        if (!windowIsMain) {
+//            windowCastScreen.setVisibility(VISIBLE);
+//        }
 
         mSeekBarProgress.setMoveEventListener(new PointSeekBar.MoveEventListener() {
             @Override
@@ -543,7 +550,9 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
     public void hide() {
         isShowing = false;
 //        mLayoutTop.setVisibility(View.GONE);
-        mLayoutBottom.setVisibility(View.GONE);
+        if (!windowIsMain) {
+            mLayoutBottom.setVisibility(View.GONE);
+        }
 
         if (mPlayType == SuperPlayerDef.PlayerType.LIVE_SHIFT) {
             mTvBackToLive.setVisibility(View.GONE);
@@ -899,6 +908,7 @@ public class WindowPlayer extends AbsPlayer implements View.OnClickListener {
             }
         }
     }
+
 
 //    @Override
 //    public void onProgressChanged(PointSeekBar seekBar, int progress, boolean fromUser) {

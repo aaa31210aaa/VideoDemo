@@ -6,13 +6,20 @@
         <entry key="../../.gradle/caches/transforms-2/files-2.1/596b40b0ab846efe12094cf291cb6fb8/jetified-appcompat-resources-1.1.0/res/drawable/abc_vector_test.xml" value="0.187" />
         <entry key="..\:/AndroidStudioProjects/VideoDemo/superplayerkit/src/main/res/layout/superplayer_vod_view.xml" value="0.4765625" />
         <entry key="..\:/AndroidStudioProjects/VideoDemo/videodetail/src/main/res/layout/fragment_in_live.xml" value="0.534375" />
+        <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab.xml" value="0.19895833333333332" />
+        <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_bottom.xml" value="0.18229166666666666" />
+        <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_left.xml" value="0.18229166666666666" />
+        <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_right.xml" value="0.2028985507246377" />
+        <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_segment.xml" value="0.2028985507246377" />
         <entry key="FlycoTabLayout_Lib/src/main/res/layout/layout_tab_top.xml" value="0.18568840579710144" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21603260869565216" />
         <entry key="app/src/main/res/layout/fragment_video_web_view_test.xml" value="0.18704710144927536" />
+        <entry key="superplayerkit/src/main/res/layout/device_list_pop_view.xml" value="0.25" />
         <entry key="superplayerkit/src/main/res/layout/superplayer_vod_player_fullscreen.xml" value="0.19157608695652173" />
         <entry key="superplayerkit/src/main/res/layout/superplayer_vod_player_window.xml" value="0.17552083333333332" />
         <entry key="superplayerkit/src/main/res/layout/superplayer_vod_view.xml" value="0.18704710144927536" />
         <entry key="video-common/src/main/res/drawable/publisher_bg.xml" value="0.1135" />
+        <entry key="video-common/src/main/res/drawable/trans_color_bg.xml" value="0.176" />
         <entry key="videodetail/src/main/res/drawable/anthology_bg.xml" value="0.187" />
         <entry key="videodetail/src/main/res/drawable/choose_pop_bg.xml" value="0.187" />
         <entry key="videodetail/src/main/res/drawable/choose_pop_rv_item_check.xml" value="0.187" />

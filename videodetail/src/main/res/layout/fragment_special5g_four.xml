@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f5f5f5"
     tools:context="ui.fragment.Special5gLiveFragment">
 
     <com.scwang.smart.refresh.layout.SmartRefreshLayout
@@ -17,7 +16,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/live_net_rv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/backgroud_fiveg"
             android:layout_marginLeft="@dimen/video_dp5"
             android:layout_marginTop="@dimen/video_dp10"
             android:layout_marginRight="@dimen/video_dp5">

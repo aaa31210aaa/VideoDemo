@@ -36,6 +36,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.zhouwei.library.CustomPopWindow;
+import com.flyco.tablayout.CommonTabLayout;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.lzy.okgo.OkGo;
@@ -78,10 +79,10 @@ import widget.NetBroadcastReceiver;
 
 public class SpecialArea5GActivity extends AppCompatActivity implements View.OnClickListener {
     public LinearLayout searchBar;
-    public SlidingTabLayout special5gTab;
+    public CommonTabLayout special5gTab;
     public NoScrollViewPager special5gVp;
     public Special5gPagerAdapter special5gPagerAdapter;
-    private List<VideoChannelModel> videoChannelModels = new ArrayList<>();
+    private ArrayList<VideoChannelModel> videoChannelModels = new ArrayList<>();
     private List<String> colunmList = new ArrayList<>();
 
     private ImageView area5gSearch;
@@ -114,7 +115,7 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
     private int tabPosition;
     public static Map<Fragment, WebView> fragmentWebViewMap = new HashMap<>();
     public static WebView currentWebView;
-
+    private int defaultTabIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +165,7 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
         special5gBack.setOnClickListener(this);
         special5gPersonalCenter.setOnClickListener(this);
 
-        toCurrentTab = getIntent().getIntExtra("setCurrentTab", 5);
+
         contentId = getIntent().getStringExtra("contentId");
         categoryName = getIntent().getStringExtra("category_name");
         requestId = getIntent().getStringExtra("requestId");
@@ -178,7 +179,6 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
     }
 
     private void initViewPager() {
-        special5gVp.setOffscreenPageLimit(6);
         if (null == special5gPagerAdapter) {
             special5gPagerAdapter = new Special5gPagerAdapter(getSupportFragmentManager());
         }
@@ -213,23 +213,17 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
             @SuppressLint("ResourceAsColor")
             @Override
             public void onPageSelected(int position) {
-                switch (position) {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                        //白背景
-                        setStatuBar(true);
-                        playerView.setOrientation(false);
-                        tabPosition = position;
-                        break;
-                    case 5:
-                        //黑背景
-                        setStatuBar(false);
-                        playerView.setOrientation(true);
-                        tabPosition = position;
-                        break;
+                special5gTab.setCurrentTab(position);
+                if ("5G.house.tuijian".equals(tabLists.get(position).getCode())) {
+                    //黑背景
+                    setStatuBar(false);
+                    playerView.setOrientation(true);
+                    tabPosition = position;
+                } else {
+                    //白背景
+                    setStatuBar(true);
+                    playerView.setOrientation(false);
+                    tabPosition = position;
                 }
 
                 Fragment fragment = special5gPagerAdapter.fragmentList.get(position);
@@ -341,32 +335,44 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
     }
 
     private void initViewPagerData(List<Special5GTabModel.DataDTO> models) {
+        special5gVp.setOffscreenPageLimit(models.size());
         try {
+            if (models.size() == 1) {
+                special5gTab.setTextSelectColor(getResources().getColor(R.color.white));
+                special5gTab.setTextSizeSelect(5);
+            }
+
             for (int i = 0; i < models.size(); i++) {
                 VideoChannelModel model = new VideoChannelModel();
                 ColumnModel columnModel = new ColumnModel();
                 columnModel.setColumnId(models.get(i).getCode());
                 columnModel.setColumnName(models.get(i).getName());
                 columnModel.setPanelCode(models.get(i).getCode());
+                if ("5G.house.tuijian".equals(models.get(i).getCode())) {
+                    defaultTabIndex = i;
+                    columnModel.setSelecticon(R.drawable.tab_icon_white);
+                } else {
+                    columnModel.setSelecticon(R.drawable.tab_icon_red);
+                }
                 columnModel.setSkipUrl(models.get(i).getJumpUrl());
+                columnModel.setUnselecticon(R.drawable.tab_icon_white);
                 model.setColumnBean(columnModel);
                 videoChannelModels.add(model);
             }
-            special5gPagerAdapter.addItems(videoChannelModels, playerView, contentId, categoryName, requestId);
+            toCurrentTab = getIntent().getIntExtra("setCurrentTab", defaultTabIndex);
+            special5gPagerAdapter.addItems(videoChannelModels, playerView, contentId, categoryName, requestId, defaultTabIndex);
             for (VideoChannelModel channelBean : videoChannelModels) {
                 colunmList.add(channelBean.getColumnBean().getColumnName());
             }
             String[] titles = colunmList.toArray(new String[colunmList.size()]);
             //tab和ViewPager进行关联
-            special5gTab.setViewPager(special5gVp, titles);
-            special5gTab.setCurrentTab(toCurrentTab);
+//            special5gTab.setViewPager(special5gVp, titles);
+            special5gTab.setTabData(videoChannelModels);
+            setCurrentPosition(toCurrentTab);
             special5gTab.setOnTabSelectListener(new OnTabSelectListener() {
                 @Override
                 public void onTabSelect(int position) {
-                    if (0 == position) {
-                    } else if (1 == position) {
-                    } else {
-                    }
+                    special5gVp.setCurrentItem(position);
                 }
 
                 @Override
@@ -376,19 +382,28 @@ public class SpecialArea5GActivity extends AppCompatActivity implements View.OnC
             });
 
 
-            special5gSixFragment = (Special5gVideoFragment) special5gPagerAdapter.getItem(5);
-            special5gSixFragment.setCommentPopIsVisible(new Special5gVideoFragment.CommentPopIsVisible() {
-                @Override
-                public void commentPopIsVisible(boolean isVisible) {
-                    if (isVisible) {
-                        topZzc.setVisibility(View.GONE);
-                    } else {
-                        topZzc.setVisibility(View.VISIBLE);
+            special5gSixFragment = (Special5gVideoFragment) special5gPagerAdapter.getItem(defaultTabIndex);
+            if (null != special5gSixFragment) {
+                special5gSixFragment.setCommentPopIsVisible(new Special5gVideoFragment.CommentPopIsVisible() {
+                    @Override
+                    public void commentPopIsVisible(boolean isVisible) {
+                        if (isVisible) {
+                            topZzc.setVisibility(View.GONE);
+                        } else {
+                            topZzc.setVisibility(View.VISIBLE);
+                        }
                     }
-                }
-            });
+                });
+            }
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void setCurrentPosition(int position) {
+        if (null != special5gTab && null != special5gVp) {
+            special5gTab.setCurrentTab(position);
+            special5gVp.setCurrentItem(position);
         }
     }
 

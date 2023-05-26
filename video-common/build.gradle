@@ -55,4 +55,6 @@ dependencies {
     api 'com.github.jd-alexander:LikeButton:0.2.3'
     api "com.github.tbruyelle:rxpermissions:0.10.2"
     api 'com.blankj:utilcode:1.13.10'
+    api 'org.fourthline.cling:cling-core:2.1.1'
+    api 'org.fourthline.cling:cling-support:2.1.1'
 }

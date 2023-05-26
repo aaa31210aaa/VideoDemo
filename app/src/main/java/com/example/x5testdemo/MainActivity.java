@@ -198,8 +198,9 @@ public class MainActivity extends AppCompatActivity {
         tgt_page.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this, TgtCodeActivity.class));
-                startActivity(new Intent(MainActivity.this, SpecialArea5GActivity.class));
+                Intent intent = new Intent(MainActivity.this, SpecialArea5GActivity.class);
+                intent.putExtra("contentId", contentId.getText().toString());
+                startActivity(intent);
             }
         });
 

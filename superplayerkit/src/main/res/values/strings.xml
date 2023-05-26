@@ -16,4 +16,5 @@
     <string name="superplayer_enter_setting_fail">进入设置页面失败,请手动开启悬浮窗权限</string>
     <string name="no_wifi" translatable="false">当前为非WI-FI,继续播放将消耗流量</string>
     <string name="data_err">系统数据错误，请重试</string>
+    <string name="cant_use_cast_screen">当前是非WIFI环境，无法使用投屏功能</string>
 </resources>

@@ -1,11 +1,14 @@
 package com.wdcs.model;
 
+import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.Keep;
 
 import java.io.Serializable;
 import java.util.List;
+
 @Keep
 public class ColumnModel implements Serializable {
     private String columnCode;
@@ -21,6 +24,8 @@ public class ColumnModel implements Serializable {
     private String id;
     private String isDefault;
     private String panelCode;
+    private int selecticon;
+    private int unselecticon;
 
     public String getSkipUrl() {
         if (TextUtils.isEmpty(skipUrl)) {
@@ -304,5 +309,25 @@ public class ColumnModel implements Serializable {
 
     public void setPanelCode(String panelCode) {
         this.panelCode = panelCode;
+    }
+
+    public int getSelecticon() {
+        return selecticon;
+    }
+
+    public void setSelecticon(int selecticon) {
+        this.selecticon = selecticon;
+    }
+
+    @SuppressLint("SupportAnnotationUsage")
+    @DrawableRes
+    public int getUnselecticon() {
+        return unselecticon;
+    }
+
+    @SuppressLint("SupportAnnotationUsage")
+    @DrawableRes
+    public void setUnselecticon(int unselecticon) {
+        this.unselecticon = unselecticon;
     }
 }

@@ -26,7 +26,6 @@ import ui.fragment.Special5gVideoFragment;
 public class Special5gPagerAdapter extends FragmentPagerAdapter {
     public List<Fragment> fragmentList = new ArrayList<>();
     private List<VideoChannelModel> titleList = new ArrayList<>();
-    private String webUrl = "https://uat-h5.zhcs.csbtv.com/sdk/news/#/?c=1";
 
     @Override
     public int getCount() {
@@ -55,7 +54,7 @@ public class Special5gPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void addItems(@Nullable List<VideoChannelModel> channelBeanList, SuperPlayerView playerView,
-                         String contentId, String categoryName, String requestId) {
+                         String contentId, String categoryName, String requestId, int defaultTabIndex) {
         titleList.clear();
         fragmentList.clear();
         titleList.addAll(channelBeanList);
@@ -78,7 +77,7 @@ public class Special5gPagerAdapter extends FragmentPagerAdapter {
                 case "5G.house.tuijian":
                     Special5gVideoFragment fragment6 = new Special5gVideoFragment();
                     fragment6.setPlayerView(playerView);
-                    fragmentList.add(fragment6.newInstance(fragment6, videoChannelModel, contentId, categoryName, requestId));
+                    fragmentList.add(fragment6.newInstance(fragment6, videoChannelModel, contentId, categoryName, requestId, defaultTabIndex, channelBeanList.size()));
                     break;
 
             }

@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 
 
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.zhouwei.library.CustomPopWindow;
 import com.lzy.okgo.OkGo;
@@ -71,9 +73,11 @@ import com.wdcs.model.VideoQuality;
 import com.wdcs.utils.ButtonSpan;
 import com.wdcs.utils.DebugLogUtils;
 import com.wdcs.utils.GsonUtil;
+import com.wdcs.utils.NetworkUtil;
 import com.wdcs.utils.NumberFormatTool;
 import com.wdcs.utils.PersonInfoManager;
 import com.wdcs.utils.ToastUtils;
+import com.wdcs.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -156,6 +160,11 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
     public static SuperPlayerView instance;
     public String mCurrentPlayVideoURL;    // 当前播放的URL
     private boolean isDark;
+    private CustomPopWindow deviceListPop; //投屏设备列表弹窗
+    private View devicePopView;
+//    private TextView tvWifiName;
+//    private LinearLayout deviceListLlSearch;
+//    private RecyclerView castDeviceRv;
 
     public static SuperPlayerView getInstance(Context context, View decorView, Boolean isMain) {
         if (instance == null) {
@@ -233,6 +242,17 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         noLoginTipsCancel.setOnClickListener(this);
         noLoginTipsOk.setOnClickListener(this);
         buriedPointModel = new BuriedPointModel();
+
+        devicePopView = View.inflate(mContext, R.layout.device_list_pop_view, null);
+//        tvWifiName = devicePopView.findViewById(R.id.tv_wifi_name);
+//        deviceListLlSearch = devicePopView.findViewById(R.id.device_list_ll_search);
+//        //投屏按钮
+//        mWindowPlayer.windowCastScreen.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showDevicePop();
+//            }
+//        });
     }
 
     private void initPlayer() {
@@ -1421,4 +1441,18 @@ public class SuperPlayerView extends RelativeLayout implements OrientationHelper
         }
     }
 
+    private void showDevicePop() {
+        if (null == deviceListPop) {
+            deviceListPop = new CustomPopWindow.PopupWindowBuilder(mContext)
+                    .setView(devicePopView)
+                    .setOutsideTouchable(true)
+                    .setFocusable(true)
+                    .size(Utils.getContext().getResources().getDisplayMetrics().widthPixels, Utils.getContext().getResources().getDisplayMetrics().heightPixels / 2)
+                    .setAnimationStyle(R.style.take_popwindow_anim)
+                    .create()
+                    .showAtLocation(decorView, Gravity.BOTTOM, 0, 0);
+        } else {
+            deviceListPop.showAtLocation(decorView, Gravity.BOTTOM, 0, 0);
+        }
+    }
 }

@@ -207,6 +207,18 @@
                     android:textSize="11.0sp"
                     android:visibility="gone" />
 
+<!--                <ImageView-->
+<!--                    android:id="@+id/window_cast_screen"-->
+<!--                    android:layout_width="30dp"-->
+<!--                    android:layout_height="30dp"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:layout_marginLeft="5dp"-->
+<!--                    android:layout_marginRight="5dp"-->
+<!--                    android:src="@drawable/polyv_btn_proj"-->
+<!--                    >-->
+
+<!--                </ImageView>-->
+
                 <ImageView
                     android:id="@+id/superplayer_iv_fullscreen"
                     android:layout_width="25dp"

@@ -8,6 +8,8 @@ import static com.wdcs.constants.Constants.CONTENTID;
 import static com.wdcs.constants.Constants.PANELCODE;
 import static com.wdcs.constants.Constants.REQUESTID;
 import static com.wdcs.constants.Constants.SPECIAL5G_ISPAUSE;
+import static com.wdcs.constants.Constants.TABPOSITION;
+import static com.wdcs.constants.Constants.TABSIZE;
 import static com.wdcs.constants.Constants.success_code;
 import static com.wdcs.constants.Constants.token_error;
 import static com.wdcs.utils.SPUtils.isVisibleNoWifiView;
@@ -51,6 +53,7 @@ import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.example.zhouwei.library.CustomPopWindow;
+import com.flyco.tablayout.CommonTabLayout;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
@@ -212,6 +215,8 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
     public String playUrl;
     private String transformationToken = "";
     private String videoPanelCode;
+    private int tabPosition;
+    private int tabSize;
 
     public Special5gVideoFragment() {
         // Required empty public constructor
@@ -219,7 +224,7 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
 
     // TODO: Rename and change types and number of parameters
     public static Special5gVideoFragment newInstance(Special5gVideoFragment fragment, VideoChannelModel videoChannelModel, String contentId, String categoryName,
-                                                     String requestId) {
+                                                     String requestId, int tabPosition, int size) {
         Bundle args = new Bundle();
         args = new Bundle();
         args.putString(PANELCODE, videoChannelModel.getColumnBean().getPanelCode());
@@ -230,6 +235,8 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
         if (!TextUtils.isEmpty(requestId)) {
             args.putString(REQUESTID, requestId);
         }
+        args.putInt(TABPOSITION, tabPosition);
+        args.putInt(TABSIZE, size);
         fragment.setArguments(args);
         return fragment;
     }
@@ -242,6 +249,8 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
             myContentId = getArguments().getString(CONTENTID);
             mCategoryName = getArguments().getString(CATEGORYNAME);
             requestId = getArguments().getString(REQUESTID);
+            tabPosition = getArguments().getInt(TABPOSITION);
+            tabSize = getArguments().getInt(TABSIZE);
         }
     }
 
@@ -256,6 +265,9 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
     }
 
     private void initView(View view) {
+        if (tabSize == 1) { //只有一个的话
+            getCategoryCompositeData(panelCode);
+        }
         ScreenUtils.transparencyBar(getActivity());
         param = VideoInteractiveParam.getInstance();
         loadingProgress = view.findViewById(R.id.video_loading_progress);
@@ -706,6 +718,7 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         this.videoFragmentIsVisibleToUser = isVisibleToUser;
+
         if (isVisibleToUser) {
             if (mDatas.isEmpty()) {
                 getCategoryCompositeData(panelCode);
@@ -2077,8 +2090,8 @@ public class Special5gVideoFragment extends Fragment implements View.OnClickList
 
                                 if (null != activityRuleBean.getData() && null != activityRuleBean.getData().getConfig().getJumpUrl()
                                         && !TextUtils.isEmpty(activityRuleBean.getData().getConfig().getJumpUrl())) {
-                                    ((SlidingTabLayout) getActivity().findViewById(R.id.video_tab)).showMsg(1, "活动");
-                                    ((SlidingTabLayout) getActivity().findViewById(R.id.video_tab)).setMsgMargin(1, ButtonSpan.dip2px(7), ButtonSpan.dip2px(10));
+                                    ((CommonTabLayout) getActivity().findViewById(R.id.special_5g_tab)).showMsg(tabPosition, "活动");
+                                    ((CommonTabLayout) getActivity().findViewById(R.id.special_5g_tab)).setMsgMargin(tabPosition, ButtonSpan.dip2px(7), ButtonSpan.dip2px(8));
                                     if (null != activityRuleImg) {
                                         activityRuleImg.setVisibility(View.VISIBLE);
                                     }

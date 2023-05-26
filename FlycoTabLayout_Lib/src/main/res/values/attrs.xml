@@ -157,6 +157,7 @@
         <attr name="tl_textUnselectColor"/>
         <attr name="tl_textBold"/>
         <attr name="tl_textAllCaps"/>
+        <attr name="tl_textSelsize"></attr>
 
         <!-- icon -->
         <!-- 设置icon宽度 -->
@@ -175,6 +176,8 @@
         <!-- 设置icon与文字间距 -->
         <attr name="tl_iconMargin" format="dimension"/>
 
+        <attr name="tl_unselect_icon_visible" format="boolean"/>
+        <attr name="tl_current_index_no_first" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="SegmentTabLayout">

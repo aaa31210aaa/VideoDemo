@@ -44,6 +44,8 @@ public class Constants {
     public static final String CERTIFICATED = "certificated";
     public static final String FROMHOMETAB = "fromHomeTab";
     public static final String FROMXKSHTAB = "fromXkshTab";
+    public static final String TABPOSITION = "tabPosition";
+    public static final String TABSIZE = "tabSize";
 
     /**
      * 1.排行榜https://uat-h5.zhcs.csbtv.com/act/xksh/#/ranking
